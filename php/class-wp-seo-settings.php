@@ -110,7 +110,14 @@ class WP_SEO_Settings {
 			return;
 		}
 
-		printf( '<input type="%s" name="%s[%s]" value="%s" size="50" />', esc_attr( $args['type'] ), esc_attr( self::SLUG ), esc_attr( $args['field'] ), esc_attr( $this->options[ $args['field'] ] ) );
+		$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
+		printf(
+			'<input type="%s" name="%s[%s]" value="%s" size="50" />',
+			esc_attr( $args['type'] ),
+			esc_attr( self::SLUG ),
+			esc_attr( $args['field'] ),
+			esc_attr( $value )
+		);
 	}
 
 	public function sanitize_options( $in ) {
@@ -165,10 +172,7 @@ class WP_SEO_Settings {
 			</div>
 
 			<div class="wp-seo-tab" id="wp_seo_archives">
-				<h3><?php _e( 'text to translate', 'localization' ) ?></h3>
-				<table class="form-table">
-					<?php do_settings_fields( self::SLUG, 'archive_' . $taxonomy->name ); ?>
-				</table>
+				General archives go here
 			</div>
 
 			<?php # $this->do_section( 'archives' ); ?>
