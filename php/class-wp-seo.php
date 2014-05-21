@@ -1,7 +1,7 @@
 <?php
 
 /**
- *
+ * WP-SEO Core Functionality
  */
 
 if ( !class_exists( 'WP_SEO' ) ) :

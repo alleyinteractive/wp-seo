@@ -23,108 +23,13 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-require_once __DIR__ . '/class-wp-seo.php';
+define( 'WP_SEO_PATH', dirname( __FILE__ ) );
+define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
 
-class WP_SEO_Settings {
+require_once WP_SEO_PATH . '/php/class-wp-seo.php';
+require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
 
-	public $options_capability = 'manage_options';
-	public $default_options = array( 'post_types' => array() );
-	public $options = array();
-
-	const SLUG = 'wp-seo';
-
-	protected static $instance;
-
-	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new WP_SEO_Settings;
-			self::$instance->setup_actions();
-		}
-		return self::$instance;
-	}
-
-	protected function __construct() {
-		/** Don't do anything **/
-	}
-
-	protected function setup_actions() {
-		// add_action( 'wp_head', array( self::$instance, 'action_wp_head' ) );
-
-		add_action( 'after_setup_theme', array( self::$instance, 'load_options' ), 5 );
-		add_action( 'admin_init', array( self::$instance, 'action_admin_init' ) );
-
-		add_action( 'admin_menu', array( self::$instance, 'action_admin_menu' ) );
-	}
-
-	/**
-	 * Load the options on demand
-	 *
-	 * @return void
-	 */
-	public function load_options() {
-		if ( !$this->options )
-			$this->options = get_option( self::SLUG, $this->default_options );
-	}
-
-	public function action_admin_init() {
-		register_setting( self::SLUG, self::SLUG, array( self::$instance, 'sanitize_options' ) );
-		add_settings_section( 'general', false, '__return_false', self::SLUG );
-		add_settings_field( 'post_types', __( 'Add meta fields to:', self::SLUG ), array( self::$instance, 'field' ), self::SLUG, 'general' );
-	}
-
-	public function action_admin_menu() {
-		add_options_page( __( 'WP SEO Settings', self::SLUG ), __( 'SEO', self::SLUG ), $this->options_capability, self::SLUG, array( self::$instance, 'view_settings_page' ) );
-	}
-
-	public function field() {
-		$post_types = get_post_types( array( 'public' => true ), 'objects' );
-		foreach ( $post_types as $slug => $post_type ) :
-			?>
-			<label><input type="checkbox" name="<?php echo self::SLUG ?>[post_types][]" value="<?php echo $slug ?>"<?php checked( in_array( $slug, $this->options['post_types'] ) ) ?> /> <?php echo $post_type->label ?></label><br />
-			<?php
-		endforeach;
-	}
-
-	public function sanitize_options( $in ) {
-
-		$out = $this->default_options;
-
-		// Validate post_types
-		$out['post_types'] = $in['post_types'];
-
-		return $out;
-	}
-
-	public function view_settings_page() {
-	?>
-	<div class="wrap">
-		<h2><?php _e( 'WP SEO', self::SLUG ); ?></h2>
-		<p><?php _e( 'SEO Settings for SEO Professionals', self::SLUG ); ?></p>
-		<form action="options.php" method="POST">
-			<?php settings_fields( self::SLUG ); ?>
-			<?php do_settings_sections( self::SLUG ); ?>
-			<?php submit_button(); ?>
-		</form>
-	</div>
-	<?php
-	}
-
-	/**
-	 * Basic styling will go here
-	 */
-	public function action_wp_head() {
-		?>
-		<style type="text/css">
-		</style>
-		<?php
-	}
-
+function wp_seo_scripts() {
+	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery' ), '1.0' );
 }
-
-function WP_SEO_Settings() {
-	return WP_SEO_Settings::instance();
-}
-add_action( 'plugins_loaded', 'WP_SEO_Settings' );
-
-
-?>
+add_action( 'admin_enqueue_scripts', 'wp_seo_scripts' );
