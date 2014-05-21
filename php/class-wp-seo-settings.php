@@ -172,7 +172,7 @@ class WP_SEO_Settings {
 			</div>
 
 			<div class="wp-seo-tab" id="wp_seo_archives">
-				General archives go here
+				General archives go here: Date, Author, Search
 			</div>
 
 			<?php # $this->do_section( 'archives' ); ?>
