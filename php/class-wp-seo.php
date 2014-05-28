@@ -54,12 +54,19 @@ class WP_SEO {
 		<table class="wp-seo-meta-fields">
 			<tbody>
 				<tr>
-					<th scope="row"><label for="wp_seo_meta_title"><?php _e( 'Meta Title', 'wp-seo' ) ?></label></th>
-					<td><input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( get_post_meta( $post->ID, '_meta_title', true ) ) ?>" size="96" /></td>
+					<th scope="row"><label for="wp_seo_meta_title"><?php _e( 'Title Tag', 'wp-seo' ); ?></label></th>
+					<td><input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( get_post_meta( $post->ID, '_meta_title', true ) ); ?>" size="96" /></td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="wp_seo_meta_description"><?php _e( 'Meta Description', 'wp-seo' ) ?></label></th>
-					<td><textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_html( get_post_meta( $post->ID, '_meta_description', true ) ) ?></textarea></td>
+					<th scope="row"><label for="wp_seo_meta_description"><?php _e( 'Meta Description', 'wp-seo' ); ?></label></th>
+					<td>
+						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_html( $description = get_post_meta( $post->ID, '_meta_description', true ) ); ?></textarea>
+						<div>
+							<?php _e( 'Description character count: ', 'wp-seo' ); ?>
+							<span class="description-character-count"></span>
+							<noscript><?php _e( sprintf( '%d (save the post to update)', strlen( $description ) ), 'wp-seo' ); ?></noscript>
+						</div>
+					<td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="wp_seo_meta_keywords"><?php _e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
