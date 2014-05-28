@@ -6,7 +6,10 @@
 	 * @return {Void}
 	 */
 	function updateDescriptionCharacterCount() {
-		$( '.description-character-count' ).html( $( '#wp_seo_meta_description' ).val().length );
+		var description;
+		if ( ( description = $( '#wp_seo_meta_description' ) ).length > 0 ) {
+			$( '.description-character-count' ).html( description.val().length );
+		}
 	}
 
 	$( '#wp_seo_settings .nav-tab' ).click( function( event ) {
