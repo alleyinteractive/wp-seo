@@ -29,6 +29,8 @@ class WP_SEO {
 	public function setup() {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_post' ) );
+		add_action( 'edit_attachment', array( $this, 'save_post' ) );
+		add_action( 'add_attachment', array( $this, 'save_post' ) );
 		add_action( 'admin_head', array( $this, 'styles' ) );
 
 		add_filter( 'wp_title', array( $this, 'wp_title' ), 20, 2 );
