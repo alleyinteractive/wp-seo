@@ -211,7 +211,7 @@ class WP_SEO {
 		foreach( $this->formatting_tags as $id => $tag ) {
 			if ( ! empty( $tag->tag ) && in_array( $tag->tag, $unique_matches ) ) {
 				/**
-				 * Filter the value of a formatting tag.
+				 * Filter the value of a formatting tag for the current page.
 				 *
 				 * The dynamic portion of the hook name, $id, refers to the
 				 * array key used to register the formatting tag in
