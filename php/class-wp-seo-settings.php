@@ -30,7 +30,7 @@ class WP_SEO_Settings {
 	/**
 	 * Taxonomies with archive pages, which can have meta fields set for them.
 	 *
-	 * @see  $this->setup().
+	 * @see  WP_SEO_Settings::setup().
 	 *
 	 * @var array Term objects.
 	 */
@@ -39,7 +39,7 @@ class WP_SEO_Settings {
 	/**
 	 * Post types that can be viewed individually and have per-entry meta values.
 	 *
-	 * @see  $this->setup().
+	 * @see  WP_SEO_Settings::setup().
 	 *
 	 * @var array Post type objects.
 	 */
@@ -48,7 +48,7 @@ class WP_SEO_Settings {
 	/**
 	 * Post types with archives, which can have meta fields set for them.
 	 *
-	 * @see  $this->setup().
+	 * @see  WP_SEO_Settings::setup().
 	 *
 	 * @var array Post type objects.
 	 */
