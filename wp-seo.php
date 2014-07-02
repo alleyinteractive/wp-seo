@@ -4,7 +4,7 @@
 	Plugin URI: https://github.com/alleyinteractive/wp-seo
 	Description: An SEO plugin that stays out of your way. Just the facts, Jack.
 	Version: 0.9.0
-	Author: Matthew Boynes, Alley Interactive
+	Author: Alley Interactive, Matthew Boynes, David Herrera
 	Author URI: http://www.alleyinteractive.com/
 */
 /*  This program is free software; you can redistribute it and/or modify

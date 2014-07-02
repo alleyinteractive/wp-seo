@@ -1,5 +1,5 @@
 === WP SEO ===
-Contributors: alleyinteractive, mboynes
+Contributors: alleyinteractive, mboynes, dlh
 Tags: seo
 Requires at least: 3.9.1
 Tested up to: 3.9.1
