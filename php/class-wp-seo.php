@@ -298,10 +298,10 @@ class WP_SEO {
 	 * @access private.
 	 *
 	 * @param  string $name  The content of the "name" attribute.
-	 * @param  string $value The content of the "value" attribute.
+	 * @param  string $content The content of the "content" attribute.
 	 */
-	private function meta_field( $name, $value ) {
-		echo "<meta name='" . esc_attr( $name ) . "' value='" . esc_attr( $value ) . "' />\n";
+	private function meta_field( $name, $content ) {
+		echo "<meta name='" . esc_attr( $name ) . "' content='" . esc_attr( $content ) . "' />\n";
 	}
 
 	/**
