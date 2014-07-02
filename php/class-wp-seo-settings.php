@@ -430,7 +430,6 @@ class WP_SEO_Settings {
 				<?php do_settings_sections( self::SLUG ); ?>
 				<?php submit_button(); ?>
 			</form>
-			<?php if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) var_dump( $this->options ); ?>
 		</div>
 		<?php
 	}
