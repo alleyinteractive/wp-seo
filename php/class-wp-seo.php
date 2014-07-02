@@ -139,7 +139,7 @@ class WP_SEO {
 					<td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="wp_seo_meta_keywords"><?php _e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
+					<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
 					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_html( get_post_meta( $post->ID, '_meta_keywords', true ) ) ?></textarea></td>
 				</tr>
 			</tbody>

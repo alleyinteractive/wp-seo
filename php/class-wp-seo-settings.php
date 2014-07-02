@@ -424,7 +424,7 @@ class WP_SEO_Settings {
 	public function view_settings_page() {
 		?>
 		<div class="wrap" id="wp_seo_settings">
-			<h2><?php _e( 'WP SEO Settings', 'wp-seo' ); ?></h2>
+			<h2><?php esc_html_e( 'WP SEO Settings', 'wp-seo' ); ?></h2>
 			<form action="options.php" method="POST">
 				<?php settings_fields( self::SLUG ); ?>
 				<?php do_settings_sections( self::SLUG ); ?>
@@ -494,7 +494,7 @@ class WP_SEO_Settings {
 		if ( ! empty( $formatting_tags ) ) :
 			?>
 			<aside>
-				<h1><?php _e( 'These Formatting Tags are available', 'wp-seo' ); ?></h1>
+				<h1><?php esc_html_e( 'These Formatting Tags are available', 'wp-seo' ); ?></h1>
 				<dl class="formatting-tags">
 					<?php foreach( $formatting_tags as $tag ) : ?>
 						<div class="formatting-tag-wrapper">
