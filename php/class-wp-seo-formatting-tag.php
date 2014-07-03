@@ -6,7 +6,7 @@
  *
  * @package WP SEO
  */
-class WP_SEO_Formatting_Tag {
+abstract class WP_SEO_Formatting_Tag {
 
 	/**
 	 * The tag name that users add to settings fields.
@@ -20,13 +20,13 @@ class WP_SEO_Formatting_Tag {
 	 *
 	 * @return string.
 	 */
-	public function get_description() {}
+	abstract public function get_description();
 
 	/**
 	 * Generate the value of the tag for the current page.
 	 *
 	 * @return string.
 	 */
-	public function get_value() {}
+	abstract public function get_value();
 
 }
