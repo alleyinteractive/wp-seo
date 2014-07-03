@@ -125,7 +125,14 @@ class WP_SEO {
 			<tbody>
 				<tr>
 					<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
-					<td><input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( get_post_meta( $post->ID, '_meta_title', true ) ); ?>" size="96" /></td>
+					<td>
+						<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title = get_post_meta( $post->ID, '_meta_title', true ) ); ?>" size="96" />
+						<div>
+							<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
+							<span class="title-character-count"></span>
+							<noscript><?php esc_html_e( sprintf( '%d (save changes to update)', strlen( $title ) ), 'wp-seo' ); ?></noscript>
+						</div>
+					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
@@ -134,7 +141,7 @@ class WP_SEO {
 						<div>
 							<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
 							<span class="description-character-count"></span>
-							<noscript><?php esc_html_e( sprintf( '%d (save the post to update)', strlen( $description ) ), 'wp-seo' ); ?></noscript>
+							<noscript><?php esc_html_e( sprintf( '%d (save changes to update)', strlen( $description ) ), 'wp-seo' ); ?></noscript>
 						</div>
 					<td>
 				</tr>

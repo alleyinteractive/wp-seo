@@ -1,15 +1,15 @@
 ;jQuery( function( $ ) {
 
 	/**
-	 * Update the description character count displayed to the user.
-	 *
-	 * @return {Void}
+	 * Update the description and title character counts displayed to the user.
 	 */
-	function updateDescriptionCharacterCount() {
-		var description;
-		if ( ( description = $( '#wp_seo_meta_description' ) ).length > 0 ) {
-			$( '.description-character-count' ).html( description.val().length );
-		}
+	function updateCharacterCounts() {
+		$( ['title', 'description'] ).each( function() {
+			var input;
+			if ( ( input = $( '#wp_seo_meta_' + this ) ).length > 0 ) {
+				$( '.' + this + '-character-count' ).html( input.val().length );
+			}
+		});
 	}
 
 	$( '#wp_seo_settings .nav-tab' ).click( function( event ) {
@@ -20,8 +20,6 @@
 	$( '.wp-seo-tab' ).hide();
 	$( $( '.nav-tab-active' ).attr( 'href' ) ).show();
 
-	updateDescriptionCharacterCount();
-	$( '#wp_seo_meta_description' ).keyup( function() {
-		updateDescriptionCharacterCount();
-	} );
+	updateCharacterCounts();
+	$( '.wp-seo-meta-fields' ).find( 'input, textarea' ).keyup( updateCharacterCounts );
 } );
