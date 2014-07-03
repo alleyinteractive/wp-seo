@@ -165,14 +165,9 @@ class WP_SEO {
 			return;
 		}
 
-		if ( 'page' == $_POST['post_type'] ) {
-			if ( ! current_user_can( 'edit_pages', $post_id ) ) {
-				return;
-			}
-		} else {
-			if ( ! current_user_can( 'edit_posts', $post_id ) ) {
-				return;
-			}
+		$post_type = get_post_type_object( $_POST['post_type'] );
+		if ( empty( $post_type->cap->edit_post ) || ! current_user_can( $post_type->cap->edit_post ) ) {
+			return;
 		}
 
 		if ( ! isset( $_POST['wp-seo-nonce'] ) || ! wp_verify_nonce( $_POST['wp-seo-nonce'], plugin_basename( __FILE__ ) ) ) {
