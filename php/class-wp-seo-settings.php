@@ -427,10 +427,63 @@ class WP_SEO_Settings {
 			<h2><?php esc_html_e( 'WP SEO Settings', 'wp-seo' ); ?></h2>
 			<form action="options.php" method="POST">
 				<?php settings_fields( self::SLUG ); ?>
-				<?php do_settings_sections( self::SLUG ); ?>
+				<?php
+					/**
+					 * Filter the type of UI to use with settings sections.
+					 *
+					 * @param  bool Whether to enhance the page with accordions.
+					 */
+					if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
+						$this->do_settings_accordions();
+					} else {
+						do_settings_sections( self::SLUG );
+					}
+				?>
 				<?php submit_button(); ?>
 			</form>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the settings fields with each section as an accordion.
+	 *
+	 * @see  do_settings_sections() for the logic of looping through sections.
+	 * @see  do_accordion_sections() for the markup to activate the accordions.
+	 */
+	private function do_settings_accordions() {
+		global $wp_settings_sections, $wp_settings_fields;
+		wp_enqueue_script( 'accordion' );
+		?>
+		<div class="accordion-container" style="border: 1px solid #e5e5e5; box-shadow: 0 1px 1px rgba( 0, 0, 0, .04 );">
+			<ul class="outer-border">
+				<?php foreach( (array) $wp_settings_sections[ $this::SLUG ] as $section ) : ?>
+					<li class="control-section accordion-section">
+						<?php if ( $section['title'] ) : ?>
+							<h3 class="accordion-section-title hndle" tabindex="0"><?php esc_html_e( $section['title'] ); ?></h3>
+						<?php endif; ?>
+
+						<div class="accordion-section-content">
+							<div class="inside">
+								<?php if ( $section['callback'] ) : ?>
+									<?php call_user_func( $section['callback'], $section ); ?>
+								<?php endif; ?>
+
+								<?php
+									if ( ! isset( $wp_settings_fields ) || ! isset( $wp_settings_fields[ $this::SLUG ] ) || ! isset( $wp_settings_fields[ $this::SLUG ][ $section['id'] ] ) ) {
+										continue;
+									}
+								?>
+
+								<table class="form-table">
+									<?php do_settings_fields( $this::SLUG, $section['id'] ); ?>
+								</table>
+							</div><!-- .inside -->
+						</div><!-- .accordion-section-content -->
+					</li><!-- .control-section.accordion-section -->
+				<?php endforeach; ?>
+			</ul><!-- .outer-border -->
+		</div><!-- .accordion-container -->
 		<?php
 	}
 
