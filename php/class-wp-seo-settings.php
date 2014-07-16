@@ -204,6 +204,9 @@ class WP_SEO_Settings {
 
 		add_settings_section( '404', __( '404 Page', 'wp-seo' ), array( $this, 'example_404_page' ), $this::SLUG );
 		add_settings_field( '404_title', __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, '404', array( 'field' => '404_title' ) );
+
+		add_settings_section( 'arbitrary', esc_html__( 'Other Meta Tags', 'wp-seo' ), false, $this::SLUG );
+		add_settings_field( 'arbitrary_tags', esc_html__( 'Tags', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'arbitrary', array( 'type' => 'repeatable', 'field' => 'arbitrary_tags', 'repeat' => array( 'name' => esc_html__( 'Name', 'lin' ), 'content' => esc_html__( 'Content', 'lin' ) ) ) );
 	}
 
 	/**
@@ -333,12 +336,22 @@ class WP_SEO_Settings {
 
 		$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
 
-		if ( 'textarea' == $args['type'] ) {
-			$this->render_textarea( $args, $value );
-		} elseif ( 'checkboxes' == $args['type'] ) {
-			$this->render_checkboxes( $args, $value );
-		} else {
-			$this->render_text_field( $args, $value );
+		switch ( $args['type'] ) {
+			case 'textarea' :
+				$this->render_textarea( $args, $value );
+				break;
+
+			case 'checkboxes' :
+				$this->render_checkboxes( $args, $value );
+				break;
+
+			case 'repeatable' :
+				$this->render_repeatable_field( $args, $value );
+				break;
+
+			default :
+				$this->render_text_field( $args, $value );
+				break;
 		}
 	}
 
@@ -348,7 +361,9 @@ class WP_SEO_Settings {
 	 * @param  array $args {
 	 *     An array of arguments for the text field.
 	 *
-	 *     @type string $size	The field size. Default 80.
+	 *     @type string $type   The field type. Default 'text'.
+	 *     @type string $field  @see WP_SEO_Settings::field().
+	 *     @type string $size   The field size. Default 80.
 	 * }
 	 * @param  string $value	The current field value.
 	 */
@@ -416,6 +431,91 @@ class WP_SEO_Settings {
 				esc_html( $label )
 			);
 		}
+	}
+
+	/**
+	 * Render a repeatble text field.
+	 *
+	 * @param  array $args {
+	 *     An array of arguments for setting up the repeatable fields.
+	 *
+	 *     @type string $field  @see WP_SEO_Settings::field().
+	 *     @type array  $repeat Associative array of repeating field names and labels.
+	 *     @type string $size   Optional. The field size. Default 70.
+	 * }
+	 * @param  array $value The current field values
+	 */
+	public function render_repeatable_field( $args, $values ) {
+		$args = wp_parse_args( $args, array(
+			'size' => 70,
+		) );
+		$input_string = '<label for="%1$s_%2$s_%3$s_%4$s">%5$s</label><input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />';
+		?>
+			<div class="wp-seo-repeatable">
+				<div class="nodes">
+					<?php if ( ! empty( $values ) ) : ?>
+						<?php foreach( (array) $values as $i => $group ) : ?>
+							<div class="wp-seo-repeatable-group">
+								<?php foreach( $group as $name => $value ) : ?>
+									<div class="wp-seo-repeatable-field">
+										<?php
+											printf( $input_string,
+												esc_attr( $this::SLUG ),
+												esc_attr( $args['field'] ),
+												intval( $i ),
+												esc_attr( $name ),
+												esc_attr( $args['repeat'][ $name ] ),
+												esc_attr( $args['size'] ),
+												esc_attr( $value )
+											);
+										?>
+									</div><!-- .wp-seo-repeatable-field -->
+								<?php endforeach; ?>
+							</div><!-- .wp-seo-repeatable-group -->
+						<?php endforeach; ?>
+					<?php else : ?>
+						<div class="wp-seo-repeatable-group">
+							<?php foreach( $args['repeat'] as $name => $label ) : ?>
+								<div class="wp-seo-repeatable-field">
+									<?php
+										printf( $input_string,
+											esc_attr( $this::SLUG ),
+											esc_attr( $args['field'] ),
+											0,
+											esc_attr( $name ),
+											esc_attr( $label ),
+											esc_attr( $args['size'] ),
+											''
+										);
+									?>
+								</div><!-- .wp-seo-repeatable-field -->
+							<?php endforeach; ?>
+						</div><!-- .wp-seo-repeatable-group -->
+					<?php endif; ?>
+				</div><!-- .nodes -->
+
+				<script type="text/template" class="wp-seo-template" data-start="<?php echo count( (array) $values ) + 1; ?>">
+					<div class="wp-seo-repeatable-group">
+						<?php foreach( $args['repeat'] as $name => $label ) : ?>
+							<div class="wp-seo-repeatable-field">
+								<?php
+									printf( $input_string,
+										esc_attr( $this::SLUG ),
+										esc_attr( $args['field'] ),
+										'<%= i %>',
+										esc_attr( $name ),
+										esc_attr( $label ),
+										esc_attr( $args['size'] ),
+										''
+									);
+								?>
+							</div><!-- .wp-seo-repeatable-field -->
+						<?php endforeach; ?>
+						<a href="#" class="wp-seo-delete"><%= wp_seo_admin.repeatable_remove_label %></a>
+					</div><!-- .wp-seo-repeatable-group -->
+				</script>
+			</div><!-- .wp-seo-repeatable -->
+		<?php
 	}
 
 	/**
@@ -494,7 +594,6 @@ class WP_SEO_Settings {
 	 * @return array     The options, sanitized.
 	 */
 	public function sanitize_options( $in ) {
-
 		$out = $this->default_options;
 
 		// Validate post types on which to show SEO fields.
@@ -530,7 +629,29 @@ class WP_SEO_Settings {
 		$sanitize_as_text_field[] = '404_title';
 
 		foreach( $sanitize_as_text_field as $field ) {
-			$out[ $field ] = isset( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : '';
+			$out[ $field ] = isset( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
+		}
+
+		/**
+		 * Sanitize repeatable fields, also as text fields:
+		 */
+
+		$repeatables = array(
+			'arbitrary_tags' => array( 'name', 'content' ),
+		);
+
+		foreach ( $repeatables as $repeatable => $fields ) {
+			if ( isset( $in[ $repeatable ] ) ) {
+				foreach( array_values( $in[ $repeatable ] ) as $i => $group ) {
+					foreach( $fields as $field ) {
+						$out[ $repeatable ][ $i ][ $field ] = isset( $group[ $field ] ) ? sanitize_text_field( $group[ $field ] ) : null;
+					}
+					// Remove empty values from this group of fields.
+					$out[ $repeatable ][ $i ] = array_filter( $out[ $repeatable ][ $i ] );
+				}
+				// Remove groups with only empty fields.
+				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
+			}
 		}
 
 		return $out;

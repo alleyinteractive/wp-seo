@@ -362,6 +362,21 @@ class WP_SEO {
 				$this->meta_field( 'keywords', $meta_keywords );
 			}
 		}
+
+		/**
+		 * Filter the artibrary meta tags that display on this page.
+		 *
+		 * @param  array {
+		 *     Numeric array of meta tag data.
+		 *
+		 *     @type  string $name The field "name" attribute.
+		 *     @type  string $content The field "content" attribute.
+		 * }
+		 */
+		foreach( apply_filters( 'wp_seo_arbitrary_tags', WP_SEO_Settings()->get_option( 'arbitrary_tags' ) ) as $tag ) {
+			$this->meta_field( $tag['name'], $tag['content'] );
+		}
+
 	}
 
 }

@@ -4,6 +4,8 @@ table.wp-seo-meta-fields { width: 100%; }
 .wp-seo-meta-fields input { width: 98%; }
 #tab-panel-formatting-tags h1 { font-size: 1.3em; margin: 1em 0; }
 #tab-panel-formatting-tags .formatting-tag-name { font-family: monospace; }
+.wp-seo-repeatable-field label { min-width: 80px; display: inline-block; font-style: italic; }
+.wp-seo-delete { font-size: smaller; }
 
 /* Display formatting tags in the help menu in two columns on shorter screens */
 #tab-panel-formatting-tags .formatting-tags {
