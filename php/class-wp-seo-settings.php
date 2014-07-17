@@ -18,7 +18,7 @@ class WP_SEO_Settings {
 	 *
 	 * @var array.
 	 */
-	public $default_options = array( 'post_types' => array() );
+	public $default_options = array();
 
 	/**
 	 * Storage unit for the current option values of the plugin.
@@ -74,14 +74,15 @@ class WP_SEO_Settings {
 	 * Add settings-related actions and filters.
 	 */
 	protected function setup() {
-		add_action( 'after_setup_theme', array( $this, 'load_options' ), 5 );
-
 		if ( is_admin() ) {
 			add_action( 'init', array( $this, 'set_properties' ) );
 			add_action( 'admin_menu', array( $this, 'add_options_page' ) );
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 		}
+
+		// Call after set_properties(), which sets the default options.
+		add_action( 'init', array( $this, 'load_options' ), 11 );
 	}
 
 	/**
@@ -115,6 +116,16 @@ class WP_SEO_Settings {
 		 * @param  array Associative array of taxonomy keys and objects.
 		 */
 		$this->taxonomies = apply_filters( 'wp_seo_taxonomies', get_taxonomies( array( 'public' => true ), 'objects' ) );
+
+		/**
+		 * Filter the options to save by default.
+		 *
+		 * These are also the settings shown when the option does not exist,
+		 * such as when the the plugin is first activated.
+		 *
+		 * @param  array Associative array of setting names and values.
+		 */
+		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ) ) );
 	}
 
 	/**
