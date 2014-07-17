@@ -151,7 +151,7 @@ class WP_SEO_Settings {
 	 * Register the plugin options page.
 	 */
 	public function add_options_page() {
-		add_options_page( __( 'WP SEO Settings', 'wp-seo' ), __( 'SEO', 'wp-seo' ), $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
+		add_options_page( esc_html__( 'WP SEO Settings', 'wp-seo' ), esc_html__( 'SEO', 'wp-seo' ), $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
 	}
 
 	/**
@@ -160,7 +160,7 @@ class WP_SEO_Settings {
 	public function add_help_tab() {
 		get_current_screen()->add_help_tab( array(
 			'id'       => 'formatting-tags',
-			'title'    => __( 'Formatting Tags', 'wp-seo' ),
+			'title'    => esc_html__( 'Formatting Tags', 'wp-seo' ),
 			'callback' => array( $this, 'view_formatting_tags_help_tab' ),
 		) );
 	}
@@ -171,50 +171,50 @@ class WP_SEO_Settings {
 	public function register_settings() {
 		register_setting( $this::SLUG, $this::SLUG, array( $this, 'sanitize_options' ) );
 
-		add_settings_section( 'home', __( 'Home Page', 'wp-seo' ), '__return_false', $this::SLUG );
-		add_settings_field( 'home_title', __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'home', array( 'field' => 'home_title' ) );
-		add_settings_field( 'home_description', __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'home', array( 'type' => 'textarea', 'field' => 'home_description' ) );
-		add_settings_field( 'home_keywords', __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'home', array( 'field' => 'home_keywords' ) );
+		add_settings_section( 'home', esc_html__( 'Home Page', 'wp-seo' ), '__return_false', $this::SLUG );
+		add_settings_field( 'home_title', esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'home', array( 'field' => 'home_title' ) );
+		add_settings_field( 'home_description', esc_html__( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'home', array( 'type' => 'textarea', 'field' => 'home_description' ) );
+		add_settings_field( 'home_keywords', esc_html__( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'home', array( 'field' => 'home_keywords' ) );
 
-		add_settings_section( 'post_types', __( 'Post types', 'wp-seo' ), '__return_false', $this::SLUG );
-		add_settings_field( 'post_types', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'post_types', array( 'field' => 'post_types', 'type' => 'checkboxes', 'items' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
+		add_settings_section( 'post_types', esc_html__( 'Post types', 'wp-seo' ), '__return_false', $this::SLUG );
+		add_settings_field( 'post_types', esc_html__( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'post_types', array( 'field' => 'post_types', 'type' => 'checkboxes', 'items' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
 
 		foreach( $this->single_post_types as $post_type ) {
-			add_settings_section( 'single_' . $post_type->name, sprintf( __( 'Single %s Defaults', 'wp-seo' ), $post_type->labels->singular_name ), array( $this, 'example_permalink' ), $this::SLUG );
-			add_settings_field( "single_{$post_type->name}_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'single_' . $post_type->name, array( 'field' => "single_{$post_type->name}_title" ) );
-			add_settings_field( "single_{$post_type->name}_description", __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'single_' . $post_type->name, array( 'type' => 'textarea', 'field' => "single_{$post_type->name}_description" ) );
-			add_settings_field( "single_{$post_type->name}_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'single_' . $post_type->name, array( 'field' => "single_{$post_type->name}_keywords" ) );
+			add_settings_section( 'single_' . $post_type->name, sprintf( esc_html__( 'Single %s Defaults', 'wp-seo' ), $post_type->labels->singular_name ), array( $this, 'example_permalink' ), $this::SLUG );
+			add_settings_field( "single_{$post_type->name}_title", esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'single_' . $post_type->name, array( 'field' => "single_{$post_type->name}_title" ) );
+			add_settings_field( "single_{$post_type->name}_description", esc_html__( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'single_' . $post_type->name, array( 'type' => 'textarea', 'field' => "single_{$post_type->name}_description" ) );
+			add_settings_field( "single_{$post_type->name}_keywords", esc_html__( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'single_' . $post_type->name, array( 'field' => "single_{$post_type->name}_keywords" ) );
 		}
 
 		foreach( $this->archived_post_types as $post_type ) {
-			add_settings_section( 'archive_' . $post_type->name, sprintf( __( '%s Archives', 'wp-seo' ), $post_type->labels->singular_name ), array( $this, 'example_post_type_archive' ), $this::SLUG );
-			add_settings_field( "archive_{$post_type->name}_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $post_type->name, array( 'field' => "archive_{$post_type->name}_title" ) );
-			add_settings_field( "archive_{$post_type->name}_description", __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $post_type->name, array( 'type' => 'textarea', 'field' => "archive_{$post_type->name}_description" ) );
-			add_settings_field( "archive_{$post_type->name}_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $post_type->name, array( 'field' => "archive_{$post_type->name}_keywords" ) );
+			add_settings_section( 'archive_' . $post_type->name, sprintf( esc_html__( '%s Archives', 'wp-seo' ), $post_type->labels->singular_name ), array( $this, 'example_post_type_archive' ), $this::SLUG );
+			add_settings_field( "archive_{$post_type->name}_title", esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $post_type->name, array( 'field' => "archive_{$post_type->name}_title" ) );
+			add_settings_field( "archive_{$post_type->name}_description", esc_html__( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $post_type->name, array( 'type' => 'textarea', 'field' => "archive_{$post_type->name}_description" ) );
+			add_settings_field( "archive_{$post_type->name}_keywords", esc_html__( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $post_type->name, array( 'field' => "archive_{$post_type->name}_keywords" ) );
 		}
 
 		foreach( $this->taxonomies as $taxonomy ) {
-			add_settings_section( 'archive_' . $taxonomy->name, sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
-			add_settings_field( "archive_{$taxonomy->name}_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'field' => "archive_{$taxonomy->name}_title" ) );
-			add_settings_field( "archive_{$taxonomy->name}_description", __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'type' => 'textarea', 'field' => "archive_{$taxonomy->name}_description" ) );
-			add_settings_field( "archive_{$taxonomy->name}_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'field' => "archive_{$taxonomy->name}_keywords" ) );
+			add_settings_section( 'archive_' . $taxonomy->name, sprintf( esc_html__( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
+			add_settings_field( "archive_{$taxonomy->name}_title", esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'field' => "archive_{$taxonomy->name}_title" ) );
+			add_settings_field( "archive_{$taxonomy->name}_description", esc_html__( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'type' => 'textarea', 'field' => "archive_{$taxonomy->name}_description" ) );
+			add_settings_field( "archive_{$taxonomy->name}_keywords", esc_html__( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'field' => "archive_{$taxonomy->name}_keywords" ) );
 		}
 
-		add_settings_section( 'archive_author', __( 'Author Archives', 'wp-seo' ), array( $this, 'example_author_archive' ), $this::SLUG );
-		add_settings_field( "archive_author_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'field' => "archive_author_title" ) );
-		add_settings_field( "archive_author_description", __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'type' => 'textarea', 'field' => "archive_author_description" ) );
-		add_settings_field( "archive_author_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'field' => "archive_author_keywords" ) );
+		add_settings_section( 'archive_author', esc_html__( 'Author Archives', 'wp-seo' ), array( $this, 'example_author_archive' ), $this::SLUG );
+		add_settings_field( "archive_author_title", esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'field' => "archive_author_title" ) );
+		add_settings_field( "archive_author_description", esc_html__( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'type' => 'textarea', 'field' => "archive_author_description" ) );
+		add_settings_field( "archive_author_keywords", esc_html__( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'field' => "archive_author_keywords" ) );
 
-		add_settings_section( 'archive_date', __( 'Date Archives', 'wp-seo' ), array( $this, 'example_date_archive' ), $this::SLUG );
-		add_settings_field( "archive_date_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'field' => "archive_date_title" ) );
-		add_settings_field( "archive_date_description", __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'type' => 'textarea', 'field' => "archive_date_description" ) );
-		add_settings_field( "archive_date_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'field' => "archive_date_keywords" ) );
+		add_settings_section( 'archive_date', esc_html__( 'Date Archives', 'wp-seo' ), array( $this, 'example_date_archive' ), $this::SLUG );
+		add_settings_field( "archive_date_title", esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'field' => "archive_date_title" ) );
+		add_settings_field( "archive_date_description", esc_html__( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'type' => 'textarea', 'field' => "archive_date_description" ) );
+		add_settings_field( "archive_date_keywords", esc_html__( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'field' => "archive_date_keywords" ) );
 
-		add_settings_section( 'search', __( 'Search Results', 'wp-seo' ), array( $this, 'example_search_page' ), $this::SLUG );
-		add_settings_field( 'search_title', __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'search', array( 'field' => 'search_title' ) );
+		add_settings_section( 'search', esc_html__( 'Search Results', 'wp-seo' ), array( $this, 'example_search_page' ), $this::SLUG );
+		add_settings_field( 'search_title', esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'search', array( 'field' => 'search_title' ) );
 
-		add_settings_section( '404', __( '404 Page', 'wp-seo' ), array( $this, 'example_404_page' ), $this::SLUG );
-		add_settings_field( '404_title', __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, '404', array( 'field' => '404_title' ) );
+		add_settings_section( '404', esc_html__( '404 Page', 'wp-seo' ), array( $this, 'example_404_page' ), $this::SLUG );
+		add_settings_field( '404_title', esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, '404', array( 'field' => '404_title' ) );
 
 		add_settings_section( 'arbitrary', esc_html__( 'Other Meta Tags', 'wp-seo' ), false, $this::SLUG );
 		add_settings_field( 'arbitrary_tags', esc_html__( 'Tags', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'arbitrary', array( 'type' => 'repeatable', 'field' => 'arbitrary_tags', 'repeat' => array( 'name' => esc_html__( 'Name', 'lin' ), 'content' => esc_html__( 'Content', 'lin' ) ) ) );
@@ -228,7 +228,7 @@ class WP_SEO_Settings {
 	 * @return string.
 	 */
 	public function ex_text() {
-		return __( 'ex. ', 'wp-seo' );
+		return esc_html__( 'ex. ', 'wp-seo' );
 	}
 
 	/**
@@ -259,7 +259,7 @@ class WP_SEO_Settings {
 		if ( $post = get_posts( array( 'numberposts' => 1, 'post_type' => str_replace( array( 'single_', 'archive_' ), '', $section['id'] ), 'fields' => 'ids', 'suppress_filters' => false ) ) ) {
 			$this->example_url( $this->ex_text(), get_the_permalink( reset( $post ) ) );
 		} else {
-			$this->example_url( __( 'No posts yet.', 'wp-seo' ) );
+			$this->example_url( esc_html__( 'No posts yet.', 'wp-seo' ) );
 		}
 	}
 
@@ -274,7 +274,7 @@ class WP_SEO_Settings {
 		if ( $term = get_terms( str_replace( 'archive_', '', $section['id'] ), array( 'number' => 1 ) ) ) {
 			$this->example_url( $this->ex_text(), get_term_link( reset( $term ) ) );
 		} else {
-			$this->example_url( __( 'No terms yet.', 'wp-seo' ) );
+			$this->example_url( esc_html__( 'No terms yet.', 'wp-seo' ) );
 		}
 	}
 
@@ -285,7 +285,7 @@ class WP_SEO_Settings {
 	 */
 	public function example_post_type_archive( $section ) {
 		if ( $url = get_post_type_archive_link( str_replace( 'archive_', '', $section['id'] ) ) ) {
-			$this->example_url( __( 'at ', 'wp-seo' ), $url );
+			$this->example_url( esc_html__( 'at ', 'wp-seo' ), $url );
 		}
 	}
 
@@ -311,7 +311,7 @@ class WP_SEO_Settings {
 	 * Display an example URL for a search page.
 	 */
 	public function example_search_page() {
-		$this->example_url( $this->ex_text(), get_search_link( __( 'wordpress', 'wp-seo' ) ) );
+		$this->example_url( $this->ex_text(), get_search_link( esc_html__( 'wordpress', 'wp-seo' ) ) );
 	}
 
 	/**
