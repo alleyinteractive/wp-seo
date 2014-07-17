@@ -30,8 +30,13 @@ require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
 require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
 require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
 
-function wp_seo_scripts() {
-	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery' ), '0.9.0' );
+function wp_seo_admin_scripts() {
+	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.9.0', true );
+	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', array(
+		'repeatable_add_more_label' => esc_html__( 'Add another', 'wp-seo' ),
+		'repeatable_remove_label' => esc_html__( 'Remove group', 'wp-seo' ),
+	) );
+
 	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.9.0' );
 }
-add_action( 'admin_enqueue_scripts', 'wp_seo_scripts' );
+add_action( 'admin_enqueue_scripts', 'wp_seo_admin_scripts' );
