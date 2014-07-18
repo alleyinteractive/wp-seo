@@ -31,7 +31,7 @@
 	}
 
 	updateCharacterCounts();
-	$( '.wp-seo-meta-fields' ).find( 'input, textarea' ).keyup( updateCharacterCounts );
+	$( '.wp-seo-post-meta-fields, .wp-seo-term-meta-fields' ).find( 'input, textarea' ).keyup( updateCharacterCounts );
 
 	/**
 	 * Add a "Remove" link to groups.

@@ -193,6 +193,10 @@ class WP_SEO_Settings {
 			add_settings_field( "archive_{$post_type->name}_keywords", esc_html__( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $post_type->name, array( 'field' => "archive_{$post_type->name}_keywords" ) );
 		}
 
+		// Post Formats have no UI, so they cannot have per-term fields.
+		add_settings_section( 'taxonomies', esc_html__( 'Taxonomies', 'wp-seo' ), '__return_false', $this::SLUG );
+		add_settings_field( 'taxonomies', esc_html__( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'taxonomies', array( 'field' => 'taxonomies', 'type' => 'checkboxes', 'items' => call_user_func_array( 'wp_list_pluck', array( array_diff_key( $this->taxonomies, array( 'post_format' => true ) ), 'label' ) ) ) );
+
 		foreach( $this->taxonomies as $taxonomy ) {
 			add_settings_section( 'archive_' . $taxonomy->name, sprintf( esc_html__( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
 			add_settings_field( "archive_{$taxonomy->name}_title", esc_html__( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'field' => "archive_{$taxonomy->name}_title" ) );
@@ -607,8 +611,9 @@ class WP_SEO_Settings {
 	public function sanitize_options( $in ) {
 		$out = $this->default_options;
 
-		// Validate post types on which to show SEO fields.
-		$out['post_types'] = array_filter( $in['post_types'], 'post_type_exists' );
+		// Validate post types and taxonomies on which to show SEO fields.
+		$out['post_types'] = isset( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
+		$out['taxonomies'] = isset( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
 
 		/**
 		 * Sanitize these as text fields and in the following order:
@@ -696,17 +701,35 @@ class WP_SEO_Settings {
 	/**
 	 * Helper to check whether a post type is set in "Add fields to individual."
 	 *
-	 * Checked a few times in WP_SEO.
-	 *
 	 * @param  string  $post_type Post type name.
 	 * @return boolean
 	 */
-	public function has_individual_fields( $post_type ) {
+	public function has_post_fields( $post_type ) {
 		if ( is_array( $this->get_option( 'post_types' ) ) ) {
 			return in_array( $post_type, $this->get_option( 'post_types') );
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the $taxonomies property.
+	 *
+	 * @return array @see WP_SEO_Settings::set_properties(), or an empty array
+	 *     as a fallback.
+	 */
+	public function get_taxonomies() {
+		return $this->get_option( 'taxonomies' ) ?: array();
+	}
+
+	/**
+	 * Helper to check whether a taxonomy is set in "Add fields to individual."
+	 *
+	 * @param  string $taxonomy Taxonomy name
+	 * @return boolean
+	 */
+	public function has_term_fields( $taxonomy ) {
+		return in_array( $taxonomy, $this->get_taxonomies() );
 	}
 
 }
