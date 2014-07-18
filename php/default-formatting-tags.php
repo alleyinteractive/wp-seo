@@ -148,6 +148,42 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 
 }
 
+class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
+
+	public $tag = '#categories#';
+
+	public function get_description() {
+		return esc_html__( 'Replaced with the Categories, comma-separated, of the content being viewed.', 'wp-seo' );
+	}
+
+	public function get_value() {
+		if ( is_singular() && is_object_in_taxonomy( get_post_type(), 'category' ) && $categories = get_the_category() ) {
+			return implode( esc_html__( ', ', 'wp-seo' ), wp_list_pluck( $categories, 'name' ) );
+		}
+
+		return false;
+	}
+
+}
+
+class WP_SEO_Format_Tags extends WP_SEO_Formatting_Tag {
+
+	public $tag = '#tags#';
+
+	public function get_description() {
+		return esc_html__( 'Replaced with the Tags, comma-separated, of the content being viewed.', 'wp-seo' );
+	}
+
+	public function get_value() {
+		if ( is_singular() && is_object_in_taxonomy( get_post_type(), 'post_tag' ) && $tags = get_the_tags() ) {
+			return implode( esc_html__( ', ', 'wp-seo' ), wp_list_pluck( $tags, 'name' ) );
+		}
+
+		return false;
+	}
+
+}
+
 class WP_SEO_Format_Term_Name extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#term_name#';
@@ -275,6 +311,8 @@ function wp_seo_default_formatting_tags( $tags ) {
 	$tags['date_published'] = new WP_SEO_Format_Date_Published;
 	$tags['date_modified'] = new WP_SEO_Format_Date_Modified;
 	$tags['author'] = new WP_SEO_Format_Author;
+	$tags['categories'] = new WP_SEO_Format_Categories;
+	$tags['tags'] = new WP_SEO_Format_Tags;
 	$tags['term_name'] = new WP_SEO_Format_Term_Name;
 	$tags['term_description'] = new WP_SEO_Format_Term_Description;
 	$tags['post_type_singular_name'] = new WP_SEO_Format_Post_Type_Singular_Name;
