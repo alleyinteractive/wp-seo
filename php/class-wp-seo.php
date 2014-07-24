@@ -97,7 +97,7 @@ class WP_SEO {
 		 *
 		 * @param string The text.
 		 */
-		$this->box_heading = apply_filters( 'wp_seo_box_heading', esc_html__( 'Search Engine Optimization', 'wp-seo' ) );
+		$this->box_heading = apply_filters( 'wp_seo_box_heading', __( 'Search Engine Optimization', 'wp-seo' ) );
 	}
 
 	/**
@@ -129,6 +129,16 @@ class WP_SEO {
 	}
 
 	/**
+	 * Helper to get the translated <noscript> text for the character count.
+	 *
+	 * @param  string $text The text to count.
+	 * @return string The text to go between the <noscript> tags.
+	 */
+	private function noscript_character_count( $text ) {
+		return sprintf( __( '%d (save changes to update)', 'wp-seo' ), strlen( $text ) );
+	}
+
+	/**
 	 * Display the SEO fields for a post.
 	 *
 	 * @param  WP_Post $post The post being edited.
@@ -145,7 +155,7 @@ class WP_SEO {
 						<div>
 							<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
 							<span class="title-character-count"></span>
-							<noscript><?php esc_html_e( sprintf( '%d (save changes to update)', strlen( $title ) ), 'wp-seo' ); ?></noscript>
+							<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
 						</div>
 					</td>
 				</tr>
@@ -156,7 +166,7 @@ class WP_SEO {
 						<div>
 							<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
 							<span class="description-character-count"></span>
-							<noscript><?php esc_html_e( sprintf( '%d (save changes to update)', strlen( $description ) ), 'wp-seo' ); ?></noscript>
+							<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
 						</div>
 					<td>
 				</tr>
@@ -188,7 +198,7 @@ class WP_SEO {
 		}
 
 		$post_type = get_post_type_object( $_POST['post_type'] );
-		if ( empty( $post_type->cap->edit_post ) || ! current_user_can( $post_type->cap->edit_post ) ) {
+		if ( empty( $post_type->cap->edit_post ) || ! current_user_can( $post_type->cap->edit_post, $post_id ) ) {
 			return;
 		}
 
@@ -243,28 +253,28 @@ class WP_SEO {
 				<tr class="form-field">
 					<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
 					<td>
-						<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo $title = esc_attr( $values['title'] ); ?>" size="96" />
+						<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title = $values['title'] ); ?>" size="96" />
 						<div>
 							<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
 							<span class="title-character-count"></span>
-							<noscript><?php esc_html_e( sprintf( '%d (save changes to update)', strlen( $title ) ), 'wp-seo' ); ?></noscript>
+							<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
 						</div>
 					</td>
 				</tr>
 				<tr class="form-field">
 					<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
 					<td>
-						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo $description = esc_html( $values['description'] ); ?></textarea>
+						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_html( $description = $values['description'] ); ?></textarea>
 						<div>
 							<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
 							<span class="description-character-count"></span>
-							<noscript><?php esc_html_e( sprintf( '%d (save changes to update)', strlen( $description ) ), 'wp-seo' ); ?></noscript>
+							<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
 						</div>
 					<td>
 				</tr>
 				<tr class="form-field">
 					<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
-					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo $keywords = esc_html( $values['keywords'] ); ?></textarea></td>
+					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_html( $values['keywords'] ); ?></textarea></td>
 				</tr>
 			</tbody>
 		</table>
@@ -292,7 +302,7 @@ class WP_SEO {
 		}
 
 		$object = get_taxonomy( $taxonomy );
-		if ( empty( $object->cap->edit_terms ) || ! current_user_can( $object->cap->edit_terms ) ) {
+		if ( empty( $object->cap->edit_terms ) || ! current_user_can( $object->cap->edit_terms, $post_id ) ) {
 			return;
 		}
 

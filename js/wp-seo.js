@@ -6,7 +6,7 @@
 	 * @return {String}
 	 */
 	function wpseo_add_more_button() {
-		return $( '<a href="#" class="button-secondary wp-seo-add">' + wp_seo_admin.repeatable_add_more_label + '</a>' );
+		return $( '<a href="#" class="button-secondary wp-seo-add" />' ).text( wp_seo_admin.repeatable_add_more_label );
 	}
 
 	/**
@@ -21,24 +21,24 @@
 	/**
 	 * Update the description and title character counts displayed to the user.
 	 */
-	function updateCharacterCounts() {
-		$( ['title', 'description'] ).each( function() {
-			var input;
-			if ( ( input = $( '#wp_seo_meta_' + this ) ).length > 0 ) {
-				$( '.' + this + '-character-count' ).html( input.val().length );
+	function wpseo_update_character_counts() {
+		_.each( ['title', 'description'], function( field ) {
+			var input = $( '#wp_seo_meta_' + field );
+			if ( input.length > 0 ) {
+				$( '.' + field + '-character-count' ).html( input.val().length );
 			}
 		});
 	}
 
-	updateCharacterCounts();
-	$( '.wp-seo-post-meta-fields, .wp-seo-term-meta-fields' ).find( 'input, textarea' ).keyup( updateCharacterCounts );
+	wpseo_update_character_counts();
+	$( '.wp-seo-post-meta-fields, .wp-seo-term-meta-fields' ).find( 'input, textarea' ).keyup( wpseo_update_character_counts );
 
 	/**
 	 * Add a "Remove" link to groups.
 	 *
 	 * Appended here to easily use the same localized field label.
 	 */
-	$( '.wp-seo-repeatable-group' ).append( '<a href="#" class="wp-seo-delete">' + wp_seo_admin.repeatable_remove_label + '</a>' );
+	$( '.wp-seo-repeatable-group' ).append( $( '<a href="#" class="wp-seo-delete" />' ).text( wp_seo_admin.repeatable_remove_label ) );
 
 	$( '.wp-seo-repeatable' )
 		// Append the "Add More" button to each repeatable field.
