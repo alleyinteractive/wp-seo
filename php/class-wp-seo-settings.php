@@ -719,7 +719,7 @@ class WP_SEO_Settings {
 	 *     as a fallback.
 	 */
 	public function get_taxonomies() {
-		return $this->get_option( 'taxonomies' ) ?: array();
+		return ( $taxonomies = $this->get_option( 'taxonomies' ) ) ? $taxonomies : array();
 	}
 
 	/**
