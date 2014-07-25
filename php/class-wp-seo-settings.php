@@ -420,7 +420,7 @@ class WP_SEO_Settings {
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
-			esc_attr( $value )
+			esc_textarea( $value )
 		);
 	}
 

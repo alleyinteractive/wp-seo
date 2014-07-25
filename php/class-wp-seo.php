@@ -162,7 +162,7 @@ class WP_SEO {
 				<tr>
 					<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
 					<td>
-						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_html( $description = get_post_meta( $post->ID, '_meta_description', true ) ); ?></textarea>
+						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description = get_post_meta( $post->ID, '_meta_description', true ) ); ?></textarea>
 						<div>
 							<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
 							<span class="description-character-count"></span>
@@ -172,7 +172,7 @@ class WP_SEO {
 				</tr>
 				<tr>
 					<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
-					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_html( get_post_meta( $post->ID, '_meta_keywords', true ) ) ?></textarea></td>
+					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( get_post_meta( $post->ID, '_meta_keywords', true ) ) ?></textarea></td>
 				</tr>
 			</tbody>
 		</table>
@@ -264,7 +264,7 @@ class WP_SEO {
 				<tr class="form-field">
 					<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
 					<td>
-						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_html( $description = $values['description'] ); ?></textarea>
+						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description = $values['description'] ); ?></textarea>
 						<div>
 							<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
 							<span class="description-character-count"></span>
@@ -274,7 +274,7 @@ class WP_SEO {
 				</tr>
 				<tr class="form-field">
 					<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
-					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_html( $values['keywords'] ); ?></textarea></td>
+					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( $values['keywords'] ); ?></textarea></td>
 				</tr>
 			</tbody>
 		</table>
