@@ -222,8 +222,10 @@ class WP_SEO {
 	 */
 	public function add_term_boxes() {
 		foreach ( WP_SEO_Settings()->get_taxonomies() as $slug ) {
-			add_action( $slug . '_edit_form', array( $this, 'term_meta_fields' ), 10, 2 );
+			add_action( $slug . '_add_form_fields', array( $this, 'add_term_meta_fields' ), 10, 2 );
+			add_action( $slug . '_edit_form', array( $this, 'edit_term_meta_fields' ), 10, 2 );
 		}
+		add_action( 'created_term', array( $this, 'save_term_fields' ), 10, 3 );
 		add_action( 'edited_term', array( $this, 'save_term_fields' ), 10, 3 );
 	}
 
@@ -238,12 +240,48 @@ class WP_SEO {
 	}
 
 	/**
-	 * Display the SEO fields for a term.
+	 * Display the SEO fields for adding a term.
+	 *
+	 * @param string $taxonomy The taxonomy slug.
+	 */
+	public function add_term_meta_fields( $taxonomy ) {
+		wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
+		?>
+		<h3><?php echo esc_html( $this->box_heading ); ?></h3>
+		<div class="wp-seo-term-meta-fields">
+			<div class="form-field">
+				<label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label>
+				<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="" size="96" />
+				<p>
+					<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
+					<span class="title-character-count"></span>
+					<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
+				</p>
+			</div>
+			<div class="form-field">
+				<label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label>
+				<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"></textarea>
+				<p>
+					<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
+					<span class="description-character-count"></span>
+					<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
+				</p>
+			</div>
+			<div class="form-field">
+				<label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label>
+				<textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"></textarea>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Display the SEO fields for editing a term.
 	 *
 	 * @param  object $tag The term object
 	 * @param  string $taxonomy The taxonomy slug
 	 */
-	public function term_meta_fields( $tag, $taxonomy ) {
+	public function edit_term_meta_fields( $tag, $taxonomy ) {
 		$values = get_option( $this->get_term_fields_option_name( $tag ), array( 'title' => '', 'description' => '', 'keywords' => '' ) );
 		wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
 		?>
@@ -254,22 +292,22 @@ class WP_SEO {
 					<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
 					<td>
 						<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title = $values['title'] ); ?>" size="96" />
-						<div>
+						<p class="description">
 							<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
 							<span class="title-character-count"></span>
 							<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
-						</div>
+						</p>
 					</td>
 				</tr>
 				<tr class="form-field">
 					<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
 					<td>
 						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description = $values['description'] ); ?></textarea>
-						<div>
+						<p class="description">
 							<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
 							<span class="description-character-count"></span>
 							<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
-						</div>
+						</p>
 					<td>
 				</tr>
 				<tr class="form-field">
@@ -302,7 +340,7 @@ class WP_SEO {
 		}
 
 		$object = get_taxonomy( $taxonomy );
-		if ( empty( $object->cap->edit_terms ) || ! current_user_can( $object->cap->edit_terms, $post_id ) ) {
+		if ( empty( $object->cap->edit_terms ) || ! current_user_can( $object->cap->edit_terms ) ) {
 			return;
 		}
 

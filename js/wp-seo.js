@@ -32,6 +32,12 @@
 
 	wpseo_update_character_counts();
 	$( '.wp-seo-post-meta-fields, .wp-seo-term-meta-fields' ).find( 'input, textarea' ).keyup( wpseo_update_character_counts );
+	// Update the character counts after a term is added via AJAX.
+	$( document ).ajaxComplete( function() {
+		if ( $( '#addtag' ).length > 0 ) {
+			wpseo_update_character_counts();
+		}
+	} );
 
 	/**
 	 * Add a "Remove" link to groups.
