@@ -549,7 +549,11 @@ class WP_SEO_Settings {
 					 * @param  bool Whether to enhance the page with accordions.
 					 */
 					if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
-						$this->do_settings_accordions();
+						global $wp_settings_sections;
+						foreach ( (array) $wp_settings_sections[ $this::SLUG ] as $section ) {
+						    add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', $section );
+						}
+						do_accordion_sections( 'wp-seo', 'advanced', null );
 					} else {
 						do_settings_sections( $this::SLUG );
 					}
@@ -561,45 +565,26 @@ class WP_SEO_Settings {
 	}
 
 	/**
-	 * Render the settings fields with each section as an accordion.
+	 * Render a section's fields as a meta box.
 	 *
-	 * @see  do_settings_sections() for the logic of looping through sections.
-	 * @see  do_accordion_sections() for the markup to activate the accordions.
+	 * @param  mixed $object Unused. Data passed from do_accordion_sections().
+	 * @param  array $box {
+	 *     An array of meta box arguments.
+	 *
+	 *     @type  string $id @see add_meta_box().
+	 *     @type  string $title @see add_meta_box().
+	 *     @type  callback $callback @see add_meta_box().
+	 *     @type  array $args @see add_meta_box(), add_settings_section().
+	 * }
 	 */
-	private function do_settings_accordions() {
-		global $wp_settings_sections, $wp_settings_fields;
-		wp_enqueue_script( 'accordion' );
-		?>
-		<div class="accordion-container" style="border: 1px solid #e5e5e5; box-shadow: 0 1px 1px rgba( 0, 0, 0, .04 );">
-			<ul class="outer-border">
-				<?php foreach( (array) $wp_settings_sections[ $this::SLUG ] as $section ) : ?>
-					<li class="control-section accordion-section">
-						<?php if ( $section['title'] ) : ?>
-							<h3 class="accordion-section-title hndle" tabindex="0"><?php esc_html_e( $section['title'] ); ?></h3>
-						<?php endif; ?>
+	public function settings_meta_box( $object, $box ) {
+		if ( is_callable( $box['args']['callback'] ) ) {
+			call_user_func( $box['args']['callback'], $box['args'] );
+		}
 
-						<div class="accordion-section-content">
-							<div class="inside">
-								<?php if ( $section['callback'] ) : ?>
-									<?php call_user_func( $section['callback'], $section ); ?>
-								<?php endif; ?>
-
-								<?php
-									if ( ! isset( $wp_settings_fields ) || ! isset( $wp_settings_fields[ $this::SLUG ] ) || ! isset( $wp_settings_fields[ $this::SLUG ][ $section['id'] ] ) ) {
-										continue;
-									}
-								?>
-
-								<table class="form-table">
-									<?php do_settings_fields( $this::SLUG, $section['id'] ); ?>
-								</table>
-							</div><!-- .inside -->
-						</div><!-- .accordion-section-content -->
-					</li><!-- .control-section.accordion-section -->
-				<?php endforeach; ?>
-			</ul><!-- .outer-border -->
-		</div><!-- .accordion-container -->
-		<?php
+		echo '<table class="form-table">';
+		do_settings_fields( $this::SLUG, $box['args']['id'] );
+		echo '</table>';
 	}
 
 	/**
