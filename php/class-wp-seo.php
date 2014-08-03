@@ -375,7 +375,7 @@ class WP_SEO {
 					 * This value is used when a formatting tag is encountered
 					 * in a string but no class for it was registered. For
 					 * example, it would be used if a tag is misspelled or if a
-					 * third-party plugin is deactivated.
+					 * third-party plugin that provided the tag is deactivated.
 					 *
 					 * @param  string The fallback value. Defaults to empty string.
 					 * @param  string $match The found formatting tag.
@@ -411,7 +411,7 @@ class WP_SEO {
 	public function wp_title( $title, $sep ) {
 		if ( is_singular() ) {
 			if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) && $meta_title = get_post_meta( get_the_ID(), '_meta_title', true ) ) {
-				return $meta_title;
+				return $this->format( $meta_title );
 			} else {
 				$key = "single_{$post_type}_title";
 			}
@@ -421,7 +421,7 @@ class WP_SEO {
 			$key = 'archive_author_title';
 		} elseif ( is_category() || is_tag() || is_tax() ) {
 			if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_fields_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
-				return $option['title'];
+				return $this->format( $option['title'] );
 			} else {
 				$key = "archive_{$taxonomy}_title";
 			}
@@ -510,12 +510,11 @@ class WP_SEO {
 				 * @param  string 		The format string retrieved from the settings.
 				 * @param  string $key	The key of the setting retrieved.
 				 */
-				$description_string = apply_filters( 'wp_seo_meta_description_format', WP_SEO_Settings()->get_option( "{$key}_description" ), $key );
-				$meta_description = $this->format( $description_string );
+				$meta_description = apply_filters( 'wp_seo_meta_description_format', WP_SEO_Settings()->get_option( "{$key}_description" ), $key );
 			}
 
 			if ( $meta_description ) {
-				$this->meta_field( 'description', $meta_description );
+				$this->meta_field( 'description', $this->format( $meta_description ) );
 			}
 
 			if ( empty( $meta_keywords ) ) {
@@ -525,12 +524,11 @@ class WP_SEO {
 				 * @param  string 		The format string retrieved from the settings.
 				 * @param  string $key	The key of the setting retrieved.
 				 */
-				$keywords_string = apply_filters( 'wp_seo_meta_keywords_format', WP_SEO_Settings()->get_option( "{$key}_keywords" ), $key );
-				$meta_keywords = $this->format( $keywords_string );
+				$meta_keywords = apply_filters( 'wp_seo_meta_keywords_format', WP_SEO_Settings()->get_option( "{$key}_keywords" ), $key );
 			}
 
 			if ( $meta_keywords ) {
-				$this->meta_field( 'keywords', $meta_keywords );
+				$this->meta_field( 'keywords', $this->format( $meta_keywords ) );
 			}
 		}
 
@@ -545,7 +543,7 @@ class WP_SEO {
 		 * }
 		 */
 		foreach( apply_filters( 'wp_seo_arbitrary_tags', WP_SEO_Settings()->get_option( 'arbitrary_tags' ) ) as $tag ) {
-			$this->meta_field( $tag['name'], $tag['content'] );
+			$this->meta_field( $tag['name'], $this->format( $tag['content'] ) );
 		}
 
 	}
