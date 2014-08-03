@@ -88,6 +88,11 @@ class WP_SEO {
 		 *
 		 * You might need this if you want to add unusual custom tags.
 		 *
+		 * @see  wp_seo_admin_scripts(), wp-seo.js. If you change the pattern,
+		 *     you should also overwrite the formatting_tag_pattern property in
+		 *     the localized wp_seo_admin object so that your tags are properly
+		 *     detected when counting characters.
+		 *
 		 * @param string WP_SEO::formatting_tag_pattern The regex.
 		 */
 		$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', $this->formatting_tag_pattern );
@@ -131,11 +136,20 @@ class WP_SEO {
 	/**
 	 * Helper to get the translated <noscript> text for the character count.
 	 *
+	 * @see  wp_seo_admin_scripts(), wpseo_update_character_counts() for the
+	 *     message and logic behind JS-enabled character count estimates when
+	 *     formatting tags are detected.
+	 *
 	 * @param  string $text The text to count.
 	 * @return string The text to go between the <noscript> tags.
 	 */
 	private function noscript_character_count( $text ) {
-		return sprintf( __( '%d (save changes to update)', 'wp-seo' ), strlen( $text ) );
+		if ( false !== $matches = $this->get_formatting_tags( $text ) ) {
+			$message = sprintf( 'At least %d, depending on formatting tags', ( strlen( $text ) - strlen( implode( '', $matches ) ) ) );
+		} else {
+			$message = strlen( $text );
+		}
+		return sprintf( __( '%s (save changes to update)', 'wp-seo' ), esc_html( $message ) );
 	}
 
 	/**
@@ -331,6 +345,17 @@ class WP_SEO {
 	}
 
 	/**
+	 * Get the formatting tags in a string.
+	 *
+	 * @param  string $string The string to search.
+	 * @return array|bool An array of found tags, or false.
+	 */
+	public function get_formatting_tags( $string ) {
+		preg_match_all( $this->formatting_tag_pattern, $string, $matches );
+		return ! empty( $matches[0] ) ? $matches[0] : false;
+	}
+
+	/**
 	 * Replace formatting tags in a string with their value for the current page.
 	 *
 	 * @param  string $string The string with formatting tags.
@@ -339,13 +364,13 @@ class WP_SEO {
 	public function format( $string ) {
 		$raw_string = $string;
 
-		preg_match_all( $this->formatting_tag_pattern, $string, $matches );
-		if ( empty( $matches[0] ) ) {
+		$matches = $this->get_formatting_tags( $string );
+		if ( ! $matches ) {
 			return $string;
 		}
 
 		$replacements = array();
-		$unique_matches = array_unique( $matches[0] );
+		$unique_matches = array_unique( $matches );
 
 		// Loop through all tags here; wp_list_pluck() or similar would anyway.
 		foreach( $this->formatting_tags as $id => $tag ) {
