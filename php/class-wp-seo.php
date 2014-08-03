@@ -366,6 +366,25 @@ class WP_SEO {
 			}
 		}
 
+		if ( count( $unique_matches ) !== count( $replacements ) ) {
+			foreach ( $unique_matches as $match ) {
+				if ( ! isset( $replacements[ $match ] ) ) {
+					/**
+					 * Filter the fallback value of formatting tags.
+					 *
+					 * This value is used when a formatting tag is encountered
+					 * in a string but no class for it was registered. For
+					 * example, it would be used if a tag is misspelled or if a
+					 * third-party plugin is deactivated.
+					 *
+					 * @param  string The fallback value. Defaults to empty string.
+					 * @param  string $match The found formatting tag.
+					 */
+					$replacements[ $match ] = apply_filters( 'wp_seo_format_fallback', '', $match );
+				}
+			}
+		}
+
 		if ( ! empty( $replacements ) ) {
 			$string = str_replace( array_keys( $replacements ), array_values( $replacements ), $string );
 		}
