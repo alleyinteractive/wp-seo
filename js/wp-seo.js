@@ -20,15 +20,32 @@
 
 	/**
 	 * Update the description and title character counts displayed to the user.
+	 *
+	 * If a string has a formatting tag, uses Underscores to render a template
+	 * with an estimated character count. The estimate is the total string
+	 * length minus the combined length of the formatting tags.
 	 */
 	function wpseo_update_character_counts() {
 		_.each( ['title', 'description'], function( field ) {
 			var input = $( '#wp_seo_meta_' + field );
 			if ( input.length > 0 ) {
-				$( '.' + field + '-character-count' ).html( input.val().length );
+				var matches = input.val().match( wp_seo_admin.formatting_tag_pattern );
+				var element = '.' + field + '-character-count';
+				if ( matches ) {
+					$( element ).html( _.template( wp_seo_admin.estimated_count_text, { count: ( input.val().length - matches.join('').length ) } ) );
+				} else {
+					$( element ).html( input.val().length );
+				}
 			}
 		});
 	}
+
+	/**
+	 * Add the default formatting tag pattern to the localized object.
+	 *
+	 * @type {RegExp}
+	 */
+	window.wp_seo_admin.formatting_tag_pattern = /#[a-zA-Z\_]+#/g;
 
 	wpseo_update_character_counts();
 	$( '.wp-seo-post-meta-fields, .wp-seo-term-meta-fields' ).find( 'input, textarea' ).keyup( wpseo_update_character_counts );

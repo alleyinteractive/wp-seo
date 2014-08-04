@@ -88,6 +88,11 @@ class WP_SEO {
 		 *
 		 * You might need this if you want to add unusual custom tags.
 		 *
+		 * @see  wp_seo_admin_scripts(), wp-seo.js. If you change the pattern,
+		 *     you should also overwrite the formatting_tag_pattern property in
+		 *     the localized wp_seo_admin object so that your tags are properly
+		 *     detected when counting characters.
+		 *
 		 * @param string WP_SEO::formatting_tag_pattern The regex.
 		 */
 		$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', $this->formatting_tag_pattern );
@@ -131,11 +136,19 @@ class WP_SEO {
 	/**
 	 * Helper to get the translated <noscript> text for the character count.
 	 *
+	 * @see  wpseo_update_character_counts() for the logic behind JS-enabled
+	 *     character count estimates when formatting tags are detected.
+	 *
 	 * @param  string $text The text to count.
 	 * @return string The text to go between the <noscript> tags.
 	 */
 	private function noscript_character_count( $text ) {
-		return sprintf( __( '%d (save changes to update)', 'wp-seo' ), strlen( $text ) );
+		if ( false !== $matches = $this->get_formatting_tags( $text ) ) {
+			$message = sprintf( wp_seo_get_estimated_character_count_string( '%d' ), ( strlen( $text ) - strlen( implode( '', $matches ) ) ) );
+		} else {
+			$message = strlen( $text );
+		}
+		return sprintf( __( '%s (save changes to update)', 'wp-seo' ), esc_html( $message ) );
 	}
 
 	/**
@@ -369,6 +382,17 @@ class WP_SEO {
 	}
 
 	/**
+	 * Get the formatting tags in a string.
+	 *
+	 * @param  string $string The string to search.
+	 * @return array|bool An array of found tags, or false.
+	 */
+	public function get_formatting_tags( $string ) {
+		preg_match_all( $this->formatting_tag_pattern, $string, $matches );
+		return ! empty( $matches[0] ) ? $matches[0] : false;
+	}
+
+	/**
 	 * Replace formatting tags in a string with their value for the current page.
 	 *
 	 * @param  string $string The string with formatting tags.
@@ -377,13 +401,14 @@ class WP_SEO {
 	public function format( $string ) {
 		$raw_string = $string;
 
-		preg_match_all( $this->formatting_tag_pattern, $string, $matches );
-		if ( empty( $matches[0] ) ) {
+		$matches = $this->get_formatting_tags( $string );
+		if ( ! $matches ) {
 			return $string;
 		}
 
+		$unique_matches = array_unique( $matches );
 		$replacements = array();
-		$unique_matches = array_unique( $matches[0] );
+		$unregistered = array();
 
 		// Loop through all tags here; wp_list_pluck() or similar would anyway.
 		foreach( $this->formatting_tags as $id => $tag ) {
@@ -404,6 +429,26 @@ class WP_SEO {
 			}
 		}
 
+		if ( count( $unique_matches ) !== count( $replacements ) ) {
+			foreach ( $unique_matches as $match ) {
+				if ( ! isset( $replacements[ $match ] ) ) {
+					/**
+					 * Filter the fallback value of formatting tags.
+					 *
+					 * This value is used when a formatting tag is encountered
+					 * in a string but no class for it was registered. For
+					 * example, it would be used if a tag is misspelled or if a
+					 * third-party plugin that provided the tag is deactivated.
+					 *
+					 * @param  string The fallback value. Defaults to empty string.
+					 * @param  string $match The unregistered formatting tag.
+					 */
+					$replacements[ $match ] = apply_filters( 'wp_seo_format_fallback', '', $match );
+					$unregistered[] = $match;
+				}
+			}
+		}
+
 		if ( ! empty( $replacements ) ) {
 			$string = str_replace( array_keys( $replacements ), array_values( $replacements ), $string );
 		}
@@ -411,10 +456,11 @@ class WP_SEO {
 		/**
 		 * Filter the formatted string.
 		 *
-		 * @param  string $string 		The formatted string.
+		 * @param  string $string       The formatted string.
 		 * @param  string $raw_string 	The string as submitted.
+		 * @param  array  $unregistered Array of any found, unregistered formatting tags.
 		 */
-		return apply_filters( 'wp_seo_after_format_string', $string, $raw_string );
+		return apply_filters( 'wp_seo_after_format_string', $string, $raw_string, $unregistered );
 	}
 
 	/**
@@ -430,7 +476,7 @@ class WP_SEO {
 	public function wp_title( $title, $sep ) {
 		if ( is_singular() ) {
 			if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) && $meta_title = get_post_meta( get_the_ID(), '_meta_title', true ) ) {
-				return $meta_title;
+				return $this->format( $meta_title );
 			} else {
 				$key = "single_{$post_type}_title";
 			}
@@ -440,7 +486,7 @@ class WP_SEO {
 			$key = 'archive_author_title';
 		} elseif ( is_category() || is_tag() || is_tax() ) {
 			if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_fields_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
-				return $option['title'];
+				return $this->format( $option['title'] );
 			} else {
 				$key = "archive_{$taxonomy}_title";
 			}
@@ -529,12 +575,11 @@ class WP_SEO {
 				 * @param  string 		The format string retrieved from the settings.
 				 * @param  string $key	The key of the setting retrieved.
 				 */
-				$description_string = apply_filters( 'wp_seo_meta_description_format', WP_SEO_Settings()->get_option( "{$key}_description" ), $key );
-				$meta_description = $this->format( $description_string );
+				$meta_description = apply_filters( 'wp_seo_meta_description_format', WP_SEO_Settings()->get_option( "{$key}_description" ), $key );
 			}
 
 			if ( $meta_description ) {
-				$this->meta_field( 'description', $meta_description );
+				$this->meta_field( 'description', $this->format( $meta_description ) );
 			}
 
 			if ( empty( $meta_keywords ) ) {
@@ -544,12 +589,11 @@ class WP_SEO {
 				 * @param  string 		The format string retrieved from the settings.
 				 * @param  string $key	The key of the setting retrieved.
 				 */
-				$keywords_string = apply_filters( 'wp_seo_meta_keywords_format', WP_SEO_Settings()->get_option( "{$key}_keywords" ), $key );
-				$meta_keywords = $this->format( $keywords_string );
+				$meta_keywords = apply_filters( 'wp_seo_meta_keywords_format', WP_SEO_Settings()->get_option( "{$key}_keywords" ), $key );
 			}
 
 			if ( $meta_keywords ) {
-				$this->meta_field( 'keywords', $meta_keywords );
+				$this->meta_field( 'keywords', $this->format( $meta_keywords ) );
 			}
 		}
 
@@ -564,7 +608,7 @@ class WP_SEO {
 		 * }
 		 */
 		foreach( apply_filters( 'wp_seo_arbitrary_tags', WP_SEO_Settings()->get_option( 'arbitrary_tags' ) ) as $tag ) {
-			$this->meta_field( $tag['name'], $tag['content'] );
+			$this->meta_field( $tag['name'], $this->format( $tag['content'] ) );
 		}
 
 	}
