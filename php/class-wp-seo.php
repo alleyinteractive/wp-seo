@@ -284,6 +284,9 @@ class WP_SEO {
 	/**
 	 * Save the SEO term values as an option.
 	 *
+	 * @uses  wp_unslash(), which the Settings API and update_post_meta()
+	 *     otherwise handle.
+	 *
 	 * @param  int $term_id Term ID.
 	 * @param  int $tt_id Term taxonomy ID.
 	 * @param  string $taxonomy Taxonomy slug.
