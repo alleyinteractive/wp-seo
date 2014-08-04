@@ -369,8 +369,9 @@ class WP_SEO {
 			return $string;
 		}
 
-		$replacements = array();
 		$unique_matches = array_unique( $matches );
+		$replacements = array();
+		$unregistered = array();
 
 		// Loop through all tags here; wp_list_pluck() or similar would anyway.
 		foreach( $this->formatting_tags as $id => $tag ) {
@@ -403,9 +404,10 @@ class WP_SEO {
 					 * third-party plugin that provided the tag is deactivated.
 					 *
 					 * @param  string The fallback value. Defaults to empty string.
-					 * @param  string $match The found formatting tag.
+					 * @param  string $match The unregistered formatting tag.
 					 */
 					$replacements[ $match ] = apply_filters( 'wp_seo_format_fallback', '', $match );
+					$unregistered[] = $match;
 				}
 			}
 		}
@@ -417,10 +419,11 @@ class WP_SEO {
 		/**
 		 * Filter the formatted string.
 		 *
-		 * @param  string $string 		The formatted string.
+		 * @param  string $string       The formatted string.
 		 * @param  string $raw_string 	The string as submitted.
+		 * @param  array  $unregistered Array of any found, unregistered formatting tags.
 		 */
-		return apply_filters( 'wp_seo_after_format_string', $string, $raw_string );
+		return apply_filters( 'wp_seo_after_format_string', $string, $raw_string, $unregistered );
 	}
 
 	/**
