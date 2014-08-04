@@ -145,7 +145,7 @@ class WP_SEO {
 	 */
 	private function noscript_character_count( $text ) {
 		if ( false !== $matches = $this->get_formatting_tags( $text ) ) {
-			$message = sprintf( 'At least %d, depending on formatting tags', ( strlen( $text ) - strlen( implode( '', $matches ) ) ) );
+			$message = sprintf( __( 'At least %d, depending on formatting tags', 'wp-seo' ), ( strlen( $text ) - strlen( implode( '', $matches ) ) ) );
 		} else {
 			$message = strlen( $text );
 		}
