@@ -30,10 +30,11 @@
 			var input = $( '#wp_seo_meta_' + field );
 			if ( input.length > 0 ) {
 				var matches = input.val().match( wp_seo_admin.formatting_tag_pattern );
+				var element = '.' + field + '-character-count';
 				if ( matches ) {
-					$( '.' + field + '-character-count' ).html( _.template( wp_seo_admin.estimated_count_text, { count: ( input.val().length - matches.join('').length ) } ) );
+					$( element ).html( _.template( wp_seo_admin.estimated_count_text, { count: ( input.val().length - matches.join('').length ) } ) );
 				} else {
-					$( '.' + field + '-character-count' ).html( input.val().length );
+					$( element ).html( input.val().length );
 				}
 			}
 		});
