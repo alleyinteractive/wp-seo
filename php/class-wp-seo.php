@@ -136,16 +136,15 @@ class WP_SEO {
 	/**
 	 * Helper to get the translated <noscript> text for the character count.
 	 *
-	 * @see  wp_seo_admin_scripts(), wpseo_update_character_counts() for the
-	 *     message and logic behind JS-enabled character count estimates when
-	 *     formatting tags are detected.
+	 * @see  wpseo_update_character_counts() for the logic behind JS-enabled
+	 *     character count estimates when formatting tags are detected.
 	 *
 	 * @param  string $text The text to count.
 	 * @return string The text to go between the <noscript> tags.
 	 */
 	private function noscript_character_count( $text ) {
 		if ( false !== $matches = $this->get_formatting_tags( $text ) ) {
-			$message = sprintf( __( 'At least %d, depending on formatting tags', 'wp-seo' ), ( strlen( $text ) - strlen( implode( '', $matches ) ) ) );
+			$message = sprintf( wp_seo_get_estimated_character_count_string( '%d' ), ( strlen( $text ) - strlen( implode( '', $matches ) ) ) );
 		} else {
 			$message = strlen( $text );
 		}

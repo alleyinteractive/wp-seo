@@ -23,7 +23,7 @@
 	 *
 	 * If a string has a formatting tag, uses Underscores to render a template
 	 * with an estimated character count. The estimate is the total string
-	 * length minus the length of the formatting tags.
+	 * length minus the combined length of the formatting tags.
 	 */
 	function wpseo_update_character_counts() {
 		_.each( ['title', 'description'], function( field ) {
