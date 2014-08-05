@@ -30,6 +30,10 @@ require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
 require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
 require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
 
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+    include WP_SEO_PATH . '/php/wp-cli.php';
+}
+
 function wp_seo_admin_scripts() {
 	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.9.0', true );
 	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', array(

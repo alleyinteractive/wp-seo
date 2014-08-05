@@ -101,6 +101,15 @@ class WP_SEO {
 	}
 
 	/**
+	 * Get the $formatting_tags property.
+	 *
+	 * @return array @see WP_SEO::formatting_tags.
+	 */
+	public function get_formatting_tags() {
+		return $this->formatting_tags;
+	}
+
+	/**
 	 * Add the SEO fields to post types that support them.
 	 *
 	 * @param string $post_type The current post type.
@@ -221,7 +230,7 @@ class WP_SEO {
 	 * Add the meta box to taxonomies with per-term fields enabled.
 	 */
 	public function add_term_boxes() {
-		foreach ( WP_SEO_Settings()->get_taxonomies() as $slug ) {
+		foreach ( WP_SEO_Settings()->get_enabled_taxonomies() as $slug ) {
 			add_action( $slug . '_edit_form', array( $this, 'term_meta_fields' ), 10, 2 );
 		}
 		add_action( 'edited_term', array( $this, 'save_term_fields' ), 10, 3 );
@@ -348,7 +357,7 @@ class WP_SEO {
 		$unique_matches = array_unique( $matches[0] );
 
 		// Loop through all tags here; wp_list_pluck() or similar would anyway.
-		foreach( $this->formatting_tags as $id => $tag ) {
+		foreach( $this->get_formatting_tags() as $id => $tag ) {
 			if ( ! empty( $tag->tag ) && in_array( $tag->tag, $unique_matches ) ) {
 				/**
 				 * Filter the value of a formatting tag for the current page.

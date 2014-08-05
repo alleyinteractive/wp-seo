@@ -32,7 +32,7 @@ class WP_SEO_Settings {
 	 *
 	 * @see  WP_SEO_Settings::setup().
 	 *
-	 * @var array Term objects.
+	 * @var array Associative array of term names and objects.
 	 */
 	private $taxonomies = array();
 
@@ -41,7 +41,7 @@ class WP_SEO_Settings {
 	 *
 	 * @see  WP_SEO_Settings::setup().
 	 *
-	 * @var array Post type objects.
+	 * @var array Associative array of post type names and objects.
 	 */
 	private $single_post_types = array();
 
@@ -50,7 +50,7 @@ class WP_SEO_Settings {
 	 *
 	 * @see  WP_SEO_Settings::setup().
 	 *
-	 * @var array Post type objects.
+	 * @var array Associative array of post type names and objects.
 	 */
 	private $archived_post_types = array();
 
@@ -72,17 +72,23 @@ class WP_SEO_Settings {
 
 	/**
 	 * Add settings-related actions and filters.
+	 *
+	 * WP_SEO_Settings::set_properties() should run late to include post types
+	 * registered on init at priority 10. It also sets the $default parameter
+	 * for get_option(), so run WP_SEO_Settings::load_options() even later.
 	 */
 	protected function setup() {
+		if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			add_action( 'init', array( $this, 'set_properties' ), 20 );
+		}
+
 		if ( is_admin() ) {
-			add_action( 'init', array( $this, 'set_properties' ) );
 			add_action( 'admin_menu', array( $this, 'add_options_page' ) );
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 		}
 
-		// Call after set_properties(), which sets the default options.
-		add_action( 'init', array( $this, 'load_options' ), 11 );
+		add_action( 'init', array( $this, 'load_options' ), 21 );
 	}
 
 	/**
@@ -126,6 +132,51 @@ class WP_SEO_Settings {
 		 * @param  array Associative array of setting names and values.
 		 */
 		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ) ) );
+	}
+
+	/**
+	 * Get the SLUG constant.
+	 *
+	 * @return string
+	 */
+	public function get_slug() {
+		return $this::SLUG;
+	}
+
+	/**
+	 * Get the $taxonomies property.
+	 *
+	 * @return array @see WP_SEO_Settings::taxonomies.
+	 */
+	public function get_taxonomies() {
+		return $this->taxonomies;
+	}
+
+	/**
+	 * Get the $single_post_types property.
+	 *
+	 * @return array @see WP_SEO_Settings::single_post_types.
+	 */
+	public function get_single_post_types() {
+		return $this->single_post_types;
+	}
+
+	/**
+	 * Get the $archived_post_types property.
+	 *
+	 * @return array @see WP_SEO_Settings::archived_post_types.
+	 */
+	public function get_archived_post_types() {
+		return $this->archived_post_types;
+	}
+
+	/**
+	 * Get the taxonomies with per-term fields enabled.
+	 *
+	 * @return array Taxonomy slugs, or an empty array as a fallback.
+	 */
+	public function get_enabled_taxonomies() {
+		return ( $taxonomies = $this->get_option( 'taxonomies' ) ) ? $taxonomies : array();
 	}
 
 	/**
@@ -651,7 +702,7 @@ class WP_SEO_Settings {
 					$out[ $repeatable ][ $i ] = array_filter( $out[ $repeatable ][ $i ] );
 				}
 				// Remove groups with only empty fields.
-				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
+				$out[ $repeatable ] = ! empty( $out[ $repeatable ] ) ? array_filter( $out[ $repeatable ] ) : array();
 			}
 		}
 
@@ -698,23 +749,13 @@ class WP_SEO_Settings {
 	}
 
 	/**
-	 * Get the $taxonomies property.
-	 *
-	 * @return array @see WP_SEO_Settings::set_properties(), or an empty array
-	 *     as a fallback.
-	 */
-	public function get_taxonomies() {
-		return ( $taxonomies = $this->get_option( 'taxonomies' ) ) ? $taxonomies : array();
-	}
-
-	/**
 	 * Helper to check whether a taxonomy is set in "Add fields to individual."
 	 *
 	 * @param  string $taxonomy Taxonomy name
 	 * @return boolean
 	 */
 	public function has_term_fields( $taxonomy ) {
-		return in_array( $taxonomy, $this->get_taxonomies() );
+		return in_array( $taxonomy, $this->get_enabled_taxonomies() );
 	}
 
 }

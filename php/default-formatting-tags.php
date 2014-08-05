@@ -9,6 +9,11 @@ class WP_SEO_Format_Site_Name extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#site_name#';
 
+	public $equivalents = array(
+		'yoast' => '%%sitename%%',
+		'aiosp' => '%blog_title%',
+	);
+
 	public function get_description() {
 		return __( "Replaced with this site's name.", 'wp-seo' );
 	}
@@ -23,6 +28,11 @@ class WP_SEO_Format_Site_Description extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#site_description#';
 
+	public $equivalents = array(
+		'yoast' => '%%sitedesc%%',
+		'aiosp' => '%blog_description%',
+	);
+
 	public function get_description() {
 		return __( "Replaced with this site's description.", 'wp-seo' );
 	}
@@ -36,6 +46,14 @@ class WP_SEO_Format_Site_Description extends WP_SEO_Formatting_Tag {
 class WP_SEO_Format_Title extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#title#';
+
+	public $equivalents = array(
+		'yoast' => '%%title%%',
+		'aiosp' => array(
+			'%page_title%',
+			'%post_title%',
+		),
+	);
 
 	public function get_description() {
 		return __( 'Replaced with the title of the content being viewed.', 'wp-seo' );
@@ -54,6 +72,10 @@ class WP_SEO_Format_Title extends WP_SEO_Formatting_Tag {
 class WP_SEO_Format_Excerpt extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#excerpt#';
+
+	public $equivalents = array(
+		'yoast' => '%%excerpt%%',
+	);
 
 	public function get_description() {
 		return __( "Replaced with the excerpt of the content being viewed. An excerpt is generated if one isn't written.", 'wp-seo' );
@@ -83,6 +105,10 @@ class WP_SEO_Format_Date_Published extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#date_published#';
 
+	public $equivalents = array(
+		'yoast' => '%%date%%',
+	);
+
 	public function get_description() {
 		return __( 'Replaced with the date that the content being viewed was published.', 'wp-seo' );
 	}
@@ -101,6 +127,10 @@ class WP_SEO_Format_Date_Modified extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#date_modified#';
 
+	public $equivalents = array(
+		'yoast' => '%%modified%%',
+	);
+
 	public function get_description() {
 		return __( 'Replaced with the date that the content being viewed was last modified.', 'wp-seo' );
 	}
@@ -118,6 +148,15 @@ class WP_SEO_Format_Date_Modified extends WP_SEO_Formatting_Tag {
 class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#author#';
+
+	public $equivalents = array(
+		'yoast' => '%%name%%',
+		'aiosp' => array(
+			'%page_author_nicename%',
+			'%post_author_nicename%',
+			'%author%',
+		),
+	);
 
 	public function get_description() {
 		return __( 'Replaced with the author name of the content or author archive being viewed.', 'wp-seo' );
@@ -152,6 +191,10 @@ class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#categories#';
 
+	public $equivalents = array(
+		'yoast' => '%%category%%',
+	);
+
 	public function get_description() {
 		return __( 'Replaced with the Categories, comma-separated, of the content being viewed.', 'wp-seo' );
 	}
@@ -169,6 +212,10 @@ class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
 class WP_SEO_Format_Tags extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#tags#';
+
+	public $equivalents = array(
+		'yoast' => '%%tags%%',
+	);
 
 	public function get_description() {
 		return __( 'Replaced with the Tags, comma-separated, of the content being viewed.', 'wp-seo' );
@@ -188,6 +235,14 @@ class WP_SEO_Format_Term_Name extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#term_name#';
 
+	public $equivalents = array(
+		'yoast' => '%%term_title%%',
+		'aiosp' => array(
+			'%category_title%',
+			'%tag%',
+		),
+	);
+
 	public function get_description() {
 		return __( 'Replaced with the name of the term whose archive is being viewed.', 'wp-seo' );
 	}
@@ -206,6 +261,15 @@ class WP_SEO_Format_Term_Description extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#term_description#';
 
+	public $equivalents = array(
+		'yoast' => array(
+			'%%category_description%%',
+			'%%tag_description%%',
+			'%%term_description%%',
+		),
+		'aiosp' => '%category_description%',
+	);
+
 	public function get_description() {
 		return __( 'Replaced with the description of the term whose archive is being viewed.', 'wp-seo' );
 	}
@@ -223,6 +287,10 @@ class WP_SEO_Format_Term_Description extends WP_SEO_Formatting_Tag {
 class WP_SEO_Format_Post_Type_Singular_Name extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#post_type_singular_name#';
+
+	public $equivalents = array(
+		'yoast' => '%%pt_single%%',
+	);
 
 	public function get_description() {
 		return __( 'Replaced with the singular form of the name of the post type being viewed.', 'wp-seo' );
@@ -244,6 +312,10 @@ class WP_SEO_Format_Post_Type_Plural_Name extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#post_type_plural_name#';
 
+	public $equivalents = array(
+		'yoast' => '%%pt_plural%%',
+	);
+
 	public function get_description() {
 		return __( 'Replaced with the plural form of the name of the post type being viewed.', 'wp-seo' );
 	}
@@ -263,6 +335,10 @@ class WP_SEO_Format_Post_Type_Plural_Name extends WP_SEO_Formatting_Tag {
 class WP_SEO_Format_Archive_Date extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#archive_date#';
+
+	public $equivalents = array(
+		'aiosp' => '%date%',
+	);
 
 	public function get_description() {
 		return __( 'Replaced with the date of the archive being viewed.', 'wp-seo' );
@@ -286,6 +362,11 @@ class WP_SEO_Format_Archive_Date extends WP_SEO_Formatting_Tag {
 class WP_SEO_Format_Search_Term extends WP_SEO_Formatting_Tag {
 
 	public $tag = '#search_term#';
+
+	public $equivalents = array(
+		'yoast' => '%%searchphrase%%',
+		'aiosp' => '%search%',
+	);
 
 	public function get_description() {
 		return __( "Replaced with the user's search term.", 'wp-seo' );
