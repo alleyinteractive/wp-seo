@@ -126,7 +126,7 @@ class WP_SEO_Settings {
 		 *
 		 * @param  array Associative array of setting names and values.
 		 */
-		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ) ) );
+		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ), 'taxonomies' => array_keys( $this->taxonomies ) ) );
 	}
 
 	/**
