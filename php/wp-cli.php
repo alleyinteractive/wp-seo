@@ -150,23 +150,17 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 				 * its meta box should not appear. WP SEO uses a whitelist. If
 				 * any post types or taxonomies are in the blacklist, ensure
 				 * they aren't in our whitelist.
-				 *
-				 * If we dropped the existing settings, then all the eligible
-				 * post types and taxonomies should be enabled except the
-				 * backlisted ones.
 				 */
 				$hide_post_types = array();
 				$hide_taxonomies = array();
 
-				$single_post_types = WP_SEO_Settings()->get_single_post_types();
 				foreach ( $single_post_types as $name => $object ) {
 					if ( ! empty( $old[ "hideeditbox-{$name}" ] ) ) {
 						$hide_post_types[] = $name;
 					}
 				}
 				if ( ! empty( $hide_post_types ) ) {
-					$remove_from = $drop ? array_keys( $single_post_types ) : $current_values['post_types'];
-					$new_values['post_types'] = array_diff( $remove_from, $hide_post_types );
+					$new_values['post_types'] = array_diff( $current_values['post_types'], $hide_post_types );
 				}
 
 				$taxonomies = WP_SEO_Settings()->get_taxonomies();
@@ -176,8 +170,7 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 					}
 				}
 				if ( ! empty( $hide_taxonomies ) ) {
-					$remove_from = $drop ? array_keys( $taxonomies ) : $current_values['post_types'];
-					$new_values['taxonomies'] = array_diff( $remove_from, $hide_taxonomies );
+					$new_values['taxonomies'] = array_diff( $current_values['taxonomies'], $hide_taxonomies );
 				}
 
 				/**
