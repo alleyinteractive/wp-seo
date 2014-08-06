@@ -334,6 +334,7 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	 */
 	private function has_formatting_tags_to_convert( $string ) {
 		switch ( $this->converting_from ) {
+			case 'add-meta-tags' :
 			case 'aiosp' :
 				return false !== strpos( $string, '%' );
 			break;
