@@ -102,9 +102,38 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 		$current_values = WP_SEO_Settings()->get_all_options();
 		$new_values = array();
 
+		$single_post_types = WP_SEO_Settings()->get_single_post_types();
+
 		switch ( $this->converting_from ) {
 			case 'add-meta-tags' :
 				$new_values = $this->convert_static_fields_from_map( $old, $new_values, $this->build_static_fields_map(), $force );
+
+				/**
+				 * Add Meta Tags automatically adds meta boxes to Posts and
+				 * Pages, but it allows users to disable each individual SEO
+				 * field in the box. Assume both should be enabled in WP SEO
+				 * unless all of their fields are disabled.
+				 *
+				 * Our whitelist should match theirs at the end of the
+				 * conversion, so long as the post type is legal in WP SEO.
+				 */
+				$new_post_types = array();
+
+				if ( ! empty( $old['custom_post_types'] ) ) {
+					// Old values are saved as $post_type => $bool.
+					$new_post_types = array_keys( $old['custom_post_types'] );
+				}
+
+				if ( ! empty( $old['post_options'] ) ) {
+					$new_post_types[] = 'post';
+				}
+
+				if ( ! empty( $old['page_options'] ) ) {
+					$new_post_types[] = 'page';
+				}
+
+				$new_values['post_types'] = array_intersect( $new_post_types, array_keys( $single_post_types ) );
+
 				// Add Meta Tags doesn't keep what we would call arbitrary tags.
 			break;
 
