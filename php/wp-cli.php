@@ -53,8 +53,8 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
      * [--force]
      * : Convert values even if they contain formatting tags without equivalents.
      *
-     * [--exclusively]
-     * : Not yet implemented. Leave behind only converted settings; remove any other existing WP SEO settings.
+     * [--drop-if-exists]
+     * : Remove all existing WP SEO settings, and replace only what is converted.
      *
      * [--dry-run]
      * : Simulate the conversion.
@@ -68,7 +68,7 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
      *     wp seo convert --from=yoast --dry-run
      *     wp seo convert --from=aiosp --verbose --force
      *
-     * @synopsis --from=<name> [--dry-run] [--verbose] [--force]
+     * @synopsis --from=<name> [--force] [--drop-if-exists] [--dry-run] [--verbose]
      */
     public function convert( $args, $assoc_args ) {
     	$this->converting_from = $assoc_args['from'];
@@ -81,11 +81,25 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
     		WP_CLI::log( sprintf( __( 'Converting settings from %s...', 'wp-seo' ), $this->can_convert_from[ $this->converting_from ]['label'] ) );
     	}
 
+    	$force = ! empty( $assoc_args['force'] );
+    	$drop = ! empty( $assoc_args['drop-if-exists'] );
     	$dry_run = ! empty( $assoc_args['dry-run'] );
     	$verbose = ! empty( $assoc_args['verbose'] );
-    	$force = ! empty( $assoc_args['force'] );
 
-    	$current_values = WP_SEO_Settings()->options;
+    	if ( $drop && false !== get_option( WP_SEO_Settings()->get_slug() ) ) {
+    		if ( $dry_run ) {
+	    		WP_CLI::warning( __( 'Pretending to delete all existing WP SEO settings and starting fresh.', 'wp-seo' ) );
+    		} else {
+	    		$deleted = delete_option( WP_SEO_Settings()->get_slug() );
+	    		if ( ! $deleted ) {
+	    			WP_CLI::error( __( 'Error deleting existing WP SEO settings. Exiting.', 'wp-seo' ) );
+	    		} else {
+	    			WP_CLI::warning( __( 'Deleting all existing WP SEO settings and starting fresh.', 'wp-seo' ) );
+	    		}
+    		}
+    	}
+
+    	$current_values = WP_SEO_Settings()->get_all_options();
     	$new_values = array();
 
     	switch ( $this->converting_from ) {
@@ -102,26 +116,34 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
     			 * its meta box should not appear. WP SEO uses a whitelist. If
     			 * any post types or taxonomies are in the blacklist, ensure
     			 * they aren't in our whitelist.
+    			 *
+    			 * If we dropped the existing settings, then all the eligible
+    			 * post types and taxonomies should be enabled except the
+    			 * backlisted ones.
     			 */
     			$hide_post_types = array();
     			$hide_taxonomies = array();
 
-    			foreach ( WP_SEO_Settings()->get_single_post_types() as $name => $object ) {
+    			$single_post_types = WP_SEO_Settings()->get_single_post_types();
+    			foreach ( $single_post_types as $name => $object ) {
     				if ( ! empty( $old[ "hideeditbox-{$name}" ] ) ) {
     					$hide_post_types[] = $name;
     				}
     			}
     			if ( ! empty( $hide_post_types ) ) {
-	    			$new_values['post_types'] = array_diff( $current_values['post_types'], $hide_post_types );
+    				$remove_from = $drop ? array_keys( $single_post_types ) : $current_values['post_types'];
+	    			$new_values['post_types'] = array_diff( $remove_from, $hide_post_types );
     			}
 
-    			foreach ( WP_SEO_Settings()->get_taxonomies() as $name => $object ) {
+    			$taxonomies = WP_SEO_Settings()->get_taxonomies();
+    			foreach ( $taxonomies as $name => $object ) {
     				if ( ! empty( $old[ "hideeditbox-tax-{$name}" ] ) ) {
     					$hide_taxonomies[] = $name;
     				}
     			}
     			if ( ! empty( $hide_taxonomies ) ) {
-    				$new_values['taxonomies'] = array_diff( $current_values['taxonomies'], $hide_taxonomies );
+    				$remove_from = $drop ? array_keys( $taxonomies ) : $current_values['post_types'];
+    				$new_values['taxonomies'] = array_diff( $remove_from, $hide_taxonomies );
     			}
 
     			/**

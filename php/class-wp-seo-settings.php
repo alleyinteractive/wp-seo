@@ -72,13 +72,10 @@ class WP_SEO_Settings {
 
 	/**
 	 * Add settings-related actions and filters.
-	 *
-	 * WP_SEO_Settings::set_properties() should run late to include post types
-	 * registered on init at priority 10. It also sets the $default parameter
-	 * for get_option(), so run WP_SEO_Settings::load_options() even later.
 	 */
 	protected function setup() {
 		if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			// Run late to include post types registered on init at priority 10.
 			add_action( 'init', array( $this, 'set_properties' ), 20 );
 		}
 
@@ -87,8 +84,6 @@ class WP_SEO_Settings {
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 		}
-
-		add_action( 'init', array( $this, 'load_options' ), 21 );
 	}
 
 	/**
@@ -189,12 +184,23 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Get the plugin's entire option value.
+	 *
+	 * @return array @see WP_SEO_Settings::options.
+	 */
+	public function get_all_options() {
+		$this->load_options();
+		return $this->options;
+	}
+
+	/**
 	 * Get an option value.
 	 *
 	 * @param  string $key 	The option key sought.
 	 * @return string|bool	The value, or false on failure.
 	 */
 	public function get_option( $key ) {
+		$this->load_options();
 		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : false;
 	}
 
@@ -400,7 +406,10 @@ class WP_SEO_Settings {
 			$args['type'] = 'text';
 		}
 
-		$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
+		$value = $this->get_option( $args['field'] );
+		if ( empty( $value ) ) {
+			$value = '';
+		}
 
 		switch ( $args['type'] ) {
 			case 'textarea' :
