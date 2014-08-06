@@ -18,10 +18,8 @@ abstract class WP_SEO_Formatting_Tag {
 	/**
 	 * Formatting tags in other SEO libraries that are equivalent to this one.
 	 *
-	 * @see  WP_SEO_CLI_Command::convert().
-	 *
 	 * @var array {
-	 *     Array of WP CLI "--from" slugs and equivalent tags.
+	 *     Array of library slugs and equivalent tags. @see WP_SEO_CLI_Command::convert().
 	 *
 	 *     @type  string|array $from The equivalent tag, or an array of tags,
 	 *                               in the other library.
