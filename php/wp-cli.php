@@ -5,20 +5,20 @@
 class WP_SEO_CLI_Command extends WP_CLI_Command {
 
 	/**
-	 * The plugin whose values are in the middle of being converted.
+	 * The library whose values are in the middle of being converted.
 	 *
 	 * @var string @see the --from parameter in WP_SEO_CLI_Command::convert().
 	 */
 	private $converting_from;
 
 	/**
-	 * Slugs of other SEO plugins that WP_SEO_CLI_Command::convert() supports.
+	 * Slugs of other SEO libraries that WP_SEO_CLI_Command::convert() supports.
 	 *
 	 * @var array {
-	 *     Array of plugin slugs.
+	 *     Array of library slugs.
 	 *
 	 *     @type  array $slug {
-	 *         Data about each plugin used during conversions.
+	 *         Data about each library used during conversions.
 	 *
 	 *         @type  string $label The readable name for informational output.
 	 *         @type  string $option The option name to convert values from.
@@ -30,25 +30,25 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 			'label' => 'Add Meta Tags',
 			'option' => 'add_meta_tags_opts',
 		),
-		'yoast' => array(
-			'label' => 'Yoast WordPress SEO',
-			'option' => 'wpseo_titles',
-		),
 		'aiosp' => array(
 			'label' => 'All In One SEO Pack',
 			'option' => 'aioseop_options',
 		),
+		'yoast' => array(
+			'label' => 'Yoast WordPress SEO',
+			'option' => 'wpseo_titles',
+		),
 	);
 
 	/**
-	 * Converts meta tags and formatting tags from other plugins to WP SEO.
+	 * Converts meta tags and formatting tags from other libraries to WP SEO.
 	 *
 	 * @todo  Tell the user the supported fields with each converter.
 	 *
 	 * ## OPTIONS
 	 *
 	 * --from
-	 * : What plugin to convert values from. Accepted values: add-meta-tags, yoast, aiosp.
+	 * : What library to convert values from. Accepted values: add-meta-tags, aiosp, yoast.
 	 *
 	 * [--force]
 	 * : Convert values even if they contain formatting tags without equivalents.
@@ -65,8 +65,8 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     wp seo convert --from=add-meta-tags
-	 *     wp seo convert --from=yoast --dry-run
 	 *     wp seo convert --from=aiosp --verbose --force
+	 *     wp seo convert --from=yoast --dry-run
 	 *
 	 * @synopsis --from=<name> [--force] [--drop-if-exists] [--dry-run] [--verbose]
 	 */
@@ -106,6 +106,11 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 			case 'add-meta-tags' :
 				$new_values = $this->convert_static_fields_from_map( $old, $new_values, $this->build_static_fields_map(), $force );
 				// Add Meta Tags doesn't keep what we would call arbitrary tags.
+			break;
+
+			case 'aiosp' :
+				$new_values = $this->convert_static_fields_from_map( $old, $new_values, $this->build_static_fields_map(), $force );
+				$new_values = $this->convert_arbitrary_fields_from_map( $old, $new_values, $current_values, $this->build_arbitrary_fields_map() );
 			break;
 
 			case 'yoast' :
@@ -156,11 +161,6 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 				if ( ! empty( $old_verify_values ) ) {
 					$new_values = $this->convert_arbitrary_fields_from_map( $old_verify_values, $new_values, $current_values, $this->build_arbitrary_fields_map() );
 				}
-			break;
-
-			case 'aiosp' :
-				$new_values = $this->convert_static_fields_from_map( $old, $new_values, $this->build_static_fields_map(), $force );
-				$new_values = $this->convert_arbitrary_fields_from_map( $old, $new_values, $current_values, $this->build_arbitrary_fields_map() );
 			break;
 		}
 
@@ -214,6 +214,22 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 				);
 			break;
 
+			case 'aiosp' :
+				$map = array(
+					'aiosp_category_title_format' => 'archive_category_title',
+					'aiosp_tag_title_format'      => 'archive_post_tag_title',
+				);
+				foreach ( WP_SEO_Settings()->get_single_post_types() as $name => $object ) {
+					$map[ "aiosp_{$name}_title_format" ] = "single_{$name}_title";
+				}
+				$map = array_merge( $map, array(
+					'aiosp_home_title'       => 'home_title',
+					'aiosp_home_description' => 'home_description',
+					'aiosp_home_keywords'    => 'home_keywords',
+				) );
+				return $map;
+			break;
+
 			case 'yoast' :
 				$map = array();
 				foreach ( WP_SEO_Settings()->get_taxonomies() as $name => $object ) {
@@ -246,22 +262,6 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 				return $map;
 			break;
 
-			case 'aiosp' :
-				$map = array(
-					'aiosp_category_title_format' => 'archive_category_title',
-					'aiosp_tag_title_format'      => 'archive_post_tag_title',
-				);
-				foreach ( WP_SEO_Settings()->get_single_post_types() as $name => $object ) {
-					$map[ "aiosp_{$name}_title_format" ] = "single_{$name}_title";
-				}
-				$map = array_merge( $map, array(
-					'aiosp_home_title'       => 'home_title',
-					'aiosp_home_description' => 'home_description',
-					'aiosp_home_keywords'    => 'home_keywords',
-				) );
-				return $map;
-			break;
-
 			default :
 				return array();
 			break;
@@ -277,6 +277,14 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	 */
 	private function build_arbitrary_fields_map() {
 		switch ( $this->converting_from ) {
+			case 'aiosp' :
+				return array(
+					'google-site-verification' => 'aiosp_google_verify',
+					'msvalidate.01'            => 'aiosp_bing_verify',
+					'p:domain_verify'          => 'aiosp_pinterest_verify',
+				);
+			break;
+
 			case 'yoast' :
 				return array(
 					'google-site-verification' => 'googleverify',
@@ -287,14 +295,6 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 				);
 			break;
 
-			case 'aiosp' :
-				return array(
-					'google-site-verification' => 'aiosp_google_verify',
-					'msvalidate.01'            => 'aiosp_bing_verify',
-					'p:domain_verify'          => 'aiosp_pinterest_verify',
-				);
-			break;
-
 			default :
 				return array();
 			break;
@@ -302,7 +302,7 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Guess whether a string has formatting tags from other plugins.
+	 * Guess whether a string has formatting tags from other libraries.
 	 *
 	 * @see  WP_SEO_CLI_Command::convert_formatting_tags().
 	 * @see  wpseo_replace_vars() for how Yoast SEO tests for its formatting tags.
@@ -312,12 +312,12 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	 */
 	private function has_formatting_tags_to_convert( $string ) {
 		switch ( $this->converting_from ) {
-			case 'yoast' :
-				return false !== strpos( $string, '%%' );
-			break;
-
 			case 'aiosp' :
 				return false !== strpos( $string, '%' );
+			break;
+
+			case 'yoast' :
+				return false !== strpos( $string, '%%' );
 			break;
 
 			default:
@@ -327,7 +327,7 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Replace formatting tags from other plugins with their WP SEO equivalents.
+	 * Replace formatting tags from other libraries with their WP SEO equivalents.
 	 *
 	 * @param  string $string Text with formatting tags to replace.
 	 * @return string|WP_Error The updated text, or WP_Error if the text
@@ -350,7 +350,7 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Given settings from another plugin and a map, create settings for WP SEO.
+	 * Given settings from another library and a map, create settings for WP SEO.
 	 *
 	 * @param  array $source The settings to convert from.
 	 * @param  array $target The under-construction WP SEO settings to merge
@@ -384,7 +384,7 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	}
 
 	/**
-	 * Given settings from another plugin and a map, create arbitrary tags for WP SEO.
+	 * Given settings from another library and a map, create arbitrary tags for WP SEO.
 	 *
 	 * First updates the value of any arbitrary tags that already exist for the
 	 * keys in the map. If the map still has keys after that, new arbitrary tags

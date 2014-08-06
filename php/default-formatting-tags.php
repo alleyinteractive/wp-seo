@@ -10,8 +10,8 @@ class WP_SEO_Format_Site_Name extends WP_SEO_Formatting_Tag {
 	public $tag = '#site_name#';
 
 	public $equivalents = array(
-		'yoast' => '%%sitename%%',
 		'aiosp' => '%blog_title%',
+		'yoast' => '%%sitename%%',
 	);
 
 	public function get_description() {
@@ -29,8 +29,8 @@ class WP_SEO_Format_Site_Description extends WP_SEO_Formatting_Tag {
 	public $tag = '#site_description#';
 
 	public $equivalents = array(
-		'yoast' => '%%sitedesc%%',
 		'aiosp' => '%blog_description%',
+		'yoast' => '%%sitedesc%%',
 	);
 
 	public function get_description() {
@@ -48,11 +48,11 @@ class WP_SEO_Format_Title extends WP_SEO_Formatting_Tag {
 	public $tag = '#title#';
 
 	public $equivalents = array(
-		'yoast' => '%%title%%',
 		'aiosp' => array(
 			'%page_title%',
 			'%post_title%',
 		),
+		'yoast' => '%%title%%',
 	);
 
 	public function get_description() {
@@ -150,12 +150,12 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 	public $tag = '#author#';
 
 	public $equivalents = array(
-		'yoast' => '%%name%%',
 		'aiosp' => array(
 			'%page_author_nicename%',
 			'%post_author_nicename%',
 			'%author%',
 		),
+		'yoast' => '%%name%%',
 	);
 
 	public function get_description() {
@@ -192,8 +192,8 @@ class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
 	public $tag = '#categories#';
 
 	public $equivalents = array(
-		'yoast'         => '%%category%%',
 		'add-meta-tags' => '%cats%',
+		'yoast'         => '%%category%%',
 	);
 
 	public function get_description() {
@@ -215,8 +215,8 @@ class WP_SEO_Format_Tags extends WP_SEO_Formatting_Tag {
 	public $tag = '#tags#';
 
 	public $equivalents = array(
-		'yoast'         => '%%tags%%',
 		'add-meta-tags' => '%tags%',
+		'yoast'         => '%%tags%%',
 	);
 
 	public function get_description() {
@@ -238,11 +238,11 @@ class WP_SEO_Format_Term_Name extends WP_SEO_Formatting_Tag {
 	public $tag = '#term_name#';
 
 	public $equivalents = array(
-		'yoast' => '%%term_title%%',
 		'aiosp' => array(
 			'%category_title%',
 			'%tag%',
 		),
+		'yoast' => '%%term_title%%',
 	);
 
 	public function get_description() {
@@ -264,12 +264,12 @@ class WP_SEO_Format_Term_Description extends WP_SEO_Formatting_Tag {
 	public $tag = '#term_description#';
 
 	public $equivalents = array(
+		'aiosp' => '%category_description%',
 		'yoast' => array(
 			'%%category_description%%',
 			'%%tag_description%%',
 			'%%term_description%%',
 		),
-		'aiosp' => '%category_description%',
 	);
 
 	public function get_description() {
@@ -366,8 +366,8 @@ class WP_SEO_Format_Search_Term extends WP_SEO_Formatting_Tag {
 	public $tag = '#search_term#';
 
 	public $equivalents = array(
-		'yoast' => '%%searchphrase%%',
 		'aiosp' => '%search%',
+		'yoast' => '%%searchphrase%%',
 	);
 
 	public function get_description() {
