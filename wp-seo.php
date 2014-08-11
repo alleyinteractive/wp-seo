@@ -31,6 +31,8 @@ require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
 require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
+    include WP_SEO_PATH . '/php/class-wp-seo-converter.php';
+    include WP_SEO_PATH . '/php/bundled-converters.php';
     include WP_SEO_PATH . '/php/wp-cli.php';
 }
 

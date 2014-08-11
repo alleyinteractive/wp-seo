@@ -119,6 +119,20 @@ class WP_SEO_Settings {
 		$this->taxonomies = apply_filters( 'wp_seo_taxonomies', get_taxonomies( array( 'public' => true ), 'objects' ) );
 
 		/**
+		 * Filter whether Post Formats should be allowed to have SEO fields.
+		 *
+		 * Most likely, you would want to enable this only if you provide a
+		 * custom UI for managing format terms.
+		 *
+		 * @param  bool Whether to allow fields. Use __return_true() to enable.
+		 */
+		if ( ! apply_filters( 'wp_seo_allow_post_format_fields', false ) ) {
+			if ( isset( $this->taxonomies['post_format'] ) ) {
+				unset( $this->taxonomies['post_format'] );
+			}
+		}
+
+		/**
 		 * Filter the options to save by default.
 		 *
 		 * These are also the settings shown when the option does not exist,
@@ -252,7 +266,7 @@ class WP_SEO_Settings {
 
 		// Post Formats have no UI, so they cannot have per-term fields.
 		add_settings_section( 'taxonomies', __( 'Taxonomies', 'wp-seo' ), '__return_false', $this::SLUG );
-		add_settings_field( 'taxonomies', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'taxonomies', array( 'field' => 'taxonomies', 'type' => 'checkboxes', 'items' => call_user_func_array( 'wp_list_pluck', array( array_diff_key( $this->taxonomies, array( 'post_format' => true ) ), 'label' ) ) ) );
+		add_settings_field( 'taxonomies', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'taxonomies', array( 'field' => 'taxonomies', 'type' => 'checkboxes', 'items' => call_user_func_array( 'wp_list_pluck', array( $this->taxonomies, 'label' ) ) ) );
 
 		foreach( $this->taxonomies as $taxonomy ) {
 			add_settings_section( 'archive_' . $taxonomy->name, sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
