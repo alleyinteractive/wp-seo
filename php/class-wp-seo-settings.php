@@ -670,9 +670,13 @@ class WP_SEO_Settings {
 	public function sanitize_options( $in ) {
 		$out = $this->default_options;
 
-		// Validate post types and taxonomies on which to show SEO fields.
-		$out['post_types'] = isset( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
-		$out['taxonomies'] = isset( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
+		/**
+		 * Validate post types and taxonomies on which to show SEO fields.
+		 *
+		 * @uses  array_values To "reset" the resulting numeric array.
+		 */
+		$out['post_types'] = isset( $in['post_types'] ) ? array_values( array_filter( $in['post_types'], 'post_type_exists' ) ) : array();
+		$out['taxonomies'] = isset( $in['taxonomies'] ) ? array_values( array_filter( $in['taxonomies'], 'taxonomy_exists' ) ) : array();
 
 		/**
 		 * Sanitize these as text fields and in the following order:
