@@ -322,6 +322,9 @@ class WP_SEO {
 	/**
 	 * Save the SEO term values as an option.
 	 *
+	 * @uses  wp_unslash(), which the Settings API and update_post_meta()
+	 *     otherwise handle.
+	 *
 	 * @param  int $term_id Term ID.
 	 * @param  int $tt_id Term taxonomy ID.
 	 * @param  string $taxonomy Taxonomy slug.
@@ -353,7 +356,7 @@ class WP_SEO {
 		}
 
 		foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
-			$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( $_POST['seo_meta'][ $field ] ) : '';
+			$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 		}
 
 		$name = $this->get_term_fields_option_name( get_term( $term_id, $taxonomy ) );

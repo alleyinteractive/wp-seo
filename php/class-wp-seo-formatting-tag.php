@@ -25,7 +25,7 @@ abstract class WP_SEO_Formatting_Tag {
 	/**
 	 * Generate the value of the tag for the current page.
 	 *
-	 * @return string.
+	 * @return mixed Usually a string, or false if no value exists.
 	 */
 	abstract public function get_value();
 
