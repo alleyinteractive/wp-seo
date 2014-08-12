@@ -12,8 +12,14 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	 * --from
 	 * : What library to convert values from. Accepted values: add-meta-tags, aiosp, yoast.
 	 *
-	 * [--force]
+	 * [--force-formatting-tags]
 	 * : Convert values even if they contain formatting tags without equivalents.
+	 *
+	 * [--force-arbitrary-tags]
+	 * : Replace existing arbitrary tags if one with the same "name" is converted.
+	 *
+	 * [--force-all]
+	 * : Same as --force-formatting-tags --force-arbitrary-tags
 	 *
 	 * [--drop-if-exists]
 	 * : Remove all existing WP SEO settings, and replace only what is converted.
@@ -30,7 +36,7 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 	 *     wp seo convert --from=aiosp --verbose --force
 	 *     wp seo convert --from=yoast --dry-run
 	 *
-	 * @synopsis --from=<name> [--force] [--drop-if-exists] [--dry-run] [--verbose]
+	 * @synopsis --from=<name> [--force-formatting-tags] [--force-arbitrary-tags] [--force-all] [--drop-if-exists] [--dry-run] [--verbose]
 	 */
 	public function convert( $args, $assoc_args ) {
 		$converters = apply_filters( 'wp_seo_converters', array() );
@@ -47,19 +53,11 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 			WP_CLI::error( $verify->get_error_message( 'can_convert' ) );
 		}
 
-		$force             = ! empty( $assoc_args['force'] );
-		$drop              = ! empty( $assoc_args['drop-if-exists'] );
-		$dry_run           = ! empty( $assoc_args['dry-run'] );
-		$verbose           = ! empty( $assoc_args['verbose'] );
-
-		$current_settings  = WP_SEO_Settings()->get_all_options();
-		$new_settings      = array();
-
-		$single_post_types = WP_SEO_Settings()->get_single_post_types();
-		$taxonomies        = WP_SEO_Settings()->get_taxonomies();
-		$tag_map           = $converter->get_tag_map();
-		$old_tags          = array_keys( $tag_map );
-		$new_tags          = array_values( $tag_map );
+		$force_formatting_tags = ! empty( $assoc_args['force-all'] ) || ! empty( $assoc_args['force-formatting-tags'] );
+		$force_arbitrary_tags  = ! empty( $assoc_args['force-all'] ) || ! empty( $assoc_args['force-arbitrary-tags'] );
+		$drop                  = ! empty( $assoc_args['drop-if-exists'] );
+		$dry_run               = ! empty( $assoc_args['dry-run'] );
+		$verbose               = ! empty( $assoc_args['verbose'] );
 
 		if ( $drop && false !== get_option( WP_SEO_Settings()->get_slug() ) ) {
 			if ( $dry_run ) {
@@ -74,56 +72,72 @@ class WP_SEO_CLI_Command extends WP_CLI_Command {
 			}
 		}
 
-		if ( $static_data = $converter->get_static_field_data() ) {
-			foreach ( $converter->get_static_field_map() as $x => $the_spot ) {
-				if ( ! empty( $static_data[ $x ] ) ) {
-					$treasure = $static_data[ $x ];
-					if ( ! $converter->has_tag( $treasure ) ) {
-						$new_settings[ $the_spot ] = $treasure;
-					} else {
-						$treasure = str_replace( $old_tags, $new_tags, $treasure );
-						$requires_force = $converter->has_tag( $treasure );
-						if ( $force || ! $requires_force ) {
-							if ( $requires_force ) {
-								WP_CLI::warning( sprintf( __( 'Forcibly converting %s setting `%s` with unsupported formatting tags.', 'wp-seo' ), $converter->label, $x ) );
-							}
-							$new_settings[ $the_spot ] = $treasure;
-						} else {
-							WP_CLI::warning( sprintf( __( 'Could not convert the %s setting `%s` because it contains unsupported formatting tags.', 'wp-seo' ), $converter->label, $x ) );
+		$current_settings  = $drop ? array() : WP_SEO_Settings()->get_all_options();
+		$new_settings      = array();
+
+		$single_post_types = WP_SEO_Settings()->get_single_post_types();
+		$taxonomies        = WP_SEO_Settings()->get_taxonomies();
+		$tag_map           = $converter->get_tag_map();
+		$old_tags          = array_keys( $tag_map );
+		$new_tags          = array_values( $tag_map );
+
+
+		if ( $converter_static_fields = $converter->get_static_fields() ) {
+			foreach ( $converter_static_fields as $key => $value ) {
+				if ( ! $converter->has_tag( $value ) ) {
+					continue;
+				} else {
+					$value = str_replace( $old_tags, $new_tags, $value );
+					$requires_force = $converter->has_tag( $value );
+					if ( $force_formatting_tags || ! $requires_force ) {
+						if ( $requires_force ) {
+							WP_CLI::warning( sprintf( __( 'Forcibly converting the `%s` setting with unsupported formatting tags.', 'wp-seo' ), $key ) );
 						}
+						$converter_static_fields[ $key ] = $value;
+					} else {
+						unset( $converter_static_fields[ $key ] );
+						WP_CLI::warning( sprintf( __( 'Could not convert the `%s` setting because it contains unsupported formatting tags.', 'wp-seo' ), $key ) );
 					}
 				}
 			}
+			$new_settings = $converter_static_fields;
 		}
 
 		$new_settings['post_types'] = $converter->get_enabled_post_types( $single_post_types );
 		$new_settings['taxonomies'] = $converter->get_enabled_taxonomies( $taxonomies );
 
-		if ( isset( $current_settings['arbitrary_tags'] ) ) {
-			$new_settings['arbitrary_tags'] = $current_settings['arbitrary_tags'];
-		}
-
-		if ( $arbitrary_data = $converter->get_arbitrary_field_data() ) {
-			$new_tag_names = wp_list_pluck( $new_settings['arbitrary_tags'], 'name' );
-			foreach ( $converter->get_arbitrary_field_map() as $x => $the_spot ) {
-				if ( ! in_array( $the_spot, $new_tag_names ) && ! empty( $arbitrary_data[ $x ] ) ) {
-					$treasure = $arbitrary_data[ $x ];
-					if ( ! $converter->has_tag( $treasure ) ) {
-						$new_settings['arbitrary_tags'][] = array( 'name' => $the_spot, 'content' => $treasure );
-					} else {
-						$treasure = str_replace( $old_tags, $new_tags, $treasure );
-						$requires_force = $converter->has_tag( $treasure );
-						if ( $force || ! $requires_force ) {
-							if ( $requires_force ) {
-								WP_CLI::warning( sprintf( __( 'Forcibly converting %s setting `%s` with unsupported formatting tags.', 'wp-seo' ), $converter->label, $x ) );
-							}
-							$new_settings['arbitrary_tags'][] = array( 'name' => $the_spot, 'content' => $treasure );
-						} else {
-							WP_CLI::warning( sprintf( __( 'Could not convert the %s setting `%s` because it contains unsupported formatting tags.', 'wp-seo' ), $converter->label, $x ) );
+		if ( $converter_arbitrary_tags = $converter->get_arbitrary_tags() ) {
+			$new_settings['arbitrary_tags'] = array();
+			if ( isset( $current_settings['arbitrary_tags'] ) ) {
+				$new_settings['arbitrary_tags'] = $current_settings['arbitrary_tags'];
+			}
+			if ( $force_arbitrary_tags ) {
+				foreach ( wp_list_pluck( $converter_arbitrary_tags, 'name' ) as $name ) {
+					$new_settings['arbitrary_tags'] = wp_list_filter( $new_settings['arbitrary_tags'], array( 'name' => $name ), 'NOT' );
+				}
+			} else {
+				foreach ( wp_list_pluck( $new_settings['arbitrary_tags'], 'name' ) as $name ) {
+					$converter_arbitrary_tags = wp_list_filter( $converter_arbitrary_tags, array( 'name' => $name ), 'NOT' );
+				}
+			}
+			foreach ( $converter_arbitrary_tags as $index => $tag ) {
+				if ( ! $converter->has_tag( $tag['content'] ) ) {
+					continue;
+				} else {
+					$tag['content'] = str_replace( $old_tags, $new_tags, $tag['content'] );
+					$requires_force = $converter->has_tag( $tag['content'] );
+					if ( $force_formatting_tags || ! $requires_force ) {
+						if ( $requires_force ) {
+							WP_CLI::warning( sprintf( __( 'Forcibly converting %s arbitrary tag `%s` with unsupported formatting tags.', 'wp-seo' ), $converter->label, $tag['name'] ) );
 						}
+						$converter_arbitrary_tags[ $index ]['content'] = $tag['content'];
+					} else {
+						unset( $converter_arbitrary_tags[ $index ] );
+						WP_CLI::warning( sprintf( __( 'Could not convert the %s arbitrary tag `%s` because it contains unsupported formatting tags.', 'wp-seo' ), $converter->label, $tag['name'] ) );
 					}
 				}
 			}
+			$new_settings['arbitrary_tags'] = array_merge( $new_settings['arbitrary_tags'], $converter_arbitrary_tags );
 		}
 
 		if ( empty( $new_settings ) ) {

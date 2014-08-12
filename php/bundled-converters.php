@@ -23,23 +23,26 @@ class WP_SEO_Add_Meta_Tags_Converter extends WP_SEO_Converter {
 		return false !== strpos( $string, '%' );
 	}
 
-	public function get_static_field_data() {
-		return get_option( 'add_meta_tags_opts' );
-	}
+	public function get_static_fields() {
+		$data = get_option( 'add_meta_tags_opts' );
+		$out = array();
 
-	public function get_static_field_map() {
-		return array(
+		$map = array(
 			'site_description' => 'home_description',
 			'site_keywords'    => 'home_keywords',
 		);
+
+		foreach ( $map as $key => $value ) {
+			if ( ! empty( $data[ $key ] ) ) {
+				$out[ $map[ $key ] ] = $data[ $key ];
+			}
+		}
+
+		return $out;
 	}
 
 	// No support for what we would call arbitrary tags.
-	public function get_arbitrary_field_data() {
-		return null;
-	}
-
-	public function get_arbitrary_field_map() {
+	public function get_arbitrary_tags() {
 		return null;
 	}
 
@@ -76,6 +79,91 @@ class WP_SEO_Add_Meta_Tags_Converter extends WP_SEO_Converter {
 		return array();
 	}
 
+}
+
+class WP_SEO_AIOSP_Converter extends WP_SEO_Converter {
+
+	public $label = 'All In One SEO Pack';
+
+	public function can_convert() {
+		if ( ! get_option( 'aioseop_options' ) ) {
+			return new WP_Error( 'can_convert', __( 'No data to convert from in the database', 'wp-seo' ) );
+		}
+
+		return true;
+	}
+
+	public function get_tag_map() {
+		return array(
+			'%blog_title%' => '#site_name#',
+			'%blog_description%' => '#site_description#',
+			'%page_title%' => '#page_title#',
+			'%post_title%' => '#post_title#',
+			'%page_author_nicename%' => '#author#',
+			'%post_author_nicename%' => '#author#',
+			'%author%' => '#author#',
+			'%category_title%' => '#term_name#',
+			'%tag%' => '#term_name#',
+			'%category_description%' => '#term_description#',
+			'%search%' => '#search_term#',
+		);
+	}
+
+	public function has_tag( $string ) {
+		return false !== strpos( $string, '%' );
+	}
+
+	public function get_static_fields() {
+		$data = get_option( 'aioseop_options' );
+		$out = array();
+
+		$map = array(
+			'aiosp_category_title_format' => 'archive_category_title',
+			'aiosp_tag_title_format'      => 'archive_post_tag_title',
+		);
+		foreach ( WP_SEO_Settings()->get_single_post_types() as $name => $object ) {
+			$map[ "aiosp_{$name}_title_format" ] = "single_{$name}_title";
+		}
+		$map = array_merge( $map, array(
+			'aiosp_home_title'       => 'home_title',
+			'aiosp_home_description' => 'home_description',
+			'aiosp_home_keywords'    => 'home_keywords',
+		) );
+
+		foreach ( $map as $key => $value ) {
+			if ( ! empty( $data[ $key ] ) ) {
+				$out[ $map[ $key ] ] = $data[ $key ];
+			}
+		}
+
+		return $out;
+	}
+
+	public function get_arbitrary_tags() {
+		$data = get_option( 'aioseop_options' );
+		$fields = array();
+
+		foreach ( array(
+			'aiosp_google_verify'    => 'google-site-verification',
+			'aiosp_bing_verify'      => 'msvalidate.01',
+			'aiosp_pinterest_verify' => 'p:domain_verify',
+		) as $key => $name ) {
+			if ( ! empty( $data[ $key ] ) ) {
+				$fields[] = array( 'name' => $name, 'content' => $data[ $key ] );
+			}
+		}
+
+		return $fields;
+	}
+
+	public function get_enabled_post_types( $single_post_types ) {
+		$option = get_option( 'aioseop_options' );
+		return $option['aiosp_cpostactive'];
+	}
+
+	public function get_enabled_taxonomies( $taxonomies ) {
+		return array();
+	}
 }
 
 class WP_SEO_Yoast_Converter extends WP_SEO_Converter {
@@ -115,11 +203,10 @@ class WP_SEO_Yoast_Converter extends WP_SEO_Converter {
 		return false !== strpos( $string, '%%' );
 	}
 
-	public function get_static_field_data() {
-		return get_option( 'wpseo_titles' );
-	}
+	public function get_static_fields() {
+		$data = get_option( 'wpseo_titles' );
+		$out = array();
 
-	public function get_static_field_map() {
 		$map = array();
 		foreach ( WP_SEO_Settings()->get_taxonomies() as $name => $object ) {
 			$map[ "title-tax-{$name}" ] = "archive_{$name}_title";
@@ -148,21 +235,33 @@ class WP_SEO_Yoast_Converter extends WP_SEO_Converter {
 			'title-search-wpseo'    => 'search_title',
 			'title-404-wpseo'       => '404_title',
 		) );
-		return $map;
+
+		foreach ( $map as $key => $value ) {
+			if ( ! empty( $data[ $key ] ) ) {
+				$out[ $map[ $key ] ] = $data[ $key ];
+			}
+		}
+
+		return $out;
 	}
 
-	public function get_arbitrary_field_map() {
-		return array(
+	public function get_arbitrary_tags() {
+		$data = get_option( 'wpseo' );
+		$fields = array();
+
+		foreach ( array(
 			'googleverify'    => 'google-site-verification',
 			'msverify'        => 'msvalidate.01',
 			'pinterestverify' => 'p:domain_verify',
 			'alexaverify'     => 'alexaVerifyID',
 			'yandexverify'    => 'yandex-verification',
-		);
-	}
+		) as $key => $name ) {
+			if ( ! empty( $data[ $key ] ) ) {
+				$fields[] = array( 'name' => $name, 'content' => $data[ $key ] );
+			}
+		}
 
-	public function get_arbitrary_field_data() {
-		return get_option( 'wpseo' );
+		return $fields;
 	}
 
 	/**
@@ -202,6 +301,7 @@ class WP_SEO_Yoast_Converter extends WP_SEO_Converter {
  */
 function wp_seo_bundled_converters( $converters ) {
 	$converters['add-meta-tags'] = 'WP_SEO_Add_Meta_Tags_Converter';
+	$converters['aiosp']         = 'WP_SEO_AIOSP_Converter';
 	$converters['yoast']         = 'WP_SEO_Yoast_Converter';
 	return $converters;
 }
