@@ -176,7 +176,7 @@ class WP_SEO_Format_Tags extends WP_SEO_Formatting_Tag {
 
 	public function get_value() {
 		if ( is_singular() && is_object_in_taxonomy( get_post_type(), 'post_tag' ) && $tags = get_the_tags() ) {
-			return implode( esc_html__( ', ', 'wp-seo' ), wp_list_pluck( $tags, 'name' ) );
+			return implode( __( ', ', 'wp-seo' ), wp_list_pluck( $tags, 'name' ) );
 		}
 
 		return false;
