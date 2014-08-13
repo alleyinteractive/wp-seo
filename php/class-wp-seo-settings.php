@@ -642,6 +642,7 @@ class WP_SEO_Settings {
 		);
 
 		foreach ( $repeatables as $repeatable => $fields ) {
+			$out[ $repeatable ] = array();
 			if ( isset( $in[ $repeatable ] ) ) {
 				foreach( array_values( $in[ $repeatable ] ) as $i => $group ) {
 					foreach( $fields as $field ) {
