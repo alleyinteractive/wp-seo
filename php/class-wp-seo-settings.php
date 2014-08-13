@@ -656,7 +656,6 @@ class WP_SEO_Settings {
 			}
 		}
 
-
 		return $out;
 	}
 
