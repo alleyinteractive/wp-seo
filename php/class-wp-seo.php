@@ -562,12 +562,15 @@ class WP_SEO {
 		 * @param  array {
 		 *     Meta tag data.
 		 *
-		 *     @type  string $name The field "name" attribute.
+		 *     @type  string $name    The field "name" attribute.
 		 *     @type  string $content The field "content" attribute.
 		 * }
 		 */
-		foreach( apply_filters( 'wp_seo_arbitrary_tags', WP_SEO_Settings()->get_option( 'arbitrary_tags' ) ) as $tag ) {
-			$this->meta_field( $tag['name'], $tag['content'] );
+		$arbitrary_tags = apply_filters( 'wp_seo_arbitrary_tags', WP_SEO_Settings()->get_option( 'arbitrary_tags' ) );
+		if ( is_array( $arbitrary_tags ) ) {
+			foreach ( $arbitrary_tags as $tag ) {
+				$this->meta_field( $tag['name'], $tag['content'] );
+			}
 		}
 
 	}

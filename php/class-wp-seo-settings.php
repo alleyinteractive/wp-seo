@@ -551,7 +551,7 @@ class WP_SEO_Settings {
 					if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
 						global $wp_settings_sections;
 						foreach ( (array) $wp_settings_sections[ $this::SLUG ] as $section ) {
-						    add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', $section );
+							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', $section );
 						}
 						do_accordion_sections( 'wp-seo', 'advanced', null );
 					} else {
@@ -642,6 +642,7 @@ class WP_SEO_Settings {
 		);
 
 		foreach ( $repeatables as $repeatable => $fields ) {
+			$out[ $repeatable ] = array();
 			if ( isset( $in[ $repeatable ] ) ) {
 				foreach( array_values( $in[ $repeatable ] ) as $i => $group ) {
 					foreach( $fields as $field ) {
