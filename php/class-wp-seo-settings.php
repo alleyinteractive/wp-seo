@@ -653,6 +653,11 @@ class WP_SEO_Settings {
 				// Remove groups with only empty fields.
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
+
+			// Save fields with no groups as an empty array, not null.
+			if ( empty( $out[ $repeatable ] ) ) {
+				$out[ $repeatable ] = array();
+			}
 		}
 
 		return $out;
