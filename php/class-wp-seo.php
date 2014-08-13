@@ -566,7 +566,7 @@ class WP_SEO {
 		 *     @type  string $content The field "content" attribute.
 		 * }
 		 */
-		foreach( apply_filters( 'wp_seo_arbitrary_tags', WP_SEO_Settings()->get_option( 'arbitrary_tags' ) ) as $tag ) {
+		foreach ( apply_filters( 'wp_seo_arbitrary_tags', WP_SEO_Settings()->get_option( 'arbitrary_tags' ) ) as $tag ) {
 			$this->meta_field( $tag['name'], $tag['content'] );
 		}
 
