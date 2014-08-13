@@ -101,21 +101,21 @@ class WP_SEO_Settings {
 		 *
 		 * @param array Associative array of post type keys and objects.
 		 */
-		$this->single_post_types = apply_filters( 'wp_seo_single_post_types', get_post_types( array( 'public' => true ), 'objects' ) );
+		$this->single_post_types = apply_filters( 'wp_seo_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 
 		/**
 		 * Filter the post types that support SEO fields on their archive pages.
 		 *
 		 * @param array Associative array of post type keys and objects.
 		 */
-		$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', get_post_types( array( 'has_archive' => true ), 'objects' ) );
+		$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 
 		/**
 		 * Filter the taxonomies that support SEO fields on term archive pages.
 		 *
 		 * @param  array Associative array of taxonomy keys and objects.
 		 */
-		$this->taxonomies = apply_filters( 'wp_seo_taxonomies', get_taxonomies( array( 'public' => true ), 'objects' ) );
+		$this->taxonomies = apply_filters( 'wp_seo_taxonomies', wp_list_filter( get_taxonomies( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 
 		/**
 		 * Filter the options to save by default.
