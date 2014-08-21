@@ -292,7 +292,7 @@ class WP_SEO_Format_Search_Term extends WP_SEO_Formatting_Tag {
 	}
 
 	public function get_value() {
-		return get_search_query();
+		return ( $term = get_search_query() ) ? $term : false;
 	}
 
 }
