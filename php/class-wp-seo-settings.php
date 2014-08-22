@@ -687,8 +687,8 @@ class WP_SEO_Settings {
 		$out = $this->default_options;
 
 		// Validate post types and taxonomies on which to show SEO fields.
-		$out['post_types'] = isset( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
-		$out['taxonomies'] = isset( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
+		$out['post_types'] = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
+		$out['taxonomies'] = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
 
 		/**
 		 * Sanitize these as text fields and in the following order:
