@@ -720,7 +720,7 @@ class WP_SEO_Settings {
 		$sanitize_as_text_field[] = '404_title';
 
 		foreach( $sanitize_as_text_field as $field ) {
-			$out[ $field ] = isset( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
+			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
 		}
 
 		/**
