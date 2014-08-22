@@ -7,6 +7,13 @@
 class WP_SEO_Settings {
 
 	/**
+	 * Instance of this class.
+	 *
+	 * @var object
+	 */
+	private static $instance = null;
+
+	/**
 	 * The user capability required to access the options page.
 	 *
 	 * @var string.
@@ -56,7 +63,13 @@ class WP_SEO_Settings {
 
 	const SLUG = 'wp-seo';
 
-	protected static $instance;
+	private function __construct() {
+		/** Don't do anything, needs to be initialized via instance() method **/
+	}
+
+	public function __clone() { wp_die( "Please don't __clone WP_SEO_Settings" ); }
+
+	public function __wakeup() { wp_die( "Please don't __wakeup WP_SEO_Settings" ); }
 
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
@@ -684,42 +697,13 @@ class WP_SEO_Settings {
 		endif;
 	}
 
-	/**
-	 * Helper to check whether a post type is set in "Add fields to individual."
-	 *
-	 * @param  string  $post_type Post type name.
-	 * @return boolean
-	 */
-	public function has_post_fields( $post_type ) {
-		if ( is_array( $this->get_option( 'post_types' ) ) ) {
-			return in_array( $post_type, $this->get_option( 'post_types') );
-		}
-
-		return false;
-	}
-
-	/**
-	 * Get the $taxonomies property.
-	 *
-	 * @return array @see WP_SEO_Settings::set_properties(), or an empty array
-	 *     as a fallback.
-	 */
-	public function get_taxonomies() {
-		return ( $taxonomies = $this->get_option( 'taxonomies' ) ) ? $taxonomies : array();
-	}
-
-	/**
-	 * Helper to check whether a taxonomy is set in "Add fields to individual."
-	 *
-	 * @param  string $taxonomy Taxonomy name
-	 * @return boolean
-	 */
-	public function has_term_fields( $taxonomy ) {
-		return in_array( $taxonomy, $this->get_taxonomies() );
-	}
-
 }
 
+/**
+ * Helper function to use the class instance.
+ *
+ * @return object
+ */
 function WP_SEO_Settings() {
 	return WP_SEO_Settings::instance();
 }

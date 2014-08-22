@@ -7,7 +7,12 @@ if ( ! class_exists( 'WP_SEO' ) ) :
  */
 class WP_SEO {
 
-	private static $instance;
+	/**
+	 * Instance of this class.
+	 *
+	 * @var object
+	 */
+	private static $instance = null;
 
 	/**
 	 * Associative array of WP_SEO_Formatting_Tag instances.
@@ -34,9 +39,9 @@ class WP_SEO {
 		/* Don't do anything, needs to be initialized via instance() method */
 	}
 
-	public function __clone() { wp_die( "Please don't __clone WP_SEO" ); }
+	public function __clone() { wp_die( __( "Please don't __clone WP_SEO", "wp-seo" ) ); }
 
-	public function __wakeup() { wp_die( "Please don't __wakeup WP_SEO" ); }
+	public function __wakeup() { wp_die( __( "Please don't __wakeup WP_SEO", "wp-seo" ) ); }
 
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
