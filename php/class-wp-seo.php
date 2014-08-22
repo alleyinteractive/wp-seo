@@ -242,7 +242,7 @@ class WP_SEO {
 	 * Add the meta box to taxonomies with per-term fields enabled.
 	 */
 	public function add_term_boxes() {
-		foreach ( WP_SEO_Settings()->get_taxonomies() as $slug ) {
+		foreach ( WP_SEO_Settings()->get_enabled_taxonomies() as $slug ) {
 			add_action( $slug . '_add_form_fields', array( $this, 'add_term_meta_fields' ), 10, 2 );
 			add_action( $slug . '_edit_form', array( $this, 'edit_term_meta_fields' ), 10, 2 );
 		}
@@ -256,7 +256,7 @@ class WP_SEO {
 	 * @param  object $term The term object
 	 * @return string The option name
 	 */
-	private function get_term_fields_option_name( $term ) {
+	public function get_term_option_name( $term ) {
 		return "wp-seo-term-{$term->term_taxonomy_id}";
 	}
 
@@ -303,7 +303,7 @@ class WP_SEO {
 	 * @param  string $taxonomy The taxonomy slug
 	 */
 	public function edit_term_meta_fields( $tag, $taxonomy ) {
-		$values = get_option( $this->get_term_fields_option_name( $tag ), array( 'title' => '', 'description' => '', 'keywords' => '' ) );
+		$values = get_option( $this->get_term_option_name( $tag ), array( 'title' => '', 'description' => '', 'keywords' => '' ) );
 		wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
 		?>
 		<h2><?php echo esc_html( $this->box_heading ); ?></h2>
@@ -380,7 +380,7 @@ class WP_SEO {
 			$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 		}
 
-		$name = $this->get_term_fields_option_name( get_term( $term_id, $taxonomy ) );
+		$name = $this->get_term_option_name( get_term( $term_id, $taxonomy ) );
 		if ( false === get_option( $name ) ) {
 			// Don't create an option unless at least one field exists.
 			$filtered_data = array_filter( $data );
@@ -463,7 +463,7 @@ class WP_SEO {
 		} elseif ( is_author() ) {
 			$key = 'archive_author_title';
 		} elseif ( is_category() || is_tag() || is_tax() ) {
-			if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_fields_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
+			if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
 				return $option['title'];
 			} else {
 				$key = "archive_{$taxonomy}_title";
@@ -532,7 +532,7 @@ class WP_SEO {
 		} elseif ( is_author() ) {
 			$key = 'archive_author';
 		} elseif ( is_category() || is_tag() || is_tax() ) {
-			if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_fields_option_name( get_queried_object() ) ) ) {
+			if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
 				$meta_description = $option['description'];
 				$meta_keywords = $option['keywords'];
 			}

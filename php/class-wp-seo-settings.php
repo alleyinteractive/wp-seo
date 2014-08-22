@@ -173,6 +173,71 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Get the $taxonomies property.
+	 *
+	 * @return array @see WP_SEO_Settings::taxonomies.
+	 */
+	public function get_taxonomies() {
+		return $this->taxonomies;
+	}
+
+	/**
+	 * Get the $single_post_types property.
+	 *
+	 * @return array @see WP_SEO_Settings::single_post_types.
+	 */
+	public function get_single_post_types() {
+		return $this->single_post_types;
+	}
+
+	/**
+	 * Get the $archived_post_types property.
+	 *
+	 * @return array @see WP_SEO_Settings::archived_post_types.
+	 */
+	public function get_archived_post_types() {
+		return $this->archived_post_types;
+	}
+
+	/**
+	 * Get the taxonomies with per-term fields enabled.
+	 *
+	 * @return array With slugs of any enabled taxonomies.
+	 */
+	public function get_enabled_taxonomies() {
+		return $this->get_option( 'taxonomies' );
+	}
+
+	/**
+	 * Get the post types with per-entry fields enabled.
+	 *
+	 * @return array With names of any enabled post types.
+	 */
+	public function get_enabled_post_types() {
+		return $this->get_option( 'post_types' );
+	}
+
+	/**
+	 * Helper to check whether a post type is set in "Add fields to individual."
+	 *
+	 * @param  string  $post_type Post type name.
+	 * @return boolean
+	 */
+	public function has_post_fields( $post_type ) {
+		return in_array( $post_type, $this->get_enabled_post_types() );
+	}
+
+	/**
+	 * Helper to check whether a taxonomy is set in "Add fields to individual."
+	 *
+	 * @param  string $taxonomy Taxonomy name
+	 * @return boolean
+	 */
+	public function has_term_fields( $taxonomy ) {
+		return in_array( $taxonomy, $this->get_enabled_taxonomies() );
+	}
+
+	/**
 	 * Register the plugin options page.
 	 */
 	public function add_options_page() {
