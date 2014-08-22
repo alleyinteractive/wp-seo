@@ -229,11 +229,6 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 		$this->_go_to_and_expect( get_term_link( $this->term_ID, 'demo_taxonomy' ), $this->term['description'] );
 	}
 
-	/**
-	 * WP_SEO_Format_Post_Type_Singular_Name and _Plural_Name should return the
-	 * name on only single and post type archives.
-	 */
-
 	function test_post_type_singular_name() {
 		$this->_set_current_tag( 'post_type_singular_name' );
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for outputting content into wp_title() and wp_head().
+ * Tests for functions that hook into wp_title() and wp_head.
  *
  * @package  WP SEO
  */
