@@ -79,10 +79,6 @@ class WP_SEO_Settings {
 		return self::$instance;
 	}
 
-	protected function __construct() {
-		/** Don't do anything **/
-	}
-
 	/**
 	 * Add settings-related actions and filters.
 	 */
