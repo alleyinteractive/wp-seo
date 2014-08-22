@@ -84,66 +84,82 @@ class WP_SEO_Settings {
 	 */
 	protected function setup() {
 		if ( is_admin() ) {
-			add_action( 'init', array( $this, 'set_properties' ) );
 			add_action( 'admin_menu', array( $this, 'add_options_page' ) );
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 		}
 
-		// Call after set_properties(), which sets the default options.
-		add_action( 'init', array( $this, 'load_options' ), 11 );
+		add_action( 'init', array( $this, 'set_properties' ) );
 	}
 
 	/**
 	 * Set class properties.
 	 */
 	public function set_properties() {
-		/**
-		 * Filter the capability required to access the settings page.
-		 *
-		 * @param string The default capability.
-		 */
-		$this->options_capability = apply_filters( 'wp_seo_options_capability', $this->options_capability );
+		if ( ! $this->options_capability ) {
+			/**
+			 * Filter the capability required to access the settings page.
+			 *
+			 * @param string The default capability.
+			 */
+			$this->options_capability = apply_filters( 'wp_seo_options_capability', $this->options_capability );
+		}
 
-		/**
-		 * Filter the post types that support per-entry SEO fields.
-		 *
-		 * @param array Associative array of post type keys and objects.
-		 */
-		$this->single_post_types = apply_filters( 'wp_seo_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		if ( ! $this->single_post_types ) {
+			/**
+			 * Filter the post types that support per-entry SEO fields.
+			 *
+			 * @param array Associative array of post type keys and objects.
+			 */
+			$this->single_post_types = apply_filters( 'wp_seo_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		}
 
-		/**
-		 * Filter the post types that support SEO fields on their archive pages.
-		 *
-		 * @param array Associative array of post type keys and objects.
-		 */
-		$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		if ( ! $this->archived_post_types ) {
+			/**
+			 * Filter the post types that support SEO fields on their archive pages.
+			 *
+			 * @param array Associative array of post type keys and objects.
+			 */
+			$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		}
 
-		/**
-		 * Filter the taxonomies that support SEO fields on term archive pages.
-		 *
-		 * @param  array Associative array of taxonomy keys and objects.
-		 */
-		$this->taxonomies = apply_filters( 'wp_seo_taxonomies', wp_list_filter( get_taxonomies( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		if ( ! $this->taxonomies ) {
+			/**
+			 * Filter the taxonomies that support SEO fields on term archive pages.
+			 *
+			 * @param  array Associative array of taxonomy keys and objects.
+			 */
+			$this->taxonomies = apply_filters( 'wp_seo_taxonomies', wp_list_filter( get_taxonomies( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		}
 
-		/**
-		 * Filter the options to save by default.
-		 *
-		 * These are also the settings shown when the option does not exist,
-		 * such as when the the plugin is first activated.
-		 *
-		 * @param  array Associative array of setting names and values.
-		 */
-		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ) ) );
-	}
+		if ( ! $this->default_options ) {
+			/**
+			 * Filter the options to save by default.
+			 *
+			 * These are also the settings shown when the option does not exist,
+			 * such as when the the plugin is first activated.
+			 *
+			 * @param  array Associative array of setting names and values.
+			 */
+			$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ) ) );
+		}
 
-	/**
-	 * Load the options on demand.
-	 */
-	public function load_options() {
 		if ( ! $this->options ) {
 			$this->options = get_option( $this::SLUG, $this->default_options );
 		}
+	}
+
+	/**
+	 * Reset class properties.
+	 */
+	public function reset_properties() {
+		$this->options_capability  = '';
+		$this->single_post_types   = array();
+		$this->archived_post_types = array();
+		$this->taxonomies          = array();
+		$this->default_options     = array();
+		$this->options             = array();
+		$this->set_properties();
 	}
 
 	/**
