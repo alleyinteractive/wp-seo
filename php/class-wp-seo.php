@@ -395,10 +395,14 @@ class WP_SEO {
 	/**
 	 * Replace formatting tags in a string with their value for the current page.
 	 *
-	 * @param  string $string The string with formatting tags.
-	 * @return string         The formatted string.
+	 * @param  string $string  The string with formatting tags.
+	 * @return string|WP_Error The formatted string, or WP_Error on error.
 	 */
 	public function format( $string ) {
+		if ( ! is_string( $string ) ) {
+			return new WP_Error( 'format_error', __( "Please don't try to format() a non-string.", 'wp-seo' ) );
+		}
+
 		$raw_string = $string;
 
 		preg_match_all( $this->formatting_tag_pattern, $string, $matches );
