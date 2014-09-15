@@ -29,7 +29,7 @@ For developers, WP SEO is welcoming. It applies filters all over the place, and 
 
 WordPress SEO allows you to customize the default format of `<title>` tags, `<meta>` descriptions, and `<meta>` keywords for your home page, single posts and custom post types, taxonomy and date archives, and more.
 
-Most of this customization happens on the WP SEO settings page, which you can access in the WordPress Dashboard. From the Dashboard, go to Settings > SEO.
+Most of this customization happens on the WP SEO settings page, which you can access in the Dashboard at Settings > SEO.
 
 === Basic usage ===
 
@@ -43,11 +43,11 @@ A "format" can be regular text. For example, you could set the `<title>` tag of 
 
 ==== Formatting tags ====
 
-But the power of formats is in formatting tags, which create dynamic text that responds to the content of the page.
+The power of formats, though, is in formatting tags, which create dynamic text that responds to the content of the page.
 
 A formatting tag looks like `#site_name#` or `#author#` or `#archive_date#`.
 
-With formatting tags, the `<title>` tag of your date archive could instead be something like "Time machine set to #archive_date#."
+With formatting tags, setting the `<title>` tag format of your date archive to "Time machine set to #archive_date#" would display something like "Time machine set to September 2014" -- and the date would change automatically based on the archive the user looked at.
 
 Some more examples:
 
@@ -55,21 +55,21 @@ Some more examples:
 
 * If you wanted to use category descriptions in the `<meta>` description field, you could go to "Category Archives" and, under "Meta Description Format", use #term_description#."
 
-* If you had a custom "Review" post type and wanted the `<title>` tag to include the date each review was last updated, you could go to "Single Review Defaults" and, under "Title Tag Format," use "#title# Review (Updated ##date_modified#).
+* If you had a custom "Review" post type and wanted the `<title>` tag to include the date each review was last updated, you could go to "Single Review Defaults" and, under "Title Tag Format," use "#title# Review (Updated #date_modified#).
 
-Fifteen formatting tags are available out-of-the-box. Details about each tag are available under the "Help" tab in the upper-right corner of the settings page.
+Fifteen formatting tags are available out-of-the-box. Details about each tag are available under the "Help" button in the upper-right corner of the settings page.
 
 === Per-entry and per-term fields ===
 
 The WP SEO Settings page allows you to set global defaults. But WP SEO also supports setting custom title, description, and keyword values for your site's individual entries and taxonomy terms.
 
-You can enable these fields on a per-post type basis under the "Post Types"heading on the settings page. Check the box next to a post type to enable the fields. The fields will now appear on the "Edit [post type]" screen for each post type.
+You can enable these fields on a per-post type basis under the "Post Types" heading on the WP SEO Settings page. Check the box next to a post type to enable the fields, and the fields will appear on the "Edit" page for each post type.
 
-You can enable these fields on a per-taxonomy basis under the "Taxonomies"heading on the settings page. Check the box next to a taxonomy to enable the fields. The fields will now appear in the "Add New [taxonomy]" form for each taxonomy and the "Edit [taxonomy]" screen for each taxonomy term.
+You can enable the fields on a per-taxonomy basis under the "Taxonomies" heading on the WP SEO Settings page. Check the box next to a taxonomy to enable the fields, and the fields will appear in the "Add New" form for each taxonomy and the "Edit" page for each taxonomy term.
 
 === Custom meta tags ===
 
-In addition to the core support for `<meta>` description and keywords, WP SEO allows you to insert set custom `<meta>` tags that are used throughout your site. These are managed under the "Other Meta Tags" heading.
+In addition to the core support for `<meta>` description and keywords, WP SEO allows you to set custom `<meta>` tags that are used throughout your site. These are managed under the "Other Meta Tags" heading on the WP SEO Settings page.
 
 For example, if you wanted to add a Google Verification `<meta>` tag for your site, you could go to "Other Meta Tags," add "google-site-verification" under the "Name" field, and the value under the "Content" field.
 
