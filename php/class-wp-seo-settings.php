@@ -75,14 +75,14 @@ class WP_SEO_Settings {
 	 */
 	protected function setup() {
 		if ( is_admin() ) {
-			add_action( 'init', array( $this, 'set_properties' ) );
+			add_action( 'init', array( $this, 'set_properties' ), 20 );
 			add_action( 'admin_menu', array( $this, 'add_options_page' ) );
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 		}
 
 		// Call after set_properties(), which sets the default options.
-		add_action( 'init', array( $this, 'load_options' ), 11 );
+		add_action( 'init', array( $this, 'load_options' ), 21 );
 	}
 
 	/**
