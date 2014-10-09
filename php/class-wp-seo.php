@@ -569,7 +569,7 @@ class WP_SEO {
 		$arbitrary_tags = apply_filters( 'wp_seo_arbitrary_tags', WP_SEO_Settings()->get_option( 'arbitrary_tags' ) );
 		if ( is_array( $arbitrary_tags ) ) {
 			foreach ( $arbitrary_tags as $tag ) {
-				$this->meta_field( $tag['name'], $tag['content'] );
+				$this->meta_field( $tag['name'], $this->format( $tag['content'] ) );
 			}
 		}
 
