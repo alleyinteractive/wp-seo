@@ -97,7 +97,7 @@ class WP_SEO_Settings {
 	 * @codeCoverageIgnore
 	 */
 	protected function setup() {
-		add_action( 'init', array( $this, 'set_properties' ) );
+		add_action( 'wp_loaded', array( $this, 'set_properties' ) );
 
 		if ( is_admin() ) {
 			add_action( 'admin_menu', array( $this, 'add_options_page' ) );

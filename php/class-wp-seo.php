@@ -69,7 +69,7 @@ class WP_SEO {
 	 * @codeCoverageIgnore
 	 */
 	protected function setup() {
-		add_action( 'init', array( $this, 'set_properties' ) );
+		add_action( 'wp_loaded', array( $this, 'set_properties' ) );
 
 		if ( is_admin() ) {
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
