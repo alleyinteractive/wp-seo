@@ -130,7 +130,7 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 	 * apply the 'the_author' filter for Co-Authors Plus support.
 	 *
 	 * On author archives, get author data directly from the queried object, not
-	 * get_the_author(), to avoid Co-Authors Plus from filtering it.
+	 * get_the_author(), to prevent Co-Authors Plus from filtering it.
 	 */
 	public function get_value() {
 		if ( is_singular() && post_type_supports( get_post_type(), 'author' ) ) {
