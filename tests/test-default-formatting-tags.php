@@ -77,6 +77,14 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the current tag has a description.
+	 */
+	function _has_description() {
+		$this->assertInternalType( 'string', $this->current_tag->get_description() );
+		$this->assertNotSame( '', $this->current_tag->get_description() );
+	}
+
+	/**
 	 * Test that the current tag returns a truthy value only on expected requests.
 	 *
 	 * These tests provide some security that formatting tags return false
@@ -133,6 +141,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_site_name() {
 		$this->_set_current_tag( 'site_name' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( 'all' );
 
 		$this->assertSame( 'Test Blog', $this->current_tag->get_value() );
@@ -141,6 +151,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_site_description() {
 		$this->_set_current_tag( 'site_description' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( 'all' );
 
 		$this->assertSame( 'Just another WordPress site', $this->current_tag->get_value() );
@@ -148,6 +160,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 	function test_title() {
 		$this->_set_current_tag( 'title' );
+
+		$this->_has_description();
 
 		$this->_truthy_on_only( array( 'single' ) );
 
@@ -177,6 +191,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_date_published() {
 		$this->_set_current_tag( 'date_published' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( array( 'single' ) );
 
 		$this->_go_to_and_expect( get_permalink( $this->post_ID ), 'September 4, 2007' );
@@ -185,6 +201,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_date_modified() {
 		$this->_set_current_tag( 'date_modified' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( array( 'single' ) );
 
 		$this->_go_to_and_expect( get_permalink( $this->post_ID ), 'September 4, 2007' );
@@ -192,6 +210,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 	function test_author() {
 		$this->_set_current_tag( 'author' );
+
+		$this->_has_description();
 
 		$this->_truthy_on_only( array( 'single', 'author' ) );
 
@@ -202,7 +222,10 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_categories() {
 		$this->_set_current_tag( 'categories' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( array( 'single' ) );
+
 		$this->_go_to_and_expect( get_permalink( $this->post_ID ), $this->category['name'] );
 	}
 
@@ -214,6 +237,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 	function test_tags() {
 		$this->_set_current_tag( 'tags' );
+
+		$this->_has_description();
 
 		$this->_truthy_on_only( array( 'single' ) );
 
@@ -229,6 +254,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_term_name() {
 		$this->_set_current_tag( 'term_name' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( array( 'category', 'tag', 'tax' ) );
 
 		$this->_go_to_and_expect( get_term_link( $this->category_ID, 'category' ), $this->category['name'] );
@@ -238,6 +265,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 	function test_term_description() {
 		$this->_set_current_tag( 'term_description' );
+
+		$this->_has_description();
 
 		$this->_truthy_on_only( array( 'category', 'tag', 'tax' ) );
 
@@ -249,6 +278,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_post_type_singular_name() {
 		$this->_set_current_tag( 'post_type_singular_name' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( array( 'single', 'post_type_archive' ) );
 
 		$this->_go_to_and_expect( get_permalink( $this->demo_ID ), $this->post_type['labels']['singular_name'] );
@@ -257,6 +288,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 	function test_post_type_plural_name() {
 		$this->_set_current_tag( 'post_type_plural_name' );
+
+		$this->_has_description();
 
 		$this->_truthy_on_only( array( 'single', 'post_type_archive' ) );
 
@@ -267,6 +300,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_archive_date() {
 		$this->_set_current_tag( 'archive_date' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( array( 'date' ) );
 
 		$this->_go_to_and_expect( get_day_link( '2007', '09', '04' ), 'September 4, 2007' );
@@ -276,6 +311,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 	function test_search() {
 		$this->_set_current_tag( 'search_term' );
+
+		$this->_has_description();
 
 		$this->_truthy_on_only( array( 'search' ) );
 
