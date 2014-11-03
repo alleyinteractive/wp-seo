@@ -67,7 +67,10 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	/**
 	 * Set the $current_tag property.
 	 *
-	 * @param string $key The key used to register the formatting tag. @see wp_seo_default_formatting_tags().
+	 * @see wp_seo_default_formatting_tags() for the array keys used to register
+	 *     individual formatting tags.
+	 *
+	 * @param string $key Formatting tag to set.
 	 */
 	function _set_current_tag( $key ) {
 		$this->current_tag = WP_SEO()->formatting_tags[ $key ];
@@ -80,13 +83,13 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	 * everywhere they should. More pages to test against can be added to
 	 * $destinations as needed.
 	 *
-	 * The individual tests for each tag check whether the tag returns the
-	 * correct value on the pages where they should return anything at all.
+	 * The tests for individual tags separately check whether the tag returns
+	 * the correct value on the pages where it should return anything at all.
 	 *
-	 * @param  array|string $conditions An array of conditionals on which the
-	 *     current tag should be truthy, or 'all' to test all conditionals.
+	 * @param  array|string $expected An array of destinations on which the
+	 *     current tag should be truthy, or 'all' to test all destinations.
 	 */
-	function _truthy_on_only( $conditions ) {
+	function _truthy_on_only( $expected ) {
 		$destinations = array(
 			'home'              => '/',
 			'404'               => '/' . rand_str( 5 ),
@@ -100,9 +103,9 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 			'search'            => get_search_link( 'wp-seo' ),
 		);
 
-		foreach ( $destinations as $name => $url ) {
+		foreach ( $destinations as $destination => $url ) {
 			$this->go_to( $url );
-			if ( 'all' == $conditions || in_array( $name, $conditions ) ) {
+			if ( 'all' == $expected || in_array( $destination, $expected ) ) {
 				$this->assertNotEmpty( $this->current_tag->get_value(), sprintf( 'Should have been truthy at %s', $url ) );
 			} else {
 				$this->assertFalse( $this->current_tag->get_value(), sprintf( 'Should not have been truthy at %s', $url ) );
