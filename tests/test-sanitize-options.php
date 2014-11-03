@@ -1,32 +1,27 @@
 <?php
 /**
- * Tests for whether inputs are sanitized correctly before saving as an option.
+ * Tests for whether submitted data are sanitized correctly before saving as options.
  *
- * @package  WP SEO
+ * @package WP SEO
  */
 class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 
-	function setUp() {
-		parent::setUp();
+	var $option_valid = array(
+		'home_title'       => 'Home | Alley Interactive',
+		'home_description' => 'We are a team of experienced digital professionals who tackle the most complex challenges facing top publishers.',
+		'home_keywords'    => 'WordPress, Drupal, Open Source',
+		'arbitrary_tags'   => array(
+			array( 'name' => 'viewport', 'content' => 'width=device-width, initial-scale=1' ),
+		),
+	);
 
-		$this->option_valid = array(
-			'home_title'       => 'Home | Alley Interactive',
-			'home_description' => 'We are a team of experienced digital professionals who tackle the most complex challenges facing top publishers.',
-			'home_keywords'    => 'WordPress, Drupal, Open Source',
-			'arbitrary_tags'   => array(
-				array( 'name' => 'viewport', 'content' => 'width=device-width, initial-scale=1' ),
-			),
-		);
+	var $option_empty_repeatable = array(
+		'arbitrary_tags' => array( array( 'name' => '', 'content' => '' ) ),
+	);
 
-		$this->option_empty_repeatable = array(
-			'arbitrary_tags' => array( array( 'name' => '', 'content' => '' ) ),
-		);
-
-		$this->option_many_empty_repeatables = array(
-			'arbitrary_tags' => array( array( 'name' => '', 'content' => '' ), array( 'name' => '', 'content' => '' ), array( 'name' => '', 'content' => '' ) ),
-		);
-
-	}
+	var $option_many_empty_repeatables = array(
+		'arbitrary_tags' => array( array( 'name' => '', 'content' => '' ), array( 'name' => '', 'content' => '' ), array( 'name' => '', 'content' => '' ) ),
+	);
 
 	/**
 	 * Wrapper for WP_SEO_Settings::sanitize_options().
@@ -118,7 +113,7 @@ class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 	/**
 	 * Test that empty repeatable fields can be sanitized twice and still be arrays.
 	 *
-	 * @see Trac ticket 21989.
+	 * @see https://core.trac.wordpress.org/ticket/21989.
 	 */
 	function test_double_sanitizing() {
 		$actual = $this->_sanitize( $this->option_empty_repeatable );
@@ -128,14 +123,6 @@ class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 		$actual = $this->_sanitize( $this->option_many_empty_repeatables );
 		$actual = $this->_sanitize( $actual );
 		$this->assertInternalType( 'array', $actual['arbitrary_tags'] );
-	}
-
-	function test_reload_options() {
-		update_option( WP_SEO_Settings::SLUG, $this->_sanitize( $this->option_valid ) );
-		WP_SEO_Settings()->reset_properties();
-		foreach ( $this->option_valid as $key => $value ) {
-			$this->assertSame( $value, WP_SEO_Settings()->get_option( $key ) );
-		}
 	}
 
 }
