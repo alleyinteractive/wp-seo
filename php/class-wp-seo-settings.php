@@ -136,26 +136,23 @@ class WP_SEO_Settings {
 	}
 
 	/**
-	 * Reset class properties.
+	 * Set $options with the current database value.
 	 */
-	public function reset_properties() {
-		$this->options_capability  = '';
-		$this->single_post_types   = array();
-		$this->archived_post_types = array();
-		$this->taxonomies          = array();
-		$this->default_options     = array();
-		$this->options             = array();
-		$this->set_properties();
+	public function set_options() {
+		$this->options = get_option( $this::SLUG, $this->default_options );
 	}
 
 	/**
 	 * Get an option value.
 	 *
-	 * @param  string $key 	The option key sought.
-	 * @return string|bool	The value, or false on failure.
+	 * @param  string $key  The option key sought.
+	 * @return mixed        The value, or null on failure.
 	 */
 	public function get_option( $key ) {
-		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : false;
+		if ( empty( $this->options ) ) {
+			$this->set_options();
+		}
+		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : null;
 	}
 
 	/**
