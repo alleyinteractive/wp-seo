@@ -234,6 +234,28 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 		$this->_go_to_and_expect( get_author_posts_url( $this->author_ID ), $this->author['display_name'] );
 	}
 
+	/**
+	 * Tests the author formatting tag in a way that uses get_the_author().
+	 *
+	 * _go_to_and_expect() skips setup_postdata(), so get_the_author() isn't available.
+	 */
+	function test_author_with_get_the_author() {
+		$this->_set_current_tag( 'author' );
+
+		$author_ID = $this->factory->user->create( array(
+			'display_name' => 'test_author',
+		) );
+
+		$post_ID = $this->factory->post->create( array(
+			'post_author' => $author_ID,
+		) );
+
+		$this->go_to( get_permalink( $post_ID ) );
+		setup_postdata( get_post( $post_ID ) );
+
+		$this->assertEquals( 'test_author', $this->current_tag->get_value() );
+	}
+
 	function test_categories() {
 		$this->_set_current_tag( 'categories' );
 
