@@ -63,14 +63,26 @@ class WP_SEO_Settings {
 
 	const SLUG = 'wp-seo';
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	private function __construct() {
 		/** Don't do anything, needs to be initialized via instance() method **/
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function __clone() { wp_die( "Please don't __clone WP_SEO_Settings" ); }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function __wakeup() { wp_die( "Please don't __wakeup WP_SEO_Settings" ); }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			self::$instance = new WP_SEO_Settings;
@@ -81,6 +93,8 @@ class WP_SEO_Settings {
 
 	/**
 	 * Add settings-related actions and filters.
+	 *
+	 * @codeCoverageIgnore
 	 */
 	protected function setup() {
 		if ( is_admin() ) {

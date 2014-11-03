@@ -35,14 +35,26 @@ class WP_SEO {
 	 */
 	private $box_heading = '';
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	private function __construct() {
 		/* Don't do anything, needs to be initialized via instance() method */
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function __clone() { wp_die( __( "Please don't __clone WP_SEO", "wp-seo" ) ); }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function __wakeup() { wp_die( __( "Please don't __wakeup WP_SEO", "wp-seo" ) ); }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			self::$instance = new WP_SEO;
@@ -53,6 +65,8 @@ class WP_SEO {
 
 	/**
 	 * Add actions and filters.
+	 *
+	 * @codeCoverageIgnore
 	 */
 	protected function setup() {
 		add_action( 'init', array( $this, 'set_properties' ) );
