@@ -30,6 +30,12 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	function _update_option_for_tests() {
 		$this->options['post_types'] = array( 'post' );
 		$this->options['taxonomies'] = array( 'category' );
+		$this->options['arbitrary_tags'] = array(
+			array(
+				'name' => 'demo arbitrary title',
+				'content' => 'demo arbitrary content',
+			),
+		);
 
 		foreach ( array(
 			'home',
@@ -62,28 +68,39 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that WP_SEO::wp_head() echoes <meta> tags with expected values.
+	 * Test that WP_SEO::wp_head() echoes all <meta> tags with expected values.
 	 *
 	 * @param  string $description The expected meta description content.
 	 * @param  string $keywords The expected meta keywords content.
 	 */
-	function _assert_meta( $description, $keywords ) {
+	function _assert_all_meta( $description, $keywords ) {
 		$expected = <<<EOF
 <meta name='description' content='{$description}' />
 <meta name='keywords' content='{$keywords}' />
+<meta name='demo arbitrary title' content='demo arbitrary content' />
 EOF;
 		$this->assertSame( strip_ws( $expected ), strip_ws( get_echo( array( WP_SEO(), 'wp_head' ) ) ) );
 	}
 
 	/**
-	 * Wrapper for checking _assert_title() and _assert_meta() on option values.
+	 * Test that WP_SEO::wp_head() echoes only the arbitrary <meta> tags.
+	 */
+	function _assert_arbitrary_meta() {
+				$expected = <<<EOF
+<meta name='demo arbitrary title' content='demo arbitrary content' />
+EOF;
+		$this->assertSame( strip_ws( $expected ), strip_ws( get_echo( array( WP_SEO(), 'wp_head' ) ) ) );
+	}
+
+	/**
+	 * Wrapper for checking _assert_title() and _assert_all_meta() on option values.
 	 *
 	 * @param  string $key The option to test. Use a name that prefixes
 	 *     '_title', '_description', and '_keywords' in the option, like 'home'.
 	 */
 	function _assert_option_filters( $key ) {
 		$this->_assert_title( $this->options[ "{$key}_title" ] );
-		$this->_assert_meta( $this->options["{$key}_description"], $this->options["{$key}_keywords"] );
+		$this->_assert_all_meta( $this->options["{$key}_description"], $this->options["{$key}_keywords"] );
 	}
 
 	/**
@@ -142,7 +159,7 @@ EOF;
 		update_option( WP_SEO()->get_term_option_name( get_term( $term_ID, 'category' ) ), array( 'title' => '_custom_title', 'description' => '_custom_description', 'keywords' => '_custom_keywords' ) );
 		$this->go_to( get_term_link( $term_ID, 'category' ) );
 		$this->_assert_title( '_custom_title' );
-		$this->_assert_meta( '_custom_description', '_custom_keywords' );
+		$this->_assert_all_meta( '_custom_description', '_custom_keywords' );
 	}
 
 	function test_post_type_archive() {
@@ -160,12 +177,14 @@ EOF;
 	function test_search() {
 		$this->go_to( get_search_link( 'wp-seo' ) );
 		$this->_assert_title( 'demo_search_title' );
+		$this->_assert_arbitrary_meta();
 	}
 
 	// No <meta> support.
 	function test_404() {
 		$this->go_to( get_day_link( '2014', '13', '13' ) );
 		$this->_assert_title( 'demo_404_title' );
+		$this->_assert_arbitrary_meta();
 	}
 
 	/**
