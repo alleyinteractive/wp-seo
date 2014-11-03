@@ -15,18 +15,31 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 	function setUp() {
 		parent::setUp();
+		$this->_create_objects();
+	}
 
-		create_initial_taxonomies();
-		register_taxonomy( 'demo_taxonomy', 'post' );
+	function tearDown() {
+		parent::tearDown();
+		// Clean up after ourselves.
+		$this->reset_post_types();
+		$this->reset_taxonomies();
+	}
 
-		$this->post_type = array( 'labels' => array( 'name' => 'Demo Post Types', 'singular_name' => 'Demo Post Type' ), 'rewrite' => true, 'has_archive' => true, 'public' => true, 'supports' => array( 'editor' ) );
-		register_post_type( 'demo_post_type', $this->post_type );
-
+	/**
+	 * Create post types, posts, taxonomies, terms, and users for these tests.
+	 *
+	 * @see especially WP_SEO_Default_Formatting_Tags_Tests::_truthy_on_only(),
+	 *     which uses most of these objects as part of the tests for each
+	 *     formatting tag.
+	 */
+	function _create_objects() {
 		$this->category = array( 'name' => 'Cat A', 'taxonomy' => 'category', 'description' => 'Cat A description' );
 		$this->category_ID = $this->factory->term->create( $this->category );
 
 		$this->tag = array( 'name' => 'Tag A', 'taxonomy' => 'post_tag', 'description' => 'Tag A description' );
 		$this->tag_ID = $this->factory->term->create( $this->tag );
+
+		register_taxonomy( 'demo_taxonomy', 'post' );
 
 		$this->term = array( 'name' => 'Term A', 'taxonomy' => 'demo_taxonomy', 'description' => 'Term A description' );
 		$this->term_ID = $this->factory->term->create( $this->term );
@@ -44,10 +57,11 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 		);
 		$this->post_ID = $this->factory->post->create( $this->post );
 
+		$this->post_type = array( 'labels' => array( 'name' => 'Demo Post Types', 'singular_name' => 'Demo Post Type' ), 'rewrite' => true, 'has_archive' => true, 'public' => true, 'supports' => array( 'editor' ) );
+		register_post_type( 'demo_post_type', $this->post_type );
+
 		$this->demo = array( 'post_type' => 'demo_post_type' );
 		$this->demo_ID = $this->factory->post->create( $this->demo );
-
-		WP_SEO()->reset_properties();
 	}
 
 	/**
