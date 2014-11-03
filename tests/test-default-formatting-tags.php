@@ -177,6 +177,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_excerpt() {
 		$this->_set_current_tag( 'excerpt' );
 
+		$this->_has_description();
+
 		$this->_truthy_on_only( array( 'single' ) );
 
 		$this->_go_to_and_expect( get_permalink( $this->post_ID ), $this->post['post_excerpt'] );
