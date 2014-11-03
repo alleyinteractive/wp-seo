@@ -137,7 +137,14 @@ EOF;
 		update_post_meta( $post_ID, '_meta_description', '_custom_meta_description' );
 		update_post_meta( $post_ID, '_meta_keywords', '_custom_meta_keywords' );
 		$this->_assert_title( '_custom_meta_title' );
-		$this->_assert_meta( '_custom_meta_description', '_custom_meta_keywords' );
+		$this->_assert_all_meta( '_custom_meta_description', '_custom_meta_keywords' );
+	}
+
+	// If there is no format string, return the original post title.
+	function test_no_format_string() {
+		add_filter( 'wp_seo_title_tag_format', '__return_false' );
+		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_title' => 'Foo' ) ) ) );
+		$this->_assert_title( 'Foo | Test Blog' );
 	}
 
 	function test_home() {
