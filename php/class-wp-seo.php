@@ -75,50 +75,36 @@ class WP_SEO {
 	 * The filter for adding custom formatting tags is applied here.
 	 */
 	public function set_properties() {
-		if ( ! $this->formatting_tags ) {
-			/**
-			 * Filter the available formatting tags.
-			 *
-			 * @see  wp_seo_default_formatting_tags() for an example implementation.
-			 *
-			 * @param array WP_SEO::formatting_tags Associative array of WP_SEO_Formatting_Tag instances.
-			 */
-			foreach ( apply_filters( 'wp_seo_formatting_tags', array() ) as $id => $tag ) {
-				if ( is_a( $tag, 'WP_SEO_Formatting_Tag' ) ) {
-					$this->formatting_tags[ $id ] = $tag;
-				}
+		$tags = array();
+		/**
+		 * Filter the available formatting tags.
+		 *
+		 * @see wp_seo_default_formatting_tags() for an example implementation.
+		 *
+		 * @param array $tags Associative array of WP_SEO_Formatting_Tag instances.
+		 */
+		foreach ( apply_filters( 'wp_seo_formatting_tags', $tags ) as $id => $tag ) {
+			if ( is_a( $tag, 'WP_SEO_Formatting_Tag' ) ) {
+				$tags[ $id ] = $tag;
 			}
 		}
+		$this->formatting_tags = $tags;
 
-		if ( ! $this->formatting_tag_pattern ) {
-			/**
-			 * Filter the regular expression used to find formatting tags.
-			 *
-			 * You might need this if you want to add unusual custom tags.
-			 *
-			 * @param string WP_SEO::formatting_tag_pattern The regex.
-			 */
-			$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
-		}
+		/**
+		 * Filter the regular expression used to find formatting tags.
+		 *
+		 * You might need this if you want to add unusual custom tags.
+		 *
+		 * @param string WP_SEO::formatting_tag_pattern The regex.
+		 */
+		$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
 
-		if ( ! $this->box_heading ) {
-			/**
-			 * Filter the heading above SEO fields on post- and term-edit screens.
-			 *
-			 * @param string The text.
-			 */
-			$this->box_heading = apply_filters( 'wp_seo_box_heading', __( 'Search Engine Optimization', 'wp-seo' ) );
-		}
-	}
-
-	/**
-	 * Reset class properties.
-	 */
-	public function reset_properties() {
-		$this->formatting_tags        = array();
-		$this->formatting_tag_pattern = '';
-		$this->box_heading            = '';
-		$this->set_properties();
+		/**
+		 * Filter the heading above SEO fields on post- and term-edit screens.
+		 *
+		 * @param string The text.
+		 */
+		$this->box_heading = apply_filters( 'wp_seo_box_heading', __( 'Search Engine Optimization', 'wp-seo' ) );
 	}
 
 	/**
