@@ -2,7 +2,7 @@
 /**
  * Tests for functions that hook into wp_title() and wp_head.
  *
- * @package  WP SEO
+ * @package WP SEO
  */
 class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 
@@ -15,17 +15,28 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 
 		register_taxonomy( $this->taxonomy, 'post' );
 		register_post_type( $this->post_type, array( 'rewrite' => true, 'has_archive' => true, 'public' => true ) );
+		WP_SEO_Settings()->set_properties();
 
 		$this->_update_option_for_tests();
-		WP_SEO_Settings()->reset_properties();
+		WP_SEO_Settings()->set_options();
+	}
+
+	function tearDown() {
+		parent::tearDown();
+		// Leave the place as we found it.
+		$this->reset_post_types();
+		$this->reset_taxonomies();
+		delete_option( WP_SEO_Settings::SLUG );
+		WP_SEO_Settings()->set_properties();
+		WP_SEO_Settings()->set_options();
 	}
 
 	/**
-	 * Update the option with title, description, and keyword values for each test.
+	 * Update the plugin option with titles, descriptions, and keywords for each test.
 	 *
-	 * This option should include all of the values used in these tests. Not
-	 * each test uses all values, but setting them all is a little cleaner, and
-	 * the option has to be set one way or another.
+	 * This option should include all of the expected values used in these
+	 * tests. Not each test uses all values, but setting them all is a little
+	 * cleaner, and the option has to be set one way or another.
 	 */
 	function _update_option_for_tests() {
 		$this->options['post_types'] = array( 'post' );
@@ -190,8 +201,8 @@ EOF;
 	/**
 	 * Proxy for testing an unsupported page.
 	 *
-	 * This tests both that even if somehow $key became true for a feed, there
-	 * would be no setting for it.
+	 * This tests both that nothing is output on a feed and that both if somehow
+	 * $key became true for a feed, there would be no setting for it.
 	 */
 	function test_feed() {
 		$this->go_to( get_feed_link() );
