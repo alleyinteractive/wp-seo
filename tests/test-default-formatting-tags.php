@@ -182,6 +182,21 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 		$this->_go_to_and_expect( get_permalink( $this->post_ID ), $this->post['post_excerpt'] );
 	}
 
+	function test_generated_excerpt() {
+		$this->_set_current_tag( 'excerpt' );
+
+		add_filter( 'excerpt_length', function() {
+			return '5';
+		} );
+
+		$post_ID = $this->factory->post->create( array(
+			'post_content' => 'Lorem ipsum dolor sit amet consectetur.',
+			'post_excerpt' => '',
+		) );
+
+		$this->_go_to_and_expect( get_permalink( $post_ID ), 'Lorem ipsum dolor sit amet' );
+	}
+
 	// WP_SEO_Format_Excerpt should be false if the post type doesn't support excerpts.
 	function test_excerpt_no_post_type_support() {
 		$this->_set_current_tag( 'excerpt' );
