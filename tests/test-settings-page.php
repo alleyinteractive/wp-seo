@@ -153,7 +153,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	 */
 	function test_example_search_page() {
 		$html = get_echo( array( WP_SEO_Settings(), 'example_search_page' ) );
-		$this->assertContains( '?s=', $html );
+		$this->assertContains( get_search_link( 'wordpress' ), $html );
 	}
 
 	/**
