@@ -19,6 +19,10 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 
 		$this->_update_option_for_tests();
 		WP_SEO_Settings()->set_options();
+
+		global $wp_rewrite;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules();
 	}
 
 	function tearDown() {

@@ -16,6 +16,9 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function setUp() {
 		parent::setUp();
 		$this->_create_objects();
+		global $wp_rewrite;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules();
 	}
 
 	function tearDown() {
