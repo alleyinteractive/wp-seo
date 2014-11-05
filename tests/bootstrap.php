@@ -1,35 +1,27 @@
 <?php
 
 /**
- * Mimic WP_UnitTestCase::reset_post_types() when testing older versions of WP.
+ * Mimic WP_UnitTestCase::reset_post_types() for supporting older versions of WP.
  *
  * @see https://core.trac.wordpress.org/changeset/29860.
  */
 function _wp_seo_reset_post_types() {
-	if ( ! method_exists( 'WP_UnitTestCase', 'reset_post_types' ) ) {
-		call_user_func( array( 'WP_UnitTestCase', 'reset_post_types' ) );
-	} else {
-		foreach ( get_post_types() as $pt ) {
-			_unregister_post_type( $pt );
-		}
-		create_initial_post_types();
+	foreach ( get_post_types() as $pt ) {
+		_unregister_post_type( $pt );
 	}
+	create_initial_post_types();
 }
 
 /**
- * Mimic WP_UnitTestCase::reset_taxonomies() when testing older versions of WP.
+ * Mimic WP_UnitTestCase::reset_taxonomies() for supporting older versions of WP.
  *
  * @see https://core.trac.wordpress.org/changeset/29860.
  */
 function _wp_seo_reset_taxonomies() {
-	if ( ! method_exists( 'WP_UnitTestCase', 'reset_taxonomies' ) ) {
-		call_user_func( array( 'WP_UnitTestCase', 'reset_taxonomies' ) );
-	} else {
-		foreach ( get_taxonomies() as $tax ) {
-			_unregister_taxonomy( $tax );
-		}
-		create_initial_taxonomies();
+	foreach ( get_taxonomies() as $tax ) {
+		_unregister_taxonomy( $tax );
 	}
+	create_initial_taxonomies();
 }
 
 $_tests_dir = getenv('WP_TESTS_DIR');
