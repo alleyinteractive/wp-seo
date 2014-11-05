@@ -28,8 +28,8 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	function tearDown() {
 		parent::tearDown();
 		// Leave the place as we found it.
-		$this->reset_post_types();
-		$this->reset_taxonomies();
+		_wp_seo_reset_post_types();
+		_wp_seo_reset_taxonomies();
 		delete_option( WP_SEO_Settings::SLUG );
 		WP_SEO_Settings()->set_properties();
 		WP_SEO_Settings()->set_options();

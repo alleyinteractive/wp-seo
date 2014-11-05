@@ -9,8 +9,8 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	function tearDown() {
 		parent::tearDown();
 		// Clean up after the one-off post types and taxonomies.
-		$this->reset_post_types();
-		$this->reset_taxonomies();
+		_wp_seo_reset_post_types();
+		_wp_seo_reset_taxonomies();
 	}
 
 	/**

@@ -24,8 +24,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function tearDown() {
 		parent::tearDown();
 		// Clean up after ourselves.
-		$this->reset_post_types();
-		$this->reset_taxonomies();
+		_wp_seo_reset_post_types();
+		_wp_seo_reset_taxonomies();
 	}
 
 	/**
