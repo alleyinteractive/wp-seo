@@ -216,6 +216,13 @@ EOF;
 	 * $key became true for a feed, there would be no setting for it.
 	 */
 	function test_feed() {
+		/**
+		 * Valid feed URLs without posts returned 404 before WordPress 4.0.
+		 *
+		 * @see https://core.trac.wordpress.org/ticket/18505
+		 */
+		$this->factory->post->create();
+
 		$this->go_to( get_feed_link() );
 		$this->assertEmpty( wp_title( '|', false ) );
 	}
