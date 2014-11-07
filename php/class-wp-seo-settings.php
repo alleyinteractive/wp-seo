@@ -348,7 +348,7 @@ class WP_SEO_Settings {
 	 */
 	public function example_permalink( $section ) {
 		if ( $post = get_posts( array( 'numberposts' => 1, 'post_type' => str_replace( array( 'single_', 'archive_' ), '', $section['id'] ), 'fields' => 'ids', 'suppress_filters' => false ) ) ) {
-			$this->example_url( $this->ex_text(), get_the_permalink( reset( $post ) ) );
+			$this->example_url( $this->ex_text(), get_permalink( reset( $post ) ) );
 		} else {
 			$this->example_url( __( 'No posts yet.', 'wp-seo' ) );
 		}
