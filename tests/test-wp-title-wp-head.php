@@ -149,6 +149,8 @@ EOF;
 		add_filter( 'wp_seo_title_tag_format', '__return_false' );
 		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_title' => 'Foo' ) ) ) );
 		$this->_assert_title( 'Foo | Test Blog' );
+		// WP_UnitTestCase::_restore_hooks() was introduced in 4.0.
+		remove_filter( 'wp_seo_title_tag_format', '__return_false' );
 	}
 
 	function test_home() {
