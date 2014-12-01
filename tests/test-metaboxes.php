@@ -18,6 +18,7 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		parent::tearDown();
 		// Clean up after ourselves.
 		delete_option( WP_SEO_Settings::SLUG );
+		wp_set_current_user( 1 );
 	}
 
 	function test_add_meta_boxes() {
