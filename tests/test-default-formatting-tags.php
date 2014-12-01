@@ -59,6 +59,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 			'tags_input'    => $this->tag['name'],
 		);
 		$this->post_ID = $this->factory->post->create( $this->post );
+		// Trigger an update to "post_modified".
+		$this->factory->post->update_object( $this->post_ID, array() );
 
 		$this->post_type = array( 'labels' => array( 'name' => 'Demo Post Types', 'singular_name' => 'Demo Post Type' ), 'rewrite' => true, 'has_archive' => true, 'public' => true, 'supports' => array( 'editor' ) );
 		register_post_type( 'demo_post_type', $this->post_type );
@@ -225,7 +227,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), 'September 4, 2007' );
+		// The modified date should be today, when we called wp_update_post().
+		$this->_go_to_and_expect( get_permalink( $this->post_ID ), date( 'F j, Y' ) );
 	}
 
 	function test_author() {
