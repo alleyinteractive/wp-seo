@@ -54,19 +54,22 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 	 */
 	function test_post_meta_fields() {
 		$post_ID = $this->factory->post->create();
-		add_post_meta( $post_ID, '_meta_title', 'test title' );
-		add_post_meta( $post_ID, '_meta_description', 'test description' );
-		add_post_meta( $post_ID, '_meta_keywords', 'test keywords' );
+		$title = rand_str();
+		$description = rand_str();
+		$keywords = rand_str();
+		add_post_meta( $post_ID, '_meta_title', $title );
+		add_post_meta( $post_ID, '_meta_description', $description );
+		add_post_meta( $post_ID, '_meta_keywords', $keywords );
 
 		$post = get_post( $post_ID );
 		$html = get_echo( array( WP_SEO(), 'post_meta_fields' ), array( $post ) );
 
 		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
-		$this->assertContains( 'name="seo_meta[title]" value="test title" size="96"', $html );
-		$this->assertContains( '<noscript>10 (save changes to update)</noscript>', $html );
-		$this->assertRegExp( '/<textarea.*?>test description<\/textarea>/', $html );
-		$this->assertContains( '<noscript>16 (save changes to update)</noscript>', $html );
-		$this->assertRegExp( '/<textarea.*?>test keywords<\/textarea>/', $html );
+		$this->assertContains( 'name="seo_meta[title]" value="' . $title . '" size="96"', $html );
+		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $title ) ), $html );
+		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
+		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
+		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
 	}
 
 	/**
@@ -81,11 +84,10 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		// No $_POST.
 		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
 
+		// Wrong post type.
 		$_POST = array(
 			'post_type' => 'page',
 		);
-
-		// Wrong post type.
 		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
 
 		$_POST = array(
@@ -121,17 +123,21 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertEmpty( get_post_meta( $post_ID, '_meta_description', true ) );
 		$this->assertEmpty( get_post_meta( $post_ID, '_meta_keywords', true ) );
 
+		$title = rand_str();
+		$description = rand_str();
+		$keywords = rand_str();
+
 		$_POST['seo_meta'] = array(
-			'title' => 'test title',
-			'description' => 'test <script>meta</script> description',
-			'keywords' => 'test keywords',
+			'title' => $title,
+			'description' => $description . '<script>meta</script>',
+			'keywords' => $keywords,
 		);
 
 		// Successful save.
 		WP_SEO()->save_post_fields( $post_ID );
-		$this->assertEquals( 'test title', get_post_meta( $post_ID, '_meta_title', true ) );
-		$this->assertEquals( 'test description', get_post_meta( $post_ID, '_meta_description', true ) );
-		$this->assertEquals( 'test keywords', get_post_meta( $post_ID, '_meta_keywords', true ) );
+		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
+		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
+		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
 	}
 
 	/**
@@ -164,23 +170,27 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$category_ID = $this->factory->term->create( array( 'taxonomy' => 'category' ) );
 		$category = get_term( $category_ID, 'category' );
 
+		$title = rand_str();
+		$description = rand_str();
+		$keywords = rand_str();
+
 		update_option(
 			WP_SEO()->get_term_option_name( $category ),
 			array(
-				'title' => 'test title',
-				'description' => 'test description',
-				'keywords' => 'test keywords',
+				'title' => $title,
+				'description' => $description,
+				'keywords' => $keywords,
 			)
 		);
 
 		$html = get_echo( array( WP_SEO(), 'edit_term_meta_fields' ), array( $category, 'category' ) );
 
 		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
-		$this->assertContains( 'name="seo_meta[title]" value="test title" size="96"', $html );
-		$this->assertContains( '<noscript>10 (save changes to update)</noscript>', $html );
-		$this->assertRegExp( '/<textarea.*?>test description<\/textarea>/', $html );
-		$this->assertContains( '<noscript>16 (save changes to update)</noscript>', $html );
-		$this->assertRegExp( '/<textarea.*?>test keywords<\/textarea>/', $html );
+		$this->assertContains( 'name="seo_meta[title]" value="' . $title . '" size="96"', $html );
+		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $title ) ), $html );
+		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
+		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
+		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
 	}
 
 	function test_save_term_fields() {
@@ -219,35 +229,42 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' );
 		$this->assertFalse( get_option( WP_SEO()->get_term_option_name( $category ) ) );
 
+		$title = rand_str();
+		$description = rand_str();
+		$keywords = rand_str();
+
 		$_POST['seo_meta'] = array(
-			'title' => 'test title',
-			'description' => 'test <script>meta</script> description',
-			'keywords' => 'test keywords',
+			'title' => $title,
+			'description' => $description . '<script>meta</script>',
+			'keywords' => $keywords,
 		);
 
 		// Successful add_option().
 		WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' );
 		$this->assertSame(
 			array(
-				'title' => 'test title',
-				'description' => 'test description',
-				'keywords' => 'test keywords',
+				'title' => $title,
+				'description' => $description,
+				'keywords' => $keywords,
 			),
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
 
+		$updated_title = rand_str();
+		$updated_keywords = rand_str();
+
 		$_POST['seo_meta'] = array(
-			'title' => 'test title',
-			'keywords' => 'test keywords',
+			'title' => $updated_title,
+			'keywords' => $updated_keywords,
 		);
 
 		// Successful update_option().
 		WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' );
 		$this->assertSame(
 			array(
-				'title' => 'test title',
+				'title' => $updated_title,
 				'description' => '',
-				'keywords' => 'test keywords',
+				'keywords' => $updated_keywords,
 			),
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
