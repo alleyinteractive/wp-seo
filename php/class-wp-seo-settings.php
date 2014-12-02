@@ -7,11 +7,18 @@
 class WP_SEO_Settings {
 
 	/**
+	 * Instance of this class.
+	 *
+	 * @var object
+	 */
+	private static $instance = null;
+
+	/**
 	 * The user capability required to access the options page.
 	 *
 	 * @var string.
 	 */
-	public $options_capability = 'manage_options';
+	public $options_capability = '';
 
 	/**
 	 * The default options to save.
@@ -56,8 +63,26 @@ class WP_SEO_Settings {
 
 	const SLUG = 'wp-seo';
 
-	protected static $instance;
+	/**
+	 * @codeCoverageIgnore
+	 */
+	private function __construct() {
+		/** Don't do anything, needs to be initialized via instance() method **/
+	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function __clone() { wp_die( "Please don't __clone WP_SEO_Settings" ); }
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function __wakeup() { wp_die( "Please don't __wakeup WP_SEO_Settings" ); }
+
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			self::$instance = new WP_SEO_Settings;
@@ -66,23 +91,19 @@ class WP_SEO_Settings {
 		return self::$instance;
 	}
 
-	protected function __construct() {
-		/** Don't do anything **/
-	}
-
 	/**
 	 * Add settings-related actions and filters.
+	 *
+	 * @codeCoverageIgnore
 	 */
 	protected function setup() {
-		if ( is_admin() ) {
-			add_action( 'init', array( $this, 'set_properties' ), 20 );
-			add_action( 'admin_menu', array( $this, 'add_options_page' ) );
-			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
-			add_action( 'admin_init', array( $this, 'register_settings' ) );
-		}
+		add_action( 'wp_loaded', array( $this, 'set_properties' ) );
 
-		// Call after set_properties(), which sets the default options.
-		add_action( 'init', array( $this, 'load_options' ), 21 );
+		if ( is_admin() ) {
+			add_action( 'admin_menu', array( $this, 'add_options_page' ) );
+			add_action( 'admin_init', array( $this, 'register_settings' ) );
+			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
+		}
 	}
 
 	/**
@@ -94,7 +115,7 @@ class WP_SEO_Settings {
 		 *
 		 * @param string The default capability.
 		 */
-		$this->options_capability = apply_filters( 'wp_seo_options_capability', $this->options_capability );
+		$this->options_capability = apply_filters( 'wp_seo_options_capability', 'manage_options' );
 
 		/**
 		 * Filter the post types that support per-entry SEO fields.
@@ -125,26 +146,92 @@ class WP_SEO_Settings {
 		 *
 		 * @param  array Associative array of setting names and values.
 		 */
-		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ) ) );
+		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ), 'taxonomies' => array_keys( $this->taxonomies ) ) );
 	}
 
 	/**
-	 * Load the options on demand.
+	 * Set $options with the current database value.
 	 */
-	public function load_options() {
-		if ( ! $this->options ) {
-			$this->options = get_option( $this::SLUG, $this->default_options );
-		}
+	public function set_options() {
+		$this->options = get_option( $this::SLUG, $this->default_options );
 	}
 
 	/**
 	 * Get an option value.
 	 *
-	 * @param  string $key 	The option key sought.
-	 * @return string|bool	The value, or false on failure.
+	 * @param  string $key  The option key sought.
+	 * @return mixed        The value, or null on failure.
 	 */
 	public function get_option( $key ) {
-		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : false;
+		if ( empty( $this->options ) ) {
+			$this->set_options();
+		}
+		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : null;
+	}
+
+	/**
+	 * Get the $taxonomies property.
+	 *
+	 * @return array @see WP_SEO_Settings::taxonomies.
+	 */
+	public function get_taxonomies() {
+		return $this->taxonomies;
+	}
+
+	/**
+	 * Get the $single_post_types property.
+	 *
+	 * @return array @see WP_SEO_Settings::single_post_types.
+	 */
+	public function get_single_post_types() {
+		return $this->single_post_types;
+	}
+
+	/**
+	 * Get the $archived_post_types property.
+	 *
+	 * @return array @see WP_SEO_Settings::archived_post_types.
+	 */
+	public function get_archived_post_types() {
+		return $this->archived_post_types;
+	}
+
+	/**
+	 * Get the taxonomies with per-term fields enabled.
+	 *
+	 * @return array With slugs of any enabled taxonomies.
+	 */
+	public function get_enabled_taxonomies() {
+		return $this->get_option( 'taxonomies' );
+	}
+
+	/**
+	 * Get the post types with per-entry fields enabled.
+	 *
+	 * @return array With names of any enabled post types.
+	 */
+	public function get_enabled_post_types() {
+		return $this->get_option( 'post_types' );
+	}
+
+	/**
+	 * Helper to check whether a post type is set in "Add fields to individual."
+	 *
+	 * @param  string  $post_type Post type name.
+	 * @return boolean
+	 */
+	public function has_post_fields( $post_type ) {
+		return in_array( $post_type, $this->get_enabled_post_types() );
+	}
+
+	/**
+	 * Helper to check whether a taxonomy is set in "Add fields to individual."
+	 *
+	 * @param  string $taxonomy Taxonomy name
+	 * @return boolean
+	 */
+	public function has_term_fields( $taxonomy ) {
+		return in_array( $taxonomy, $this->get_enabled_taxonomies() );
 	}
 
 	/**
@@ -155,7 +242,7 @@ class WP_SEO_Settings {
 	}
 
 	/**
-	 * Add tabs to the help menu on the plugin settings page.
+	 * Add tabs to the help menu on the plugin options page.
 	 */
 	public function add_help_tab() {
 		get_current_screen()->add_help_tab( array(
@@ -176,8 +263,8 @@ class WP_SEO_Settings {
 		add_settings_field( 'home_description', __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'home', array( 'type' => 'textarea', 'field' => 'home_description' ) );
 		add_settings_field( 'home_keywords', __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'home', array( 'field' => 'home_keywords' ) );
 
-		add_settings_section( 'post_types', __( 'Post types', 'wp-seo' ), '__return_false', $this::SLUG );
-		add_settings_field( 'post_types', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'post_types', array( 'field' => 'post_types', 'type' => 'checkboxes', 'items' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
+		add_settings_section( 'post_types', __( 'Post Types', 'wp-seo' ), '__return_false', $this::SLUG );
+		add_settings_field( 'post_types', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'post_types', array( 'field' => 'post_types', 'type' => 'checkboxes', 'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
 
 		foreach( $this->single_post_types as $post_type ) {
 			add_settings_section( 'single_' . $post_type->name, sprintf( __( 'Single %s Defaults', 'wp-seo' ), $post_type->labels->singular_name ), array( $this, 'example_permalink' ), $this::SLUG );
@@ -195,7 +282,7 @@ class WP_SEO_Settings {
 
 		// Post Formats have no UI, so they cannot have per-term fields.
 		add_settings_section( 'taxonomies', __( 'Taxonomies', 'wp-seo' ), '__return_false', $this::SLUG );
-		add_settings_field( 'taxonomies', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'taxonomies', array( 'field' => 'taxonomies', 'type' => 'checkboxes', 'items' => call_user_func_array( 'wp_list_pluck', array( array_diff_key( $this->taxonomies, array( 'post_format' => true ) ), 'label' ) ) ) );
+		add_settings_field( 'taxonomies', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'taxonomies', array( 'field' => 'taxonomies', 'type' => 'checkboxes', 'boxes' => call_user_func_array( 'wp_list_pluck', array( array_diff_key( $this->taxonomies, array( 'post_format' => true ) ), 'label' ) ) ) );
 
 		foreach( $this->taxonomies as $taxonomy ) {
 			add_settings_section( 'archive_' . $taxonomy->name, sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
@@ -205,14 +292,14 @@ class WP_SEO_Settings {
 		}
 
 		add_settings_section( 'archive_author', __( 'Author Archives', 'wp-seo' ), array( $this, 'example_author_archive' ), $this::SLUG );
-		add_settings_field( "archive_author_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'field' => "archive_author_title" ) );
-		add_settings_field( "archive_author_description", __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'type' => 'textarea', 'field' => "archive_author_description" ) );
-		add_settings_field( "archive_author_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'field' => "archive_author_keywords" ) );
+		add_settings_field( 'archive_author_title', __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'field' => 'archive_author_title' ) );
+		add_settings_field( 'archive_author_description', __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'type' => 'textarea', 'field' => 'archive_author_description' ) );
+		add_settings_field( 'archive_author_keywords', __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_author', array( 'field' => 'archive_author_keywords' ) );
 
 		add_settings_section( 'archive_date', __( 'Date Archives', 'wp-seo' ), array( $this, 'example_date_archive' ), $this::SLUG );
-		add_settings_field( "archive_date_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'field' => "archive_date_title" ) );
-		add_settings_field( "archive_date_description", __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'type' => 'textarea', 'field' => "archive_date_description" ) );
-		add_settings_field( "archive_date_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'field' => "archive_date_keywords" ) );
+		add_settings_field( 'archive_date_title', __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'field' => 'archive_date_title' ) );
+		add_settings_field( 'archive_date_description', __( 'Meta Description Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'type' => 'textarea', 'field' => 'archive_date_description' ) );
+		add_settings_field( 'archive_date_keywords', __( 'Meta Keywords Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_date', array( 'field' => 'archive_date_keywords' ) );
 
 		add_settings_section( 'search', __( 'Search Results', 'wp-seo' ), array( $this, 'example_search_page' ), $this::SLUG );
 		add_settings_field( 'search_title', __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'search', array( 'field' => 'search_title' ) );
@@ -232,7 +319,7 @@ class WP_SEO_Settings {
 	 * @return string.
 	 */
 	public function ex_text() {
-		return __( 'ex. ', 'wp-seo' );
+		return __( 'ex.', 'wp-seo' );
 	}
 
 	/**
@@ -247,7 +334,7 @@ class WP_SEO_Settings {
 	public function example_url( $text, $url = false ) {
 		echo '<p class="description">' . esc_html( $text );
 		if ( false !== $url ) {
-			echo '<code><a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $url ) . '</a></code>';
+			echo ' <code><a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $url ) . '</a></code>';
 		}
 		echo '</p>';
 	}
@@ -261,7 +348,7 @@ class WP_SEO_Settings {
 	 */
 	public function example_permalink( $section ) {
 		if ( $post = get_posts( array( 'numberposts' => 1, 'post_type' => str_replace( array( 'single_', 'archive_' ), '', $section['id'] ), 'fields' => 'ids', 'suppress_filters' => false ) ) ) {
-			$this->example_url( $this->ex_text(), get_the_permalink( reset( $post ) ) );
+			$this->example_url( $this->ex_text(), get_permalink( reset( $post ) ) );
 		} else {
 			$this->example_url( __( 'No posts yet.', 'wp-seo' ) );
 		}
@@ -328,16 +415,17 @@ class WP_SEO_Settings {
 	}
 
 	/**
-	 * Set up a settings field.
+	 * Helper for gathering arguments to send to a field-rendering method.
 	 *
 	 * @param  array $args {
 	 *     An array of arguments for the type and details of the field.
 	 *
-	 *     @type  string $field The field name, use as the key in the option.
-	 *     @type  string $type	The field type. Default text. Accepts textarea
-	 *            				or any field type that can fall back to text.
-	 *     @type  mixed 		Optional. Other args for the render methods.
-	 *     						@see the methods this calls based on $type.
+	 *     @type  string $field The field name, used as the key in the option.
+	 *     @type  string $type  The field type. Use "textarea", "checkboxes", or
+	 *                          "repeatable" to call the relevant method; all
+	 *                          others become the "type" in render_text_field().
+	 *     @type  mixed         Optional. Other args for the render methods.
+	 *                          Refer to method called based on $type.
 	 * }
 	 */
 	public function field( $args ) {
@@ -376,14 +464,15 @@ class WP_SEO_Settings {
 	 * @param  array $args {
 	 *     An array of arguments for the text field.
 	 *
+	 *     @type string $field  The field name.
 	 *     @type string $type   The field type. Default 'text'.
-	 *     @type string $field  @see WP_SEO_Settings::field().
 	 *     @type string $size   The field size. Default 80.
 	 * }
 	 * @param  string $value	The current field value.
 	 */
 	public function render_text_field( $args, $value ) {
 		$args = wp_parse_args( $args, array(
+			'type' => 'text',
 			'size' => 80,
 		) );
 
@@ -403,8 +492,9 @@ class WP_SEO_Settings {
 	 * @param  array $args {
 	 *     An array of arguments for the textarea.
 	 *
-	 *     @type  int $rows 	Rows in the textarea. Default 2.
-	 *     @type  int $cols		Columns in the textarea. Default 80.
+	 *     @type  string $field The field name.
+	 *     @type  int    $rows  Rows in the textarea. Default 2.
+	 *     @type  int    $cols  Columns in the textarea. Default 80.
 	 * }
 	 * @param  string $value	The current field value.
 	 */
@@ -428,22 +518,26 @@ class WP_SEO_Settings {
 	 * Render settings checkboxes.
 	 *
 	 * @param  array $args {
-	 * 		An array of arguments for the checkboxes.
+	 *     An array of arguments for the checkboxes.
 	 *
-	 * 		@type  array $items		An associative array of the value and label
-	 * 								of each checkbox.
+	 *     @type string $field The field name.
+	 *     @type array  $boxes An associative array of the value and label
+	 *                         of each checkbox.
 	 * }
-	 * @param  array $value The current field values.
+	 * @param  array $values Indexed array of current field values.
 	 */
-	public function render_checkboxes( $args, $value ) {
-		foreach( $args['items'] as $item => $label ) {
-			printf(
-				'<label for="%1$s_%2$s_%3$s"><input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>%5$s</label><br>',
+	public function render_checkboxes( $args, $values ) {
+		foreach( $args['boxes'] as $box_value => $box_label ) {
+			printf( '
+					<label for="%1$s_%2$s_%3$s">
+						<input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>
+						%5$s
+					</label><br>',
 				esc_attr( $this::SLUG ),
 				esc_attr( $args['field'] ),
-				esc_attr( $item ),
-				is_array( $value ) ? checked( in_array( $item, $value ), true, false ) : '',
-				esc_html( $label )
+				esc_attr( $box_value ),
+				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
+				esc_html( $box_label )
 			);
 		}
 	}
@@ -454,8 +548,9 @@ class WP_SEO_Settings {
 	 * @param  array $args {
 	 *     An array of arguments for setting up the repeatable fields.
 	 *
-	 *     @type string $field  @see WP_SEO_Settings::field().
-	 *     @type array  $repeat Associative array of repeating field names and labels.
+	 *     @type string $field  The field name.
+	 *     @type array  $repeat Associative array of field names and labels to
+	 *                          include in each repeated instance of the field.
 	 *     @type string $size   Optional. The field size. Default 70.
 	 * }
 	 * @param  array $value The current field values
@@ -464,7 +559,12 @@ class WP_SEO_Settings {
 		$args = wp_parse_args( $args, array(
 			'size' => 70,
 		) );
-		$input_string = '<label for="%1$s_%2$s_%3$s_%4$s">%5$s</label><input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />';
+		$input_string = '
+			<label for="%1$s_%2$s_%3$s_%4$s">
+				%5$s
+			</label>
+			<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />';
+		$data_start = ( 0 === count( $values ) ) ? 1 : count( $values );
 		?>
 			<div class="wp-seo-repeatable">
 				<div class="nodes">
@@ -509,7 +609,7 @@ class WP_SEO_Settings {
 					<?php endif; ?>
 				</div><!-- .nodes -->
 
-				<script type="text/template" class="wp-seo-template" data-start="<?php echo count( (array) $values ) + 1; ?>">
+				<script type="text/template" class="wp-seo-template" data-start="<?php echo absint( $data_start ); ?>">
 					<div class="wp-seo-repeatable-group">
 						<?php foreach( $args['repeat'] as $name => $label ) : ?>
 							<div class="wp-seo-repeatable-field">
@@ -538,29 +638,29 @@ class WP_SEO_Settings {
 	 */
 	public function view_settings_page() {
 		?>
-		<div class="wrap" id="wp_seo_settings">
-			<h2><?php esc_html_e( 'WP SEO Settings', 'wp-seo' ); ?></h2>
-			<form action="options.php" method="POST">
-				<?php settings_fields( $this::SLUG ); ?>
-				<?php
-					/**
-					 * Filter the type of UI to use with settings sections.
-					 *
-					 * @param  bool Whether to enhance the page with accordions.
-					 */
-					if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
-						global $wp_settings_sections;
-						foreach ( (array) $wp_settings_sections[ $this::SLUG ] as $section ) {
-							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', $section );
+			<div class="wrap" id="wp_seo_settings">
+				<h2><?php esc_html_e( 'WP SEO Settings', 'wp-seo' ); ?></h2>
+				<form action="options.php" method="POST">
+					<?php settings_fields( $this::SLUG ); ?>
+					<?php
+						/**
+						 * Filter the type of UI to use with settings sections.
+						 *
+						 * @param  bool Whether to enhance the page with accordions.
+						 */
+						if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
+							global $wp_settings_sections;
+							foreach ( (array) $wp_settings_sections[ $this::SLUG ] as $section ) {
+								add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', $section );
+							}
+							do_accordion_sections( 'wp-seo', 'advanced', null );
+						} else {
+							do_settings_sections( $this::SLUG );
 						}
-						do_accordion_sections( 'wp-seo', 'advanced', null );
-					} else {
-						do_settings_sections( $this::SLUG );
-					}
-				?>
-				<?php submit_button(); ?>
-			</form>
-		</div>
+					?>
+					<?php submit_button(); ?>
+				</form>
+			</div>
 		<?php
 	}
 
@@ -597,8 +697,8 @@ class WP_SEO_Settings {
 		$out = $this->default_options;
 
 		// Validate post types and taxonomies on which to show SEO fields.
-		$out['post_types'] = isset( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
-		$out['taxonomies'] = isset( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
+		$out['post_types'] = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
+		$out['taxonomies'] = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
 
 		/**
 		 * Sanitize these as text fields and in the following order:
@@ -630,7 +730,7 @@ class WP_SEO_Settings {
 		$sanitize_as_text_field[] = '404_title';
 
 		foreach( $sanitize_as_text_field as $field ) {
-			$out[ $field ] = isset( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
+			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
 		}
 
 		/**
@@ -684,42 +784,13 @@ class WP_SEO_Settings {
 		endif;
 	}
 
-	/**
-	 * Helper to check whether a post type is set in "Add fields to individual."
-	 *
-	 * @param  string  $post_type Post type name.
-	 * @return boolean
-	 */
-	public function has_post_fields( $post_type ) {
-		if ( is_array( $this->get_option( 'post_types' ) ) ) {
-			return in_array( $post_type, $this->get_option( 'post_types') );
-		}
-
-		return false;
-	}
-
-	/**
-	 * Get the $taxonomies property.
-	 *
-	 * @return array @see WP_SEO_Settings::set_properties(), or an empty array
-	 *     as a fallback.
-	 */
-	public function get_taxonomies() {
-		return ( $taxonomies = $this->get_option( 'taxonomies' ) ) ? $taxonomies : array();
-	}
-
-	/**
-	 * Helper to check whether a taxonomy is set in "Add fields to individual."
-	 *
-	 * @param  string $taxonomy Taxonomy name
-	 * @return boolean
-	 */
-	public function has_term_fields( $taxonomy ) {
-		return in_array( $taxonomy, $this->get_taxonomies() );
-	}
-
 }
 
+/**
+ * Helper function to use the class instance.
+ *
+ * @return object
+ */
 function WP_SEO_Settings() {
 	return WP_SEO_Settings::instance();
 }

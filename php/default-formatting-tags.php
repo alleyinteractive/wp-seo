@@ -130,7 +130,7 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 	 * apply the 'the_author' filter for Co-Authors Plus support.
 	 *
 	 * On author archives, get author data directly from the queried object, not
-	 * get_the_author(), to avoid Co-Authors Plus from filtering it.
+	 * get_the_author(), to prevent Co-Authors Plus from filtering it.
 	 */
 	public function get_value() {
 		if ( is_singular() && post_type_supports( get_post_type(), 'author' ) ) {
@@ -158,7 +158,7 @@ class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
 
 	public function get_value() {
 		if ( is_singular() && is_object_in_taxonomy( get_post_type(), 'category' ) && $categories = get_the_category() ) {
-			return implode( ', ', wp_list_pluck( $categories, 'name' ) );
+			return implode( __( ', ', 'wp-seo' ), wp_list_pluck( $categories, 'name' ) );
 		}
 
 		return false;
@@ -292,7 +292,7 @@ class WP_SEO_Format_Search_Term extends WP_SEO_Formatting_Tag {
 	}
 
 	public function get_value() {
-		return get_search_query();
+		return ( $term = get_search_query() ) ? $term : false;
 	}
 
 }

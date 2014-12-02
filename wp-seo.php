@@ -25,9 +25,16 @@
 define( 'WP_SEO_PATH', dirname( __FILE__ ) );
 define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
 
+// Core filters for the page title and meta tags, and post and term metaboxes.
 require_once WP_SEO_PATH . '/php/class-wp-seo.php';
+
+// Settings page and option management.
 require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
+
+// Extendable formatting-tag class.
 require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
+
+// Included formatting tags.
 require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
 
 function wp_seo_admin_scripts() {

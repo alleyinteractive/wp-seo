@@ -7,7 +7,12 @@ if ( ! class_exists( 'WP_SEO' ) ) :
  */
 class WP_SEO {
 
-	private static $instance;
+	/**
+	 * Instance of this class.
+	 *
+	 * @var object
+	 */
+	private static $instance = null;
 
 	/**
 	 * Associative array of WP_SEO_Formatting_Tag instances.
@@ -21,7 +26,7 @@ class WP_SEO {
 	 *
 	 * @var string.
 	 */
-	public $formatting_tag_pattern = '/#[a-zA-Z\_]+#/';
+	public $formatting_tag_pattern = '';
 
 	/**
 	 * The heading text above the SEO fields on posts and terms.
@@ -30,14 +35,26 @@ class WP_SEO {
 	 */
 	private $box_heading = '';
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	private function __construct() {
 		/* Don't do anything, needs to be initialized via instance() method */
 	}
 
-	public function __clone() { wp_die( "Please don't __clone WP_SEO" ); }
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function __clone() { wp_die( __( "Please don't __clone WP_SEO", "wp-seo" ) ); }
 
-	public function __wakeup() { wp_die( "Please don't __wakeup WP_SEO" ); }
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function __wakeup() { wp_die( __( "Please don't __wakeup WP_SEO", "wp-seo" ) ); }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			self::$instance = new WP_SEO;
@@ -48,9 +65,11 @@ class WP_SEO {
 
 	/**
 	 * Add actions and filters.
+	 *
+	 * @codeCoverageIgnore
 	 */
 	protected function setup() {
-		add_action( 'init', array( $this, 'set_properties' ) );
+		add_action( 'wp_loaded', array( $this, 'set_properties' ) );
 
 		if ( is_admin() ) {
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
@@ -70,18 +89,20 @@ class WP_SEO {
 	 * The filter for adding custom formatting tags is applied here.
 	 */
 	public function set_properties() {
+		$tags = array();
 		/**
 		 * Filter the available formatting tags.
 		 *
-		 * @see  wp_seo_default_formatting_tags() for an example implementation.
+		 * @see wp_seo_default_formatting_tags() for an example implementation.
 		 *
-		 * @param array WP_SEO::formatting_tags Associative array of WP_SEO_Formatting_Tag instances.
+		 * @param array $tags Associative array of WP_SEO_Formatting_Tag instances.
 		 */
-		foreach ( apply_filters( 'wp_seo_formatting_tags', $this->formatting_tags ) as $id => $tag ) {
+		foreach ( apply_filters( 'wp_seo_formatting_tags', $tags ) as $id => $tag ) {
 			if ( is_a( $tag, 'WP_SEO_Formatting_Tag' ) ) {
-				$this->formatting_tags[ $id ] = $tag;
+				$tags[ $id ] = $tag;
 			}
 		}
+		$this->formatting_tags = $tags;
 
 		/**
 		 * Filter the regular expression used to find formatting tags.
@@ -90,7 +111,7 @@ class WP_SEO {
 		 *
 		 * @param string WP_SEO::formatting_tag_pattern The regex.
 		 */
-		$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', $this->formatting_tag_pattern );
+		$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
 
 		/**
 		 * Filter the heading above SEO fields on post- and term-edit screens.
@@ -146,36 +167,36 @@ class WP_SEO {
 	public function post_meta_fields( $post ) {
 		wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
 		?>
-		<table class="wp-seo-post-meta-fields">
-			<tbody>
-				<tr>
-					<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
-					<td>
-						<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title = get_post_meta( $post->ID, '_meta_title', true ) ); ?>" size="96" />
-						<div>
-							<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
-							<span class="title-character-count"></span>
-							<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
-					<td>
-						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description = get_post_meta( $post->ID, '_meta_description', true ) ); ?></textarea>
-						<div>
-							<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
-							<span class="description-character-count"></span>
-							<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
-						</div>
-					<td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
-					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( get_post_meta( $post->ID, '_meta_keywords', true ) ) ?></textarea></td>
-				</tr>
-			</tbody>
-		</table>
+			<table class="wp-seo-post-meta-fields">
+				<tbody>
+					<tr>
+						<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
+						<td>
+							<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title = get_post_meta( $post->ID, '_meta_title', true ) ); ?>" size="96" />
+							<div>
+								<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
+								<span class="title-character-count"></span>
+								<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
+						<td>
+							<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description = get_post_meta( $post->ID, '_meta_description', true ) ); ?></textarea>
+							<div>
+								<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
+								<span class="description-character-count"></span>
+								<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
+							</div>
+						<td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
+						<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( get_post_meta( $post->ID, '_meta_keywords', true ) ) ?></textarea></td>
+					</tr>
+				</tbody>
+			</table>
 		<?php
 	}
 
@@ -202,11 +223,20 @@ class WP_SEO {
 			return;
 		}
 
-		if ( ! isset( $_POST['wp-seo-nonce'] ) || ! wp_verify_nonce( $_POST['wp-seo-nonce'], plugin_basename( __FILE__ ) ) ) {
+		if ( ! isset( $_POST['wp-seo-nonce'] ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wp-seo-nonce'], plugin_basename( __FILE__ ) ) ) {
+			return;
+		}
+
+		if ( ! isset( $_POST['post_ID'] ) ) {
 			return;
 		}
 
 		$post_id = absint( $_POST['post_ID'] );
+
 		if ( ! isset( $_POST['seo_meta'] ) ) {
 			$_POST['seo_meta'] = array();
 		}
@@ -221,7 +251,7 @@ class WP_SEO {
 	 * Add the meta box to taxonomies with per-term fields enabled.
 	 */
 	public function add_term_boxes() {
-		foreach ( WP_SEO_Settings()->get_taxonomies() as $slug ) {
+		foreach ( WP_SEO_Settings()->get_enabled_taxonomies() as $slug ) {
 			add_action( $slug . '_add_form_fields', array( $this, 'add_term_meta_fields' ), 10, 2 );
 			add_action( $slug . '_edit_form', array( $this, 'edit_term_meta_fields' ), 10, 2 );
 		}
@@ -235,7 +265,7 @@ class WP_SEO {
 	 * @param  object $term The term object
 	 * @return string The option name
 	 */
-	private function get_term_fields_option_name( $term ) {
+	public function get_term_option_name( $term ) {
 		return "wp-seo-term-{$term->term_taxonomy_id}";
 	}
 
@@ -247,31 +277,31 @@ class WP_SEO {
 	public function add_term_meta_fields( $taxonomy ) {
 		wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
 		?>
-		<h3><?php echo esc_html( $this->box_heading ); ?></h3>
-		<div class="wp-seo-term-meta-fields">
-			<div class="form-field">
-				<label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label>
-				<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="" size="96" />
-				<p>
-					<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
-					<span class="title-character-count"></span>
-					<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
-				</p>
+			<h3><?php echo esc_html( $this->box_heading ); ?></h3>
+			<div class="wp-seo-term-meta-fields">
+				<div class="form-field">
+					<label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label>
+					<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="" size="96" />
+					<p>
+						<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
+						<span class="title-character-count"></span>
+						<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
+					</p>
+				</div>
+				<div class="form-field">
+					<label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label>
+					<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"></textarea>
+					<p>
+						<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
+						<span class="description-character-count"></span>
+						<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
+					</p>
+				</div>
+				<div class="form-field">
+					<label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label>
+					<textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"></textarea>
+				</div>
 			</div>
-			<div class="form-field">
-				<label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label>
-				<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"></textarea>
-				<p>
-					<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
-					<span class="description-character-count"></span>
-					<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
-				</p>
-			</div>
-			<div class="form-field">
-				<label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label>
-				<textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"></textarea>
-			</div>
-		</div>
 		<?php
 	}
 
@@ -282,47 +312,47 @@ class WP_SEO {
 	 * @param  string $taxonomy The taxonomy slug
 	 */
 	public function edit_term_meta_fields( $tag, $taxonomy ) {
-		$values = get_option( $this->get_term_fields_option_name( $tag ), array( 'title' => '', 'description' => '', 'keywords' => '' ) );
+		$values = get_option( $this->get_term_option_name( $tag ), array( 'title' => '', 'description' => '', 'keywords' => '' ) );
 		wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
 		?>
-		<h2><?php echo esc_html( $this->box_heading ); ?></h2>
-		<table class="form-table wp-seo-term-meta-fields">
-			<tbody>
-				<tr class="form-field">
-					<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
-					<td>
-						<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title = $values['title'] ); ?>" size="96" />
-						<p class="description">
-							<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
-							<span class="title-character-count"></span>
-							<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
-						</p>
-					</td>
-				</tr>
-				<tr class="form-field">
-					<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
-					<td>
-						<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description = $values['description'] ); ?></textarea>
-						<p class="description">
-							<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
-							<span class="description-character-count"></span>
-							<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
-						</p>
-					<td>
-				</tr>
-				<tr class="form-field">
-					<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
-					<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( $values['keywords'] ); ?></textarea></td>
-				</tr>
-			</tbody>
-		</table>
+			<h2><?php echo esc_html( $this->box_heading ); ?></h2>
+			<table class="form-table wp-seo-term-meta-fields">
+				<tbody>
+					<tr class="form-field">
+						<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
+						<td>
+							<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title = $values['title'] ); ?>" size="96" />
+							<p class="description">
+								<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
+								<span class="title-character-count"></span>
+								<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
+							</p>
+						</td>
+					</tr>
+					<tr class="form-field">
+						<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
+						<td>
+							<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description = $values['description'] ); ?></textarea>
+							<p class="description">
+								<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
+								<span class="description-character-count"></span>
+								<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
+							</p>
+						<td>
+					</tr>
+					<tr class="form-field">
+						<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
+						<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( $values['keywords'] ); ?></textarea></td>
+					</tr>
+				</tbody>
+			</table>
 		<?php
 	}
 
 	/**
 	 * Save the SEO term values as an option.
 	 *
-	 * @uses  wp_unslash(), which the Settings API and update_post_meta()
+	 * @see wp_unslash(), which the Settings API and update_post_meta()
 	 *     otherwise handle.
 	 *
 	 * @param  int $term_id Term ID.
@@ -347,7 +377,11 @@ class WP_SEO {
 			return;
 		}
 
-		if ( ! isset( $_POST['wp-seo-nonce'] ) || ! wp_verify_nonce( $_POST['wp-seo-nonce'], plugin_basename( __FILE__ ) ) ) {
+		if ( ! isset( $_POST['wp-seo-nonce'] ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_POST['wp-seo-nonce'], plugin_basename( __FILE__ ) ) ) {
 			return;
 		}
 
@@ -359,7 +393,7 @@ class WP_SEO {
 			$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 		}
 
-		$name = $this->get_term_fields_option_name( get_term( $term_id, $taxonomy ) );
+		$name = $this->get_term_option_name( get_term( $term_id, $taxonomy ) );
 		if ( false === get_option( $name ) ) {
 			// Don't create an option unless at least one field exists.
 			$filtered_data = array_filter( $data );
@@ -374,10 +408,14 @@ class WP_SEO {
 	/**
 	 * Replace formatting tags in a string with their value for the current page.
 	 *
-	 * @param  string $string The string with formatting tags.
-	 * @return string         The formatted string.
+	 * @param  string $string  The string with formatting tags.
+	 * @return string|WP_Error The formatted string, or WP_Error on error.
 	 */
 	public function format( $string ) {
+		if ( ! is_string( $string ) ) {
+			return new WP_Error( 'format_error', __( "Please don't try to format() a non-string.", 'wp-seo' ) );
+		}
+
 		$raw_string = $string;
 
 		preg_match_all( $this->formatting_tag_pattern, $string, $matches );
@@ -388,16 +426,15 @@ class WP_SEO {
 		$replacements = array();
 		$unique_matches = array_unique( $matches[0] );
 
-		// Loop through all tags here; wp_list_pluck() or similar would anyway.
 		foreach( $this->formatting_tags as $id => $tag ) {
 			if ( ! empty( $tag->tag ) && in_array( $tag->tag, $unique_matches ) ) {
 				/**
 				 * Filter the value of a formatting tag for the current page.
 				 *
-				 * The dynamic portion of the hook name, $id, refers to the
-				 * array key used to register the formatting tag in
-				 * $this->setup(). For example, the hook for the default
-				 * "#site_name#" formatting tag is 'wp_seo_format_site_name'.
+				 * The dynamic portion of the hook name, $id, refers to the key
+				 * used to register the tag in WP_SEO::set_properties(). For
+				 * example, the hook for the default "#site_name#" formatting
+				 * tag is 'wp_seo_format_site_name'.
 				 *
 				 * @see wp_seo_default_formatting_tags() for the defaults' keys.
 				 *
@@ -442,7 +479,7 @@ class WP_SEO {
 		} elseif ( is_author() ) {
 			$key = 'archive_author_title';
 		} elseif ( is_category() || is_tag() || is_tax() ) {
-			if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_fields_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
+			if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
 				return $option['title'];
 			} else {
 				$key = "archive_{$taxonomy}_title";
@@ -494,10 +531,9 @@ class WP_SEO {
 	 * Determine the <meta> values for the current page.
 	 *
 	 * Unlike WP_SEO::wp_title(), custom per-entry and per-term values are not
-	 * returned immediately but rendered at the end of the method. They should
-	 * not be filtered, regardless.
+	 * returned immediately but rendered at the end of the method.
 	 *
-	 * @uses WP_SEO::meta_field() To render the results.
+	 * @see WP_SEO::meta_field() for detail on how the values are rendered.
 	 */
 	public function wp_head() {
 		if ( is_singular() ) {
@@ -511,7 +547,7 @@ class WP_SEO {
 		} elseif ( is_author() ) {
 			$key = 'archive_author';
 		} elseif ( is_category() || is_tag() || is_tax() ) {
-			if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_fields_option_name( get_queried_object() ) ) ) {
+			if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
 				$meta_description = $option['description'];
 				$meta_keywords = $option['keywords'];
 			}
