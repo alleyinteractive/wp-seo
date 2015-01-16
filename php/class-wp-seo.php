@@ -504,11 +504,9 @@ class WP_SEO {
 			 * @param  string $key 	The key of the setting retrieved.
 			 */
 			$title_string = apply_filters( 'wp_seo_title_tag_format', WP_SEO_Settings()->get_option( $key ), $key );
-
-			if ( $title_string ) {
-				return $this->format( $title_string );
-			} else {
-				return $title;
+			$title_tag = $this->format( $title_string );
+			if ( $title_tag && ! is_wp_error( $title_tag ) ) {
+				$title = $title_tag;
 			}
 		}
 
@@ -572,7 +570,7 @@ class WP_SEO {
 				$meta_description = $this->format( $description_string );
 			}
 
-			if ( $meta_description ) {
+			if ( $meta_description && ! is_wp_error( $meta_description ) ) {
 				$this->meta_field( 'description', $meta_description );
 			}
 
@@ -587,7 +585,7 @@ class WP_SEO {
 				$meta_keywords = $this->format( $keywords_string );
 			}
 
-			if ( $meta_keywords ) {
+			if ( $meta_keywords && ! is_wp_error( $meta_keywords ) ) {
 				$this->meta_field( 'keywords', $meta_keywords );
 			}
 		}

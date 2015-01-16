@@ -229,4 +229,20 @@ EOF;
 		$this->assertEmpty( wp_title( '|', false ) );
 	}
 
+	/**
+	 * If no option exists, test that the title is the default and that no meta are rendered.
+	 */
+	function test_no_option() {
+		delete_option( WP_SEO_Settings::SLUG );
+		WP_SEO_Settings()->set_options();
+
+		$this->go_to( '/' );
+
+		// Uses a random $sep to be sure it couldn't have come from us.
+		$sep = rand_str();
+		$this->assertContains( $sep, wp_title( $sep, false ) );
+
+		$this->assertEmpty( get_echo( array( WP_SEO(), 'wp_head' ) ) );
+	}
+
 }
