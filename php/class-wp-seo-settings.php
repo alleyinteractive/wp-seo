@@ -795,4 +795,4 @@ class WP_SEO_Settings {
 function WP_SEO_Settings() {
 	return WP_SEO_Settings::instance();
 }
-add_action( 'after_setup_theme', 'WP_SEO_Settings' );
+add_action( 'after_setup_theme', 'WP_SEO_Settings', 9 );
