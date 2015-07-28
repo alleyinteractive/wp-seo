@@ -202,7 +202,7 @@ class WP_SEO_Settings {
 	 * @return array With slugs of any enabled taxonomies.
 	 */
 	public function get_enabled_taxonomies() {
-		return $this->get_option( 'taxonomies', array() );
+		return $this->get_option( 'taxonomies' );
 	}
 
 	/**
@@ -211,7 +211,7 @@ class WP_SEO_Settings {
 	 * @return array With names of any enabled post types.
 	 */
 	public function get_enabled_post_types() {
-		return $this->get_option( 'post_types', array() );
+		return $this->get_option( 'post_types' );
 	}
 
 	/**
