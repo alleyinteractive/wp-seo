@@ -221,7 +221,11 @@ class WP_SEO_Settings {
 	 * @return boolean
 	 */
 	public function has_post_fields( $post_type ) {
-		return in_array( $post_type, $this->get_enabled_post_types() );
+		$post_types = $this->get_enabled_post_types();
+		if ( empty( $post_types ) ) {
+			$post_types = array();
+		}
+		return in_array( $post_type, $post_types );
 	}
 
 	/**
