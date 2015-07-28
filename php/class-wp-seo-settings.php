@@ -159,14 +159,15 @@ class WP_SEO_Settings {
 	/**
 	 * Get an option value.
 	 *
-	 * @param  string $key  The option key sought.
-	 * @return mixed        The value, or null on failure.
+	 * @param  string $key The option key sought.
+	 * @param  mixed $default Optional default.
+	 * @return mixed The value, or null on failure.
 	 */
-	public function get_option( $key ) {
+	public function get_option( $key, $default = null ) {
 		if ( empty( $this->options ) ) {
 			$this->set_options();
 		}
-		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : null;
+		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : $default;
 	}
 
 	/**
@@ -202,7 +203,7 @@ class WP_SEO_Settings {
 	 * @return array With slugs of any enabled taxonomies.
 	 */
 	public function get_enabled_taxonomies() {
-		return $this->get_option( 'taxonomies' );
+		return $this->get_option( 'taxonomies', array() );
 	}
 
 	/**
@@ -211,7 +212,7 @@ class WP_SEO_Settings {
 	 * @return array With names of any enabled post types.
 	 */
 	public function get_enabled_post_types() {
-		return $this->get_option( 'post_types' );
+		return $this->get_option( 'post_types', array() );
 	}
 
 	/**
@@ -221,11 +222,7 @@ class WP_SEO_Settings {
 	 * @return boolean
 	 */
 	public function has_post_fields( $post_type ) {
-		$post_types = $this->get_enabled_post_types();
-		if ( empty( $post_types ) ) {
-			$post_types = array();
-		}
-		return in_array( $post_type, $post_types );
+		return in_array( $post_type, $this->get_enabled_post_types() );
 	}
 
 	/**
