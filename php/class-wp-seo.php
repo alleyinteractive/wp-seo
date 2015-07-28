@@ -253,7 +253,7 @@ class WP_SEO {
 	public function add_term_boxes() {
 		$taxonomies = WP_SEO_Settings()->get_enabled_taxonomies();
 		if ( ! empty( $taxonomies ) ) {
-			foreach ( WP_SEO_Settings()->get_enabled_taxonomies() as $slug ) {
+			foreach ( $taxonomies as $slug ) {
 				add_action( $slug . '_add_form_fields', array( $this, 'add_term_meta_fields' ), 10, 2 );
 				add_action( $slug . '_edit_form', array( $this, 'edit_term_meta_fields' ), 10, 2 );
 			}
