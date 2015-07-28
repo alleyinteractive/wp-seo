@@ -251,12 +251,15 @@ class WP_SEO {
 	 * Add the meta box to taxonomies with per-term fields enabled.
 	 */
 	public function add_term_boxes() {
-		foreach ( WP_SEO_Settings()->get_enabled_taxonomies() as $slug ) {
-			add_action( $slug . '_add_form_fields', array( $this, 'add_term_meta_fields' ), 10, 2 );
-			add_action( $slug . '_edit_form', array( $this, 'edit_term_meta_fields' ), 10, 2 );
+		$taxonomies = WP_SEO_Settings()->get_enabled_taxonomies();
+		if ( ! empty( $taxonomies ) ) {
+			foreach ( WP_SEO_Settings()->get_enabled_taxonomies() as $slug ) {
+				add_action( $slug . '_add_form_fields', array( $this, 'add_term_meta_fields' ), 10, 2 );
+				add_action( $slug . '_edit_form', array( $this, 'edit_term_meta_fields' ), 10, 2 );
+			}
+			add_action( 'created_term', array( $this, 'save_term_fields' ), 10, 3 );
+			add_action( 'edited_term', array( $this, 'save_term_fields' ), 10, 3 );
 		}
-		add_action( 'created_term', array( $this, 'save_term_fields' ), 10, 3 );
-		add_action( 'edited_term', array( $this, 'save_term_fields' ), 10, 3 );
 	}
 
 	/**
