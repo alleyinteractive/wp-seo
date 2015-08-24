@@ -380,6 +380,6 @@ class WP_SEO {
 }
 
 function wp_seo() {
-	return wp_seo::instance();
+	return WP_SEO::instance();
 }
 add_action( 'get_header', 'wp_seo' );
