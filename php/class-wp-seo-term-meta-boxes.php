@@ -109,7 +109,7 @@ class WP_SEO_Term_Meta_Boxes {
 					<label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label>
 					<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="" size="96" />
 					<p>
-						<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
+						<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
 						<span class="title-character-count"></span>
 						<noscript><?php echo esc_html( wp_seo_noscript_character_count( '' ) ); ?></noscript>
 					</p>
@@ -119,7 +119,7 @@ class WP_SEO_Term_Meta_Boxes {
 					<label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label>
 					<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"></textarea>
 					<p>
-						<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
+						<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
 						<span class="description-character-count"></span>
 						<noscript><?php echo esc_html( wp_seo_noscript_character_count( '' ) ); ?></noscript>
 					</p>
@@ -152,7 +152,7 @@ class WP_SEO_Term_Meta_Boxes {
 						<td>
 							<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $values['title'] ); ?>" size="96" />
 							<p class="description">
-								<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
+								<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
 								<span class="title-character-count"></span>
 								<noscript><?php echo esc_html( wp_seo_noscript_character_count( $values['title'] ) ); ?></noscript>
 							</p>
@@ -164,7 +164,7 @@ class WP_SEO_Term_Meta_Boxes {
 						<td>
 							<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $values['description'] ); ?></textarea>
 							<p class="description">
-								<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
+								<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
 								<span class="description-character-count"></span>
 								<noscript><?php echo esc_html( wp_seo_noscript_character_count( $values['description'] ) ); ?></noscript>
 							</p>

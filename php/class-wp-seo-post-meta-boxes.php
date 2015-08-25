@@ -143,7 +143,7 @@ class WP_SEO_Post_Meta_Boxes {
 						<td>
 							<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title ); ?>" size="96" />
 							<div>
-								<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
+								<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
 								<span class="title-character-count"></span>
 								<noscript><?php echo esc_html( wp_seo_noscript_character_count( $title ) ); ?></noscript>
 							</div>
@@ -154,7 +154,7 @@ class WP_SEO_Post_Meta_Boxes {
 						<td>
 							<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description ); ?></textarea>
 							<div>
-								<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
+								<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
 								<span class="description-character-count"></span>
 								<noscript><?php echo esc_html( wp_seo_noscript_character_count( $description ) ); ?></noscript>
 							</div>
