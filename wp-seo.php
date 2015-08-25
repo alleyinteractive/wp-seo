@@ -22,28 +22,33 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-define( 'WP_SEO_PATH', dirname( __FILE__ ) );
-define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
+if ( ! class_exists( 'WP_SEO' ) ) {
 
-// Core filters for the page title and meta tags, and post and term metaboxes.
-require_once WP_SEO_PATH . '/php/class-wp-seo.php';
+	define( 'WP_SEO_PATH', dirname( __FILE__ ) );
+	define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
 
-// Settings page and option management.
-require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
+	// Extendable formatting-tag class.
+	require_once ( WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php' );
 
-// Extendable formatting-tag class.
-require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
+	// Bundled formatting tags.
+	require_once ( WP_SEO_PATH . '/php/default-formatting-tags.php' );
 
-// Included formatting tags.
-require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
+	// Settings page and option management.
+	require_once ( WP_SEO_PATH . '/php/class-wp-seo-settings.php' );
 
-function wp_seo_admin_scripts() {
-	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.9.0', true );
-	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', array(
-		'repeatable_add_more_label' => __( 'Add another', 'wp-seo' ),
-		'repeatable_remove_label' => __( 'Remove group', 'wp-seo' ),
-	) );
+	// Post meta boxes.
+	require_once ( WP_SEO_PATH . '/php/class-wp-seo-post-meta-boxes.php' );
 
-	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.9.0' );
+	// Term meta boxes.
+	require_once ( WP_SEO_PATH . '/php/class-wp-seo-term-meta-boxes.php' );
+
+	// Get WP SEO values for a query.
+	require_once ( WP_SEO_PATH . '/php/class-wp-seo-query.php' );
+
+	// Filter the page title and render meta tags.
+	require_once ( WP_SEO_PATH . '/php/class-wp-seo.php' );
+
+	// Common helpers and miscellaneous functions.
+	require_once( WP_SEO_PATH . '/php/functions.php' );
+
 }
-add_action( 'admin_enqueue_scripts', 'wp_seo_admin_scripts' );
