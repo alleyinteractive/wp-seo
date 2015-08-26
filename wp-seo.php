@@ -28,7 +28,7 @@ if ( ! class_exists( 'WP_SEO' ) ) {
 	define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
 
 	// Base singleton class.
-	require_once( WP_SEO_PATH . '/php/class-wp-seo-singleton.php' );
+	require_once ( WP_SEO_PATH . '/php/class-wp-seo-singleton.php' );
 
 	// Extendable formatting-tag class.
 	require_once ( WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php' );
