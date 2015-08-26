@@ -52,6 +52,6 @@ if ( ! class_exists( 'WP_SEO' ) ) {
 	require_once ( WP_SEO_PATH . '/php/class-wp-seo.php' );
 
 	// Common helpers and miscellaneous functions.
-	require_once( WP_SEO_PATH . '/php/functions.php' );
+	require_once ( WP_SEO_PATH . '/php/functions.php' );
 
 }
