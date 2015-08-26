@@ -358,7 +358,7 @@ class WP_SEO {
 	 */
 	public function add_term_meta_fields( $taxonomy ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Term_Meta_Boxes::taxonomy_add_form_fields()' );
-		WP_SEO_Term_Meta_Boxes::taxonomy_add_form_fields( $taxonomy );
+		WP_SEO_Term_Meta_Boxes::instance()->taxonomy_add_form_fields( $taxonomy );
 	}
 
 	/**
@@ -366,7 +366,7 @@ class WP_SEO {
 	 */
 	public function edit_term_meta_fields( $tag, $taxonomy ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Term_Meta_Boxes::taxonomy_edit_form()' );
-		WP_SEO_Term_Meta_Boxes::taxonomy_edit_form( $tag, $taxonomy );
+		WP_SEO_Term_Meta_Boxes::instance()->taxonomy_edit_form( $tag, $taxonomy );
 	}
 
 	/**
@@ -374,7 +374,7 @@ class WP_SEO {
 	 */
 	public function save_term_fields( $term_id, $term_taxonomy_id, $taxonomy ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Term_Meta_Boxes::created_term() or WP_SEO_Term_Meta_Boxes::edited_term()' );
-		WP_SEO_Term_Meta_Boxes::edited_term( $term_id, $term_taxonomy_id, $taxonomy );
+		WP_SEO_Term_Meta_Boxes::instance()->edited_term( $term_id, $term_taxonomy_id, $taxonomy );
 	}
 
 }
