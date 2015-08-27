@@ -1,8 +1,12 @@
 <?php
 /**
- * Adds meta boxes to edit-post screens and saves the submitted data.
+ * Class file for WP_SEO_Post_Meta_Boxes.
  *
  * @package WP_SEO
+ */
+
+/**
+ * Adds meta boxes to edit-post screens and saves the submitted data.
  */
 class WP_SEO_Post_Meta_Boxes extends WP_SEO_Meta_Boxes {
 
