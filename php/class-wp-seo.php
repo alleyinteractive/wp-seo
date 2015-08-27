@@ -11,6 +11,13 @@
 class WP_SEO extends WP_SEO_Singleton {
 
 	/**
+	 * A {@see WP_SEO_Query} instance for the main query on this page.
+	 *
+	 * @var WP_SEO_Query
+	 */
+	private $seo_query;
+
+	/**
 	 * Initialize properties, add actions and filters.
 	 *
 	 * @codeCoverageIgnore
