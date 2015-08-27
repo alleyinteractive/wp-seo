@@ -25,6 +25,20 @@ abstract class WP_SEO_Singleton {
 	}
 
 	/**
+	 * @codeCoverageIgnore
+	 */
+	public function __clone() {
+		wp_die( sprintf( __( "Please don't __clone %s", "wp-seo" ), get_called_class() ) );
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function __wakeup() {
+		wp_die( sprintf( __( "Please don't __wakeup %s", "wp-seo" ), get_called_class() ) );
+	}
+
+	/**
 	 * Return an instance of a child class.
 	 *
 	 * @return WP_SEO_Singleton
