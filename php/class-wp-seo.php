@@ -14,20 +14,6 @@ class WP_SEO {
 	private static $instance = null;
 
 	/**
-	 * Associative array of {@see WP_SEO_Formatting_Tag} IDs and instances.
-	 *
-	 * @var array.
-	 */
-	public $formatting_tags = array();
-
-	/**
-	 * The regular expression used to find formatting tags in a string.
-	 *
-	 * @var string.
-	 */
-	public $formatting_tag_pattern = '';
-
-	/**
 	 * @codeCoverageIgnore
 	 */
 	private function __construct() {
@@ -56,10 +42,7 @@ class WP_SEO {
 	 * @codeCoverageIgnore
 	 */
 	protected function setup() {
-		$this->init_formatting_tags();
-		$this->init_formatting_tag_pattern();
 		$this->init_seo_query();
-
 		add_filter( 'wp_title', array( $this, 'filter_wp_title' ), 10, 3 );
 		add_action( 'wp_head', array( $this, 'wp_head' ) );
 	}
@@ -89,92 +72,6 @@ class WP_SEO {
 		$this->render_meta_description();
 		$this->render_meta_keywords();
 		$this->render_arbitrary_tags();
-	}
-
-	/**
-	 * Replace formatting tags in a string with their value for the current page.
-	 *
-	 * @param  string $string  The string with formatting tags.
-	 * @return string|WP_Error The formatted string, or WP_Error on error.
-	 */
-	public function format( $string ) {
-		if ( ! is_string( $string ) ) {
-			return new WP_Error( 'format_error', __( "Please don't try to format() a non-string.", 'wp-seo' ) );
-		}
-
-		$raw_string = $string;
-
-		preg_match_all( $this->formatting_tag_pattern, $string, $matches );
-		if ( empty( $matches[0] ) ) {
-			return $string;
-		}
-
-		$replacements = array();
-		$unique_matches = array_unique( $matches[0] );
-
-		foreach ( $this->formatting_tags as $id => $tag ) {
-			if ( ! empty( $tag->tag ) && in_array( $tag->tag, $unique_matches ) ) {
-				/**
-				 * Filter the value of a formatting tag for the current page.
-				 *
-				 * The dynamic portion of the hook name, `$id`, refers to the
-				 * key used to register the formatting tag. For example, the
-				 * hook for the default "#site_name#" formatting tag is
-				 * 'wp_seo_format_site_name'.
-				 *
-				 * @see wp_seo_default_formatting_tags() for the defaults' keys.
-				 *
-				 * @param string The value returned by the formatting tag.
-				 */
-				$replacements[ $tag->tag ] = apply_filters( "wp_seo_format_{$id}", $tag->get_value() );
-			}
-		}
-
-		if ( ! empty( $replacements ) ) {
-			$string = str_replace( array_keys( $replacements ), array_values( $replacements ), $string );
-		}
-
-		/**
-		 * Filter the formatted string.
-		 *
-		 * @param string $string The formatted string.
-		 * @param string $raw_string The string as submitted.
-		 */
-		return apply_filters( 'wp_seo_after_format_string', $string, $raw_string );
-	}
-
-	/**
-	 * Set the available formatting tags.
-	 */
-	private function init_formatting_tags() {
-		/**
-		 * Filter the available formatting tags.
-		 *
-		 * @see wp_seo_default_formatting_tags() for an example implementation.
-		 *
-		 * @param array $tags Associative array of WP_SEO_Formatting_Tag instances.
-		 */
-		$tags = apply_filters( 'wp_seo_formatting_tags', array() );
-
-		foreach ( $tags as $id => $tag ) {
-			if ( $tag instanceof WP_SEO_Formatting_Tag ) {
-				$this->formatting_tags[ $id ] = $tag;
-			}
-		}
-	}
-
-	/**
-	 * Set the regular expression used to find formatting tags in a string.
-	 */
-	private function init_formatting_tag_pattern() {
-		/**
-		 * Filter the regular expression used to find formatting tags in a string.
-		 *
-		 * You might filter this if you want to add unusual custom tags.
-		 *
-		 * @param string $formatting_tag_pattern The regex.
-		 */
-		$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
 	}
 
 	/**
@@ -308,6 +205,21 @@ class WP_SEO {
 	}
 
 	/**
+	 * @return mixed
+	 */
+	public function __get( $name ) {
+		if ( 'formatting_tag_pattern' === $name ) {
+			return WP_SEO_Formatter::instance()->get_formatting_tag_pattern();
+		}
+
+		if ( 'formatting_tags' === $name ) {
+			return WP_SEO_Formatting_Tag_Collection::instance()->get_all();
+		}
+
+		return null;
+	}
+
+	/**
 	 * @deprecated
 	 */
 	public function set_properties() {
@@ -375,6 +287,14 @@ class WP_SEO {
 	public function save_term_fields( $term_id, $term_taxonomy_id, $taxonomy ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Term_Meta_Boxes::created_term() or WP_SEO_Term_Meta_Boxes::edited_term()' );
 		WP_SEO_Term_Meta_Boxes::instance()->edited_term( $term_id, $term_taxonomy_id, $taxonomy );
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public function format( $string ) {
+		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Formatter::format()' );
+		WP_SEO_Formatter::instance()->format( $string );
 	}
 
 }

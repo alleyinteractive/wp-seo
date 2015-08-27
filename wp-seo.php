@@ -33,8 +33,14 @@ if ( ! class_exists( 'WP_SEO' ) ) {
 	// Extendable formatting-tag class.
 	require_once ( WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php' );
 
+	// Stores available formatting tag instances.
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-formatting-tag-collection.php' );
+
 	// Bundled formatting tags.
 	require_once ( WP_SEO_PATH . '/php/default-formatting-tags.php' );
+
+	// Formatting tag formatter.
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-formatter.php' );
 
 	// Settings page and option management.
 	require_once ( WP_SEO_PATH . '/php/class-wp-seo-settings.php' );
