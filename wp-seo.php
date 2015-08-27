@@ -28,36 +28,36 @@ if ( ! class_exists( 'WP_SEO' ) ) {
 	define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
 
 	// Base singleton class.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo-singleton.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-singleton.php' );
 
 	// Extendable formatting-tag class.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php' );
 
 	// Stores available formatting tag instances.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo-formatting-tag-collection.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-formatting-tag-collection.php' );
 
 	// Bundled formatting tags.
-	require_once ( WP_SEO_PATH . '/php/default-formatting-tags.php' );
+	require_once( WP_SEO_PATH . '/php/default-formatting-tags.php' );
 
 	// Formatting tag formatter.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo-formatter.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-formatter.php' );
 
 	// Settings page and option management.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo-settings.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-settings.php' );
 
 	// Post meta boxes.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo-post-meta-boxes.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-post-meta-boxes.php' );
 
 	// Term meta boxes.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo-term-meta-boxes.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-term-meta-boxes.php' );
 
 	// Get WP SEO values for a query.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo-query.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-query.php' );
 
 	// Filter the page title and render meta tags.
-	require_once ( WP_SEO_PATH . '/php/class-wp-seo.php' );
+	require_once( WP_SEO_PATH . '/php/class-wp-seo.php' );
 
 	// Common helpers and miscellaneous functions.
-	require_once ( WP_SEO_PATH . '/php/functions.php' );
+	require_once( WP_SEO_PATH . '/php/functions.php' );
 
 }
