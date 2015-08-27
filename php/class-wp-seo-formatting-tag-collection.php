@@ -13,7 +13,7 @@ class WP_SEO_Formatting_Tag_Collection extends WP_SEO_Singleton {
 	/**
 	 * Associative array of WP_SEO_Formatting_Tag IDs and instances.
 	 *
-	 * @var array.
+	 * @var array
 	 */
 	private $items = array();
 
