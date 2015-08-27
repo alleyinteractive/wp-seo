@@ -6,30 +6,6 @@
  */
 
 /**
- * Get the WP SEO meta box heading.
- *
- * @return string
- */
-function wp_seo_meta_box_heading() {
-	/**
-	 * Filter the heading above SEO fields on edit-post screens.
-	 *
-	 * @param string The text. Default is "Search Engine Optimization."
-	 */
-	return apply_filters( 'wp_seo_box_heading', __( 'Search Engine Optimization', 'wp-seo' ) );
-}
-
-/**
- * Get the translated <noscript> text for the character count.
- *
- * @param string $text The text to count.
- * @return string The text to go between the <noscript> tags.
- */
-function wp_seo_noscript_character_count( $text ) {
-	return sprintf( __( '%d (save changes to update)', 'wp-seo' ), strlen( $text ) );
-}
-
-/**
  * Construct an option name for per-term SEO fields.
  *
  * @param object $term The term object.
@@ -52,3 +28,11 @@ function wp_seo_admin_scripts() {
 	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.9.0' );
 }
 add_action( 'admin_enqueue_scripts', 'wp_seo_admin_scripts' );
+
+/**
+ * @deprecated
+ */
+function wp_seo_noscript_character_count( $text ) {
+	_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Meta_Boxes::noscript_character_count()' );
+	return WP_SEO_Meta_Boxes::instance()->noscript_character_count( $text );
+}
