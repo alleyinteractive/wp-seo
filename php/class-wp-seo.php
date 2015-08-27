@@ -1,40 +1,14 @@
 <?php
 /**
- * Sets the page title and renders meta fields.
+ * Class file for WP_SEO.
  *
  * @package WP_SEO
  */
-class WP_SEO {
 
-	/**
-	 * Instance of this class.
-	 *
-	 * @var WP_SEO
-	 */
-	private static $instance = null;
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	private function __construct() {
-		/* Don't do anything, needs to be initialized via instance() method */
-	}
-
-	/**
-	 * Return an instance of this class.
-	 *
-	 * @codeCoverageIgnore
-	 *
-	 * @return WP_SEO
-	 */
-	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self;
-			self::$instance->setup();
-		}
-
-		return self::$instance;
-	}
+/**
+ * Sets the page title and renders meta fields.
+ */
+class WP_SEO extends WP_SEO_Singleton {
 
 	/**
 	 * Initialize properties, add actions and filters.
