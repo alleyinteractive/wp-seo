@@ -45,6 +45,9 @@ if ( ! class_exists( 'WP_SEO' ) ) {
 	// Settings page and option management.
 	require_once( WP_SEO_PATH . '/php/class-wp-seo-settings.php' );
 
+	// Base meta boxes class.
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-meta-boxes.php' );
+
 	// Post meta boxes.
 	require_once( WP_SEO_PATH . '/php/class-wp-seo-post-meta-boxes.php' );
 

@@ -1,40 +1,14 @@
 <?php
 /**
- * Adds meta boxes to edit-post screens and saves the submitted data.
+ * Class file for WP_SEO_Post_Meta_Boxes.
  *
  * @package WP_SEO
  */
-class WP_SEO_Post_Meta_Boxes {
 
-	/**
-	 * Instance of this class.
-	 *
-	 * @var WP_SEO_Post_Meta_Boxes
-	 */
-	private static $instance = null;
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	private function __construct() {
-		/* Don't do anything, needs to be initialized via instance() method */
-	}
-
-	/**
-	 * Return an instance of this class.
-	 *
-	 * @codeCoverageIgnore
-	 *
-	 * @return WP_SEO_Post_Meta_Boxes
-	 */
-	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self;
-			self::$instance->setup();
-		}
-
-		return self::$instance;
-	}
+/**
+ * Adds meta boxes to edit-post screens and saves the submitted data.
+ */
+class WP_SEO_Post_Meta_Boxes extends WP_SEO_Meta_Boxes {
 
 	/**
 	 * Add actions and filters.
@@ -108,7 +82,7 @@ class WP_SEO_Post_Meta_Boxes {
 
 		add_meta_box(
 			'wp_seo',
-			wp_seo_meta_box_heading(),
+			$this->get_box_heading(),
 			array( $this, 'do_meta_box' ),
 			$post_type,
 			/**
@@ -145,7 +119,7 @@ class WP_SEO_Post_Meta_Boxes {
 							<div>
 								<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
 								<span class="title-character-count"></span>
-								<noscript><?php echo esc_html( wp_seo_noscript_character_count( $title ) ); ?></noscript>
+								<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
 							</div>
 						</td>
 					</tr>
@@ -156,7 +130,7 @@ class WP_SEO_Post_Meta_Boxes {
 							<div>
 								<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
 								<span class="description-character-count"></span>
-								<noscript><?php echo esc_html( wp_seo_noscript_character_count( $description ) ); ?></noscript>
+								<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
 							</div>
 						<td>
 					</tr>

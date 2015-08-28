@@ -1,40 +1,14 @@
 <?php
 /**
- * Adds meta boxes to edit-term screens and saves the submitted data.
+ * Class file for WP_SEO_Term_Meta_Boxes.
  *
  * @package WP_SEO
  */
-class WP_SEO_Term_Meta_Boxes {
 
-	/**
-	 * Instance of this class.
-	 *
-	 * @var WP_SEO_Term_Meta_Boxes
-	 */
-	private static $instance = null;
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	private function __construct() {
-		/* Don't do anything, needs to be initialized via instance() method */
-	}
-
-	/**
-	 * Return an instance of this class.
-	 *
-	 * @codeCoverageIgnore
-	 *
-	 * @return WP_SEO_Term_Meta_Boxes
-	 */
-	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self;
-			self::$instance->setup();
-		}
-
-		return self::$instance;
-	}
+/**
+ * Adds meta boxes to edit-term screens and saves the submitted data.
+ */
+class WP_SEO_Term_Meta_Boxes extends WP_SEO_Meta_Boxes {
 
 	/**
 	 * Add actions and filters.
@@ -102,7 +76,7 @@ class WP_SEO_Term_Meta_Boxes {
 	private function render_add_term_fields() {
 		wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
 		?>
-			<h3><?php echo esc_html( wp_seo_meta_box_heading() ); ?></h3>
+			<h3><?php echo esc_html( $this->get_box_heading() ); ?></h3>
 
 			<div class="wp-seo-term-meta-fields">
 				<div class="form-field">
@@ -111,7 +85,7 @@ class WP_SEO_Term_Meta_Boxes {
 					<p>
 						<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
 						<span class="title-character-count"></span>
-						<noscript><?php echo esc_html( wp_seo_noscript_character_count( '' ) ); ?></noscript>
+						<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
 					</p>
 				</div>
 
@@ -121,7 +95,7 @@ class WP_SEO_Term_Meta_Boxes {
 					<p>
 						<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
 						<span class="description-character-count"></span>
-						<noscript><?php echo esc_html( wp_seo_noscript_character_count( '' ) ); ?></noscript>
+						<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
 					</p>
 				</div>
 
@@ -143,7 +117,7 @@ class WP_SEO_Term_Meta_Boxes {
 
 		$values = get_option( wp_seo_get_term_option_name( $term ), array( 'title' => '', 'description' => '', 'keywords' => '' ) );
 		?>
-			<h2><?php echo esc_html( wp_seo_meta_box_heading() ); ?></h2>
+			<h2><?php echo esc_html( $this->get_box_heading() ); ?></h2>
 
 			<table class="form-table wp-seo-term-meta-fields">
 				<tbody>
@@ -154,7 +128,7 @@ class WP_SEO_Term_Meta_Boxes {
 							<p class="description">
 								<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
 								<span class="title-character-count"></span>
-								<noscript><?php echo esc_html( wp_seo_noscript_character_count( $values['title'] ) ); ?></noscript>
+								<noscript><?php echo esc_html( $this->noscript_character_count( $values['title'] ) ); ?></noscript>
 							</p>
 						</td>
 					</tr>
@@ -166,7 +140,7 @@ class WP_SEO_Term_Meta_Boxes {
 							<p class="description">
 								<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
 								<span class="description-character-count"></span>
-								<noscript><?php echo esc_html( wp_seo_noscript_character_count( $values['description'] ) ); ?></noscript>
+								<noscript><?php echo esc_html( $this->noscript_character_count( $values['description'] ) ); ?></noscript>
 							</p>
 						<td>
 					</tr>
