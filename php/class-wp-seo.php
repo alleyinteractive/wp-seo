@@ -80,7 +80,7 @@ class WP_SEO extends WP_SEO_Singleton {
 		 */
 		$title = apply_filters( 'wp_seo_title_tag_format', $title );
 
-		$title = $this->format( $title );
+		$title = WP_SEO_Formatter::instance()->format( $title );
 
 		if ( is_wp_error( $title ) ) {
 			$title = '';
@@ -104,7 +104,7 @@ class WP_SEO extends WP_SEO_Singleton {
 		 */
 		$description = apply_filters( 'wp_seo_meta_description_format', $description );
 
-		$description = $this->format( $description );
+		$description = WP_SEO_Formatter::instance()->format( $description );
 
 		if ( ! $description || is_wp_error( $description ) ) {
 			return;
@@ -128,7 +128,7 @@ class WP_SEO extends WP_SEO_Singleton {
 		 */
 		$keywords = apply_filters( 'wp_seo_meta_keywords_format', $keywords );
 
-		$keywords = $this->format( $keywords );
+		$keywords = WP_SEO_Formatter::instance()->format( $keywords );
 
 		if ( ! $keywords || is_wp_error( $keywords ) ) {
 			return;
@@ -165,7 +165,7 @@ class WP_SEO extends WP_SEO_Singleton {
 				continue;
 			}
 
-			$content = $this->format( $tag['content'] );
+			$content = WP_SEO_Formatter::instance()->format( $tag['content'] );
 
 			if ( ! $content || is_wp_error( $content ) ) {
 				continue;
