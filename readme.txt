@@ -57,7 +57,25 @@ Some more examples:
 
 * If you had a custom "Review" post type and wanted the `<title>` tag to include the date each review was last updated, you could go to "Single Review Defaults" and, under "Title Tag Format," use "#title# Review (Updated #date_modified#).
 
-Fifteen formatting tags are available out-of-the-box. Details about each tag are available under the "Help" button in the upper-right corner of the settings page.
+These formatting tags are available out-of-the-box:
+
+* `#archive_date#`
+* `#author#`
+* `#categories#`
+* `#date_modified#`
+* `#date_published#`
+* `#excerpt#`
+* `#post_type_plural_name#`
+* `#post_type_singular_name#`
+* `#search_term#`
+* `#site_description#`
+* `#site_name#`
+* `#tags#`
+* `#term_description#`
+* `#term_name#`
+* `#title#`
+
+More details about each tag are available under the "Help" button in the upper-right corner of the settings page.
 
 === Per-entry and per-term fields ===
 
