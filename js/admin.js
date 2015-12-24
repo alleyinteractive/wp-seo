@@ -40,7 +40,6 @@
 		$repeated.append(
 			$( '<p />' ).append(
 				$( '<button />' )
-					.attr( 'href', '#' )
 					.addClass( 'wp-seo-remove-repeated' )
 					.text( wpSeo.l10n.remove )
 					.on( 'click', onClickRemoveRepeatable )
