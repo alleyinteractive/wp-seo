@@ -24,7 +24,7 @@
 	/**
 	 * Append a "Remove" button to a repeatable element.
 	 *
-	 * @param {Event} el The element.
+	 * @param {Element} el The element.
 	 */
 	var appendRemoveRepeatedButton = function ( el ) {
 		var $repeated = $( el );
