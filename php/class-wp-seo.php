@@ -144,7 +144,7 @@ class WP_SEO extends WP_SEO_Singleton {
 		/**
 		 * @todo Safe get_option(), no type casting.
 		 */
-		$arbitrary_tags = (array) WP_SEO_Settings()->get_option( 'arbitrary_tags' );
+		$arbitrary_tags = (array) wp_seo_settings()->get_option( 'arbitrary_tags' );
 
 		/**
 		 * Filter the arbitrary meta tags for the current page.

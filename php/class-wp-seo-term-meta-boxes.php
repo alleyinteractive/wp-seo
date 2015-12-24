@@ -16,7 +16,7 @@ class WP_SEO_Term_Meta_Boxes extends WP_SEO_Meta_Boxes {
 	 * @codeCoverageIgnore
 	 */
 	protected function setup() {
-		$taxonomies = WP_SEO_Settings()->get_enabled_taxonomies();
+		$taxonomies = wp_seo_settings()->get_enabled_taxonomies();
 
 		if ( ! empty( $taxonomies ) ) {
 			foreach ( $taxonomies as $taxonomy ) {
@@ -76,32 +76,32 @@ class WP_SEO_Term_Meta_Boxes extends WP_SEO_Meta_Boxes {
 	private function render_add_term_fields() {
 		wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
 		?>
-			<h3><?php echo esc_html( $this->get_box_heading() ); ?></h3>
+			<h2><?php echo esc_html( $this->get_box_heading() ); ?></h2>
 
 			<div class="wp-seo-term-meta-fields">
 				<div class="form-field">
-					<label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label>
-					<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="" size="96" />
+					<label for="wp-seo-meta-title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label>
+					<input type="text" id="wp-seo-meta-title" class="wp-seo-has-character-count" name="seo_meta[title]" value="" size="96" />
 					<p>
 						<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
-						<span class="title-character-count"></span>
+						<span data-character-count-for="wp-seo-meta-title" class="wp-seo-character-count"></span>
 						<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
 					</p>
 				</div>
 
 				<div class="form-field">
-					<label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label>
-					<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"></textarea>
+					<label for="wp-seo-meta-description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label>
+					<textarea id="wp-seo-meta-description" class="wp-seo-has-character-count" name="seo_meta[description]" rows="2" cols="96"></textarea>
 					<p>
 						<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
-						<span class="description-character-count"></span>
+						<span data-character-count-for="wp-seo-meta-description" class="wp-seo-character-count"></span>
 						<noscript><?php echo esc_html( $this->noscript_character_count( '' ) ); ?></noscript>
 					</p>
 				</div>
 
 				<div class="form-field">
-					<label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label>
-					<textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"></textarea>
+					<label for="wp-seo-meta-keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label>
+					<textarea id="wp-seo-meta-keywords" name="seo_meta[keywords]" rows="2" cols="96"></textarea>
 				</div>
 			</div>
 		<?php
@@ -122,32 +122,32 @@ class WP_SEO_Term_Meta_Boxes extends WP_SEO_Meta_Boxes {
 			<table class="form-table wp-seo-term-meta-fields">
 				<tbody>
 					<tr class="form-field">
-						<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
+						<th scope="row"><label for="wp-seo-meta-title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
 						<td>
-							<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $values['title'] ); ?>" size="96" />
+							<input type="text" id="wp-seo-meta-title" class="wp-seo-has-character-count" name="seo_meta[title]" value="<?php echo esc_attr( $values['title'] ); ?>" size="96" />
 							<p class="description">
 								<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
-								<span class="title-character-count"></span>
+								<span data-character-count-for="wp-seo-meta-title" class="wp-seo-character-count"></span>
 								<noscript><?php echo esc_html( $this->noscript_character_count( $values['title'] ) ); ?></noscript>
 							</p>
 						</td>
 					</tr>
 
 					<tr class="form-field">
-						<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
+						<th scope="row"><label for="wp-seo-meta-description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
 						<td>
-							<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $values['description'] ); ?></textarea>
+							<textarea id="wp-seo-meta-description" class="wp-seo-has-character-count" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $values['description'] ); ?></textarea>
 							<p class="description">
 								<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
-								<span class="description-character-count"></span>
+								<span data-character-count-for="wp-seo-meta-description" class="wp-seo-character-count"></span>
 								<noscript><?php echo esc_html( $this->noscript_character_count( $values['description'] ) ); ?></noscript>
 							</p>
 						<td>
 					</tr>
 
 					<tr class="form-field">
-						<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
-						<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( $values['keywords'] ); ?></textarea></td>
+						<th scope="row"><label for="wp-seo-meta-keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
+						<td><textarea id="wp-seo-meta-keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( $values['keywords'] ); ?></textarea></td>
 					</tr>
 				</tbody>
 			</table>
@@ -171,7 +171,7 @@ class WP_SEO_Term_Meta_Boxes extends WP_SEO_Meta_Boxes {
 			return;
 		}
 
-		if ( ! WP_SEO_Settings()->has_term_fields( $taxonomy ) ) {
+		if ( ! wp_seo_settings()->has_term_fields( $taxonomy ) ) {
 			return;
 		}
 
@@ -213,15 +213,3 @@ class WP_SEO_Term_Meta_Boxes extends WP_SEO_Meta_Boxes {
 	}
 
 }
-
-/**
- * Helper function to use the class instance.
- *
- * @todo destroy
- *
- * @return object
- */
-function wp_seo_term_meta_boxes() {
-	return WP_SEO_Term_Meta_Boxes::instance();
-}
-add_action( 'admin_init', 'wp_seo_term_meta_boxes' );

@@ -76,7 +76,7 @@ class WP_SEO_Post_Meta_Boxes extends WP_SEO_Meta_Boxes {
 	 * @param string $post_type Post type to register the meta box with.
 	 */
 	private function register_meta_box( $post_type ) {
-		if ( ! WP_SEO_Settings()->has_post_fields( $post_type ) ) {
+		if ( ! wp_seo_settings()->has_post_fields( $post_type ) ) {
 			return;
 		}
 
@@ -113,30 +113,30 @@ class WP_SEO_Post_Meta_Boxes extends WP_SEO_Meta_Boxes {
 			<table class="wp-seo-post-meta-fields">
 				<tbody>
 					<tr>
-						<th scope="row"><label for="wp_seo_meta_title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
+						<th scope="row"><label for="wp-seo-meta-title"><?php esc_html_e( 'Title Tag', 'wp-seo' ); ?></label></th>
 						<td>
-							<input type="text" id="wp_seo_meta_title" name="seo_meta[title]" value="<?php echo esc_attr( $title ); ?>" size="96" />
+							<input type="text" id="wp-seo-meta-title" class="wp-seo-has-character-count" name="seo_meta[title]" value="<?php echo esc_attr( $title ); ?>" size="96" />
 							<div>
 								<?php esc_html_e( 'Title character count:', 'wp-seo' ); ?>
-								<span class="title-character-count"></span>
+								<span data-character-count-for="wp-seo-meta-title" class="wp-seo-character-count"></span>
 								<noscript><?php echo esc_html( $this->noscript_character_count( $title ) ); ?></noscript>
 							</div>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="wp_seo_meta_description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
+						<th scope="row"><label for="wp-seo-meta-description"><?php esc_html_e( 'Meta Description', 'wp-seo' ); ?></label></th>
 						<td>
-							<textarea id="wp_seo_meta_description" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description ); ?></textarea>
+							<textarea id="wp-seo-meta-description" class="wp-seo-has-character-count" name="seo_meta[description]" rows="2" cols="96"><?php echo esc_textarea( $description ); ?></textarea>
 							<div>
 								<?php esc_html_e( 'Description character count:', 'wp-seo' ); ?>
-								<span class="description-character-count"></span>
+								<span data-character-count-for="wp-seo-meta-description" class="wp-seo-character-count"></span>
 								<noscript><?php echo esc_html( $this->noscript_character_count( $description ) ); ?></noscript>
 							</div>
 						<td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
-						<td><textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( get_post_meta( $post->ID, '_meta_keywords', true ) ) ?></textarea></td>
+						<th scope="row"><label for="wp-seo-meta-keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ) ?></label></th>
+						<td><textarea id="wp-seo-meta-keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( get_post_meta( $post->ID, '_meta_keywords', true ) ) ?></textarea></td>
 					</tr>
 				</tbody>
 			</table>
@@ -162,7 +162,7 @@ class WP_SEO_Post_Meta_Boxes extends WP_SEO_Meta_Boxes {
 			return;
 		}
 
-		if ( ! WP_SEO_Settings()->has_post_fields( $post_type->name ) ) {
+		if ( ! wp_seo_settings()->has_post_fields( $post_type->name ) ) {
 			return;
 		}
 
@@ -195,15 +195,3 @@ class WP_SEO_Post_Meta_Boxes extends WP_SEO_Meta_Boxes {
 	}
 
 }
-
-/**
- * Helper function to use the class instance.
- *
- * @todo destroy
- *
- * @return WP_SEO_Post_Meta_Boxes
- */
-function wp_seo_post_meta_boxes() {
-	return WP_SEO_Post_Meta_Boxes::instance();
-}
-add_action( 'admin_init', 'wp_seo_post_meta_boxes' );

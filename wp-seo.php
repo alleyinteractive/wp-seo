@@ -45,6 +45,12 @@ if ( ! class_exists( 'WP_SEO' ) ) {
 	// Settings page and option management.
 	require_once( WP_SEO_PATH . '/php/class-wp-seo-settings.php' );
 
+	// Base class for creating plugin administration functionality.
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-administration.php' );
+
+	// Dashboard settings page.
+	require_once( WP_SEO_PATH . '/php/class-wp-seo-settings-page.php' );
+
 	// Base meta boxes class.
 	require_once( WP_SEO_PATH . '/php/class-wp-seo-meta-boxes.php' );
 
@@ -60,7 +66,19 @@ if ( ! class_exists( 'WP_SEO' ) ) {
 	// Filter the page title and render meta tags.
 	require_once( WP_SEO_PATH . '/php/class-wp-seo.php' );
 
+	// Manage static assets.
+	require_once( WP_SEO_PATH . '/php/assets.php' );
+
 	// Common helpers and miscellaneous functions.
 	require_once( WP_SEO_PATH . '/php/functions.php' );
 
+	// Ready, aim, fire.
+	add_action( 'admin_menu', function () {
+		WP_SEO_Settings_Page::instance();
+	} );
+
+	add_action( 'admin_init', function () {
+		WP_SEO_Post_Meta_Boxes::instance();
+		WP_SEO_Term_Meta_Boxes::instance();
+	} );
 }
