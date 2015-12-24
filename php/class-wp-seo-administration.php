@@ -68,6 +68,7 @@ class WP_SEO_Administration extends WP_SEO_Singleton {
 		$terms = get_terms( $taxonomy, array(
 			'hierarchical' => false,
 			'number' => 1,
+			'update_term_meta_cache' => false,
 		) );
 
 		if ( ! $terms ) {
