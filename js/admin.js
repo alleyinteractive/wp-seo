@@ -1,4 +1,4 @@
-(function( $ ) {
+(function ( $ ) {
 	/**
 	 * Append an "Add Another" button to an element.
 	 *
@@ -24,7 +24,7 @@
 	/**
 	 * Append a "Remove" button to a repeatable element.
 	 *
-	 * @param {Extendable} el The element.
+	 * @param {Event} el The element.
 	 */
 	var appendRemoveRepeatedButton = function ( el ) {
 		var $repeated = $( el );
@@ -143,7 +143,7 @@
 			.siblings( '.wp-seo-repeated' )
 			.last()
 			.find( 'label' )
-			.each(function( i, label ) {
+			.each(function ( i, label ) {
 				var $label = $( label );
 				var id = _.uniqueId( 'wp-seo-' );
 
@@ -152,7 +152,7 @@
 			});
 	};
 
-	$( document ).on( 'ready', function() {
+	$( document ).on( 'ready', function () {
 		$( '.wp-seo-repeatable' ).each(function ( i, repeatable ) {
 			appendAddRepeatableButton( repeatable );
 		});
