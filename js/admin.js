@@ -104,6 +104,8 @@
 			.closest( '.wp-seo-repeatable' )
 			.find( '.wp-seo-template' );
 
+		e.preventDefault();
+
 		if ( ! $template.length ) {
 			return;
 		}
@@ -128,6 +130,8 @@
 	 */
 	var onClickRemoveRepeatable = function ( e ) {
 		var $target = $( e.target );
+
+		e.preventDefault();
 
 		$target.closest( '.wp-seo-repeated' ).hide( 'fast', function () {
 			this.remove();
