@@ -190,6 +190,17 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		// Remove post types without labels.
 		wp_list_filter( $post_types, array( 'label' => false ), 'NOT' );
 
+		if ( has_filter( 'wp_seo_single_post_types' ) ) {
+			/**
+			 * Filter the post type objects.
+			 *
+			 * @deprecated Use 'wp_seo_available_single_post_types'.
+			 *
+			 * @param array $post_types Post type objects.
+			 */
+			$post_types = apply_filters( 'wp_seo_single_post_types', $post_types );
+		}
+
 		$post_types = array_keys( $post_types );
 
 		/**
@@ -211,6 +222,17 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		// Remove post types without labels.
 		wp_list_filter( $post_types, array( 'label' => false ), 'NOT' );
 
+		if ( has_filter( 'wp_seo_archived_post_types' ) ) {
+			/**
+			 * Filter the post type objects.
+			 *
+			 * @deprecated Use 'wp_seo_available_archive_post_types'.
+			 *
+			 * @param array $post_types Post type objects.
+			 */
+			$post_types = apply_filters( 'wp_seo_archived_post_types', $post_types );
+		}
+
 		$post_types = array_keys( $post_types );
 
 		/**
@@ -231,6 +253,17 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 
 		// Remove taxonomies without labels.
 		wp_list_filter( $taxonomies, array( 'label' => false ), 'NOT' );
+
+		if ( has_filter( 'wp_seo_taxonomies' ) ) {
+			/**
+			 * Filter the taxonomy objects.
+			 *
+			 * @deprecated Use 'wp_seo_available_taxonomies'.
+			 *
+			 * @param array $taxonomies Taxonomy objects.
+			 */
+			$taxonomies = apply_filters( 'wp_seo_taxonomies', $taxonomies );
+		}
 
 		// Remove Post Formats, which have labels but no UI (by default).
 		if ( isset( $taxonomies['post_format'] ) ) {
@@ -292,7 +325,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function get_single_post_types() {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings::get_available_single_post_types()' );
-		return apply_filters( 'wp_seo_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		return array_map( 'get_post_type_object', $this->get_available_single_post_types() );
 	}
 
 	/**
@@ -300,7 +333,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function get_archived_post_types() {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings::get_available_archive_post_types()' );
-		return apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		return array_map( 'get_post_type_object', $this->get_available_archive_post_types() );
 	}
 
 	/**
@@ -308,7 +341,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function get_taxonomies() {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings::get_available_taxonomies()' );
-		return apply_filters( 'wp_seo_taxonomies', wp_list_filter( get_taxonomies( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		return array_map( 'get_taxonomy', $this->get_available_taxonomies() );
 	}
 
 	/**
