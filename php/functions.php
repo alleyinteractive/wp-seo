@@ -6,6 +6,15 @@
  */
 
 /**
+ * Helper function to use the WP_SEO instance.
+ *
+ * @return WP_SEO
+ */
+function wp_seo() {
+	return WP_SEO::instance();
+}
+
+/**
  * Helper function to use the WP_SEO_Settings instance.
  *
  * @return WP_SEO_Settings

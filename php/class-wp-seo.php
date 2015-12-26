@@ -279,8 +279,3 @@ class WP_SEO extends WP_SEO_Singleton {
 	}
 
 }
-
-function wp_seo() {
-	return WP_SEO::instance();
-}
-add_action( 'get_header', 'wp_seo' );

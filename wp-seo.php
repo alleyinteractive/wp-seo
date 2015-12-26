@@ -73,6 +73,10 @@ if ( ! class_exists( 'WP_SEO' ) ) {
 	require_once( WP_SEO_PATH . '/php/functions.php' );
 
 	// Ready, aim, fire.
+	add_action( 'get_header', function () {
+		WP_SEO::instance();
+	} );
+
 	add_action( 'admin_menu', function () {
 		WP_SEO_Settings_Page::instance();
 	} );
