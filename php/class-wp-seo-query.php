@@ -5,7 +5,6 @@
  * @package WP_SEO
  */
 class WP_SEO_Query {
-
 	/**
 	 * The {@see WP_Query} to get WP SEO values for.
 	 *
@@ -197,5 +196,4 @@ class WP_SEO_Query {
 	public function get_keywords() {
 		return $this->keywords;
 	}
-
 }

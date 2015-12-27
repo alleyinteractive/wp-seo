@@ -9,7 +9,6 @@
  * Sets the page title and renders meta fields.
  */
 class WP_SEO extends WP_SEO_Singleton {
-
 	/**
 	 * A {@see WP_SEO_Query} instance for the main query on this page.
 	 *
@@ -277,5 +276,4 @@ class WP_SEO extends WP_SEO_Singleton {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Formatter::format()' );
 		WP_SEO_Formatter::instance()->format( $string );
 	}
-
 }

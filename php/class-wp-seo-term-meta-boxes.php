@@ -9,7 +9,6 @@
  * Adds meta boxes to edit-term screens and saves the submitted data.
  */
 class WP_SEO_Term_Meta_Boxes extends WP_SEO_Meta_Boxes {
-
 	/**
 	 * Add actions and filters.
 	 *
@@ -211,5 +210,4 @@ class WP_SEO_Term_Meta_Boxes extends WP_SEO_Meta_Boxes {
 			update_option( $name, $data );
 		}
 	}
-
 }

@@ -7,7 +7,6 @@
  * @package WP SEO
  */
 abstract class WP_SEO_Formatting_Tag {
-
 	/**
 	 * The tag name that users add to settings fields.
 	 *
@@ -28,5 +27,4 @@ abstract class WP_SEO_Formatting_Tag {
 	 * @return mixed Usually a string, or false if no value exists.
 	 */
 	abstract public function get_value();
-
 }

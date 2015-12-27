@@ -9,7 +9,6 @@
  * Formats the formatting tags.
  */
 class WP_SEO_Formatter extends WP_SEO_Singleton {
-
 	/**
 	 * Replace formatting tags in a string with their value for the current page.
 	 *
@@ -77,5 +76,4 @@ class WP_SEO_Formatter extends WP_SEO_Singleton {
 		 */
 		return apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
 	}
-
 }

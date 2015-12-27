@@ -9,7 +9,6 @@
  * Stores available instances of {@see WP_SEO_Formatting_Tag}.
  */
 class WP_SEO_Formatting_Tag_Collection extends WP_SEO_Singleton {
-
 	/**
 	 * Associative array of WP_SEO_Formatting_Tag IDs and instances.
 	 *
@@ -52,5 +51,4 @@ class WP_SEO_Formatting_Tag_Collection extends WP_SEO_Singleton {
 	public function get_all() {
 		return $this->items;
 	}
-
 }

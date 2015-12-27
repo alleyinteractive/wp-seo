@@ -9,7 +9,6 @@
  * Base singleton class.
  */
 abstract class WP_SEO_Singleton {
-
 	/**
 	 * Instances of child classes.
 	 *
@@ -60,5 +59,4 @@ abstract class WP_SEO_Singleton {
 	 * @codeCoverageIgnore
 	 */
 	protected function setup() {}
-
 }

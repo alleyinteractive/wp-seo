@@ -6,7 +6,6 @@
  */
 
 class WP_SEO_Format_Title extends WP_SEO_Formatting_Tag {
-
 	public $tag = '#title#';
 
 	public function get_description() {
@@ -20,5 +19,4 @@ class WP_SEO_Format_Title extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }

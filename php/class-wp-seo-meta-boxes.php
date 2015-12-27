@@ -9,7 +9,6 @@
  * Base class for adding WP SEO meta boxes.
  */
 class WP_SEO_Meta_Boxes extends WP_SEO_Singleton {
-
 	/**
 	 * Get the meta box heading.
 	 *
@@ -35,5 +34,4 @@ class WP_SEO_Meta_Boxes extends WP_SEO_Singleton {
 	public function noscript_character_count( $text ) {
 		return sprintf( __( '%d (save changes to update)', 'wp-seo' ), strlen( $text ) );
 	}
-
 }

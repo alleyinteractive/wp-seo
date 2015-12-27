@@ -9,7 +9,6 @@
  * Adds meta boxes to edit-post screens and saves the submitted data.
  */
 class WP_SEO_Post_Meta_Boxes extends WP_SEO_Meta_Boxes {
-
 	/**
 	 * Add actions and filters.
 	 *
@@ -193,5 +192,4 @@ class WP_SEO_Post_Meta_Boxes extends WP_SEO_Meta_Boxes {
 			update_post_meta( $post_ID, "_meta_{$field}", $value );
 		}
 	}
-
 }
