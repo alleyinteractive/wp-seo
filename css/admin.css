@@ -27,9 +27,24 @@ table.wp-seo-post-meta-fields {
 	min-width: 80px;
 }
 
+/* A button with the 'button-link' class that we make look like a link. */
+
 .wp-seo-arbitrary-tags .wp-seo-remove-repeated {
+	color: #0073aa;
 	font-size: smaller;
+	text-decoration: underline;
 }
+
+.wp-seo-arbitrary-tags .wp-seo-remove-repeated:active,
+.wp-seo-arbitrary-tags .wp-seo-remove-repeated:hover {
+	color: #00a0d2
+}
+
+.wp-seo-arbitrary-tags .wp-seo-remove-repeated:focus {
+	color: #124964;
+}
+
+/* Help menu. */
 
 #tab-panel-formatting-tags h1 {
 	font-size: 1.3em;
