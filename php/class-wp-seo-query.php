@@ -58,6 +58,48 @@ class WP_SEO_Query {
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function has_title() {
+		return ! empty( $this->title );
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_title() {
+		return $this->title;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function has_description() {
+		return ! empty( $this->description );
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_description() {
+		return $this->description;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function has_keywords() {
+		return ! empty( $this->keywords );
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_keywords() {
+		return $this->keywords;
+	}
+
+	/**
 	 * Set $key_prefix based on this instance's $wp_query.
 	 */
 	private function init_key_prefix() {
@@ -153,47 +195,5 @@ class WP_SEO_Query {
 				$this->keywords = wp_seo_settings()->get_option( $this->key_prefix . 'keywords' );
 			}
 		}
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function has_title() {
-		return ! empty( $this->title );
-	}
-
-	/**
-	 * @return string
-	 */
-	public function get_title() {
-		return $this->title;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function has_description() {
-		return ! empty( $this->description );
-	}
-
-	/**
-	 * @return string
-	 */
-	public function get_description() {
-		return $this->description;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function has_keywords() {
-		return ! empty( $this->keywords );
-	}
-
-	/**
-	 * @return string
-	 */
-	public function get_keywords() {
-		return $this->keywords;
 	}
 }
