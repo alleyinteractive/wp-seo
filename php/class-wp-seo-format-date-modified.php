@@ -12,7 +12,7 @@ class WP_SEO_Format_Date_Modified extends WP_SEO_Formatting_Tag {
 	public $tag = '#date_modified#';
 
 	public function get_description() {
-		return __( 'Replaced with the date that the content being viewed was last modified.', 'wp-seo' );
+			return __( 'Replaced with the date that the post being viewed was last modified.', 'wp-seo' );
 	}
 
 	public function get_value() {

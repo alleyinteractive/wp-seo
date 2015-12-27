@@ -12,7 +12,7 @@ class WP_SEO_Format_Excerpt extends WP_SEO_Formatting_Tag {
 	public $tag = '#excerpt#';
 
 	public function get_description() {
-		return __( "Replaced with the excerpt of the content being viewed. An excerpt is generated if one isn't written.", 'wp-seo' );
+		return __( "Replaced with the excerpt of the post being viewed. An excerpt is generated if one isn't written.", 'wp-seo' );
 	}
 
 	/**

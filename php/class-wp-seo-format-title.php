@@ -9,7 +9,7 @@ class WP_SEO_Format_Title extends WP_SEO_Formatting_Tag {
 	public $tag = '#title#';
 
 	public function get_description() {
-		return __( 'Replaced with the title of the content being viewed.', 'wp-seo' );
+		return __( 'Replaced with the title of the post being viewed.', 'wp-seo' );
 	}
 
 	public function get_value() {

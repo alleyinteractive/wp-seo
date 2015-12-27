@@ -12,7 +12,7 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 	public $tag = '#author#';
 
 	public function get_description() {
-		return __( 'Replaced with the author name of the content or author archive being viewed.', 'wp-seo' );
+		return __( 'Replaced with the author name of the post or author archive being viewed.', 'wp-seo' );
 	}
 
 	/**
