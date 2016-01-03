@@ -17,7 +17,7 @@
 					.addClass( 'button-secondary wp-seo-add-repeatable' )
 					.text( wpSeo.l10n.addAnother )
 					.on( 'click', onClickAddRepeatable )
-				)
+			)
 		);
 	};
 
@@ -43,7 +43,7 @@
 					.addClass( 'button-link wp-seo-remove-repeated' )
 					.text( wpSeo.l10n.remove )
 					.on( 'click', onClickRemoveRepeatable )
-				)
+			)
 		);
 	};
 
