@@ -305,8 +305,8 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	private function get_default_options() {
 		$defaults = array(
-			'post_types' => $this->get_single_post_types(),
-			'taxonomies' => $this->get_taxonomies(),
+			'post_types' => $this->get_available_single_post_types(),
+			'taxonomies' => $this->get_available_taxonomies(),
 		);
 
 		/**
