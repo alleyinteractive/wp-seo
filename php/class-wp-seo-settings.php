@@ -140,9 +140,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		$post_types = $this->get_option( 'post_types', $this->get_available_single_post_types() );
 
 		// Remove post types that are saved but not enabled.
-		return array_filter( $post_types, function ( $name ) {
-			return in_array( $name, $this->get_available_single_post_types(), true );
-		} );
+		return array_filter( $post_types, array( $this, 'is_available_single_post_type' ) );
 	}
 
 	/**
@@ -154,9 +152,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		$taxonomies = $this->get_option( 'taxonomies', $this->get_available_taxonomies() );
 
 		// Remove taxonomies that are saved but not enabled.
-		return array_filter( $taxonomies, function ( $name ) {
-			return in_array( $name, $this->get_available_taxonomies(), true );
-		} );
+		return array_filter( $taxonomies, array( $this, 'is_available_taxonomy' ) );
 	}
 
 	/**
@@ -209,6 +205,16 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		 * @param array Post type names.
 		 */
 		return apply_filters( 'wp_seo_available_single_post_types', $post_types );
+	}
+
+	/**
+	 * Helper to check whether a post type supports setting SEO values on single posts.
+	 *
+	 * @param string $post_type Post type name.
+	 * @return bool
+	 */
+	public function is_available_single_post_type( $post_type ) {
+		return in_array( $post_type, $this->get_available_single_post_types(), true );
 	}
 
 	/**
@@ -278,6 +284,16 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		 * @param array Taxonomy names.
 		 */
 		return apply_filters( 'wp_seo_available_taxonomies', $taxonomies );
+	}
+
+	/**
+	 * Helper to check whether a taxonomy supports setting SEO values on term archives.
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 * @return bool
+	 */
+	public function is_available_taxonomy( $taxonomy ) {
+		return in_array( $taxonomy, $this->get_available_taxonomies(), true );
 	}
 
 	/**
