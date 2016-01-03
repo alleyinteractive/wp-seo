@@ -412,7 +412,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function render_text_field( $args, $value ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings_Page::do_text_field()' );
-		WP_SEO_Settings::instance()->do_text_field( '[' . $args['field'] . ']', $args['field'], $value );
+		WP_SEO_Settings_Page::instance()->do_text_field( '[' . $args['field'] . ']', $args['field'], $value );
 	}
 
 	/**
@@ -420,7 +420,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function render_textarea( $args, $value ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings_Page::do_textarea()' );
-		WP_SEO_Settings::instance()->do_textarea( '[' . $args['field'] . ']', $args['field'], $value );
+		WP_SEO_Settings_Page::instance()->do_textarea( '[' . $args['field'] . ']', $args['field'], $value );
 	}
 
 	/**
@@ -428,7 +428,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function render_checkboxes( $args, $values ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings_Page::do_checkboxes_for_objects()' );
-		WP_SEO_Settings::instance()->do_checkboxes_for_objects(
+		WP_SEO_Settings_Page::instance()->do_checkboxes_for_objects(
 			'[' . $args['field'] . ']',
 			$values,
 			$args['boxes']
