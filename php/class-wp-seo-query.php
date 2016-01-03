@@ -107,7 +107,7 @@ class WP_SEO_Query {
 		if ( $this->wp_query->is_singular() ) {
 			$post_type = get_post_type( $this->wp_query->get_queried_object() );
 
-			if ( WP_SEO_Settings()->has_post_fields( $post_type ) ) {
+			if ( wp_seo_settings()->has_post_fields( $post_type ) ) {
 				$post_id = $this->wp_query->get_queried_object_id();
 
 				$meta_title = get_post_meta( $post_id, '_meta_title', true );
@@ -143,15 +143,15 @@ class WP_SEO_Query {
 
 		if ( $this->key_prefix ) {
 			if ( ! $this->title ) {
-				$this->title = WP_SEO_Settings()->get_option( $this->key_prefix . 'title' );
+				$this->title = wp_seo_settings()->get_option( $this->key_prefix . 'title' );
 			}
 
 			if ( ! $this->description ) {
-				$this->description = WP_SEO_Settings()->get_option( $this->key_prefix . 'description' );
+				$this->description = wp_seo_settings()->get_option( $this->key_prefix . 'description' );
 			}
 
 			if ( ! $this->keywords ) {
-				$this->keywords = WP_SEO_Settings()->get_option( $this->key_prefix . 'keywords' );
+				$this->keywords = wp_seo_settings()->get_option( $this->key_prefix . 'keywords' );
 			}
 		}
 	}

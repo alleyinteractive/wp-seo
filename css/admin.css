@@ -1,0 +1,81 @@
+table.wp-seo-post-meta-fields {
+	width: 100%;
+}
+
+.wp-seo-post-meta-fields th {
+	padding: 3px;
+	text-align: right;
+	vertical-align: top;
+}
+
+.wp-seo-post-meta-fields textarea {
+	height: 4em;
+	width: 98%;
+}
+
+.wp-seo-post-meta-fields input {
+	width: 98%;
+}
+
+.wp-seo-arbitrary-tags .wp-seo-repeated {
+	margin-bottom: 1em;
+}
+
+.wp-seo-arbitrary-tags label {
+	display: inline-block;
+	font-style: italic;
+	min-width: 80px;
+}
+
+/* A button with the 'button-link' class that we make look like a link. */
+
+.wp-seo-arbitrary-tags .wp-seo-remove-repeated {
+	color: #0073aa;
+	font-size: smaller;
+	text-decoration: underline;
+}
+
+.wp-seo-arbitrary-tags .wp-seo-remove-repeated:active,
+.wp-seo-arbitrary-tags .wp-seo-remove-repeated:hover {
+	color: #00a0d2
+}
+
+.wp-seo-arbitrary-tags .wp-seo-remove-repeated:focus {
+	color: #124964;
+}
+
+/* Help menu. */
+
+#tab-panel-formatting-tags h1 {
+	font-size: 1.3em;
+	margin: 1em 0;
+}
+
+#tab-panel-formatting-tags .formatting-tag-name {
+	font-family: monospace;
+}
+
+/* Display formatting tags in the help menu in two columns on shorter screens */
+#tab-panel-formatting-tags .formatting-tags {
+	-webkit-column-count: 2;
+	-moz-column-count: 2;
+	column-count: 2;
+}
+
+@media screen and (min-height: 992px) {
+
+	#tab-panel-formatting-tags .formatting-tags {
+		-webkit-column-count: 1;
+		-moz-column-count: 1;
+		column-count: 1;
+	}
+
+}
+
+#tab-panel-formatting-tags .formatting-tag-wrapper {
+	-webkit-column-break-inside: avoid;
+	-moz-column-break-inside: avoid;
+	-o-column-break-inside: avoid;
+	-ms-column-break-inside: avoid;
+	column-break-inside: avoid;
+}
