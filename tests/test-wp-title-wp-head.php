@@ -148,7 +148,7 @@ EOF;
 	function test_no_format_string() {
 		add_filter( 'wp_seo_title_tag_format', '__return_false' );
 		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_title' => 'Foo' ) ) ) );
-		$this->_assert_title( 'Foo | Test Blog' );
+		$this->_assert_title( 'Foo | ' );
 		// WP_UnitTestCase::_restore_hooks() was introduced in 4.0.
 		remove_filter( 'wp_seo_title_tag_format', '__return_false' );
 	}
@@ -236,7 +236,7 @@ EOF;
 		delete_option( WP_SEO_Settings::SLUG );
 		WP_SEO_Settings()->set_options();
 
-		$this->go_to( '/' );
+		$this->go_to( get_permalink( $this->factory->post->create() ) );
 
 		// Uses a random $sep to be sure it couldn't have come from us.
 		$sep = rand_str();
