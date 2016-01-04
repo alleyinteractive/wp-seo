@@ -43,6 +43,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 			'title'    => 'Formatting Tags',
 			'content'   => '',
 			'callback' => array( WP_SEO_Settings(), 'view_formatting_tags_help_tab' ),
+			'priority' => 10,
 		) );
 	}
 
