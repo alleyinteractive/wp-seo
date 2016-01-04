@@ -245,4 +245,23 @@ EOF;
 		$this->assertEmpty( get_echo( array( WP_SEO(), 'wp_head' ) ) );
 	}
 
+	/**
+	 * Test that WP_SEO::meta_field() rejects non-string input.
+	 */
+	function test_invalid_meta_field() {
+		delete_option( WP_SEO_Settings::SLUG );
+		WP_SEO_Settings()->set_options();
+
+		update_option( WP_SEO_Settings::SLUG, array(
+			'arbitrary_tags' => array(
+				'name' => 'foo',
+				'value' => new WP_Error(),
+			),
+		) );
+
+		$this->go_to( '/' );
+
+		$this->assertEmpty( get_echo( array( WP_SEO(), 'wp_head' ) ) );
+	}
+
 }
