@@ -147,8 +147,10 @@ EOF;
 	// If there is no format string, return the original post title.
 	function test_no_format_string() {
 		add_filter( 'wp_seo_title_tag_format', '__return_false' );
-		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_title' => 'Foo' ) ) ) );
-		$this->_assert_title( 'Foo | Test Blog' );
+		$title = rand_str();
+		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_title' => $title ) ) ) );
+		// The site name doesn't appear in all versions we test against; just check for our title.
+		$this->assertContains( $title, wp_title( '&raquo;', false ) );
 		// WP_UnitTestCase::_restore_hooks() was introduced in 4.0.
 		remove_filter( 'wp_seo_title_tag_format', '__return_false' );
 	}
@@ -236,11 +238,30 @@ EOF;
 		delete_option( WP_SEO_Settings::SLUG );
 		WP_SEO_Settings()->set_options();
 
-		$this->go_to( '/' );
+		$this->go_to( get_permalink( $this->factory->post->create() ) );
 
 		// Uses a random $sep to be sure it couldn't have come from us.
 		$sep = rand_str();
 		$this->assertContains( $sep, wp_title( $sep, false ) );
+
+		$this->assertEmpty( get_echo( array( WP_SEO(), 'wp_head' ) ) );
+	}
+
+	/**
+	 * Test that WP_SEO::meta_field() rejects non-string input.
+	 */
+	function test_invalid_meta_field() {
+		delete_option( WP_SEO_Settings::SLUG );
+		WP_SEO_Settings()->set_options();
+
+		update_option( WP_SEO_Settings::SLUG, array(
+			'arbitrary_tags' => array(
+				'name' => 'foo',
+				'value' => new WP_Error(),
+			),
+		) );
+
+		$this->go_to( '/' );
 
 		$this->assertEmpty( get_echo( array( WP_SEO(), 'wp_head' ) ) );
 	}

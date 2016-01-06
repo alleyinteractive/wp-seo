@@ -38,7 +38,14 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	function test_add_help_tab() {
 		set_current_screen( 'front' );
 		WP_SEO_Settings()->add_help_tab();
-		$this->assertEquals( get_current_screen()->get_help_tab( 'formatting-tags' ), array(
+
+		$actual = get_current_screen()->get_help_tab( 'formatting-tags' );
+		// Not all versions we test against include the priority.
+		if ( isset( $actual['priority'] ) ) {
+			unset( $actual['priority'] );
+		}
+
+		$this->assertEquals( $actual, array(
 			'id'       => 'formatting-tags',
 			'title'    => 'Formatting Tags',
 			'content'   => '',
