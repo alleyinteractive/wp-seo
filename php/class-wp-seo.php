@@ -79,6 +79,7 @@ class WP_SEO {
 			add_action( 'admin_init', array( $this, 'add_term_boxes' ) );
 		}
 
+		add_filter( 'pre_get_document_title', array( $this, 'pre_get_document_title' ), 20 );
 		add_filter( 'wp_title', array( $this, 'wp_title' ), 20, 2 );
 		add_filter( 'wp_head', array( $this, 'wp_head' ), 5 );
 	}
@@ -508,6 +509,23 @@ class WP_SEO {
 			if ( $title_tag && ! is_wp_error( $title_tag ) ) {
 				$title = $title_tag;
 			}
+		}
+
+		return $title;
+	}
+
+	/**
+	 * Filter the document title before it is generated.
+	 *
+	 * @param string $title The document title. Default empty string.
+	 * @return string The custom title, if any, or the received $title if none exists.
+	 */
+	public function pre_get_document_title( $title ) {
+		// We can lean on the logic already in WP_SEO::wp_title().
+		$custom = $this->wp_title( $title, '' );
+
+		if ( $custom ) {
+			$title = $custom;
 		}
 
 		return $title;
