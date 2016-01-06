@@ -522,6 +522,10 @@ class WP_SEO {
 	 * @param  string $content The content of the "content" attribute.
 	 */
 	private function meta_field( $name, $content ) {
+		if ( ! is_string( $name ) || ! is_string( $content ) ) {
+			return;
+		}
+
 		echo "<meta name='" . esc_attr( $name ) . "' content='" . esc_attr( $content ) . "' />\n";
 	}
 
