@@ -147,8 +147,10 @@ EOF;
 	// If there is no format string, return the original post title.
 	function test_no_format_string() {
 		add_filter( 'wp_seo_title_tag_format', '__return_false' );
-		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_title' => 'Foo' ) ) ) );
-		$this->_assert_title( 'Foo | ' );
+		$title = rand_str();
+		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_title' => $title ) ) ) );
+		// The site name doesn't appear in all versions we test against; just check for our title.
+		$this->assertContains( $title, wp_title( '&raquo;', false ) );
 		// WP_UnitTestCase::_restore_hooks() was introduced in 4.0.
 		remove_filter( 'wp_seo_title_tag_format', '__return_false' );
 	}
