@@ -80,6 +80,10 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	 */
 	function _assert_title( $title ) {
 		$this->assertSame( $title, wp_title( '|', false, 'right' ) );
+
+		if ( function_exists( 'wp_get_document_title' ) ) {
+			$this->assertSame( $title, wp_get_document_title() );
+		}
 	}
 
 	/**
