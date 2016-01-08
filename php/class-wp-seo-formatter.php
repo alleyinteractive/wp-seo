@@ -17,7 +17,7 @@ class WP_SEO_Formatter extends WP_SEO_Singleton {
 	 */
 	public function format( $string ) {
 		if ( ! is_string( $string ) ) {
-			return new WP_Error( 'format_error', __( "Please don't try to format() a non-string.", 'wp-seo' ) );
+			return new WP_Error( 'invalid_argument', __( 'Tried to format() a non-string', 'wp-seo' ) );
 		}
 
 		$raw_string = $string;
