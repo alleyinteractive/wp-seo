@@ -140,9 +140,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		$post_types = $this->get_option( 'post_types', $this->get_available_single_post_types() );
 
 		// Remove post types that are saved but not enabled.
-		return array_filter( $post_types, function ( $name ) {
-			return in_array( $name, $this->get_available_single_post_types(), true );
-		} );
+		return array_filter( $post_types, array( $this, 'is_available_single_post_type' ) );
 	}
 
 	/**
@@ -154,9 +152,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		$taxonomies = $this->get_option( 'taxonomies', $this->get_available_taxonomies() );
 
 		// Remove taxonomies that are saved but not enabled.
-		return array_filter( $taxonomies, function ( $name ) {
-			return in_array( $name, $this->get_available_taxonomies(), true );
-		} );
+		return array_filter( $taxonomies, array( $this, 'is_available_taxonomy' ) );
 	}
 
 	/**
@@ -209,6 +205,16 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 		 * @param array Post type names.
 		 */
 		return apply_filters( 'wp_seo_available_single_post_types', $post_types );
+	}
+
+	/**
+	 * Helper to check whether a post type supports setting SEO values on single posts.
+	 *
+	 * @param string $post_type Post type name.
+	 * @return bool
+	 */
+	public function is_available_single_post_type( $post_type ) {
+		return in_array( $post_type, $this->get_available_single_post_types(), true );
 	}
 
 	/**
@@ -281,6 +287,16 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	}
 
 	/**
+	 * Helper to check whether a taxonomy supports setting SEO values on term archives.
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 * @return bool
+	 */
+	public function is_available_taxonomy( $taxonomy ) {
+		return in_array( $taxonomy, $this->get_available_taxonomies(), true );
+	}
+
+	/**
 	 * Get the default plugin options.
 	 *
 	 * Used when, for example, no option value exists in the database.
@@ -289,8 +305,8 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	private function get_default_options() {
 		$defaults = array(
-			'post_types' => $this->get_single_post_types(),
-			'taxonomies' => $this->get_taxonomies(),
+			'post_types' => $this->get_available_single_post_types(),
+			'taxonomies' => $this->get_available_taxonomies(),
 		);
 
 		/**
@@ -396,7 +412,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function render_text_field( $args, $value ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings_Page::do_text_field()' );
-		WP_SEO_Settings::instance()->do_text_field( '[' . $args['field'] . ']', $args['field'], $value );
+		WP_SEO_Settings_Page::instance()->do_text_field( '[' . $args['field'] . ']', $args['field'], $value );
 	}
 
 	/**
@@ -404,7 +420,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function render_textarea( $args, $value ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings_Page::do_textarea()' );
-		WP_SEO_Settings::instance()->do_textarea( '[' . $args['field'] . ']', $args['field'], $value );
+		WP_SEO_Settings_Page::instance()->do_textarea( '[' . $args['field'] . ']', $args['field'], $value );
 	}
 
 	/**
@@ -412,7 +428,7 @@ class WP_SEO_Settings extends WP_SEO_Singleton {
 	 */
 	public function render_checkboxes( $args, $values ) {
 		_deprecated_function( __FUNCTION__, '1.0', 'WP_SEO_Settings_Page::do_checkboxes_for_objects()' );
-		WP_SEO_Settings::instance()->do_checkboxes_for_objects(
+		WP_SEO_Settings_Page::instance()->do_checkboxes_for_objects(
 			'[' . $args['field'] . ']',
 			$values,
 			$args['boxes']
