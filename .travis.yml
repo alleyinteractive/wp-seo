@@ -2,26 +2,20 @@ sudo: false
 
 language: php
 
+branches:
+    only:
+        - master
 php:
     - 5.3
-    - 5.4
-    - 5.5
     - 5.6
+    - 7.0
 
 env:
-    - WP_VERSION=master WP_MULTISITE=0
-    - WP_VERSION=master WP_MULTISITE=1
-    - WP_VERSION=4.4 WP_MULTISITE=0
-    - WP_VERSION=4.4 WP_MULTISITE=1
-    - WP_VERSION=4.3 WP_MULTISITE=0
-    - WP_VERSION=4.3 WP_MULTISITE=1
+    - WP_VERSION=master
+    - WP_VERSION=4.5
+    - WP_VERSION=4.4
 
 matrix:
-    include:
-        - php: 7.0
-          env: WP_VERSION=master
-    allow_failures:
-        - php: 7.0
     fast_finish: true
 
 before_script:
@@ -34,4 +28,7 @@ before_script:
     - sed -i "s/yourusernamehere/travis/" /tmp/wordpress/wp-tests-config.php
     - sed -i "s/yourpasswordhere//" /tmp/wordpress/wp-tests-config.php
 
-script: phpunit
+script:
+    - find . -type "f" -iname "*.php" | xargs -L "1" php -l; fi
+    - phpunit
+    - export WP_MULTISITE=1 && phpunit
