@@ -30,5 +30,5 @@ before_script:
 
 script:
     - find . -type "f" -iname "*.php" | xargs -L "1" php -l
-    - phpunit
+    - export WP_MULTISITE=0 && phpunit
     - export WP_MULTISITE=1 && phpunit
