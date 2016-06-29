@@ -16,7 +16,7 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 	}
 
 	/**
-	 * Combines the post_id_to_* and term_data_to_* data providers..
+	 * Combines the post_id_to_* and term_data_to_* data providers.
 	 */
 	function data_post_id_to_and_term_data_to() {
 		return array_merge( $this->data_post_id_to_functions(), $this->data_term_data_to_functions() );
@@ -53,7 +53,7 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 			array(
 				'wp_seo_post_id_to_the_title_character_count',
 				'Should count the title value in post meta',
-				strlen( $meta_title ),
+				(string) strlen( $meta_title ),
 				array( $post_id ),
 			),
 			array(
@@ -65,7 +65,7 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 			array(
 				'wp_seo_post_id_to_the_description_character_count',
 				'Should count the description value in post meta',
-				strlen( $meta_description ),
+				(string) strlen( $meta_description ),
 				array( $post_id ),
 			),
 			array(
@@ -105,7 +105,7 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 			array(
 				'wp_seo_term_data_to_the_title_character_count',
 				'Should count the title value in the term options',
-				strlen( $title ),
+				(string) strlen( $title ),
 				array( $term->term_id, $term->taxonomy ),
 			),
 			array(
@@ -117,7 +117,7 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 			array(
 				'wp_seo_term_data_to_the_description_character_count',
 				'Should count the description value in the term options',
-				strlen( $description ),
+				(string) strlen( $description ),
 				array( $term->term_id, $term->taxonomy ),
 			),
 			array(
