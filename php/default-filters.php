@@ -9,6 +9,8 @@
  * @package WP_SEO
  */
 
+add_action( 'admin_init',                                                       'wp_seo_load_admin_files', 0 );
+
 add_action( 'wp_seo_post_meta_fields',                                          'wp_seo_the_post_meta_fields' );
 add_action( 'wp_seo_post_meta_fields_title_label',                              'wp_seo_the_meta_title_label' );
 add_action( 'wp_seo_post_meta_fields_title_input',                              'wp_seo_post_id_to_the_meta_title_input' );

@@ -31,6 +31,7 @@ require_once $_tests_dir . '/includes/functions.php';
 
 function _manually_load_plugin() {
 	require dirname( __FILE__ ) . '/../wp-seo.php';
+	wp_seo_load_admin_files();
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
