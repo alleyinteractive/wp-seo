@@ -3,7 +3,7 @@
 	Plugin Name: WP SEO
 	Plugin URI: https://github.com/alleyinteractive/wp-seo
 	Description: An SEO plugin that stays out of your way. Just the facts, Jack.
-	Version: 0.9.0
+	Version: 0.11.0
 	Author: Alley Interactive, Matthew Boynes, David Herrera
 	Author URI: http://www.alleyinteractive.com/
 */
@@ -25,6 +25,9 @@
 define( 'WP_SEO_PATH', dirname( __FILE__ ) );
 define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
 
+// Behind-the-scenes functions.
+require_once WP_SEO_PATH . '/php/internal-functions.php';
+
 // Core filters for the page title and meta tags, and post and term metaboxes.
 require_once WP_SEO_PATH . '/php/class-wp-seo.php';
 
@@ -36,6 +39,12 @@ require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
 
 // Included formatting tags.
 require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
+
+// General functions.
+require_once WP_SEO_PATH . '/php/general-functions.php';
+
+// The plugin's default filters.
+require_once WP_SEO_PATH . '/php/default-filters.php';
 
 function wp_seo_admin_scripts() {
 	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.9.0', true );

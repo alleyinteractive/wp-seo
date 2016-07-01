@@ -2,8 +2,8 @@
 Contributors: alleyinteractive, mboynes, dlh
 Tags: seo
 Requires at least: 3.9.1
-Tested up to: 4.4.0
-Stable tag: 0.10.0
+Tested up to: 4.5.0
+Stable tag: 0.11.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,6 +102,9 @@ Use the "Remove group" button, or just remove the field content, to remove a cus
 3. Setting title and meta fields for a post
 
 == Changelog ==
+
+= 0.11.0 =
+* Add hooks for customizing post- and term-field markup.
 
 = 0.10.0 =
 * Add support for title tags generated with `wp_get_document_title()`, introduced in WordPress 4.4.
