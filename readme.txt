@@ -103,6 +103,9 @@ Use the "Remove group" button, or just remove the field content, to remove a cus
 
 == Changelog ==
 
+= Unreleased =
+* Fixed: Update to latest Underscore `_.template()` syntax.
+
 = 0.11.0 =
 * Add hooks for customizing post- and term-field markup.
 
