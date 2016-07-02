@@ -1,4 +1,5 @@
 ;jQuery( function( $ ) {
+	var $wp_seo_settings = $( '#wp_seo_settings' );
 
 	/**
 	 * Get a link to an "Add another repeatable group" link.
@@ -57,7 +58,7 @@
 	/**
 	 * Add a repeatable group on click.
 	 */
-	$( '#wp_seo_settings' ).on( 'click', '.wp-seo-add', function( e ) {
+	$wp_seo_settings.on( 'click', '.wp-seo-add', function( e ) {
 		e.preventDefault();
 		var $tpl = $( this ).siblings( '.wp-seo-template' );
 		var html = _.template( $tpl.html() );
@@ -69,7 +70,7 @@
 	/**
 	 * Remove a repeatable group on click.
 	 */
-	$( '#wp_seo_settings' ).on( 'click', '.wp-seo-delete', function( e ) {
+	$wp_seo_settings.on( 'click', '.wp-seo-delete', function( e ) {
 		e.preventDefault();
 		$( this ).parent().hide( 'fast', function(){
 			$parent = $( this ).parent();
