@@ -3,7 +3,7 @@ Contributors: alleyinteractive, mboynes, dlh
 Tags: seo
 Requires at least: 3.9.1
 Tested up to: 4.5.0
-Stable tag: 0.11.0
+Stable tag: 0.11.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,7 +103,7 @@ Use the "Remove group" button, or just remove the field content, to remove a cus
 
 == Changelog ==
 
-= Unreleased =
+= 0.11.1 =
 * Fixed: Update to latest Underscore `_.template()` syntax.
 
 = 0.11.0 =
