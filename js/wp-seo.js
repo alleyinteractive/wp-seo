@@ -60,9 +60,9 @@
 	$( '#wp_seo_settings' ).on( 'click', '.wp-seo-add', function( e ) {
 		e.preventDefault();
 		var $tpl = $( this ).siblings( '.wp-seo-template' );
-		var html = _.template( $tpl.html(), { i: $tpl.data( 'start' ) } );
+		var html = _.template( $tpl.html() );
 		$tpl.data( 'start', $tpl.data( 'start' ) + 1 );
-		$( this ).siblings( '.nodes' ).append( html );
+		$( this ).siblings( '.nodes' ).append( html( { i: $tpl.data( 'start' ) } ) );
 		wp_seo_toggle_removes( $( this ).siblings( '.nodes' ) );
 	} );
 
