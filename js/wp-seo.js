@@ -1,4 +1,14 @@
 ;jQuery( function( $ ) {
+	var $wp_seo_settings = $( '#wp_seo_settings' );
+
+	/**
+	 * Rename the 'search' class applied to the "Search Results" accordion
+	 * section, as it conflicts with a class name in WordPress core.
+	 */
+	$wp_seo_settings
+		.find( '.accordion-section.search' )
+		.removeClass( 'search' )
+		.addClass( 'search-results' );
 
 	/**
 	 * Get a link to an "Add another repeatable group" link.
@@ -57,7 +67,7 @@
 	/**
 	 * Add a repeatable group on click.
 	 */
-	$( '#wp_seo_settings' ).on( 'click', '.wp-seo-add', function( e ) {
+	$wp_seo_settings.on( 'click', '.wp-seo-add', function( e ) {
 		e.preventDefault();
 		var $tpl = $( this ).siblings( '.wp-seo-template' );
 		var html = _.template( $tpl.html() );
@@ -69,7 +79,7 @@
 	/**
 	 * Remove a repeatable group on click.
 	 */
-	$( '#wp_seo_settings' ).on( 'click', '.wp-seo-delete', function( e ) {
+	$wp_seo_settings.on( 'click', '.wp-seo-delete', function( e ) {
 		e.preventDefault();
 		$( this ).parent().hide( 'fast', function(){
 			$parent = $( this ).parent();
@@ -77,5 +87,4 @@
 			wp_seo_toggle_removes( $parent );
 		} );
 	} );
-
 } );
