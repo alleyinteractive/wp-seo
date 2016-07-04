@@ -2,6 +2,15 @@
 	var $wp_seo_settings = $( '#wp_seo_settings' );
 
 	/**
+	 * Rename the 'search' class applied to the "Search Results" accordion
+	 * section, as it conflicts with a class name in WordPress core.
+	 */
+	$wp_seo_settings
+		.find( '.accordion-section.search' )
+		.removeClass( 'search' )
+		.addClass( 'search-results' );
+
+	/**
 	 * Get a link to an "Add another repeatable group" link.
 	 *
 	 * @return {String}
@@ -78,5 +87,4 @@
 			wp_seo_toggle_removes( $parent );
 		} );
 	} );
-
 } );
