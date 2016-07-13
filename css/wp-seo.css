@@ -23,3 +23,11 @@ table.wp-seo-post-meta-fields { width: 100%; }
 	-ms-column-break-inside: avoid;
 	column-break-inside: avoid;
 }
+
+#wp_seo_settings .accordion-section.search {
+	/**
+	 * Reset font size to the value normally inherited by `.accordion-section`.
+	 * Otherise, it inherits the base size given to `.search` in common.css.
+	 */
+	font-size: 13px;
+}
