@@ -482,7 +482,7 @@ class WP_SEO {
 			return;
 		}
 
-		echo "<meta name='" . esc_attr( $name ) . "' content='" . esc_attr( $content ) . "' />\n";
+		echo "<meta name='" . esc_attr( $name ) . "' content='" . esc_attr( $content ) . "' /><!-- WP SEO -->\n";
 	}
 
 	/**

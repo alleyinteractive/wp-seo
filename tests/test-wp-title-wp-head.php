@@ -94,9 +94,9 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	 */
 	function _assert_all_meta( $description, $keywords ) {
 		$expected = <<<EOF
-<meta name='description' content='{$description}' />
-<meta name='keywords' content='{$keywords}' />
-<meta name='demo arbitrary title' content='demo arbitrary content' />
+<meta name='description' content='{$description}' /><!-- WP SEO -->
+<meta name='keywords' content='{$keywords}' /><!-- WP SEO -->
+<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
 EOF;
 		$this->assertSame( strip_ws( $expected ), strip_ws( get_echo( array( WP_SEO(), 'wp_head' ) ) ) );
 	}
@@ -106,7 +106,7 @@ EOF;
 	 */
 	function _assert_arbitrary_meta() {
 				$expected = <<<EOF
-<meta name='demo arbitrary title' content='demo arbitrary content' />
+<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
 EOF;
 		$this->assertSame( strip_ws( $expected ), strip_ws( get_echo( array( WP_SEO(), 'wp_head' ) ) ) );
 	}
