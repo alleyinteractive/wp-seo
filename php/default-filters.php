@@ -6,7 +6,7 @@
  *
  * Not all of the default hooks are here (yet).
  *
- * @since 0.11.3-beta1 Some hooks in this file might change to support new
+ * @since 0.11.3-beta1 Some hooks in this file may change to support new
  *    features in an upcoming version of WP SEO. The release notes will include
  *    details about these changes.
  *
