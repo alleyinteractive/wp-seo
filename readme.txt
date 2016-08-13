@@ -103,6 +103,9 @@ Use the "Remove group" button, or just remove the field content, to remove a cus
 
 == Changelog ==
 
+= 0.11.3-beta1 =
+* Changed: Announced planned changes to default filters.
+
 = 0.11.2 =
 * Fixed: On the settings page, make the "Search" section heading's font size consistent with other section headings.
 
