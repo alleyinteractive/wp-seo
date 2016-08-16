@@ -474,6 +474,8 @@ class WP_SEO {
 	 *
 	 * @access private.
 	 *
+	 * @since 0.12.0 An HTML comment was added to the output.
+	 *
 	 * @param  string $name  The content of the "name" attribute.
 	 * @param  string $content The content of the "content" attribute.
 	 */
