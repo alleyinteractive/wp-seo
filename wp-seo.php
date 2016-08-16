@@ -43,6 +43,9 @@ require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
 // General functions.
 require_once WP_SEO_PATH . '/php/general-functions.php';
 
+// Formatting functions.
+require_once WP_SEO_PATH . '/php/formatting-functions.php';
+
 // The plugin's default filters.
 require_once WP_SEO_PATH . '/php/default-filters.php';
 
