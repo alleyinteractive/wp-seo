@@ -105,6 +105,7 @@ Use the "Remove group" button, or just remove the field content, to remove a cus
 
 = Unreleased =
 * Added: Print an HTML comment next to WP SEO meta tags to help spot them while debugging.
+* Fixed: Added translator comments to strings with placeholders.
 
 = 0.11.3-beta1 =
 * Changed: Announced planned changes to default filters.
