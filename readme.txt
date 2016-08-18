@@ -97,6 +97,22 @@ Use the "Add another" button to add as many custom `<meta>` tags as you need.
 
 Use the "Remove group" button, or just remove the field content, to remove a custom `<meta>` tag.
 
+== Frequently Asked Questions ==
+
+= How can I change who has access to the SEO settings page? =
+
+In your plugin or theme, return your capability of choice to the `'wp_seo_options_capability'` filter. For example:
+
+	// Allow users with the 'edit_posts' capability to access Settings > SEO.
+	add_filter( 'wp_seo_options_capability', function () {
+		return 'edit_posts';
+	} );
+
+	// Do not allow anyone to access Settings > SEO.
+	add_filter( 'wp_seo_options_capability', function () {
+		return 'do_not_allow';
+	} );
+
 == Formatting Tag "Safe Mode" ==
 
 You can enable formatting tag "safe mode" by calling `wp_seo_enable_formatting_tag_safe_mode()` in your plugin or theme. For example: `add_action( 'template_redirect', 'wp_seo_enable_formatting_tag_safe_mode' )`.
