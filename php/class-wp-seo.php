@@ -357,13 +357,13 @@ class WP_SEO {
 
 		$raw_string = $string;
 
-		preg_match_all( $this->formatting_tag_pattern, $string, $matches );
-		if ( empty( $matches[0] ) ) {
+		$matches = wp_seo_match_all_formatting_tags( $string );
+		if ( empty( $matches ) ) {
 			return $string;
 		}
 
 		$replacements = array();
-		$unique_matches = array_unique( $matches[0] );
+		$unique_matches = array_unique( $matches );
 
 		foreach( $this->formatting_tags as $id => $tag ) {
 			if ( ! empty( $tag->tag ) && in_array( $tag->tag, $unique_matches ) ) {
@@ -473,6 +473,8 @@ class WP_SEO {
 	 * Render a <meta /> field.
 	 *
 	 * @access private.
+	 *
+	 * @since 0.12.0 An HTML comment was added to the output.
 	 *
 	 * @param  string $name  The content of the "name" attribute.
 	 * @param  string $content The content of the "content" attribute.
