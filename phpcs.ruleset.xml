@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<ruleset name="WP SEO">
+	<description>PHP_CodeSniffer standard for the WP SEO plugin</description>
+
+	<file>wp-seo.php</file>
+	<file>php/</file>
+
+	<rule ref="WordPress" />
+</ruleset>
