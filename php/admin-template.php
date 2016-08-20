@@ -159,8 +159,8 @@ function wp_seo_the_add_term_meta_fields( $taxonomy ) {
 /**
  * Prints markup and fires actions to place the default WP SEO fields on the edit-term screen.
  *
- * @param WP_Term $tag The term object.
- * @param string $taxonomy The taxonomy slug.
+ * @param WP_Term $tag      The term object.
+ * @param string  $taxonomy The taxonomy slug.
  */
 function wp_seo_the_edit_term_meta_fields( $tag, $taxonomy ) {
 	?>
