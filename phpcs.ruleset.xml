@@ -5,5 +5,8 @@
 	<file>wp-seo.php</file>
 	<file>php/</file>
 
-	<rule ref="WordPress" />
+	<rule ref="WordPress">
+		<!-- This plugin can be used in environments without wpcom_vip_get_term_link(). -->
+		<exclude name="WordPress.VIP.RestrictedFunctions.get_term_link" />
+	</rule>
 </ruleset>
