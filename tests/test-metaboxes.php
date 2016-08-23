@@ -145,7 +145,7 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$description = 'What is Folder\SubFolder\File.txt?';
 		$keywords = '';
 
-		// Successful save data with slashes. add_magic_quotes() to simulate wp_magic_quotes().
+		// Successfully save data with slashes. add_magic_quotes() to simulate wp_magic_quotes().
 		$_POST['seo_meta'] = add_magic_quotes( array(
 			'title'       => $title,
 			'description' => $description,
