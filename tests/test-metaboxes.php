@@ -128,13 +128,30 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$description = rand_str();
 		$keywords = rand_str();
 
-		$_POST['seo_meta'] = array(
+		// add_magic_quotes() to simulate wp_magic_quotes().
+		$_POST['seo_meta'] = add_magic_quotes( array(
 			'title' => $title,
 			'description' => $description . '<script>meta</script>',
 			'keywords' => $keywords,
-		);
+		) );
 
 		// Successful save.
+		WP_SEO()->save_post_fields( $post_ID );
+		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
+		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
+		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
+
+		$title = "Is your name O'Reilly?";
+		$description = 'What is Folder\SubFolder\File.txt?';
+		$keywords = '';
+
+		// Successful save data with slashes. add_magic_quotes() to simulate wp_magic_quotes().
+		$_POST['seo_meta'] = add_magic_quotes( array(
+			'title'       => $title,
+			'description' => $description,
+			'keywords'    => $keywords,
+		) );
+
 		WP_SEO()->save_post_fields( $post_ID );
 		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
 		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );

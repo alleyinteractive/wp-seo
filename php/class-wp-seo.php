@@ -227,8 +227,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			}
 
 			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
-				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( $_POST['seo_meta'][ $field ] ) : '';
-				update_post_meta( $post_id, '_meta_' . $field, $data );
+				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
+				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
 			}
 		}
 
