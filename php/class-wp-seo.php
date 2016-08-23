@@ -1,9 +1,13 @@
 <?php
+/**
+ * Class file for WP_SEO.
+ *
+ * @package WP_SEO
+ */
+
 if ( ! class_exists( 'WP_SEO' ) ) :
 	/**
-	 * WP SEO Core Functionality
-	 *
-	 * @package WP SEO
+	 * WP SEO core functionality.
 	 */
 	class WP_SEO {
 
@@ -29,23 +33,35 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public $formatting_tag_pattern = '';
 
 		/**
+		 * Unused.
+		 *
 		 * @codeCoverageIgnore
 		 */
 		private function __construct() {
-			/* Don't do anything, needs to be initialized via instance() method */
+			// Don't do anything, needs to be initialized via instance() method.
 		}
 
 		/**
+		 * Unused.
+		 *
 		 * @codeCoverageIgnore
 		 */
-		public function __clone() { wp_die( __( "Please don't __clone WP_SEO", "wp-seo" ) ); }
+		public function __clone() {
+			wp_die( esc_html__( "Please don't __clone WP_SEO", 'wp-seo' ) );
+		}
 
 		/**
+		 * Unused.
+		 *
 		 * @codeCoverageIgnore
 		 */
-		public function __wakeup() { wp_die( __( "Please don't __wakeup WP_SEO", "wp-seo" ) ); }
+		public function __wakeup() {
+			wp_die( esc_html__( "Please don't __wakeup WP_SEO", 'wp-seo' ) );
+		}
 
 		/**
+		 * Get the instance of this class.
+		 *
 		 * @codeCoverageIgnore
 		 */
 		public static function instance() {
@@ -111,7 +127,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		/**
 		 * Get the WP SEO term option value for a given term.
 		 *
-		 * @param int $term_id Term ID.
+		 * @param int    $term_id  Term ID.
 		 * @param string $taxonomy Term taxonomy.
 		 * @return mixed The get_option() return value for the given term data.
 		 */
@@ -191,20 +207,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @param  int $post_id The post ID being edited.
 		 */
 		public function save_post_fields( $post_id ) {
-			if ( ! isset( $_POST['post_type'] ) ) {
-				return;
-			}
-
 			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-				return;
-			}
-
-			if ( ! WP_SEO_Settings()->has_post_fields( $_POST['post_type'] ) ) {
-				return;
-			}
-
-			$post_type = get_post_type_object( $_POST['post_type'] );
-			if ( empty( $post_type->cap->edit_post ) || ! current_user_can( $post_type->cap->edit_post, $post_id ) ) {
 				return;
 			}
 
@@ -212,7 +215,22 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				return;
 			}
 
-			if ( ! wp_verify_nonce( $_POST['wp-seo-nonce'], plugin_basename( __FILE__ ) ) ) {
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wp-seo-nonce'] ) ), plugin_basename( __FILE__ ) ) ) {
+				return;
+			}
+
+			if ( ! isset( $_POST['post_type'] ) ) {
+				return;
+			}
+
+			$post_type = sanitize_text_field( wp_unslash( $_POST['post_type'] ) );
+
+			if ( ! WP_SEO_Settings()->has_post_fields( $post_type ) ) {
+				return;
+			}
+
+			$post_type_obj = get_post_type_object( $post_type );
+			if ( empty( $post_type_obj->cap->edit_post ) || ! current_user_can( $post_type_obj->cap->edit_post, $post_id ) ) {
 				return;
 			}
 
@@ -247,7 +265,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		/**
 		 * Helper to construct an option name for per-term SEO fields.
 		 *
-		 * @param  object $term The term object
+		 * @param WP_Term $term The term object.
 		 * @return string The option name
 		 */
 		public function get_term_option_name( $term ) {
@@ -273,8 +291,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		/**
 		 * Display the SEO fields for editing a term.
 		 *
-		 * @param  object $tag The term object
-		 * @param  string $taxonomy The taxonomy slug
+		 * @param WP_Term $tag      The term object.
+		 * @param string  $taxonomy The taxonomy slug.
 		 */
 		public function edit_term_meta_fields( $tag, $taxonomy ) {
 			wp_nonce_field( plugin_basename( __FILE__ ), 'wp-seo-nonce' );
@@ -294,9 +312,9 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @see wp_unslash(), which the Settings API and update_post_meta()
 		 *     otherwise handle.
 		 *
-		 * @param  int $term_id Term ID.
-		 * @param  int $tt_id Term taxonomy ID.
-		 * @param  string $taxonomy Taxonomy slug.
+		 * @param int    $term_id  Term ID.
+		 * @param int    $tt_id    Term taxonomy ID.
+		 * @param string $taxonomy Taxonomy slug.
 		 */
 		public function save_term_fields( $term_id, $tt_id, $taxonomy ) {
 			if ( ! isset( $_POST['taxonomy'] ) ) {
@@ -320,7 +338,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				return;
 			}
 
-			if ( ! wp_verify_nonce( $_POST['wp-seo-nonce'], plugin_basename( __FILE__ ) ) ) {
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wp-seo-nonce'] ) ), plugin_basename( __FILE__ ) ) ) {
 				return;
 			}
 
@@ -365,7 +383,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			$replacements = array();
 			$unique_matches = array_unique( $matches );
 
-			foreach( $this->formatting_tags as $id => $tag ) {
+			foreach ( $this->formatting_tags as $id => $tag ) {
 				if ( ! empty( $tag->tag ) && in_array( $tag->tag, $unique_matches ) ) {
 					/**
 					 * Filter the value of a formatting tag for the current page.
@@ -573,8 +591,13 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 
 	}
 
-	function WP_SEO() {
+	/**
+	 * Helper function to use the class instance.
+	 *
+	 * @return WP_SEO
+	 */
+	function wp_seo() {
 		return WP_SEO::instance();
 	}
-	add_action( 'after_setup_theme', 'WP_SEO' );
+	add_action( 'after_setup_theme', 'wp_seo' );
 endif;
