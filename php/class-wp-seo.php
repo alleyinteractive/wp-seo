@@ -10,7 +10,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 	 * WP SEO core functionality.
 	 */
 	class WP_SEO {
-
 		/**
 		 * Instance of this class.
 		 *
@@ -588,7 +587,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			}
 
 		}
-
 	}
 
 	/**

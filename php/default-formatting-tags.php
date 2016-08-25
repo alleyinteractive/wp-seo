@@ -11,7 +11,6 @@
  * Formatting tag for the site name.
  */
 class WP_SEO_Format_Site_Name extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -36,14 +35,12 @@ class WP_SEO_Format_Site_Name extends WP_SEO_Formatting_Tag {
 	public function get_value() {
 		return get_bloginfo( 'name' );
 	}
-
 }
 
 /**
  * Formatting tag for the site description.
  */
 class WP_SEO_Format_Site_Description extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -68,14 +65,12 @@ class WP_SEO_Format_Site_Description extends WP_SEO_Formatting_Tag {
 	public function get_value() {
 		return get_bloginfo( 'description' );
 	}
-
 }
 
 /**
  * Formatting tag for a post's title.
  */
 class WP_SEO_Format_Title extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -104,14 +99,12 @@ class WP_SEO_Format_Title extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a post's excerpt.
  */
 class WP_SEO_Format_Excerpt extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -156,7 +149,6 @@ class WP_SEO_Format_Excerpt extends WP_SEO_Formatting_Tag {
  * Formatting tag for a post's publish date.
  */
 class WP_SEO_Format_Date_Published extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -185,14 +177,12 @@ class WP_SEO_Format_Date_Published extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a post's modified date.
  */
 class WP_SEO_Format_Date_Modified extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -221,14 +211,12 @@ class WP_SEO_Format_Date_Modified extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a post's author.
  */
 class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -271,14 +259,12 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a post's categories.
  */
 class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -307,7 +293,6 @@ class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
@@ -343,14 +328,12 @@ class WP_SEO_Format_Tags extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a term's name.
  */
 class WP_SEO_Format_Term_Name extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -379,14 +362,12 @@ class WP_SEO_Format_Term_Name extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a term's description.
  */
 class WP_SEO_Format_Term_Description extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -415,14 +396,12 @@ class WP_SEO_Format_Term_Description extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a post type's singular name.
  */
 class WP_SEO_Format_Post_Type_Singular_Name extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -453,14 +432,12 @@ class WP_SEO_Format_Post_Type_Singular_Name extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a post type's plural name.
  */
 class WP_SEO_Format_Post_Type_Plural_Name extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -491,14 +468,12 @@ class WP_SEO_Format_Post_Type_Plural_Name extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for the date of a date archive.
  */
 class WP_SEO_Format_Archive_Date extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -533,14 +508,12 @@ class WP_SEO_Format_Archive_Date extends WP_SEO_Formatting_Tag {
 
 		return false;
 	}
-
 }
 
 /**
  * Formatting tag for a user's search term.
  */
 class WP_SEO_Format_Search_Term extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * Tag name.
 	 *
@@ -565,7 +538,6 @@ class WP_SEO_Format_Search_Term extends WP_SEO_Formatting_Tag {
 	public function get_value() {
 		return ( $term = get_search_query() ) ? $term : false;
 	}
-
 }
 
 /**

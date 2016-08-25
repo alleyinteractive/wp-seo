@@ -9,7 +9,6 @@
  * Manages the plugin settings page, and provides helpers to some option values.
  */
 class WP_SEO_Settings {
-
 	/**
 	 * Instance of this class.
 	 *
@@ -811,7 +810,6 @@ class WP_SEO_Settings {
 			<?php
 		endif;
 	}
-
 }
 
 /**
