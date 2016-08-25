@@ -382,7 +382,6 @@ class WP_SEO_Settings {
 	 */
 	public function example_term_archive( $section ) {
 		if ( $term = get_terms( str_replace( 'archive_', '', $section['id'] ), array( 'number' => 1 ) ) ) {
-			// $term is a \WP_Term, which wpcom_vip_get_term_link() allows.
 			$this->example_url( $this->ex_text(), get_term_link( reset( $term ) ) );
 		} else {
 			$this->example_url( __( 'No terms yet.', 'wp-seo' ) );
