@@ -73,7 +73,7 @@ These formatting tags are available out-of-the-box:
 * `#tags#`
 * `#term_description#`
 * `#term_name#`
-* `#thumbnail_url`
+* `#thumbnail_url#`
 * `#title#`
 
 Any WordPress plugin or theme can register their own tags, too. For example, a social media plugin could add a `#twitter_handle#` formatting tag that displayed a post author's Twitter username.
