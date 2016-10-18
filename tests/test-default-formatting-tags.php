@@ -62,6 +62,11 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 		// Trigger an update to "post_modified".
 		$this->factory->post->update_object( $this->post_ID, array() );
 
+		$this->attachment_id = self::factory()->attachment->create_object( 'image.jpg', 0, array(
+			'post_mime_type' => 'image/jpeg',
+		) );
+		set_post_thumbnail( $this->post_ID, $this->attachment_id );
+
 		$this->post_type = array( 'labels' => array( 'name' => 'Demo Post Types', 'singular_name' => 'Demo Post Type' ), 'rewrite' => true, 'has_archive' => true, 'public' => true, 'supports' => array( 'editor' ) );
 		register_post_type( 'demo_post_type', $this->post_type );
 
@@ -364,4 +369,13 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 		$this->_go_to_and_expect( get_search_link( 'wp-seo' ), 'wp-seo' );
 	}
 
+	function test_thumbnail_url() {
+		$this->_set_current_tag( 'thumbnail_url' );
+
+		$this->_has_description();
+
+		$this->_truthy_on_only( array( 'single' ) );
+
+		$this->_go_to_and_expect( get_permalink( $this->post_ID ), wp_get_attachment_image_url( $this->attachment_id, 'full' ) );
+	}
 }

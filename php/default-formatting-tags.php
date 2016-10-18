@@ -541,6 +541,36 @@ class WP_SEO_Format_Search_Term extends WP_SEO_Formatting_Tag {
 }
 
 /**
+ * Formatting tag for the post thumbnail URL.
+ */
+class WP_SEO_Format_Thumbnail_URL extends WP_SEO_Formatting_Tag {
+	/**
+	 * Tag name.
+	 *
+	 * @var string
+	 */
+	public $tag = '#thumbnail_url#';
+
+	/**
+	 * Get the tag description.
+	 *
+	 * @return string
+	 */
+	public function get_description() {
+		return __( 'Replaced with the URL for the full-size featured image of the content being viewed.', 'wp-seo' );
+	}
+
+	/**
+	 * Get the tag value for the current page.
+	 *
+	 * @return mixed Thumbnail URL, or false.
+	 */
+	public function get_value() {
+		return ( is_singular() ) ? get_the_post_thumbnail_url( get_the_ID(), 'full' ) : false;
+	}
+}
+
+/**
  * Register the default formatting tags.
  *
  * @param  array $tags Associated array of formatting tags to load.
@@ -562,6 +592,7 @@ function wp_seo_default_formatting_tags( $tags ) {
 	$tags['post_type_plural_name'] = new WP_SEO_Format_Post_Type_Plural_Name;
 	$tags['archive_date'] = new WP_SEO_Format_Archive_Date;
 	$tags['search_term'] = new WP_SEO_Format_Search_Term;
+	$tags['thumbnail_url'] = new WP_SEO_Format_Thumbnail_URL;
 	return $tags;
 }
 add_filter( 'wp_seo_formatting_tags', 'wp_seo_default_formatting_tags' );
