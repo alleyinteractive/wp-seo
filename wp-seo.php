@@ -3,7 +3,7 @@
  * Plugin Name: WP SEO
  * Plugin URI: https://github.com/alleyinteractive/wp-seo
  * Description: An SEO plugin that stays out of your way. Just the facts, Jack.
- * Version: 0.11.3-beta1
+ * Version: 0.12.0
  * Author: Alley Interactive, Matthew Boynes, David Herrera
  * Author URI: https://www.alleyinteractive.com/
  *
