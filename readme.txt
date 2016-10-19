@@ -135,7 +135,7 @@ When "safe mode" is disabled, WP SEO will include the unrecognized formatting ta
 == Changelog ==
 
 = Unreleased =
-* Added: "Thumbnail URL" formatting tag.
+* Added: `#thumbnail_url#` formatting tag, which represents the URL for the featured image of the content being viewed.
 * Added: Formatting Tag "Safe Mode" for preventing the display of unrecognized formatting tags.
 * Added: Print an HTML comment next to WP SEO meta tags to help spot them while debugging.
 * Fixed: Added translator comments to strings with placeholders.
