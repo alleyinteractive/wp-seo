@@ -557,7 +557,7 @@ class WP_SEO_Format_Thumbnail_URL extends WP_SEO_Formatting_Tag {
 	 * @return string
 	 */
 	public function get_description() {
-		return __( 'Replaced with the URL for the full-size featured image of the content being viewed.', 'wp-seo' );
+		return __( 'Replaced with the URL for the featured image of the content being viewed.', 'wp-seo' );
 	}
 
 	/**
