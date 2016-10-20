@@ -67,7 +67,7 @@ function wp_seo_post_id_to_the_meta_keywords_input( $post_id ) {
 /**
  * Call printing function for the meta title input for a given term.
  *
- * @param int $term_id Term ID.
+ * @param int    $term_id  Term ID.
  * @param string $taxonomy The taxonomy slug.
  */
 function wp_seo_term_data_to_the_meta_title_input( $term_id, $taxonomy ) {
@@ -78,7 +78,7 @@ function wp_seo_term_data_to_the_meta_title_input( $term_id, $taxonomy ) {
 /**
  * Call printing function for the title character count for a given term.
  *
- * @param int $term_id Term ID.
+ * @param int    $term_id  Term ID.
  * @param string $taxonomy The taxonomy slug.
  */
 function wp_seo_term_data_to_the_title_character_count( $term_id, $taxonomy ) {
@@ -89,7 +89,7 @@ function wp_seo_term_data_to_the_title_character_count( $term_id, $taxonomy ) {
 /**
  * Call printing function for the meta description input for a given term.
  *
- * @param int $term_id Term ID.
+ * @param int    $term_id  Term ID.
  * @param string $taxonomy The taxonomy slug.
  */
 function wp_seo_term_data_to_the_meta_description_input( $term_id, $taxonomy ) {
@@ -100,7 +100,7 @@ function wp_seo_term_data_to_the_meta_description_input( $term_id, $taxonomy ) {
 /**
  * Call printing function for the description character count for a given term.
  *
- * @param int $term_id Term ID.
+ * @param int    $term_id  Term ID.
  * @param string $taxonomy The taxonomy slug.
  */
 function wp_seo_term_data_to_the_description_character_count( $term_id, $taxonomy ) {
@@ -111,7 +111,7 @@ function wp_seo_term_data_to_the_description_character_count( $term_id, $taxonom
 /**
  * Call printing function for the meta keywords input for a given term.
  *
- * @param int $term_id Term ID.
+ * @param int    $term_id  Term ID.
  * @param string $taxonomy The taxonomy slug.
  */
 function wp_seo_term_data_to_the_meta_keywords_input( $term_id, $taxonomy ) {

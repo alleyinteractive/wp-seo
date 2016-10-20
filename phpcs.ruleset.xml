@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ruleset name="WP SEO">
+	<description>PHP_CodeSniffer standard for the WP SEO plugin</description>
+
+	<file>wp-seo.php</file>
+	<file>php/</file>
+
+	<rule ref="WordPress">
+		<!-- This plugin can be used in environments without wpcom_vip_get_term_link(). -->
+		<exclude name="WordPress.VIP.RestrictedFunctions.get_term_link" />
+	</rule>
+</ruleset>
