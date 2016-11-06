@@ -426,7 +426,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public function wp_title( $title, $sep ) {
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) && $meta_title = get_post_meta( get_the_ID(), '_meta_title', true ) ) {
-					return $meta_title;
+					$title_tag = $this->format( $meta_title );
+					$key = false;
 				} else {
 					$key = "single_{$post_type}_title";
 				}
@@ -436,7 +437,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$key = 'archive_author_title';
 			} elseif ( is_category() || is_tag() || is_tax() ) {
 				if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
-					return $option['title'];
+					$title_tag = $this->format( $option['title'] );
+					$key = false;
 				} else {
 					$key = "archive_{$taxonomy}_title";
 				}
@@ -449,6 +451,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			} elseif ( is_404() ) {
 				$key = '404_title';
 			} else {
+				$title_tag = false;
 				$key = false;
 			}
 
@@ -461,9 +464,10 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				 */
 				$title_string = apply_filters( 'wp_seo_title_tag_format', WP_SEO_Settings()->get_option( $key ), $key );
 				$title_tag = $this->format( $title_string );
-				if ( $title_tag && ! is_wp_error( $title_tag ) ) {
-					$title = $title_tag;
-				}
+			}
+
+			if ( $title_tag && ! is_wp_error( $title_tag ) ) {
+				$title = $title_tag;
 			}
 
 			return $title;
@@ -515,8 +519,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public function wp_head() {
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
-					$meta_description = get_post_meta( get_the_ID(), '_meta_description', true );
-					$meta_keywords = get_post_meta( get_the_ID(), '_meta_keywords', true );
+					$meta_description = $this->format( get_post_meta( get_the_ID(), '_meta_description', true ) );
+					$meta_keywords = $this->format( get_post_meta( get_the_ID(), '_meta_keywords', true ) );
 				}
 				$key = "single_{$post_type}";
 			} elseif ( is_front_page() ) {
@@ -525,8 +529,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$key = 'archive_author';
 			} elseif ( is_category() || is_tag() || is_tax() ) {
 				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
-					$meta_description = $option['description'];
-					$meta_keywords = $option['keywords'];
+					$meta_description = $this->format( $option['description'] );
+					$meta_keywords = $this->format( $option['keywords'] );
 				}
 				$key = "archive_{$taxonomy}";
 			} elseif ( is_post_type_archive() ) {
