@@ -14,6 +14,7 @@
  */
 
 add_action( 'admin_init',                                                       'wp_seo_load_admin_files', 0 );
+add_action( 'admin_enqueue_scripts',                                            'wp_seo_admin_scripts' );
 
 add_action( 'wp_seo_post_meta_fields',                                          'wp_seo_the_post_meta_fields' );
 add_action( 'wp_seo_post_meta_fields_title_label',                              'wp_seo_the_meta_title_label' );
