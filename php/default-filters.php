@@ -45,3 +45,5 @@ add_action( 'wp_seo_edit_term_meta_fields_description_input',                   
 add_action( 'wp_seo_edit_term_meta_fields_after_description_input',             'wp_seo_term_data_to_the_description_character_count', 10, 2 );
 add_action( 'wp_seo_edit_term_meta_fields_keywords_label',                      'wp_seo_the_meta_keywords_label' );
 add_action( 'wp_seo_edit_term_meta_fields_keywords_input',                      'wp_seo_term_data_to_the_meta_keywords_input', 10, 2 );
+
+add_action( 'wp_ajax_wp_seo_display_character_count',                           'wp_seo_ajax_display_character_count' );
