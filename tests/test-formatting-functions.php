@@ -80,7 +80,7 @@ class WP_SEO_Formatting_Functions_Tests extends WP_SEO_Testcase {
 	}
 
 	/**
-	 * Test wp_seo_get_the_display_character_count() with strings that can be countd.
+	 * Test wp_seo_get_the_display_character_count() with strings that can be counted.
 	 *
 	 * @dataProvider data_display_character_count_string_lengths
 	 */
