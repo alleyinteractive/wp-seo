@@ -65,7 +65,7 @@
 		input.addEventListener( 'keyup', function () {
 			character_count.textContent = wp_seo_admin.l10n.calculating_character_count;
 			debounce_update_count();
-		} );
+		});
 
 		if ( addtag ) {
 			/**
