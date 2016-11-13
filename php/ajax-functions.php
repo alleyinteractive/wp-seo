@@ -2,7 +2,7 @@
 /**
  * Ajax handlers.
  *
- * @package AHOT
+ * @package WP_SEO
  */
 
 /**
