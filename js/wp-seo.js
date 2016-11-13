@@ -59,7 +59,7 @@
 		};
 
 		// Debounced version of the above.
-		debounce_update_count = _.debounce( update_count, 750 );
+		debounce_update_count = _.debounce( update_count, 500 );
 
 		// Update the count (eventually) after typing.
 		input.addEventListener( 'keyup', function () {
