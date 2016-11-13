@@ -12,6 +12,7 @@ function wp_seo_admin_scripts() {
 	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.13.0', true );
 
 	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', array(
+		'ajaxurl' => admin_url( 'admin-ajax.php', 'relative' ),
 		'l10n' => array(
 			'calculating_character_count'        => __( 'Calculating...', 'wp-seo' ),
 			'character_count_calculator_missing' => __( 'Error: Character count calculator is missing!', 'wp-seo' ),

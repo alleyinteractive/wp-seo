@@ -43,7 +43,7 @@
 			}
 
 			$.get(
-				ajaxurl,
+				wp_seo_admin.ajaxurl,
 				{
 					action: 'wp_seo_display_character_count',
 					string: input.value,
