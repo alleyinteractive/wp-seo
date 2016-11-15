@@ -43,7 +43,7 @@ function wp_seo_no_formatting_tags_allowed( $string ) {
  *
  * @param  string $string String to count.
  * @return string         The character count as a string, or a description of
- *                        the count if it can't be calculated precicsely.
+ *                        the count if it can't be calculated precisely.
  */
 function wp_seo_get_the_display_character_count( $string ) {
 	$matches = wp_seo_match_all_formatting_tags( $string );
