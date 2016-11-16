@@ -299,7 +299,6 @@ class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
  * Formatting tag for a post's tags.
  */
 class WP_SEO_Format_Tags extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * (Formatting) tag name.
 	 *
