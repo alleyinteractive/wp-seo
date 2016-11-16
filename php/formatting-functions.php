@@ -42,12 +42,13 @@ function wp_seo_no_formatting_tags_allowed( $string ) {
  * @since 0.13.0
  *
  * @param  string $string String to count.
- * @return string         String with the character count for display to users.
+ * @return string         String with the character count for display.
  */
 function wp_seo_get_the_display_character_count( $string ) {
 	$matches = wp_seo_match_all_formatting_tags( $string );
 
 	if ( count( $matches ) ) {
+		// Formatting tags are present, so we have to estimate the count.
 		$length = strlen( str_replace( $matches, '', $string ) );
 
 		if ( 0 === $length ) {
