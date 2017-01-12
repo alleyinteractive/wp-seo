@@ -36,7 +36,7 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Update the plugin option with titles, descriptions, and keywords for each test.
+	 * Update the plugin option with titles, descriptions, keywords, and social fields for each test.
 	 *
 	 * This option should include all of the expected values used in these
 	 * tests. Not each test uses all values, but setting them all is a little
@@ -51,7 +51,8 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 				'content' => 'demo arbitrary content',
 			),
 		);
-
+		$this->options['fb_app_id'] = $this->fb_app_id = $this->fb_app_id =rand_str();
+		$this->attachment_ID = $this->factory->attachment->create();
 		foreach ( array(
 			'home',
 			'single_post',
@@ -65,9 +66,13 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 			'404',
 			'feed',
 		) as $key ) {
-			$this->options[ "{$key}_title" ]       = "demo_{$key}_title";
-			$this->options[ "{$key}_description" ] = "demo_{$key}_description";
-			$this->options[ "{$key}_keywords" ]    = "demo_{$key}_keywords";
+			$this->options[ "{$key}_title" ]          = "demo_{$key}_title";
+			$this->options[ "{$key}_description" ]    = "demo_{$key}_description";
+			$this->options[ "{$key}_keywords" ]       = "demo_{$key}_keywords";
+			$this->options[ "{$key}_og_title" ]       = "demo_{$key}_og_title";
+			$this->options[ "{$key}_og_description" ] = "demo_{$key}_og_description";
+			$this->options[ "{$key}_og_type" ]        = "demo_{$key}_og_type";
+			$this->options[ "{$key}_og_image" ]       = $this->attachment_ID;
 		}
 
 		update_option( WP_SEO_Settings::SLUG, WP_SEO_Settings()->sanitize_options( $this->options ) );
@@ -92,10 +97,15 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	 * @param  string $description The expected meta description content.
 	 * @param  string $keywords The expected meta keywords content.
 	 */
-	function _assert_all_meta( $description, $keywords ) {
+	function _assert_all_meta( $description, $keywords, $og_title, $og_description, $og_type, $og_image ) {
 		$expected = <<<EOF
 <meta name='description' content='{$description}' /><!-- WP SEO -->
 <meta name='keywords' content='{$keywords}' /><!-- WP SEO -->
+<meta name='og:title' content='{$og_title}' /><!-- WP SEO -->
+<meta name='og:description' content='{$og_description}' /><!-- WP SEO -->
+<meta name='og:type' content='{$og_type}' /><!-- WP SEO -->
+<meta name='og:image' content='{$og_image}' /><!-- WP SEO -->
+<meta name='fb:app_id' content='{$this->fb_app_id}' /><!-- WP SEO -->
 <meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
 EOF;
 		$this->assertSame( strip_ws( $expected ), strip_ws( get_echo( array( WP_SEO(), 'wp_head' ) ) ) );
@@ -119,7 +129,14 @@ EOF;
 	 */
 	function _assert_option_filters( $key ) {
 		$this->_assert_title( $this->options[ "{$key}_title" ] );
-		$this->_assert_all_meta( $this->options["{$key}_description"], $this->options["{$key}_keywords"] );
+		$this->_assert_all_meta(
+			$this->options["{$key}_description"],
+			$this->options["{$key}_keywords"],
+			$this->options["{$key}_og_title"],
+			$this->options["{$key}_og_description"],
+			$this->options["{$key}_og_type"],
+			$this->options["{$key}_og_image"]
+		);
 	}
 
 	/**
@@ -140,12 +157,24 @@ EOF;
 
 	// A post with custom values should not use the single_{type}_ values.
 	function test_single_custom() {
-		$this->go_to( get_permalink( $post_ID = $this->factory->post->create() ) );
+		$attachment_ID = $this->factory->attachment->create();
 		update_post_meta( $post_ID, '_meta_title', '_custom_meta_title' );
 		update_post_meta( $post_ID, '_meta_description', '_custom_meta_description' );
 		update_post_meta( $post_ID, '_meta_keywords', '_custom_meta_keywords' );
+		update_post_meta( $post_ID, '_meta_og_title', '_custom_meta_og_title' );
+		update_post_meta( $post_ID, '_meta_og_description', '_custom_meta_og_description' );
+		update_post_meta( $post_ID, '_meta_og_type', '_custom_meta_og_type' );
+		update_post_meta( $post_ID, '_meta_og_image', $attachment_ID );
+		$this->go_to( get_permalink( $post_ID = $this->factory->post->create() ) );
 		$this->_assert_title( '_custom_meta_title' );
-		$this->_assert_all_meta( '_custom_meta_description', '_custom_meta_keywords' );
+		$this->_assert_all_meta(
+			'_custom_meta_description',
+			'_custom_meta_keywords',
+			'_custom_meta_og_title',
+			'_custom_meta_og_description',
+			'_custom_meta_og_type',
+			wp_get_attachment_image_src( $attachment_ID )
+		 );
 	}
 
 	// If there is no format string, return the original post title.
