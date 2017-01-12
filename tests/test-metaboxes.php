@@ -74,6 +74,30 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that markup for post fields has our expected fields and values.
+	 */
+	function test_post_meta_og_fields() {
+		$post_ID = $this->factory->post->create();
+		$post = get_post( $post_ID );
+		$attachment_ID = $this->factory->attachment->create();
+		$title = rand_str();
+		$description = rand_str();
+		$type = rand_str();
+
+		add_post_meta( $post_ID, '_meta_og_image', $attachment_ID );
+		add_post_meta( $post_ID, '_meta_og_title', $title );
+		add_post_meta( $post_ID, '_meta_og_description', $description );
+		add_post_meta( $post_ID, '_meta_og_type', $type );
+
+		$html = get_echo( array( WP_SEO(), 'post_meta_fields' ), array( $post ) );
+		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
+		$this->assertContains( 'name="seo_meta[og_image]" value="' . $attachment_ID . '"', $html );
+		$this->assertContains( 'name="seo_meta[og_type]" value="' . $type . '"', $type );
+		$this->assertContains( 'name="seo_meta[og_title]" value="' . $title . '"', $title );
+		$this->assertContains( 'name="seo_meta[og_description]" value="' . $description . '"', $description );
+	}
+
+	/**
 	 * Test most ways saving post fields can fail and the one way they succeed.
 	 */
 	function test_save_post_fields() {
@@ -123,16 +147,28 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertEmpty( get_post_meta( $post_ID, '_meta_title', true ) );
 		$this->assertEmpty( get_post_meta( $post_ID, '_meta_description', true ) );
 		$this->assertEmpty( get_post_meta( $post_ID, '_meta_keywords', true ) );
+		$this->assertEmpty( get_post_meta( $post_ID, '_meta_og_title', true ) );
+		$this->assertEmpty( get_post_meta( $post_ID, '_meta_og_description', true ) );
+		$this->assertEmpty( get_post_meta( $post_ID, '_meta_og_type', true ) );
+		$this->assertEmpty( get_post_meta( $post_ID, '_meta_og_image', true ) );
 
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
+		$og_title = rand_str();
+		$og_description = rand_str();
+		$og_type = rand_str();
+		$og_image = $this->factory->attachment->create();
 
 		// add_magic_quotes() to simulate wp_magic_quotes().
 		$_POST['seo_meta'] = add_magic_quotes( array(
-			'title' => $title,
-			'description' => $description . '<script>meta</script>',
-			'keywords' => $keywords,
+			'title'          => $title,
+			'description'    => $description . '<script>meta</script>',
+			'keywords'       => $keywords,
+			'og_title'       => $og_title,
+			'og_description' => $og_description,
+			'og_type'        => $og_type,
+			'og_image'       => $og_image,
 		) );
 
 		// Successful save.
@@ -140,22 +176,38 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
 		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
 		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
+		$this->assertEquals( $og_title, get_post_meta( $post_ID, '_meta_og_title', true ) );
+		$this->assertEquals( $og_description, get_post_meta( $post_ID, '_meta_og_description', true ) );
+		$this->assertEquals( $og_type, get_post_meta( $post_ID, '_meta_og_type', true ) );
+		$this->assertEquals( $og_image, get_post_meta( $post_ID, '_meta_og_image', true ) );
 
 		$title = "Is your name O'Reilly?";
 		$description = 'What is Folder\SubFolder\File.txt?';
 		$keywords = '';
+		$og_title = rand_str();
+		$og_description = 'What is Folder\SubFolder\File.txt?';
+		$og_type = rand_str();
+		$og_image = $this->factory->attachment->create();
 
 		// Successfully save data with slashes. add_magic_quotes() to simulate wp_magic_quotes().
 		$_POST['seo_meta'] = add_magic_quotes( array(
-			'title'       => $title,
-			'description' => $description,
-			'keywords'    => $keywords,
+			'title'          => $title,
+			'description'    => $description,
+			'keywords'       => $keywords,
+			'og_title'       => $og_title,
+			'og_description' => $og_description,
+			'og_type'        => $og_type,
+			'og_image'       => $og_image,
 		) );
 
 		WP_SEO()->save_post_fields( $post_ID );
 		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
 		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
 		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
+		$this->assertEquals( $og_title, get_post_meta( $post_ID, '_meta_og_title', true ) );
+		$this->assertEquals( $og_description, get_post_meta( $post_ID, '_meta_og_description', true ) );
+		$this->assertEquals( $og_type, get_post_meta( $post_ID, '_meta_og_type', true ) );
+		$this->assertEquals( $og_image, get_post_meta( $post_ID, '_meta_og_image', true ) );
 	}
 
 	/**
@@ -179,6 +231,10 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertContains( 'name="seo_meta[title]"', $html );
 		$this->assertContains( 'name="seo_meta[description]"', $html );
 		$this->assertContains( 'name="seo_meta[keywords]"', $html );
+		$this->assertContains( 'name="seo_meta[og_title]"', $html );
+		$this->assertContains( 'name="seo_meta[og_description]"', $html );
+		$this->assertContains( 'name="seo_meta[og_type]"', $html );
+		$this->assertContains( 'name="seo_meta[og_image]"', $html );
 	}
 
 	/**
@@ -191,13 +247,21 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
+		$og_title = rand_str();
+		$og_description = rand_str();
+		$og_type = rand_str();
+		$og_image = $this->factory->attachment->create();
 
 		update_option(
 			WP_SEO()->get_term_option_name( $category ),
 			array(
-				'title' => $title,
-				'description' => $description,
-				'keywords' => $keywords,
+				'title'          => $title,
+				'description'    => $description,
+				'keywords'       => $keywords,
+				'og_title'       => $og_title,
+				'og_description' => $og_description,
+				'og_type'        => $og_type,
+				'og_image'       => $og_image,
 			)
 		);
 
@@ -209,6 +273,11 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
 		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
+		$this->assertContains( 'name="seo_meta[og_title]" value="' . $og_title . '" size="96"', $html );
+		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $og_title ) ), $html );
+		$this->assertRegExp( "/<textarea.*?>{$og_description}<\/textarea>/", $html );
+		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $og_description ) ), $html );
+		// @TODO Add OG Type & OG Image test
 	}
 
 	function test_save_term_fields() {
@@ -250,30 +319,49 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
+		$og_title = rand_str();
+		$og_description = rand_str();
+		$og_type = rand_str();
+		$og_image = $this->factory->attachment->create();
 
 		$_POST['seo_meta'] = array(
-			'title' => $title,
-			'description' => $description . '<script>meta</script>',
-			'keywords' => $keywords,
+			'title'          => $title,
+			'description'    => $description . '<script>meta</script>',
+			'keywords'       => $keywords,
+			'og_title'       => $og_title,
+			'og_description' => $og_description,
+			'og_type'        => $og_type,
+			'og_image'       => $og_image,
 		);
 
 		// Successful add_option().
 		WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' );
 		$this->assertSame(
 			array(
-				'title' => $title,
-				'description' => $description,
-				'keywords' => $keywords,
+				'title'          => $title,
+				'description'    => $description,
+				'keywords'       => $keywords,
+				'og_title'       => $og_title,
+				'og_description' => $og_description,
+				'og_type'        => $og_type,
+				'og_image'       => $og_image,
 			),
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
 
 		$updated_title = rand_str();
 		$updated_keywords = rand_str();
+		$update_og_title = rand_str();
+		$update_og_description = rand_str();
+		$update_og_type = rand_str();
+		$update_og_image = $this->factory->attachment->create();
 
 		$_POST['seo_meta'] = array(
-			'title' => $updated_title,
-			'keywords' => $updated_keywords,
+			'title'          => $updated_title,
+			'keywords'       => $updated_keywords,
+			'og_title'       => $updated_og_title,
+			'og_type'        => $updated_og_type,
+			'og_image'       => $updated_og_image,
 		);
 
 		// Successful update_option().
@@ -281,8 +369,12 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertSame(
 			array(
 				'title' => $updated_title,
-				'description' => '',
-				'keywords' => $updated_keywords,
+				'description'    => '',
+				'keywords'       => $updated_keywords,
+				'og_title'       => $og_title,
+				'og_description' => '',
+				'og_type'        => $og_type,
+				'og_image'       => $og_image,
 			),
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);

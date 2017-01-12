@@ -31,15 +31,23 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 	 * }
 	 */
 	function data_post_id_to_functions() {
-		$meta_title       = rand_str( rand( 32, 64 ) );
-		$meta_description = rand_str( rand( 32, 64 ) );
-		$meta_keywords    = rand_str( rand( 32, 64 ) );
+		$meta_title             = rand_str( rand( 32, 64 ) );
+		$meta_description       = rand_str( rand( 32, 64 ) );
+		$meta_keywords          = rand_str( rand( 32, 64 ) );
+		$meta_og_title          = rand_str( rand( 32, 64 ) );
+		$meta_og_description    = rand_str( rand( 32, 64 ) );
+		$meta_og_type           = rand_str( rand( 32, 64 ) );
+		$meta_og_image          = $this->factory->attachment->create();
 
 		$post_id = $this->factory->post->create( array(
 			'meta_input' => array(
-				'_meta_title'       => $meta_title,
-				'_meta_description' => $meta_description,
-				'_meta_keywords'    => $meta_keywords,
+				'_meta_title'          => $meta_title,
+				'_meta_description'    => $meta_description,
+				'_meta_keywords'       => $meta_keywords,
+				'_meta_og_title'       => $meta_title,
+				'_meta_og_description' => $meta_description,
+				'_meta_og_type'        => $meta_og_type,
+				'_meta_og_image'       => $meta_og_image,
 			),
 		) );
 
@@ -74,6 +82,42 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 				$meta_keywords,
 				array( $post_id ),
 			),
+			array(
+				'wp_seo_post_id_to_the_meta_og_title_input',
+				'Should print the OG title value in post meta',
+				$meta_og_title,
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_og_title_character_count',
+				'Should count the OG title value in post meta',
+				(string) strlen( $meta_og_title ),
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_og_description_input',
+				'Should print the OG description value in post meta',
+				$meta_og_description,
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_og_description_character_count',
+				'Should count the OG description value in post meta',
+				(string) strlen( $meta_og_description ),
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_og_type_input',
+				'Should print the OG type value in post meta',
+				$meta_og_type,
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_og_image_input',
+				'Should print the OG image value in post meta',
+				wp_get_attachment_image_src( $meta_og_image ),
+				array( $post_id ),
+			),
 		);
 	}
 
@@ -85,14 +129,22 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 	 * }
 	 */
 	function data_term_data_to_functions() {
-		$title       = rand_str( rand( 32, 64 ) );
-		$description = rand_str( rand( 32, 64 ) );
-		$keywords    = rand_str( rand( 32, 64 ) );
+		$meta_title             = rand_str( rand( 32, 64 ) );
+		$meta_description       = rand_str( rand( 32, 64 ) );
+		$meta_keywords          = rand_str( rand( 32, 64 ) );
+		$meta_og_title          = rand_str( rand( 32, 64 ) );
+		$meta_og_description    = rand_str( rand( 32, 64 ) );
+		$meta_og_type           = rand_str( rand( 32, 64 ) );
+		$meta_og_image          = $this->factory->attachment->create();
 
 		$term = $this->create_and_get_term_with_option( array(
 			'title' => $title,
-			'description' => $description,
-			'keywords' => $keywords,
+			'description'    => $description,
+			'keywords'       => $keywords,
+			'og_title'       => $meta_title,
+			'og_description' => $meta_description,
+			'og_type'        => $meta_og_type,
+			'og_image'       => $meta_og_image,
 		) );
 
 		return array(
@@ -125,6 +177,42 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 				'Should print the keyword value in the term options',
 				$keywords,
 				array( $term->term_id, $term->taxonomy ),
+			),
+			array(
+				'wp_seo_term_data_to_the_meta_og_title_input',
+				'Should print the OG title value in post meta',
+				$meta_og_title,
+				array( $term_data ),
+			),
+			array(
+				'wp_seo_term_data_to_the_og_title_character_count',
+				'Should count the OG title value in post meta',
+				(string) strlen( $meta_og_title ),
+				array( $term_data ),
+			),
+			array(
+				'wp_seo_term_data_to_the_meta_og_description_input',
+				'Should print the OG description value in post meta',
+				$meta_og_description,
+				array( $term_data ),
+			),
+			array(
+				'wp_seo_term_data_to_the_og_description_character_count',
+				'Should count the OG description value in post meta',
+				(string) strlen( $meta_og_description ),
+				array( $term_data ),
+			),
+			array(
+				'wp_seo_term_data_to_the_meta_og_type_input',
+				'Should print the OG type value in post meta',
+				$meta_og_type,
+				array( $term_data ),
+			),
+			array(
+				'wp_seo_term_data_to_the_meta_og_image_input',
+				'Should print the OG image value in post meta',
+				wp_get_attachment_image_src( $meta_og_image ),
+				array( $term_data ),
 			),
 		);
 	}

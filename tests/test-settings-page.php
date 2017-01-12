@@ -23,7 +23,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		global $submenu;
 		$this->assertContains(
 			array(
-				'SEO',
+				'SEO & Social',
 				'manage_options',
 				'wp-seo',
 				'WP SEO Settings',
