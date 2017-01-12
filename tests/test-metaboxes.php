@@ -74,6 +74,30 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that markup for post fields has our expected fields and values.
+	 */
+	function test_post_meta_og_fields() {
+		$post_ID = $this->factory->post->create();
+		$post = get_post( $post_ID );
+		$attachment_ID = $this->factory->attachment->create();
+		$title = rand_str();
+		$description = rand_str();
+		$type = rand_str();
+
+		add_post_meta( $post_ID, '_meta_og_image', $attachment_ID );
+		add_post_meta( $post_ID, '_meta_og_title', $title );
+		add_post_meta( $post_ID, '_meta_og_description', $description );
+		add_post_meta( $post_ID, '_meta_og_type', $description );
+
+		$html = get_echo( array( WP_SEO(), 'post_meta_fields' ), array( $post ) );
+		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
+		$this->assertContains( 'name="seo_meta[og_image]" value="' . $attachment_ID . '"', $html );
+		$this->assertContains( 'name="seo_meta[og_type]" value="' . $attachment_ID . '"', $type );
+		$this->assertContains( 'name="seo_meta[og_title]" value="' . $attachment_ID . '"', $title );
+		$this->assertContains( 'name="seo_meta[og_description]" value="' . $attachment_ID . '"', $description );
+	}
+
+	/**
 	 * Test most ways saving post fields can fail and the one way they succeed.
 	 */
 	function test_save_post_fields() {
