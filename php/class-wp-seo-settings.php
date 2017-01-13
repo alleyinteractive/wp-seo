@@ -260,7 +260,7 @@ class WP_SEO_Settings {
 	 * Register the plugin options page.
 	 */
 	public function add_options_page() {
-		$title = apply_filters( 'wp_seo_options_page_title', __( 'WP Settings', 'wp-seo' ) );
+		$title = apply_filters( 'wp_seo_options_page_title', __( 'WP SEO Settings', 'wp-seo' ) );
 		$menu_title = apply_filters( 'wp_seo_options_page_menu_title', __( 'SEO', 'wp-seo' ) );
 		add_options_page( $title, $menu_title, $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
 	}
@@ -789,7 +789,7 @@ class WP_SEO_Settings {
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
 		}
-		$out = apply_filters( 'wp_seo_sanitize', $in, $out );
+		$out = apply_filters( 'wp_seo_sanitize', $out, $in );
 		return $out;
 	}
 
