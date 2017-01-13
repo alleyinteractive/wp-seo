@@ -185,10 +185,10 @@ class WP_SEO_Settings {
 	 * @return mixed The value, or null on failure.
 	 */
 	public function get_option( $key, $default = null ) {
-		if ( empty( $this->options ) ) {
+		if ( empty( self::$options ) ) {
 			$this->set_options();
 		}
-		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : $default;
+		return isset( self::$options[ $key ] ) ? self::$options[ $key ] : $default;
 	}
 
 	/**
