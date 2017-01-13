@@ -21,14 +21,14 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		WP_SEO_Settings()->add_options_page();
 
 		global $submenu;
-		$this->assertEquals(
+		$this->assertContains(
 			array(
 				'SEO',
 				'manage_options',
 				'wp-seo',
 				'WP SEO Settings',
 			),
-			$submenu['options-general.php'][0]
+			$submenu['options-general.php']
 		);
 	}
 
