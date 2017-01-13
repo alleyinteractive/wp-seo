@@ -35,7 +35,7 @@ class WP_SEO_Settings {
 	 *
 	 * @var array.
 	 */
-	public $options = array();
+	public static $options = array();
 
 	/**
 	 * Taxonomies with archive pages, which can have meta fields set for them.
@@ -168,7 +168,7 @@ class WP_SEO_Settings {
 	 * Set $options with the current database value.
 	 */
 	public function set_options() {
-		$this->options = get_option( $this::SLUG, $this->default_options );
+		self::$options = get_option( $this::SLUG, $this->default_options );
 	}
 
 	/**
@@ -447,7 +447,7 @@ class WP_SEO_Settings {
 	 *                          Refer to method called based on $type.
 	 * }
 	 */
-	public function field( $args ) {
+	public static function field( $args ) {
 		if ( empty( $args['field'] ) ) {
 			return;
 		}
@@ -456,23 +456,23 @@ class WP_SEO_Settings {
 			$args['type'] = 'text';
 		}
 
-		$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
+		$value = ! empty( self::$options[ $args['field'] ] ) ? self::$options[ $args['field'] ] : '';
 
 		switch ( $args['type'] ) {
 			case 'textarea' :
-				$this->render_textarea( $args, $value );
+				self::render_textarea( $args, $value );
 				break;
 
 			case 'checkboxes' :
-				$this->render_checkboxes( $args, $value );
+				self::render_checkboxes( $args, $value );
 				break;
 
 			case 'repeatable' :
-				$this->render_repeatable_field( $args, $value );
+				self::render_repeatable_field( $args, $value );
 				break;
 
 			default :
-				$this->render_text_field( $args, $value );
+				self::render_text_field( $args, $value );
 				break;
 		}
 	}
@@ -489,7 +489,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public function render_text_field( $args, $value ) {
+	public static function render_text_field( $args, $value ) {
 		$args = wp_parse_args( $args, array(
 			'type' => 'text',
 			'size' => 80,
@@ -498,7 +498,7 @@ class WP_SEO_Settings {
 		printf(
 			'<input type="%s" name="%s[%s]" value="%s" size="%s" />',
 			esc_attr( $args['type'] ),
-			esc_attr( $this::SLUG ),
+			esc_attr( self::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $value ),
 			esc_attr( $args['size'] )
@@ -517,7 +517,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public function render_textarea( $args, $value ) {
+	public static function render_textarea( $args, $value ) {
 		$args = wp_parse_args( $args, array(
 			'rows' => 2,
 			'cols' => 80,
@@ -525,7 +525,7 @@ class WP_SEO_Settings {
 
 		printf(
 			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
-			esc_attr( $this::SLUG ),
+			esc_attr( self::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
@@ -545,14 +545,14 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $values Indexed array of current field values.
 	 */
-	public function render_checkboxes( $args, $values ) {
+	public static function render_checkboxes( $args, $values ) {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf( '
 					<label for="%1$s_%2$s_%3$s">
 						<input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>
 						%5$s
 					</label><br>',
-				esc_attr( $this::SLUG ),
+				esc_attr( self::SLUG ),
 				esc_attr( $args['field'] ),
 				esc_attr( $box_value ),
 				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
