@@ -781,7 +781,7 @@ class WP_SEO_Settings {
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
 		}
-
+		$out = apply_filters( 'wp_seo_sanitize', $in, $out );
 		return $out;
 	}
 
