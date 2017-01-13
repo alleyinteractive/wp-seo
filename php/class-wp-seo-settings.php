@@ -64,6 +64,12 @@ class WP_SEO_Settings {
 	 */
 	private $archived_post_types = array();
 
+	public $field_types = array(
+		'textarea',
+		'checkboxes',
+		'repeatable'
+	);
+
 	const SLUG = 'wp-seo';
 
 	/**
@@ -254,7 +260,9 @@ class WP_SEO_Settings {
 	 * Register the plugin options page.
 	 */
 	public function add_options_page() {
-		add_options_page( __( 'WP SEO Settings', 'wp-seo' ), __( 'SEO', 'wp-seo' ), $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
+		$title = apply_filters( 'wp_seo_options_page_title', __( 'WP Settings', 'wp-seo' ) );
+		$menu_title = apply_filters( 'wp_seo_options_page_menu_title', __( 'SEO', 'wp-seo' ) );
+		add_options_page( $title, $menu_title, $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
 	}
 
 	/**
