@@ -608,7 +608,7 @@ class WP_SEO_Settings {
 													%5$s
 												</label>
 												<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-												esc_attr( $this::SLUG ),
+												esc_attr( self::SLUG ),
 												esc_attr( $args['field'] ),
 												intval( $i ),
 												esc_attr( $name ),
@@ -631,7 +631,7 @@ class WP_SEO_Settings {
 												%5$s
 											</label>
 											<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-											esc_attr( $this::SLUG ),
+											esc_attr( self::SLUG ),
 											esc_attr( $args['field'] ),
 											0,
 											esc_attr( $name ),
@@ -656,7 +656,7 @@ class WP_SEO_Settings {
 											%5$s
 										</label>
 										<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-										esc_attr( $this::SLUG ),
+										esc_attr( self::SLUG ),
 										esc_attr( $args['field'] ),
 										'<%= i %>',
 										esc_attr( $name ),
