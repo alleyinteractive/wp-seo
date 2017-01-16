@@ -188,7 +188,7 @@ class WP_SEO_Settings {
 	 * @param mixed  $value   The option value.
 	 */
 	public function set_option( $key, $value ) {
-		self::$options[ $option ] = $value;
+		self::$options[ $key ] = $value;
 	}
 
 	/**
