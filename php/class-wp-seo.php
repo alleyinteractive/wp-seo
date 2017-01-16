@@ -533,29 +533,19 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		}
 
 		/**
-		 * Determine the <meta> values for the current page.
+		 * Helper function for determining the 'key' for use in head
 		 *
-		 * Unlike WP_SEO::wp_title(), custom per-entry and per-term values are not
-		 * returned immediately but rendered at the end of the method.
-		 *
-		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
 		 */
-		public function wp_head() {
+		public function get_key() {
 			if ( is_singular() ) {
-				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
-					$meta_description = $this->format( get_post_meta( get_the_ID(), '_meta_description', true ) );
-					$meta_keywords = $this->format( get_post_meta( get_the_ID(), '_meta_keywords', true ) );
-				}
+				$post_type = get_post_type();
 				$key = "single_{$post_type}";
 			} elseif ( is_front_page() ) {
 				$key = 'home';
 			} elseif ( is_author() ) {
 				$key = 'archive_author';
 			} elseif ( is_category() || is_tag() || is_tax() ) {
-				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
-					$meta_description = $this->format( $option['description'] );
-					$meta_keywords = $this->format( $option['keywords'] );
-				}
+				$taxonomy = get_queried_object()->taxonomy;
 				$key = "archive_{$taxonomy}";
 			} elseif ( is_post_type_archive() ) {
 				$key = 'archive_' . get_queried_object()->name;
@@ -564,7 +554,19 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			} else {
 				$key = false;
 			}
+			return $key;
+		}
 
+		/**
+		 * Determine the <meta> values for the current page.
+		 *
+		 * Unlike WP_SEO::wp_title(), custom per-entry and per-term values are not
+		 * returned immediately but rendered at the end of the method.
+		 *
+		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
+		 */
+		public function wp_head() {
+			$key = $this->get_key();
 			if ( $key ) {
 				if ( empty( $meta_description ) ) {
 					/**
