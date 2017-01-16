@@ -35,7 +35,7 @@ class WP_SEO_Settings {
 	 *
 	 * @var array.
 	 */
-	public $options = array();
+	public static $options = array();
 
 	/**
 	 * Taxonomies with archive pages, which can have meta fields set for them.
@@ -63,6 +63,12 @@ class WP_SEO_Settings {
 	 * @var array Post type objects.
 	 */
 	private $archived_post_types = array();
+
+	public $field_types = array(
+		'textarea',
+		'checkboxes',
+		'repeatable'
+	);
 
 	const SLUG = 'wp-seo';
 
@@ -168,7 +174,14 @@ class WP_SEO_Settings {
 	 * Set $options with the current database value.
 	 */
 	public function set_options() {
-		$this->options = get_option( $this::SLUG, $this->default_options );
+		self::$options = get_option( $this::SLUG, $this->default_options );
+	}
+
+	/**
+	 * Override the value of an option in the static variable.
+	 */
+	public function set_option( $option, $value ) {
+		self::$options[$option] = $value;
 	}
 
 	/**
@@ -179,10 +192,10 @@ class WP_SEO_Settings {
 	 * @return mixed The value, or null on failure.
 	 */
 	public function get_option( $key, $default = null ) {
-		if ( empty( $this->options ) ) {
+		if ( empty( self::$options ) ) {
 			$this->set_options();
 		}
-		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : $default;
+		return isset( self::$options[ $key ] ) ? self::$options[ $key ] : $default;
 	}
 
 	/**
@@ -254,7 +267,9 @@ class WP_SEO_Settings {
 	 * Register the plugin options page.
 	 */
 	public function add_options_page() {
-		add_options_page( __( 'WP SEO Settings', 'wp-seo' ), __( 'SEO', 'wp-seo' ), $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
+		$title = apply_filters( 'wp_seo_options_page_title', __( 'WP SEO Settings', 'wp-seo' ) );
+		$menu_title = apply_filters( 'wp_seo_options_page_menu_title', __( 'SEO', 'wp-seo' ) );
+		add_options_page( $title, $menu_title, $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
 	}
 
 	/**
@@ -447,7 +462,7 @@ class WP_SEO_Settings {
 	 *                          Refer to method called based on $type.
 	 * }
 	 */
-	public function field( $args ) {
+	public static function field( $args ) {
 		if ( empty( $args['field'] ) ) {
 			return;
 		}
@@ -456,23 +471,23 @@ class WP_SEO_Settings {
 			$args['type'] = 'text';
 		}
 
-		$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
+		$value = ! empty( self::$options[ $args['field'] ] ) ? self::$options[ $args['field'] ] : '';
 
 		switch ( $args['type'] ) {
 			case 'textarea' :
-				$this->render_textarea( $args, $value );
+				self::render_textarea( $args, $value );
 				break;
 
 			case 'checkboxes' :
-				$this->render_checkboxes( $args, $value );
+				self::render_checkboxes( $args, $value );
 				break;
 
 			case 'repeatable' :
-				$this->render_repeatable_field( $args, $value );
+				self::render_repeatable_field( $args, $value );
 				break;
 
 			default :
-				$this->render_text_field( $args, $value );
+				self::render_text_field( $args, $value );
 				break;
 		}
 	}
@@ -489,7 +504,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public function render_text_field( $args, $value ) {
+	public static function render_text_field( $args, $value ) {
 		$args = wp_parse_args( $args, array(
 			'type' => 'text',
 			'size' => 80,
@@ -498,7 +513,7 @@ class WP_SEO_Settings {
 		printf(
 			'<input type="%s" name="%s[%s]" value="%s" size="%s" />',
 			esc_attr( $args['type'] ),
-			esc_attr( $this::SLUG ),
+			esc_attr( self::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $value ),
 			esc_attr( $args['size'] )
@@ -517,7 +532,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public function render_textarea( $args, $value ) {
+	public static function render_textarea( $args, $value ) {
 		$args = wp_parse_args( $args, array(
 			'rows' => 2,
 			'cols' => 80,
@@ -525,7 +540,7 @@ class WP_SEO_Settings {
 
 		printf(
 			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
-			esc_attr( $this::SLUG ),
+			esc_attr( self::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
@@ -545,14 +560,14 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $values Indexed array of current field values.
 	 */
-	public function render_checkboxes( $args, $values ) {
+	public static function render_checkboxes( $args, $values ) {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf( '
 					<label for="%1$s_%2$s_%3$s">
 						<input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>
 						%5$s
 					</label><br>',
-				esc_attr( $this::SLUG ),
+				esc_attr( self::SLUG ),
 				esc_attr( $args['field'] ),
 				esc_attr( $box_value ),
 				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
@@ -574,7 +589,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $values The current field values.
 	 */
-	public function render_repeatable_field( $args, $values ) {
+	public static function render_repeatable_field( $args, $values ) {
 		$args = wp_parse_args( $args, array(
 			'size' => 70,
 		) );
@@ -593,7 +608,7 @@ class WP_SEO_Settings {
 													%5$s
 												</label>
 												<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-												esc_attr( $this::SLUG ),
+												esc_attr( self::SLUG ),
 												esc_attr( $args['field'] ),
 												intval( $i ),
 												esc_attr( $name ),
@@ -616,7 +631,7 @@ class WP_SEO_Settings {
 												%5$s
 											</label>
 											<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-											esc_attr( $this::SLUG ),
+											esc_attr( self::SLUG ),
 											esc_attr( $args['field'] ),
 											0,
 											esc_attr( $name ),
@@ -641,7 +656,7 @@ class WP_SEO_Settings {
 											%5$s
 										</label>
 										<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-										esc_attr( $this::SLUG ),
+										esc_attr( self::SLUG ),
 										esc_attr( $args['field'] ),
 										'<%= i %>',
 										esc_attr( $name ),
@@ -781,7 +796,7 @@ class WP_SEO_Settings {
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
 		}
-
+		$out = apply_filters( 'wp_seo_sanitize', $out, $in );
 		return $out;
 	}
 

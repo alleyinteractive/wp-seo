@@ -79,8 +79,14 @@ class WP_SEO_Admin_Template_Tests extends WP_UnitTestCase {
 			array(
 				'wp_seo_the_title_character_count',
 				'Should print the passed number',
-				"#{$num} \(save changes to update\)#s",
+				"#{$num}#",
 				array( $num ),
+			),
+			array(
+				'wp_seo_the_title_character_count',
+				'Should print a noscript save-changes prompt',
+				"#<noscript>.+?</noscript>#s",
+				array( '' ),
 			),
 			array(
 				'wp_seo_the_meta_description_label',
@@ -103,8 +109,14 @@ class WP_SEO_Admin_Template_Tests extends WP_UnitTestCase {
 			array(
 				'wp_seo_the_description_character_count',
 				'Should print the passed number',
-				"#{$num} \(save changes to update\)#s",
+				"#{$num}#",
 				array( $num ),
+			),
+			array(
+				'wp_seo_the_description_character_count',
+				'Should print a noscript save-changes prompt',
+				"#<noscript>.+?</noscript>#s",
+				array( '' ),
 			),
 			array(
 				'wp_seo_the_meta_keywords_label',
