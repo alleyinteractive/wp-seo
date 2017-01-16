@@ -589,7 +589,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $values The current field values.
 	 */
-	public function render_repeatable_field( $args, $values ) {
+	public static function render_repeatable_field( $args, $values ) {
 		$args = wp_parse_args( $args, array(
 			'size' => 70,
 		) );
