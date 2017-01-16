@@ -39,6 +39,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public $whitelisted_fields = array(
 			'title',
 			'description',
+			'keywords',
 		);
 
 		/**
