@@ -32,6 +32,16 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public $formatting_tag_pattern = '';
 
 		/**
+		 * The fields whitelisted for use.
+		 *
+		 * @var string.
+		 */
+		public $whitelisted_fields = array(
+			'title',
+			'description',
+		);
+
+		/**
 		 * Unused.
 		 *
 		 * @codeCoverageIgnore
@@ -121,6 +131,15 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 * @param string WP_SEO::formatting_tag_pattern The regex.
 			 */
 			$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
+
+			/**
+			 * Filter the whitelisted fields.
+			 *
+			 * You might need this if you have added other fields.
+			 *
+			 * @param string WP_SEO::whitelisted_fields The built-in fields
+			 */
+			$this->whitelisted_fields = apply_filters( 'wp_seo_whitelisted_fields', $this->whitelisted_fields );
 		}
 
 		/**
@@ -149,11 +168,15 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @return array Option values with default keys and values.
 		 */
 		public function intersect_term_option( $option_value ) {
-			return wp_seo_intersect_args( $option_value, array(
-				'title'       => '',
-				'description' => '',
-				'keywords'    => '',
-			) );
+			$term_fields = apply_filters(
+				'wp_seo_intersect_term_option',
+				array(
+					'title'       => '',
+					'description' => '',
+					'keywords'    => '',
+				)
+			);
+			return wp_seo_intersect_args( $option_value, $term_fields );
 		}
 
 		/**
@@ -243,7 +266,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
+			foreach ( $this->whitelisted_fields as $field ) {
 				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
 			}
@@ -345,7 +368,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
+			foreach ( $this->whitelisted_fields as $field ) {
 				$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 			}
 
