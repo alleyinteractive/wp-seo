@@ -64,10 +64,15 @@ class WP_SEO_Settings {
 	 */
 	private $archived_post_types = array();
 
+	/**
+	 * Currently supported field types
+	 *
+	 * @var array Field types
+	 */
 	public $field_types = array(
 		'textarea',
 		'checkboxes',
-		'repeatable'
+		'repeatable',
 	);
 
 	const SLUG = 'wp-seo';
@@ -179,9 +184,11 @@ class WP_SEO_Settings {
 
 	/**
 	 * Override the value of an option in the static variable.
+	 * @param string $key     The option key sought.
+	 * @param mixed  $value   The option value.
 	 */
-	public function set_option( $option, $value ) {
-		self::$options[$option] = $value;
+	public function set_option( $key, $value ) {
+		self::$options[ $option ] = $value;
 	}
 
 	/**
