@@ -58,6 +58,8 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
+		// preg_match required three parameters before 5.4.0
+		$preg_match_compatibility_matches = array();
 		add_post_meta( $post_ID, '_meta_title', $title );
 		add_post_meta( $post_ID, '_meta_description', $description );
 		add_post_meta( $post_ID, '_meta_keywords', $keywords );
@@ -67,10 +69,11 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 
 		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
 		$this->assertContains( 'name="seo_meta[title]" value="' . $title . '" size="96"', $html );
-		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $title ) ), $html );
+		$this->assertContains( sprintf( '<span class="title-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
-		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
+		$this->assertContains( sprintf( '<span class="description-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
+		$this->assertSame( 2, preg_match_all( sprintf( '#<noscript>[^>]+?<p>%s</p>[^>]+?</noscript>#m', __( 'Save changes to update.', 'wp-seo' ) ), $html, $preg_match_compatibility_matches ) );
 	}
 
 	/**
@@ -191,6 +194,7 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
+		$preg_match_compatibility_matches = array();
 
 		update_option(
 			WP_SEO()->get_term_option_name( $category ),
@@ -205,10 +209,11 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 
 		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
 		$this->assertContains( 'name="seo_meta[title]" value="' . $title . '" size="96"', $html );
-		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $title ) ), $html );
+		$this->assertContains( sprintf( '<span class="title-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
-		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
+		$this->assertContains( sprintf( '<span class="description-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
+		$this->assertSame( 2, preg_match_all( sprintf( '#<noscript>[^>]+?<p>%s</p>[^>]+?</noscript>#m', __( 'Save changes to update.', 'wp-seo' ) ), $html, $preg_match_compatibility_matches ) );
 	}
 
 	function test_save_term_fields() {
