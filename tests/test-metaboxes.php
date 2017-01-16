@@ -73,7 +73,7 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
 		$this->assertContains( sprintf( '<span class="description-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
-		$this->assertSame( 2, preg_match_all( sprintf( '#<noscript>[^>]+?<p>%s</p>[^>]+?</noscript>#m', __( 'Save changes to update.', 'wp-seo', $preg_match_compatibility_matches ) ), $html ) );
+		$this->assertSame( 2, preg_match_all( sprintf( '#<noscript>[^>]+?<p>%s</p>[^>]+?</noscript>#m', __( 'Save changes to update.', 'wp-seo' ) ), $html, $preg_match_compatibility_matches ) );
 	}
 
 	/**
@@ -213,7 +213,7 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
 		$this->assertContains( sprintf( '<span class="description-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
-		$this->assertSame( 2, preg_match_all( sprintf( '#<noscript>[^>]+?<p>%s</p>[^>]+?</noscript>#m', __( 'Save changes to update.', 'wp-seo', $preg_match_compatibility_matches ) ), $html ) );
+		$this->assertSame( 2, preg_match_all( sprintf( '#<noscript>[^>]+?<p>%s</p>[^>]+?</noscript>#m', __( 'Save changes to update.', 'wp-seo' ) ), $html, $preg_match_compatibility_matches ) );
 	}
 
 	function test_save_term_fields() {
