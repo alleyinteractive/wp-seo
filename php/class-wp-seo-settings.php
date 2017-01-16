@@ -178,6 +178,13 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Override the value of an option in the static variable.
+	 */
+	public function set_option( $option, $value ) {
+		self::$options[$option] = $value;
+	}
+
+	/**
 	 * Get an option value.
 	 *
 	 * @param string $key     The option key sought.
