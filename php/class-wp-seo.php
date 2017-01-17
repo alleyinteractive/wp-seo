@@ -574,8 +574,12 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				}
 			} elseif ( is_category() || is_tag() || is_tax() ) {
 				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
-					$meta_description = $this->format( $option['description'] );
-					$meta_keywords = $this->format( $option['keywords'] );
+					if ( isset( $option['description'] ) ) {
+						$meta_description = $this->format( $option['description'] );
+					}
+					if ( isset( $option['keywords'] ) ) {
+						$meta_keywords = $this->format( $option['keywords'] );
+					}
 				}
 			}
 			if ( $key ) {
