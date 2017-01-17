@@ -3,7 +3,7 @@
 
 	$document = $( document );
 	addtag    = document.getElementById( 'addtag' );
-	images    = jQuery( '.wp-seo-image-container');
+	images    = jQuery( '.wp-seo-image-container' );
 
 	/**
 	 * Get a link to an "Add another repeatable group" link.
@@ -117,8 +117,11 @@
 		.append( wp_seo_add_more_button() )
 		// Toggle the "Remove" link from each group as needed.
 		.each( function( i, el ) {
-			wp_seo_toggle_removes( $( el ).find( '> .nodes' ) );
-	} );
+			wp_seo_toggle_removes(
+				$( el ).find( '> .nodes' )
+			);
+		}
+	);
 
 	/**
 	 * Add a repeatable group on click.
@@ -155,7 +158,7 @@
 				delImgLink
 					.on( 'click', function( e ){
 						e.preventDefault();
-						imgContainer.html('');
+						imgContainer.html( '' );
 						addImgLink.removeClass( 'hidden' );
 						delImgLink.addClass( 'hidden' );
 						imgIdInput.val( '' );
@@ -175,9 +178,8 @@
 							multiple: false  // Set to true to allow multiple files to be selected
 						});
 						frame.on( 'select', function() {
-							var attachment = frame.state().get('selection').first().toJSON();
-							imgContainer.append( '<img src="'+attachment.url+'" alt="" style="max-width:400px;"/>' );
-							console.log(attachment.id);
+							var attachment = frame.state().get( 'selection' ).first().toJSON();
+							imgContainer.append( '<img src="' + attachment.url + '" alt="" style="max-width:400px;"/>' );
 							imgIdInput.val( attachment.id );
 							addImgLink.addClass( 'hidden' );
 							delImgLink.removeClass( 'hidden' );

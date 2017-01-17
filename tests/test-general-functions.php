@@ -41,25 +41,25 @@ class WP_SEO_General_Functions_Tests extends WP_UnitTestCase {
 				array(),
 				array( $key_1 => $val_1, $key_2 => $val_2 ),
 				array( $key_1 => $val_1, $key_2 => $val_2 ),
-				'Should return $defaults if no $args are passed'
+				'Should return $defaults if no $args are passed',
 			),
 			array(
 				array( $key_1 => $val_3 ),
 				array( $key_1 => $val_1, $key_2 => $val_2 ),
 				array( $key_1 => $val_3, $key_2 => $val_2 ),
-				'Should return any passed $args values whose keys are in $defaults'
+				'Should return any passed $args values whose keys are in $defaults',
 			),
 			array(
 				array( $key_1 => $val_3, $key_2 => $val_4 ),
 				array( $key_1 => $val_1, $key_2 => $val_2 ),
 				array( $key_1 => $val_3, $key_2 => $val_4 ),
-				'Should return all passed $args values whose keys are in $defaults'
+				'Should return all passed $args values whose keys are in $defaults',
 			),
 			array(
 				array( $key_1 => $val_1 ),
 				array( $key_2 => $val_2 ),
 				array( $key_2 => $val_2 ),
-				'Should reject passed $args whose keys are not in defaults'
+				'Should reject passed $args whose keys are not in defaults',
 			),
 		);
 	}

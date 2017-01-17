@@ -119,7 +119,7 @@ EOF;
 	 */
 	function _assert_option_filters( $key ) {
 		$this->_assert_title( $this->options[ "{$key}_title" ] );
-		$this->_assert_all_meta( $this->options["{$key}_description"], $this->options["{$key}_keywords"] );
+		$this->_assert_all_meta( $this->options[ "{$key}_description" ], $this->options[ "{$key}_keywords" ] );
 	}
 
 	/**
@@ -179,21 +179,21 @@ EOF;
 	}
 
 	function test_author_archive() {
-		$author_ID = $this->factory->user->create( array( 'user_login' => 'user-a' ) );
-		$this->factory->post->create( array( 'post_author' => $author_ID ) );
-		$this->go_to( get_author_posts_url( $author_ID ) );
+		$author_id = $this->factory->user->create( array( 'user_login' => 'user-a' ) );
+		$this->factory->post->create( array( 'post_author' => $author_id ) );
+		$this->go_to( get_author_posts_url( $author_id ) );
 		$this->_assert_option_filters( 'archive_author' );
 	}
 
 	function test_category() {
-		$category_ID = $this->factory->term->create( array( 'name' => 'cat-a', 'taxonomy' => 'category' ) );
-		$this->go_to( get_term_link( $category_ID, 'category' ) );
+		$category_id = $this->factory->term->create( array( 'name' => 'cat-a', 'taxonomy' => 'category' ) );
+		$this->go_to( get_term_link( $category_id, 'category' ) );
 		$this->_assert_option_filters( 'archive_category' );
 	}
 
 	function test_tax() {
-		$term_ID = $this->factory->term->create( array( 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ) );
-		$this->go_to( get_term_link( $term_ID, $this->taxonomy ) );
+		$term_id = $this->factory->term->create( array( 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ) );
+		$this->go_to( get_term_link( $term_id, $this->taxonomy ) );
 		$this->_assert_option_filters( "archive_{$this->taxonomy}" );
 	}
 
