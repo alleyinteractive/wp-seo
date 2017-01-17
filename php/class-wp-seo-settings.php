@@ -655,12 +655,12 @@ class WP_SEO_Settings {
 	public static function render_image_field( $args, $og_img_id, $slug = self::SLUG ) {
 		wp_enqueue_media();
 		if ( ! empty( $og_img_id ) ) {
-			$upload_link = esc_url( get_upload_iframe_src( 'image' ) );
 			$og_img_src = wp_get_attachment_image_src( $og_img_id, 'og_image' );
 			$og_img = is_array( $og_img_src );
 		} else {
 			$og_img = false;
 		}
+		$upload_link = esc_url( get_upload_iframe_src( 'image' ) );
 		echo '<div class="wp-seo-image-container">';
 		echo '<div class="custom-img-container">';
 		if ( $og_img ) {
