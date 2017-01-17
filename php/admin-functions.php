@@ -20,6 +20,8 @@ function wp_seo_admin_scripts() {
 		// Backcompat.
 		'repeatable_add_more_label' => __( 'Add another', 'wp-seo' ),
 		'repeatable_remove_label'   => __( 'Remove group', 'wp-seo' ),
+		'media_modal_button'        => __( 'Select image', 'wp-seo' ),
+		'media_modal_title'         => __( 'Choose an image', 'wp-seo' ),
 	) );
 
 	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.11.2' );

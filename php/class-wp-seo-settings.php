@@ -494,6 +494,14 @@ class WP_SEO_Settings {
 				self::render_repeatable_field( $args, $value );
 				break;
 
+			case 'dropdown' :
+				self::render_dropdown( $args, $value );
+				break;
+
+			case 'image' :
+				self::render_image_field( $args, $value );
+				break;
+
 			default :
 				self::render_text_field( $args, $value );
 				break;
@@ -585,7 +593,109 @@ class WP_SEO_Settings {
 	}
 
 	/**
-	 * Render a repeatble text field.
+	 * Render settings dropdown.
+	 *
+	 * @param  array $args {
+	 *     An array of arguments for the dropdown.
+	 *
+	 *     @type string $field The field name.
+	 *     @type array  $boxes An associative array of the value and label
+	 *                         of each dropdown option.
+	 * }
+	 * @param  array $values Indexed array of current field values.
+	 */
+	public static function render_dropdown( $args, $values, $slug = self::SLUG ) {
+		printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
+			esc_attr( $slug ),
+			esc_attr( $args['field'] )
+		);
+		$count = 0;
+		if ( empty( $values ) ) {
+			$selected = 'selected';
+			$disabled = 'disabled';
+		} else {
+			$selected = '';
+			$disabled = '';
+		}
+		printf(
+			'<option value="" %1$s %2$s>%3$s</option>',
+			esc_attr( $selected ),
+			esc_attr( $disabled ),
+			esc_html( __( 'Select a type', 'wp-seo' ) )
+		);
+		foreach ( $args['boxes'] as $box_value => $box_label ) {
+			printf(
+				'<option id="%1$s_%2$s_%3$s" value="%4$s" %5$s>%6$s</option>',
+				esc_attr( $slug ),
+				esc_attr( $args['field'] ),
+				esc_attr( $count ),
+				esc_attr( $box_value ),
+				selected( $values, $box_value, true ),
+				esc_html( $box_label )
+			);
+			$count++;
+		}
+		echo '</select>';
+	}
+
+	/**
+	 * Render image field.
+	 *
+	 * @param  array $args {
+	 *     An array of arguments for the image field.
+	 *
+	 *     @type string $field The field name.
+	 *     @type array  $boxes An associative array of the value and label
+	 *                         of each dropdown option.
+	 * }
+	 * @param  array $values Indexed array of current field values.
+	 */
+	public static function render_image_field( $args, $og_img_id, $slug = self::SLUG ) {
+		wp_enqueue_media();
+		$upload_link = esc_url( get_upload_iframe_src( 'image' ) );
+		$og_img_src = wp_get_attachment_image_src( $og_img_id, 'og_image' );
+		$og_img = is_array( $og_img_src );
+		echo '<div class="wp-seo-image-container">';
+		echo '<div class="custom-img-container">';
+		if ( $og_img ) {
+			echo sprintf(
+				'<img src="%1$s" style="max-width:400px" />',
+				$og_img_src[0]
+			);
+		}
+		echo '</div>';
+		echo '<p class="hide-if-no-js">';
+		if ( $og_img ) {
+			$upload_hidden = 'hidden';
+			$remove_hidden = '';
+		} else {
+			$upload_hidden = '';
+			$remove_hidden = 'hidden';
+		}
+		echo sprintf(
+			'<a class="upload-custom-img %1$s" href="%2$s">%3$s</a>',
+			esc_attr( $upload_hidden ),
+			esc_url( $upload_link ),
+			__( 'Set custom image', 'wp-seo' )
+		);
+		echo sprintf(
+			'<a class="delete-custom-img %1$s" href="%2$s">%3$s</a>',
+			$remove_hidden,
+			esc_url( '#' ),
+			__( 'Remove this image', 'wp-seo' )
+		);
+		echo '</p>';
+		echo sprintf(
+			'<input id="%1$s_%2$s" class="custom-img-id" name="%1$s[%2$s]" type="hidden" value="%3$s" />',
+			esc_attr( $slug ),
+			esc_attr( $args['field'] ),
+			esc_attr( $og_img_id )
+		);
+		echo '</div>';
+	}
+
+	/**
+	 * Render a repeatable text field.
 	 *
 	 * @param  array $args {
 	 *     An array of arguments for setting up the repeatable fields.
