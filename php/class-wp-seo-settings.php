@@ -603,6 +603,7 @@ class WP_SEO_Settings {
 	 *                         of each dropdown option.
 	 * }
 	 * @param  array $values Indexed array of current field values.
+	 * @param  string $slug Slug to use for the field.
 	 */
 	public static function render_dropdown( $args, $values, $slug = self::SLUG ) {
 		printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
@@ -648,19 +649,24 @@ class WP_SEO_Settings {
 	 *     @type array  $boxes An associative array of the value and label
 	 *                         of each dropdown option.
 	 * }
-	 * @param  array $values Indexed array of current field values.
+	 * @param  array $og_img_id Current image ID value.
+	 * @param  string $slug Slug to use for the field.
 	 */
 	public static function render_image_field( $args, $og_img_id, $slug = self::SLUG ) {
 		wp_enqueue_media();
-		$upload_link = esc_url( get_upload_iframe_src( 'image' ) );
-		$og_img_src = wp_get_attachment_image_src( $og_img_id, 'og_image' );
-		$og_img = is_array( $og_img_src );
+		if ( ! empty( $og_img_id ) ) {
+			$upload_link = esc_url( get_upload_iframe_src( 'image' ) );
+			$og_img_src = wp_get_attachment_image_src( $og_img_id, 'og_image' );
+			$og_img = is_array( $og_img_src );
+		} else {
+			$og_img = false;
+		}
 		echo '<div class="wp-seo-image-container">';
 		echo '<div class="custom-img-container">';
 		if ( $og_img ) {
 			echo sprintf(
 				'<img src="%1$s" style="max-width:400px" />',
-				$og_img_src[0]
+				esc_url( $og_img_src[0] )
 			);
 		}
 		echo '</div>';
@@ -676,13 +682,13 @@ class WP_SEO_Settings {
 			'<a class="upload-custom-img %1$s" href="%2$s">%3$s</a>',
 			esc_attr( $upload_hidden ),
 			esc_url( $upload_link ),
-			__( 'Set custom image', 'wp-seo' )
+			esc_html( __( 'Set custom image', 'wp-seo' ) )
 		);
 		echo sprintf(
 			'<a class="delete-custom-img %1$s" href="%2$s">%3$s</a>',
-			$remove_hidden,
+			esc_attr( $remove_hidden ),
 			esc_url( '#' ),
-			__( 'Remove this image', 'wp-seo' )
+			esc_html( __( 'Remove this image', 'wp-seo' ) )
 		);
 		echo '</p>';
 		echo sprintf(
