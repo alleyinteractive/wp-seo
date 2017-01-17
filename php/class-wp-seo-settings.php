@@ -595,14 +595,14 @@ class WP_SEO_Settings {
 	/**
 	 * Render settings dropdown.
 	 *
-	 * @param  array $args {
+	 * @param  array  $args {
 	 *     An array of arguments for the dropdown.
 	 *
 	 *     @type string $field The field name.
 	 *     @type array  $boxes An associative array of the value and label
 	 *                         of each dropdown option.
 	 * }
-	 * @param  array $values Indexed array of current field values.
+	 * @param  array  $values Indexed array of current field values.
 	 * @param  string $slug Slug to use for the field.
 	 */
 	public static function render_dropdown( $args, $values, $slug = self::SLUG ) {
@@ -642,14 +642,14 @@ class WP_SEO_Settings {
 	/**
 	 * Render image field.
 	 *
-	 * @param  array $args {
+	 * @param  array  $args {
 	 *     An array of arguments for the image field.
 	 *
 	 *     @type string $field The field name.
 	 *     @type array  $boxes An associative array of the value and label
 	 *                         of each dropdown option.
 	 * }
-	 * @param  array $og_img_id Current image ID value.
+	 * @param  array  $og_img_id Current image ID value.
 	 * @param  string $slug Slug to use for the field.
 	 */
 	public static function render_image_field( $args, $og_img_id, $slug = self::SLUG ) {
