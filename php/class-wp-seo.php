@@ -568,18 +568,17 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public function wp_head() {
 			$key = $this->get_key();
 
-			if ( false !== strpos( $key, 'single_' ) ) {
-				if ( WP_SEO_Settings()->has_post_fields( get_post_type() ) ) {
-					$meta_description = get_post_meta( get_the_ID(), '_meta_description', true );
-					$meta_keywords = get_post_meta( get_the_ID(), '_meta_keywords', true );
+			if ( is_singular() ) {
+				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
+					$meta_description = $this->format( get_post_meta( get_the_ID(), '_meta_description', true ) );
+					$meta_keywords = $this->format( get_post_meta( get_the_ID(), '_meta_keywords', true ) );
 				}
-			} elseif ( false !== strpos( $key, 'archive_' ) ) {
+			} elseif ( is_category() || is_tag() || is_tax() ) {
 				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
-					$meta_description = $option['description'];
-					$meta_keywords = $option['keywords'];
+					$meta_description = $this->format( $option['description'] );
+					$meta_keywords = $this->format( $option['keywords'] );
 				}
 			}
-
 			if ( $key ) {
 				if ( empty( $meta_description ) ) {
 					/**
