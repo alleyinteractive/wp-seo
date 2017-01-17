@@ -534,7 +534,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 
 		/**
 		 * Helper function for determining the 'key' for use in head
-		 *
 		 */
 		public function get_key() {
 			if ( is_singular() ) {
