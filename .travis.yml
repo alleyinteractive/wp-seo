@@ -58,7 +58,9 @@ script:
     - if [[ "$PHP_LINT" == "1" ]]; then find . -type "f" -iname "*.php" | xargs -L "1" php -l; fi
     - if [[ "$WP_PHPCS" == "1" ]]; then /tmp/php-codesniffer/scripts/phpcs -p -s -v -n --standard=./phpcs.ruleset.xml; fi
     - export WP_MULTISITE=0 && phpunit
+    - export WP_MULTISITE=0 && phpunit --group ajax
     - export WP_MULTISITE=1 && phpunit
+    - export WP_MULTISITE=1 && phpunit --group ajax
 
 notifications:
     email: false

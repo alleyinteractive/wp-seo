@@ -54,23 +54,26 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 	 * Test that markup for post fields has our expected fields and values.
 	 */
 	function test_post_meta_fields() {
-		$post_ID = $this->factory->post->create();
+		$post_id = $this->factory->post->create();
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
-		add_post_meta( $post_ID, '_meta_title', $title );
-		add_post_meta( $post_ID, '_meta_description', $description );
-		add_post_meta( $post_ID, '_meta_keywords', $keywords );
+		// preg_match required three parameters before 5.4.0
+		$preg_match_compatibility_matches = array();
+		add_post_meta( $post_id, '_meta_title', $title );
+		add_post_meta( $post_id, '_meta_description', $description );
+		add_post_meta( $post_id, '_meta_keywords', $keywords );
 
-		$post = get_post( $post_ID );
+		$post = get_post( $post_id );
 		$html = get_echo( array( WP_SEO(), 'post_meta_fields' ), array( $post ) );
 
 		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
 		$this->assertContains( 'name="seo_meta[title]" value="' . $title . '" size="96"', $html );
-		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $title ) ), $html );
+		$this->assertContains( sprintf( '<span class="title-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
-		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
+		$this->assertContains( sprintf( '<span class="description-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
+		$this->assertSame( 2, preg_match_all( sprintf( '#<noscript>[^>]+?<p>%s</p>[^>]+?</noscript>#m', __( 'Save changes to update.', 'wp-seo' ) ), $html, $preg_match_compatibility_matches ) );
 	}
 
 	/**
@@ -78,84 +81,66 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 	 */
 	function test_save_post_fields() {
 		wp_set_current_user( 1 );
-		$post_ID = $this->factory->post->create();
-		$post = get_post( $post_ID );
+		$post_id = $this->factory->post->create();
+		$post = get_post( $post_id );
 		$html = get_echo( array( WP_SEO(), 'post_meta_fields' ), array( $post ) );
-
 		// No $_POST.
-		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
-
+		$this->assertNull( WP_SEO()->save_post_fields( $post_id ) );
 		// Wrong post type.
 		$_POST = array(
 			'post_type' => 'page',
 		);
-		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
-
+		$this->assertNull( WP_SEO()->save_post_fields( $post_id ) );
 		$_POST = array(
 			'post_type' => 'post',
 		);
-
 		// Incapable user.
 		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 		wp_set_current_user( $user_id );
-		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
-
+		$this->assertNull( WP_SEO()->save_post_fields( $post_id ) );
 		wp_set_current_user( 1 );
-
 		// No nonce.
-		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
-
+		$this->assertNull( WP_SEO()->save_post_fields( $post_id ) );
 		$_POST['wp-seo-nonce'] = rand_str();
-
 		// Wrong nonce.
-		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
-
+		$this->assertNull( WP_SEO()->save_post_fields( $post_id ) );
 		preg_match( "/name=\"wp-seo-nonce\" value=\"(.*?)\"/m", $html, $nonce_matches );
 		$_POST['wp-seo-nonce'] = $nonce_matches[1];
-
 		// No POST'ed ID.
-		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
-
-		$_POST['post_ID'] = $post_ID;
-
+		$this->assertNull( WP_SEO()->save_post_fields( $post_id ) );
+		$_POST['post_ID'] = $post_id;
 		// No SEO data.
-		WP_SEO()->save_post_fields( $post_ID );
-		$this->assertEmpty( get_post_meta( $post_ID, '_meta_title', true ) );
-		$this->assertEmpty( get_post_meta( $post_ID, '_meta_description', true ) );
-		$this->assertEmpty( get_post_meta( $post_ID, '_meta_keywords', true ) );
-
+		WP_SEO()->save_post_fields( $post_id );
+		$this->assertEmpty( get_post_meta( $post_id, '_meta_title', true ) );
+		$this->assertEmpty( get_post_meta( $post_id, '_meta_description', true ) );
+		$this->assertEmpty( get_post_meta( $post_id, '_meta_keywords', true ) );
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
-
 		// add_magic_quotes() to simulate wp_magic_quotes().
 		$_POST['seo_meta'] = add_magic_quotes( array(
 			'title' => $title,
 			'description' => $description . '<script>meta</script>',
 			'keywords' => $keywords,
 		) );
-
 		// Successful save.
-		WP_SEO()->save_post_fields( $post_ID );
-		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
-		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
-		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
-
+		WP_SEO()->save_post_fields( $post_id );
+		$this->assertEquals( $title, get_post_meta( $post_id, '_meta_title', true ) );
+		$this->assertEquals( $description, get_post_meta( $post_id, '_meta_description', true ) );
+		$this->assertEquals( $keywords, get_post_meta( $post_id, '_meta_keywords', true ) );
 		$title = "Is your name O'Reilly?";
 		$description = 'What is Folder\SubFolder\File.txt?';
 		$keywords = '';
-
 		// Successfully save data with slashes. add_magic_quotes() to simulate wp_magic_quotes().
 		$_POST['seo_meta'] = add_magic_quotes( array(
 			'title'       => $title,
 			'description' => $description,
 			'keywords'    => $keywords,
 		) );
-
-		WP_SEO()->save_post_fields( $post_ID );
-		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
-		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
-		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
+		WP_SEO()->save_post_fields( $post_id );
+		$this->assertEquals( $title, get_post_meta( $post_id, '_meta_title', true ) );
+		$this->assertEquals( $description, get_post_meta( $post_id, '_meta_description', true ) );
+		$this->assertEquals( $keywords, get_post_meta( $post_id, '_meta_keywords', true ) );
 	}
 
 	/**
@@ -185,12 +170,13 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 	 * Test that markup for term fields has our expected fields and values.
 	 */
 	function test_edit_term_meta_fields() {
-		$category_ID = $this->factory->term->create( array( 'taxonomy' => 'category' ) );
-		$category = get_term( $category_ID, 'category' );
+		$category_id = $this->factory->term->create( array( 'taxonomy' => 'category' ) );
+		$category = get_term( $category_id, 'category' );
 
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
+		$preg_match_compatibility_matches = array();
 
 		update_option(
 			WP_SEO()->get_term_option_name( $category ),
@@ -205,46 +191,47 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 
 		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
 		$this->assertContains( 'name="seo_meta[title]" value="' . $title . '" size="96"', $html );
-		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $title ) ), $html );
+		$this->assertContains( sprintf( '<span class="title-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
-		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
+		$this->assertContains( sprintf( '<span class="description-character-count">%d</span>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
+		$this->assertSame( 2, preg_match_all( sprintf( '#<noscript>[^>]+?<p>%s</p>[^>]+?</noscript>#m', __( 'Save changes to update.', 'wp-seo' ) ), $html, $preg_match_compatibility_matches ) );
 	}
 
 	function test_save_term_fields() {
 		wp_set_current_user( 1 );
-		$category_ID = $this->factory->term->create( array( 'taxonomy' => 'category' ) );
-		$category = get_term( $category_ID, 'category' );
+		$category_id = $this->factory->term->create( array( 'taxonomy' => 'category' ) );
+		$category = get_term( $category_id, 'category' );
 		$html = get_echo( array( WP_SEO(), 'edit_term_meta_fields' ), array( $category, 'category' ) );
 
 		// No $_POST.
-		$this->assertNull( WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' ) );
+		$this->assertNull( WP_SEO()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' ) );
 
 		$_POST['taxonomy'] = 'category';
 
 		// Wrong taxonomy.
-		$this->assertNull( WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'post_tag' ) );
+		$this->assertNull( WP_SEO()->save_term_fields( $category_id, $category->term_taxonomy_id, 'post_tag' ) );
 
 		// Incapable user.
 		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 		wp_set_current_user( $user_id );
-		$this->assertNull( WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' ) );
+		$this->assertNull( WP_SEO()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' ) );
 
 		wp_set_current_user( 1 );
 
 		// No nonce.
-		$this->assertNull( WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' ) );
+		$this->assertNull( WP_SEO()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' ) );
 
 		$_POST['wp-seo-nonce'] = rand_str();
 
 		// Wrong nonce.
-		$this->assertNull( WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' ) );
+		$this->assertNull( WP_SEO()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' ) );
 
-		preg_match( "/name=\"wp-seo-nonce\" value=\"(.*?)\"/m", $html, $nonce_matches );
+		preg_match( '/name=\"wp-seo-nonce\" value=\"(.*?)\"/m', $html, $nonce_matches );
 		$_POST['wp-seo-nonce'] = $nonce_matches[1];
 
 		// No SEO data? No option.
-		WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' );
+		WP_SEO()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' );
 		$this->assertFalse( get_option( WP_SEO()->get_term_option_name( $category ) ) );
 
 		$title = rand_str();
@@ -258,7 +245,7 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		);
 
 		// Successful add_option().
-		WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' );
+		WP_SEO()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' );
 		$this->assertSame(
 			array(
 				'title' => $title,
@@ -277,7 +264,7 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		);
 
 		// Successful update_option().
-		WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' );
+		WP_SEO()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' );
 		$this->assertSame(
 			array(
 				'title' => $updated_title,

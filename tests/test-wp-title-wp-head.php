@@ -119,7 +119,7 @@ EOF;
 	 */
 	function _assert_option_filters( $key ) {
 		$this->_assert_title( $this->options[ "{$key}_title" ] );
-		$this->_assert_all_meta( $this->options["{$key}_description"], $this->options["{$key}_keywords"] );
+		$this->_assert_all_meta( $this->options[ "{$key}_description" ], $this->options[ "{$key}_keywords" ] );
 	}
 
 	/**
@@ -140,12 +140,26 @@ EOF;
 
 	// A post with custom values should not use the single_{type}_ values.
 	function test_single_custom() {
-		$this->go_to( get_permalink( $post_ID = $this->factory->post->create() ) );
-		update_post_meta( $post_ID, '_meta_title', '_custom_meta_title' );
-		update_post_meta( $post_ID, '_meta_description', '_custom_meta_description' );
-		update_post_meta( $post_ID, '_meta_keywords', '_custom_meta_keywords' );
+		$post_title   = rand_str();
+		$post_excerpt = rand_str();
+		$post_id = $this->factory->post->create( array(
+			'post_title' => $post_title,
+			'post_excerpt' => $post_excerpt,
+		) );
+
+		$this->go_to( get_permalink( $post_id ) );
+		update_post_meta( $post_id, '_meta_title', '_custom_meta_title' );
+		update_post_meta( $post_id, '_meta_description', '_custom_meta_description' );
+		update_post_meta( $post_id, '_meta_keywords', '_custom_meta_keywords' );
 		$this->_assert_title( '_custom_meta_title' );
 		$this->_assert_all_meta( '_custom_meta_description', '_custom_meta_keywords' );
+
+		// Formatting tags should be converted.
+		update_post_meta( $post_id, '_meta_title', '#title#' );
+		update_post_meta( $post_id, '_meta_description', '#excerpt#' );
+		update_post_meta( $post_id, '_meta_keywords', '#site_name#' );
+		$this->_assert_title( $post_title );
+		$this->_assert_all_meta( $post_excerpt, get_bloginfo( 'name' ) );
 	}
 
 	// If there is no format string, return the original post title.
@@ -165,31 +179,49 @@ EOF;
 	}
 
 	function test_author_archive() {
-		$author_ID = $this->factory->user->create( array( 'user_login' => 'user-a' ) );
-		$this->factory->post->create( array( 'post_author' => $author_ID ) );
-		$this->go_to( get_author_posts_url( $author_ID ) );
+		$author_id = $this->factory->user->create( array( 'user_login' => 'user-a' ) );
+		$this->factory->post->create( array( 'post_author' => $author_id ) );
+		$this->go_to( get_author_posts_url( $author_id ) );
 		$this->_assert_option_filters( 'archive_author' );
 	}
 
 	function test_category() {
-		$category_ID = $this->factory->term->create( array( 'name' => 'cat-a', 'taxonomy' => 'category' ) );
-		$this->go_to( get_term_link( $category_ID, 'category' ) );
+		$category_id = $this->factory->term->create( array( 'name' => 'cat-a', 'taxonomy' => 'category' ) );
+		$this->go_to( get_term_link( $category_id, 'category' ) );
 		$this->_assert_option_filters( 'archive_category' );
 	}
 
 	function test_tax() {
-		$term_ID = $this->factory->term->create( array( 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ) );
-		$this->go_to( get_term_link( $term_ID, $this->taxonomy ) );
+		$term_id = $this->factory->term->create( array( 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ) );
+		$this->go_to( get_term_link( $term_id, $this->taxonomy ) );
 		$this->_assert_option_filters( "archive_{$this->taxonomy}" );
 	}
 
 	// A term with custom values should not use the archive_{taxonomy}_ fields.
 	function test_category_custom() {
-		$term_ID = $this->factory->term->create( array( 'name' => 'cat-b', 'taxonomy' => 'category' ) );
-		update_option( WP_SEO()->get_term_option_name( get_term( $term_ID, 'category' ) ), array( 'title' => '_custom_title', 'description' => '_custom_description', 'keywords' => '_custom_keywords' ) );
-		$this->go_to( get_term_link( $term_ID, 'category' ) );
+		$term_name = rand_str();
+		$term_description = rand_str();
+		$term_id = $this->factory->term->create( array( 'name' => $term_name, 'description' => $term_description, 'taxonomy' => 'category' ) );
+		$option_name = WP_SEO()->get_term_option_name( get_term( $term_id, 'category' ) );
+
+		$this->go_to( get_term_link( $term_id, 'category' ) );
+
+		update_option( $option_name, array(
+			'title' => '_custom_title',
+			'description' => '_custom_description',
+			'keywords' => '_custom_keywords',
+		) );
 		$this->_assert_title( '_custom_title' );
 		$this->_assert_all_meta( '_custom_description', '_custom_keywords' );
+
+		// Formatting tags should be converted.
+		update_option( $option_name, array(
+			'title' => '#term_name#',
+			'description' => '#term_description#',
+			'keywords' => '#site_name#',
+		) );
+		$this->_assert_title( $term_name );
+		$this->_assert_all_meta( $term_description, get_bloginfo( 'name' ) );
 	}
 
 	function test_post_type_archive() {

@@ -6,6 +6,28 @@
  */
 
 /**
+ * Enqueues scripts and styles for administration pages.
+ */
+function wp_seo_admin_scripts() {
+	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.13.0', true );
+
+	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', array(
+		'ajaxurl' => admin_url( 'admin-ajax.php', 'relative' ),
+		'l10n' => array(
+			'calculating_character_count'        => __( 'Calculating...', 'wp-seo' ),
+			'character_count_calculator_missing' => __( 'Error: Character count calculator is missing!', 'wp-seo' ),
+		),
+		// Backcompat.
+		'repeatable_add_more_label' => __( 'Add another', 'wp-seo' ),
+		'repeatable_remove_label'   => __( 'Remove group', 'wp-seo' ),
+		'media_modal_button'        => __( 'Select image', 'wp-seo' ),
+		'media_modal_title'         => __( 'Choose an image', 'wp-seo' ),
+	) );
+
+	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.11.2' );
+}
+
+/**
  * Get the default title above SEO fields on post- and term-edit screens.
  *
  * @return string The title.
@@ -34,7 +56,7 @@ function wp_seo_post_id_to_the_meta_title_input( $post_id ) {
  * @param int $post_id Post ID.
  */
 function wp_seo_post_id_to_the_title_character_count( $post_id ) {
-	wp_seo_the_title_character_count( strlen( get_post_meta( $post_id, '_meta_title', true ) ) );
+	wp_seo_the_title_character_count( wp_seo_get_the_display_character_count( get_post_meta( $post_id, '_meta_title', true ) ) );
 }
 
 /**
@@ -52,7 +74,7 @@ function wp_seo_post_id_to_the_meta_description_input( $post_id ) {
  * @param int $post_id Post ID.
  */
 function wp_seo_post_id_to_the_description_character_count( $post_id ) {
-	wp_seo_the_description_character_count( strlen( get_post_meta( $post_id, '_meta_description', true ) ) );
+	wp_seo_the_description_character_count( wp_seo_get_the_display_character_count( get_post_meta( $post_id, '_meta_description', true ) ) );
 }
 
 /**
@@ -83,7 +105,7 @@ function wp_seo_term_data_to_the_meta_title_input( $term_id, $taxonomy ) {
  */
 function wp_seo_term_data_to_the_title_character_count( $term_id, $taxonomy ) {
 	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
-	wp_seo_the_title_character_count( strlen( $term_option['title'] ) );
+	wp_seo_the_title_character_count( wp_seo_get_the_display_character_count( $term_option['title'] ) );
 }
 
 /**
@@ -105,7 +127,7 @@ function wp_seo_term_data_to_the_meta_description_input( $term_id, $taxonomy ) {
  */
 function wp_seo_term_data_to_the_description_character_count( $term_id, $taxonomy ) {
 	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
-	wp_seo_the_description_character_count( strlen( $term_option['description'] ) );
+	wp_seo_the_description_character_count( wp_seo_get_the_display_character_count( $term_option['description'] ) );
 }
 
 /**
