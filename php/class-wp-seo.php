@@ -392,7 +392,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 */
 		public function format( $string ) {
 			if ( is_integer( $string ) ) {
-				return $string; // This is fine
+				return $string; // This is fine.
 			}
 			if ( ! is_string( $string ) ) {
 				return new WP_Error( 'format_error', __( "Please don't try to format() a non-string.", 'wp-seo' ) );
