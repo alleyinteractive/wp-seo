@@ -32,6 +32,17 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public $formatting_tag_pattern = '';
 
 		/**
+		 * The fields whitelisted for use.
+		 *
+		 * @var string.
+		 */
+		public $whitelisted_fields = array(
+			'title',
+			'description',
+			'keywords',
+		);
+
+		/**
 		 * Unused.
 		 *
 		 * @codeCoverageIgnore
@@ -121,6 +132,15 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 * @param string WP_SEO::formatting_tag_pattern The regex.
 			 */
 			$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
+
+			/**
+			 * Filter the whitelisted fields.
+			 *
+			 * You might need this if you have added other fields.
+			 *
+			 * @param string WP_SEO::whitelisted_fields The built-in fields
+			 */
+			$this->whitelisted_fields = apply_filters( 'wp_seo_whitelisted_fields', $this->whitelisted_fields );
 		}
 
 		/**
@@ -149,11 +169,20 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @return array Option values with default keys and values.
 		 */
 		public function intersect_term_option( $option_value ) {
-			return wp_seo_intersect_args( $option_value, array(
-				'title'       => '',
-				'description' => '',
-				'keywords'    => '',
-			) );
+			/**
+			 * Filter the fields that will be intersected with term options.
+			 *
+			 * @param array Array of fields to intersect.
+			 */
+			$term_fields = apply_filters(
+				'wp_seo_intersect_term_option',
+				array(
+					'title'       => '',
+					'description' => '',
+					'keywords'    => '',
+				)
+			);
+			return wp_seo_intersect_args( $option_value, $term_fields );
 		}
 
 		/**
@@ -242,8 +271,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			if ( ! isset( $_POST['seo_meta'] ) ) {
 				$_POST['seo_meta'] = array();
 			}
-
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
+			foreach ( $this->whitelisted_fields as $field ) {
 				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
 			}
@@ -345,7 +373,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
+			foreach ( $this->whitelisted_fields as $field ) {
 				$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 			}
 
@@ -368,6 +396,9 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @return string|WP_Error The formatted string, or WP_Error on error.
 		 */
 		public function format( $string ) {
+			if ( is_integer( $string ) ) {
+				return $string; // This is fine.
+			}
 			if ( ! is_string( $string ) ) {
 				return new WP_Error( 'format_error', __( "Please don't try to format() a non-string.", 'wp-seo' ) );
 			}
@@ -509,29 +540,18 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		}
 
 		/**
-		 * Determine the <meta> values for the current page.
-		 *
-		 * Unlike WP_SEO::wp_title(), custom per-entry and per-term values are not
-		 * returned immediately but rendered at the end of the method.
-		 *
-		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
+		 * Helper function for determining the 'key' for use in head
 		 */
-		public function wp_head() {
+		public function get_key() {
 			if ( is_singular() ) {
-				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
-					$meta_description = $this->format( get_post_meta( get_the_ID(), '_meta_description', true ) );
-					$meta_keywords = $this->format( get_post_meta( get_the_ID(), '_meta_keywords', true ) );
-				}
+				$post_type = get_post_type();
 				$key = "single_{$post_type}";
 			} elseif ( is_front_page() ) {
 				$key = 'home';
 			} elseif ( is_author() ) {
 				$key = 'archive_author';
 			} elseif ( is_category() || is_tag() || is_tax() ) {
-				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
-					$meta_description = $this->format( $option['description'] );
-					$meta_keywords = $this->format( $option['keywords'] );
-				}
+				$taxonomy = get_queried_object()->taxonomy;
 				$key = "archive_{$taxonomy}";
 			} elseif ( is_post_type_archive() ) {
 				$key = 'archive_' . get_queried_object()->name;
@@ -540,7 +560,35 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			} else {
 				$key = false;
 			}
+			return $key;
+		}
 
+		/**
+		 * Determine the <meta> values for the current page.
+		 *
+		 * Unlike WP_SEO::wp_title(), custom per-entry and per-term values are not
+		 * returned immediately but rendered at the end of the method.
+		 *
+		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
+		 */
+		public function wp_head() {
+			$key = $this->get_key();
+
+			if ( is_singular() ) {
+				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
+					$meta_description = $this->format( get_post_meta( get_the_ID(), '_meta_description', true ) );
+					$meta_keywords = $this->format( get_post_meta( get_the_ID(), '_meta_keywords', true ) );
+				}
+			} elseif ( is_category() || is_tag() || is_tax() ) {
+				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
+					if ( isset( $option['description'] ) ) {
+						$meta_description = $this->format( $option['description'] );
+					}
+					if ( isset( $option['keywords'] ) ) {
+						$meta_keywords = $this->format( $option['keywords'] );
+					}
+				}
+			}
 			if ( $key ) {
 				if ( empty( $meta_description ) ) {
 					/**

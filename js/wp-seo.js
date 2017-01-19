@@ -1,8 +1,9 @@
 ;jQuery( function( $ ) {
-	var $document, addtag;
+	var $document, addtag, frame, metabox;
 
 	$document = $( document );
 	addtag    = document.getElementById( 'addtag' );
+	images    = $( '.wp-seo-image-container' );
 
 	/**
 	 * Get a link to an "Add another repeatable group" link.
@@ -116,8 +117,11 @@
 		.append( wp_seo_add_more_button() )
 		// Toggle the "Remove" link from each group as needed.
 		.each( function( i, el ) {
-			wp_seo_toggle_removes( $( el ).find( '> .nodes' ) );
-	} );
+			wp_seo_toggle_removes(
+				$( el ).find( '> .nodes' )
+			);
+		}
+	);
 
 	/**
 	 * Add a repeatable group on click.
@@ -143,4 +147,44 @@
 		} );
 	} );
 
+	if ( images ) {
+		images.each(function ( index, image ) {
+			var imageblock = $( image );
+			var addImgLink = imageblock.find( '.upload-custom-img' ),
+			delImgLink = imageblock.find( '.delete-custom-img' ),
+			imgContainer = imageblock.find( '.custom-img-container' ),
+			imgIdInput = imageblock.find( '.custom-img-id' );
+			delImgLink
+				.on( 'click', function( e ){
+					e.preventDefault();
+					imgContainer.html( '' );
+					addImgLink.removeClass( 'hidden' );
+					delImgLink.addClass( 'hidden' );
+					imgIdInput.val( '' );
+				});
+			addImgLink
+				.on( 'click', function( evt ){
+	 				evt.preventDefault();
+					if ( frame ) {
+						frame.open();
+						return;
+					}
+					frame = wp.media({
+						title: wp_seo_admin.media_modal_title,
+						button: {
+							text: wp_seo_admin.media_modal_button
+						},
+						multiple: false  // Set to true to allow multiple files to be selected
+					});
+					frame.on( 'select', function() {
+						var attachment = frame.state().get( 'selection' ).first().toJSON();
+						imgContainer.append( '<img src="' + attachment.url + '" alt="" style="max-width:400px;"/>' );
+						imgIdInput.val( attachment.id );
+						addImgLink.addClass( 'hidden' );
+						delImgLink.removeClass( 'hidden' );
+					});
+					frame.open();
+				});
+		});
+	}
 } );

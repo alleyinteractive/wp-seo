@@ -85,7 +85,7 @@ class WP_SEO_Admin_Template_Tests extends WP_UnitTestCase {
 			array(
 				'wp_seo_the_title_character_count',
 				'Should print a noscript save-changes prompt',
-				"#<noscript>.+?</noscript>#s",
+				'#<noscript>.+?</noscript>#s',
 				array( '' ),
 			),
 			array(
@@ -127,7 +127,7 @@ class WP_SEO_Admin_Template_Tests extends WP_UnitTestCase {
 			array(
 				'wp_seo_the_meta_keywords_input',
 				'Should print an input',
-				'#<textarea[^>]*?></textarea>#',
+				"#<textarea[^>]*?></textarea>#",
 				array( '' ),
 			),
 			array(
