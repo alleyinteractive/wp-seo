@@ -73,6 +73,8 @@ class WP_SEO_Settings {
 		'textarea',
 		'checkboxes',
 		'repeatable',
+		'dropdown',
+		'image',
 	);
 
 	const SLUG = 'wp-seo';
@@ -275,7 +277,19 @@ class WP_SEO_Settings {
 	 * Register the plugin options page.
 	 */
 	public function add_options_page() {
+
+		/**
+		 * Filter the WP SEO page title.
+		 *
+		 * @param string Title for WP SEO Settings page.
+		 */
 		$title = apply_filters( 'wp_seo_options_page_title', __( 'WP SEO Settings', 'wp-seo' ) );
+
+		/**
+		 * Filter the WP SEO page title in menu.
+		 *
+		 * @param string Title for WP SEO Settings page in menu.
+		 */
 		$menu_title = apply_filters( 'wp_seo_options_page_menu_title', __( 'SEO', 'wp-seo' ) );
 		add_options_page( $title, $menu_title, $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
 	}
@@ -656,14 +670,15 @@ class WP_SEO_Settings {
 		wp_enqueue_media();
 		if ( ! empty( $og_img_id ) ) {
 			$og_img_src = wp_get_attachment_image_src( $og_img_id, 'og_image' );
-			$og_img = is_array( $og_img_src );
+			$has_og_img = is_array( $og_img_src );
 		} else {
-			$og_img = false;
+			$has_og_img = false;
 		}
 		$upload_link = esc_url( get_upload_iframe_src( 'image' ) );
 		echo '<div class="wp-seo-image-container">';
 		echo '<div class="custom-img-container">';
-		if ( $og_img ) {
+		// If we have an image, output it.
+		if ( $has_og_img ) {
 			echo sprintf(
 				'<img src="%1$s" style="max-width:400px" />',
 				esc_url( $og_img_src[0] )
@@ -671,7 +686,8 @@ class WP_SEO_Settings {
 		}
 		echo '</div>';
 		echo '<p class="hide-if-no-js">';
-		if ( $og_img ) {
+		// If we have an image, hide the add button, and vice versa.
+		if ( $has_og_img ) {
 			$upload_hidden = 'hidden';
 			$remove_hidden = '';
 		} else {
@@ -687,7 +703,7 @@ class WP_SEO_Settings {
 		echo sprintf(
 			'<a class="delete-custom-img %1$s" href="%2$s">%3$s</a>',
 			esc_attr( $remove_hidden ),
-			esc_url( '#' ),
+			'#',
 			esc_html( __( 'Remove this image', 'wp-seo' ) )
 		);
 		echo '</p>';
@@ -920,6 +936,12 @@ class WP_SEO_Settings {
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
 		}
+		/**
+		 * Filter the sanitzed output, for sanitization in an extension.
+		 *
+		 * @param  array Already sanitized data.
+		 * @param  array Original data input.
+		 */
 		$out = apply_filters( 'wp_seo_sanitize', $out, $in );
 		return $out;
 	}

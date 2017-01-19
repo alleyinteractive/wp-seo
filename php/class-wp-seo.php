@@ -169,6 +169,11 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @return array Option values with default keys and values.
 		 */
 		public function intersect_term_option( $option_value ) {
+			/**
+			 * Filter the fields that will be intersected with term options.
+			 *
+			 * @param array Array of fields to intersect.
+			 */
 			$term_fields = apply_filters(
 				'wp_seo_intersect_term_option',
 				array(
