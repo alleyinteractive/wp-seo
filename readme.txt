@@ -3,7 +3,7 @@ Contributors: alleyinteractive, mboynes, dlh
 Tags: seo
 Requires at least: 4.4.0
 Tested up to: 4.6.0
-Stable tag: 0.12.0
+Stable tag: 0.13.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -134,8 +134,10 @@ When "safe mode" is disabled, WP SEO will include the unrecognized formatting ta
 
 == Changelog ==
 
-= Unreleased =
+= 0.13.0 =
 * Added: Formatting tags can now be used in per-post and per-term meta values.
+* Added: Dropdown and image field types are now available for extension plugins.
+* Added: Filters to support extension plugins. See WP SEO Social for example.
 
 = 0.12.0 =
 * Added: `#thumbnail_url#` formatting tag, which represents the URL for the featured image of the content being viewed.
