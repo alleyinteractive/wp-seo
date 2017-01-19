@@ -3,7 +3,7 @@
 
 	$document = $( document );
 	addtag    = document.getElementById( 'addtag' );
-	images    = jQuery( '.wp-seo-image-container' );
+	images    = $( '.wp-seo-image-container' );
 
 	/**
 	 * Get a link to an "Add another repeatable group" link.
