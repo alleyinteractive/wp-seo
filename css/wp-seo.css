@@ -1,4 +1,6 @@
 table.wp-seo-post-meta-fields { width: 100%; }
+#postbox-container-1 .wp-seo-post-meta-fields th { display: block; max-width: none; text-align: left; }
+#postbox-container-1 .wp-seo-post-meta-fields td { display: block; }
 .wp-seo-post-meta-fields th { padding: 3px; vertical-align: top; text-align: right; }
 .wp-seo-post-meta-fields textarea { height: 4em; width: 98%; }
 .wp-seo-post-meta-fields input { width: 98%; }
