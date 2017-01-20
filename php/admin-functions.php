@@ -24,7 +24,7 @@ function wp_seo_admin_scripts() {
 		'media_modal_title'         => __( 'Choose an image', 'wp-seo' ),
 	) );
 
-	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.11.2' );
+	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.13.0' );
 }
 
 /**
