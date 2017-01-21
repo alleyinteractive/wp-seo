@@ -9,7 +9,7 @@
  * Enqueues scripts and styles for administration pages.
  */
 function wp_seo_admin_scripts() {
-	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.13.0', true );
+	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), WP_SEO_VERSION, true );
 
 	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', array(
 		'ajaxurl' => admin_url( 'admin-ajax.php', 'relative' ),
@@ -24,7 +24,7 @@ function wp_seo_admin_scripts() {
 		'media_modal_title'         => __( 'Choose an image', 'wp-seo' ),
 	) );
 
-	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.13.0' );
+	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), WP_SEO_VERSION );
 }
 
 /**
