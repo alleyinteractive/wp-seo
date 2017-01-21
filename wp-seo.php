@@ -26,6 +26,14 @@
 
 define( 'WP_SEO_PATH', dirname( __FILE__ ) );
 define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
+
+/**
+ * Current plugin version.
+ *
+ * @since 0.13.0
+ *
+ * @var string $version
+ */
 define( 'WP_SEO_VERSION', '0.13.0' );
 
 // Behind-the-scenes functions.
