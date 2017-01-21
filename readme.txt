@@ -138,6 +138,7 @@ When "safe mode" is disabled, WP SEO will include the unrecognized formatting ta
 * Added: Formatting tags can now be used in per-post and per-term meta values.
 * Added: Dropdown and image field types are now available for extension plugins.
 * Added: Filters to support extension plugins. See WP SEO Social for example.
+* Added: `WP_SEO_VERSION` constant.
 
 = 0.12.0 =
 * Added: `#thumbnail_url#` formatting tag, which represents the URL for the featured image of the content being viewed.

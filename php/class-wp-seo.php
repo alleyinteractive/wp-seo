@@ -18,13 +18,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		private static $instance = null;
 
 		/**
-		 * Current version of the plugin
-		 *
-		 * @var string
-		 */
-		public $plugin_version = '0.13.0';
-
-		/**
 		 * Associative array of WP_SEO_Formatting_Tag instances.
 		 *
 		 * @var array.
