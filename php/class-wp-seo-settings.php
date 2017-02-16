@@ -625,7 +625,7 @@ class WP_SEO_Settings {
 			'<option value="" %1$s %2$s>%3$s</option>',
 			esc_attr( $selected ),
 			esc_attr( $disabled ),
-			esc_html( __( 'Select a type', 'wp-seo' ) )
+			esc_html( __( 'Select', 'wp-seo' ) )
 		);
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf(
