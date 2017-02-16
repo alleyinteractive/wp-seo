@@ -925,14 +925,6 @@ class WP_SEO_Settings {
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
 		}
-		/**
-		 * Filters the sanitzed output, for sanitization in an extension.
-		 *
-		 * @since  v0.13.0
-		 * @param  array $out Already sanitized data.
-		 * @param  array $in Original data input.
-		 */
-		$out = apply_filters( 'wp_seo_sanitize', $out, $in );
 		return $out;
 	}
 
