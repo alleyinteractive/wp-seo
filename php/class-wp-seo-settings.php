@@ -64,19 +64,6 @@ class WP_SEO_Settings {
 	 */
 	private $archived_post_types = array();
 
-	/**
-	 * Currently supported field types
-	 *
-	 * @var array Field types
-	 */
-	public $field_types = array(
-		'textarea',
-		'checkboxes',
-		'repeatable',
-		'dropdown',
-		'image',
-	);
-
 	const SLUG = 'wp-seo';
 
 	/**
