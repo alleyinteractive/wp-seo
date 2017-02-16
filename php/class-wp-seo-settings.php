@@ -266,15 +266,17 @@ class WP_SEO_Settings {
 	public function add_options_page() {
 
 		/**
-		 * Filter the WP SEO page title.
+		 * Filters the WP SEO page title.
 		 *
+		 * @since v0.13.0
 		 * @param string Title for WP SEO Settings page.
 		 */
 		$title = apply_filters( 'wp_seo_options_page_title', __( 'WP SEO Settings', 'wp-seo' ) );
 
 		/**
-		 * Filter the WP SEO page title in menu.
+		 * Filters the WP SEO page title in menu.
 		 *
+		 * @since v0.13.0
 		 * @param string Title for WP SEO Settings page in menu.
 		 */
 		$menu_title = apply_filters( 'wp_seo_options_page_menu_title', __( 'SEO', 'wp-seo' ) );
@@ -924,10 +926,11 @@ class WP_SEO_Settings {
 			}
 		}
 		/**
-		 * Filter the sanitzed output, for sanitization in an extension.
+		 * Filters the sanitzed output, for sanitization in an extension.
 		 *
-		 * @param  array Already sanitized data.
-		 * @param  array Original data input.
+		 * @since  v0.13.0
+		 * @param  array $out Already sanitized data.
+		 * @param  array $in Original data input.
 		 */
 		$out = apply_filters( 'wp_seo_sanitize', $out, $in );
 		return $out;
