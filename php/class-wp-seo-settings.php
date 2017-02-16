@@ -645,15 +645,14 @@ class WP_SEO_Settings {
 	/**
 	 * Render image field.
 	 *
-	 * @param  array  $args {
+	 * @param  array $args {
 	 *     An array of arguments for the image field.
 	 *
 	 *     @type string $field The field name.
 	 *     @type array  $boxes An associative array of the value and label
 	 *                         of each dropdown option.
 	 * }
-	 * @param  array  $img_id Current image ID value.
-	 * @param  string $this::SLUG Slug to use for the field.
+	 * @param  array $img_id Current image ID value.
 	 */
 	public function render_image_field( $args, $img_id ) {
 		wp_enqueue_media();
