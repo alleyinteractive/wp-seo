@@ -523,10 +523,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public function render_text_field( $args, $value, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = $this::SLUG;
-		}
+	public function render_text_field( $args, $value ) {
 		$args = wp_parse_args( $args, array(
 			'type' => 'text',
 			'size' => 80,
@@ -535,7 +532,7 @@ class WP_SEO_Settings {
 		printf(
 			'<input type="%s" name="%s[%s]" value="%s" size="%s" />',
 			esc_attr( $args['type'] ),
-			esc_attr( $slug ),
+			esc_attr( $this::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $value ),
 			esc_attr( $args['size'] )
@@ -554,10 +551,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public function render_textarea( $args, $value, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = $this::SLUG;
-		}
+	public function render_textarea( $args, $value ) {
 		$args = wp_parse_args( $args, array(
 			'rows' => 2,
 			'cols' => 80,
@@ -565,7 +559,7 @@ class WP_SEO_Settings {
 
 		printf(
 			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
-			esc_attr( $slug ),
+			esc_attr( $this::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
@@ -585,17 +579,14 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $values Indexed array of current field values.
 	 */
-	public function render_checkboxes( $args, $values, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = $this::SLUG;
-		}
+	public function render_checkboxes( $args, $values ) {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf( '
 					<label for="%1$s_%2$s_%3$s">
 						<input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>
 						%5$s
 					</label><br>',
-				esc_attr( $slug ),
+				esc_attr( $this::SLUG ),
 				esc_attr( $args['field'] ),
 				esc_attr( $box_value ),
 				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
@@ -615,14 +606,11 @@ class WP_SEO_Settings {
 	 *                         of each dropdown option.
 	 * }
 	 * @param  array  $values Indexed array of current field values.
-	 * @param  string $slug Slug to use for the field.
+	 * @param  string $this::SLUG Slug to use for the field.
 	 */
-	public function render_dropdown( $args, $values, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = $this::SLUG;
-		}
+	public function render_dropdown( $args, $values ) {
 		printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
-			esc_attr( $slug ),
+			esc_attr( $this::SLUG ),
 			esc_attr( $args['field'] )
 		);
 		$count = 0;
@@ -642,7 +630,7 @@ class WP_SEO_Settings {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf(
 				'<option id="%1$s_%2$s_%3$s" value="%4$s" %5$s>%6$s</option>',
-				esc_attr( $slug ),
+				esc_attr( $this::SLUG ),
 				esc_attr( $args['field'] ),
 				esc_attr( $count ),
 				esc_attr( $box_value ),
@@ -665,12 +653,9 @@ class WP_SEO_Settings {
 	 *                         of each dropdown option.
 	 * }
 	 * @param  array  $img_id Current image ID value.
-	 * @param  string $slug Slug to use for the field.
+	 * @param  string $this::SLUG Slug to use for the field.
 	 */
-	public function render_image_field( $args, $img_id, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = $this::SLUG;
-		}
+	public function render_image_field( $args, $img_id ) {
 		wp_enqueue_media();
 		if ( ! empty( $img_id ) ) {
 			$img_src = wp_get_attachment_image_src( $img_id, 'og_image' );
@@ -713,7 +698,7 @@ class WP_SEO_Settings {
 		echo '</p>';
 		echo sprintf(
 			'<input id="%1$s_%2$s" class="custom-img-id" name="%1$s[%2$s]" type="hidden" value="%3$s" />',
-			esc_attr( $slug ),
+			esc_attr( $this::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $img_id )
 		);
