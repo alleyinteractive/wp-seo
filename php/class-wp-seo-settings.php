@@ -35,7 +35,7 @@ class WP_SEO_Settings {
 	 *
 	 * @var array.
 	 */
-	public static $options = array();
+	public $options = array();
 
 	/**
 	 * Taxonomies with archive pages, which can have meta fields set for them.
@@ -168,17 +168,17 @@ class WP_SEO_Settings {
 	 * Set $options with the current database value.
 	 */
 	public function set_options() {
-		self::$options = get_option( $this::SLUG, $this->default_options );
+		$this->options = get_option( $this::SLUG, $this->default_options );
 	}
 
 	/**
-	 * Override the value of an option in the static variable.
+	 * Override the value of an option in the variable.
 	 *
 	 * @param string $key     The option key sought.
 	 * @param mixed  $value   The option value.
 	 */
 	public function set_option( $key, $value ) {
-		self::$options[ $key ] = $value;
+		$this->$options[ $key ] = $value;
 	}
 
 	/**
@@ -189,10 +189,10 @@ class WP_SEO_Settings {
 	 * @return mixed The value, or null on failure.
 	 */
 	public function get_option( $key, $default = null ) {
-		if ( empty( self::$options ) ) {
+		if ( empty( $this->options ) ) {
 			$this->set_options();
 		}
-		return isset( self::$options[ $key ] ) ? self::$options[ $key ] : $default;
+		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : $default;
 	}
 
 	/**
@@ -473,7 +473,7 @@ class WP_SEO_Settings {
 	 *                          Refer to method called based on $type.
 	 * }
 	 */
-	public static function field( $args ) {
+	public function field( $args ) {
 		if ( empty( $args['field'] ) ) {
 			return;
 		}
@@ -482,31 +482,31 @@ class WP_SEO_Settings {
 			$args['type'] = 'text';
 		}
 
-		$value = ! empty( self::$options[ $args['field'] ] ) ? self::$options[ $args['field'] ] : '';
+		$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
 
 		switch ( $args['type'] ) {
 			case 'textarea' :
-				self::render_textarea( $args, $value );
+				$this->render_textarea( $args, $value );
 				break;
 
 			case 'checkboxes' :
-				self::render_checkboxes( $args, $value );
+				$this->render_checkboxes( $args, $value );
 				break;
 
 			case 'repeatable' :
-				self::render_repeatable_field( $args, $value );
+				$this->render_repeatable_field( $args, $value );
 				break;
 
 			case 'dropdown' :
-				self::render_dropdown( $args, $value );
+				$this->render_dropdown( $args, $value );
 				break;
 
 			case 'image' :
-				self::render_image_field( $args, $value );
+				$this->render_image_field( $args, $value );
 				break;
 
 			default :
-				self::render_text_field( $args, $value );
+				$this->render_text_field( $args, $value );
 				break;
 		}
 	}
@@ -523,7 +523,10 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public static function render_text_field( $args, $value, $slug = self::SLUG ) {
+	public function render_text_field( $args, $value, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = $this::SLUG;
+		}
 		$args = wp_parse_args( $args, array(
 			'type' => 'text',
 			'size' => 80,
@@ -551,7 +554,10 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public static function render_textarea( $args, $value, $slug = self::SLUG ) {
+	public function render_textarea( $args, $value, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = $this::SLUG;
+		}
 		$args = wp_parse_args( $args, array(
 			'rows' => 2,
 			'cols' => 80,
@@ -579,7 +585,10 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $values Indexed array of current field values.
 	 */
-	public static function render_checkboxes( $args, $values, $slug = self::SLUG ) {
+	public function render_checkboxes( $args, $values, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = $this::SLUG;
+		}
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf( '
 					<label for="%1$s_%2$s_%3$s">
@@ -608,7 +617,10 @@ class WP_SEO_Settings {
 	 * @param  array  $values Indexed array of current field values.
 	 * @param  string $slug Slug to use for the field.
 	 */
-	public static function render_dropdown( $args, $values, $slug = self::SLUG ) {
+	public function render_dropdown( $args, $values, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = $this::SLUG;
+		}
 		printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
 			esc_attr( $slug ),
 			esc_attr( $args['field'] )
@@ -655,7 +667,10 @@ class WP_SEO_Settings {
 	 * @param  array  $img_id Current image ID value.
 	 * @param  string $slug Slug to use for the field.
 	 */
-	public static function render_image_field( $args, $img_id, $slug = self::SLUG ) {
+	public function render_image_field( $args, $img_id, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = $this::SLUG;
+		}
 		wp_enqueue_media();
 		if ( ! empty( $img_id ) ) {
 			$img_src = wp_get_attachment_image_src( $img_id, 'og_image' );
@@ -718,7 +733,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $values The current field values.
 	 */
-	public static function render_repeatable_field( $args, $values ) {
+	public function render_repeatable_field( $args, $values ) {
 		$args = wp_parse_args( $args, array(
 			'size' => 70,
 		) );
@@ -737,7 +752,7 @@ class WP_SEO_Settings {
 													%5$s
 												</label>
 												<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-												esc_attr( self::SLUG ),
+												esc_attr( $this::SLUG ),
 												esc_attr( $args['field'] ),
 												intval( $i ),
 												esc_attr( $name ),
@@ -760,7 +775,7 @@ class WP_SEO_Settings {
 												%5$s
 											</label>
 											<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-											esc_attr( self::SLUG ),
+											esc_attr( $this::SLUG ),
 											esc_attr( $args['field'] ),
 											0,
 											esc_attr( $name ),
@@ -785,7 +800,7 @@ class WP_SEO_Settings {
 											%5$s
 										</label>
 										<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-										esc_attr( self::SLUG ),
+										esc_attr( $this::SLUG ),
 										esc_attr( $args['field'] ),
 										'<%= i %>',
 										esc_attr( $name ),
