@@ -523,7 +523,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public static function render_text_field( $args, $value ) {
+	public static function render_text_field( $args, $value, $slug = self::SLUG ) {
 		$args = wp_parse_args( $args, array(
 			'type' => 'text',
 			'size' => 80,
@@ -532,7 +532,7 @@ class WP_SEO_Settings {
 		printf(
 			'<input type="%s" name="%s[%s]" value="%s" size="%s" />',
 			esc_attr( $args['type'] ),
-			esc_attr( self::SLUG ),
+			esc_attr( $slug ),
 			esc_attr( $args['field'] ),
 			esc_attr( $value ),
 			esc_attr( $args['size'] )
@@ -551,7 +551,7 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 */
-	public static function render_textarea( $args, $value ) {
+	public static function render_textarea( $args, $value, $slug = self::SLUG ) {
 		$args = wp_parse_args( $args, array(
 			'rows' => 2,
 			'cols' => 80,
@@ -559,7 +559,7 @@ class WP_SEO_Settings {
 
 		printf(
 			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
-			esc_attr( self::SLUG ),
+			esc_attr( $slug ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
@@ -579,14 +579,14 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $values Indexed array of current field values.
 	 */
-	public static function render_checkboxes( $args, $values ) {
+	public static function render_checkboxes( $args, $values, $slug = self::SLUG ) {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf( '
 					<label for="%1$s_%2$s_%3$s">
 						<input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>
 						%5$s
 					</label><br>',
-				esc_attr( self::SLUG ),
+				esc_attr( $slug ),
 				esc_attr( $args['field'] ),
 				esc_attr( $box_value ),
 				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
