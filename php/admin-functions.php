@@ -16,12 +16,12 @@ function wp_seo_admin_scripts() {
 		'l10n' => array(
 			'calculating_character_count'        => __( 'Calculating...', 'wp-seo' ),
 			'character_count_calculator_missing' => __( 'Error: Character count calculator is missing!', 'wp-seo' ),
+			'media_modal_button'                 => __( 'Select image', 'wp-seo' ),
+			'media_modal_title'                  => __( 'Choose an image', 'wp-seo' ),
 		),
 		// Backcompat.
 		'repeatable_add_more_label' => __( 'Add another', 'wp-seo' ),
 		'repeatable_remove_label'   => __( 'Remove group', 'wp-seo' ),
-		'media_modal_button'        => __( 'Select image', 'wp-seo' ),
-		'media_modal_title'         => __( 'Choose an image', 'wp-seo' ),
 	) );
 
 	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.13.0' );
