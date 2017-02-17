@@ -150,26 +150,23 @@
 	if ( images ) {
 		images.each(function ( index, image ) {
 			var imageblock = $( image );
-			var addImgLink = imageblock.find( '.upload-custom-img' ),
-			delImgLink = imageblock.find( '.delete-custom-img' ),
-			imgContainer = imageblock.find( '.custom-img-container' ),
-			imgIdInput = imageblock.find( '.custom-img-id' );
-			delImgLink
+			imageblock
+				.find( '.delete-custom-img' )
 				.on( 'click', function( e ){
+					var thisImage = $(this).parents(':eq(1)');
 					e.preventDefault();
-					imgContainer.html( '' );
-					addImgLink.removeClass( 'hidden' );
-					delImgLink.addClass( 'hidden' );
-					imgIdInput.val( '' );
+					thisImage.find( '.custom-img-container' ).html( '' );
+					thisImage.find( '.upload-custom-img' ).removeClass( 'hidden' );
+					thisImage.find( '.delete-custom-img' ).addClass( 'hidden' );
+					thisImage.find( '.custom-img-id' ).val( '' );
 				});
-			addImgLink
+			imageblock
+				.find( '.upload-custom-img' )
 				.on( 'click', function( evt ){
+					var thisImage = $(this).parents(':eq(1)');
 	 				evt.preventDefault();
-					if ( frame ) {
-						frame.open();
-						return;
-					}
 					frame = wp.media({
+						element: thisImage,
 						title: wp_seo_admin.media_modal_title,
 						button: {
 							text: wp_seo_admin.media_modal_button
@@ -178,10 +175,13 @@
 					});
 					frame.on( 'select', function() {
 						var attachment = frame.state().get( 'selection' ).first().toJSON();
-						imgContainer.append( '<img src="' + attachment.url + '" alt="" style="max-width:400px;"/>' );
-						imgIdInput.val( attachment.id );
-						addImgLink.addClass( 'hidden' );
-						delImgLink.removeClass( 'hidden' );
+						var img = document.createElement("IMG");
+						img.src = attachment.url;
+						img.style['max-width'] = "400px";
+						frame.options.element[0].firstChild.append( img );
+						frame.options.element.find( '.custom-img-id' ).val( attachment.id );
+						frame.options.element.find( '.upload-custom-img' ).addClass( 'hidden' );
+						frame.options.element.find( '.delete-custom-img' ).removeClass( 'hidden' );
 					});
 					frame.open();
 				});
