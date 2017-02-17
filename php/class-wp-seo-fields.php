@@ -78,7 +78,7 @@ class WP_SEO_Fields {
 			$args['type'] = 'text';
 		}
 
-		$value = ! empty( $this->options[ $args['field'] ] ) ? WP_SEO_Settings()->options[ $args['field'] ] : '';
+		$value = ! empty( WP_SEO_Settings()->options[ $args['field'] ] ) ? WP_SEO_Settings()->options[ $args['field'] ] : '';
 
 		switch ( $args['type'] ) {
 			case 'textarea' :

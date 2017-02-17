@@ -176,24 +176,24 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	 */
 	function test_field() {
 		// No field.
-		$html = get_echo( array( WP_SEO_Settings(), 'field' ), array( array() ) );
+		$html = get_echo( array( WP_SEO_Fields(), 'field' ), array( array() ) );
 		$this->assertEmpty( $html );
 
 		// No type? Use a text field.
-		$html = get_echo( array( WP_SEO_Settings(), 'field' ), array( array( 'field' => 'demo' ) ) );
+		$html = get_echo( array( WP_SEO_Fields(), 'field' ), array( array( 'field' => 'demo' ) ) );
 		$this->assertRegExp( '/<input[^>]+type="text"[^>]+name="wp-seo\[demo\]"/', $html );
 
 		// Check that a value is passed.
 		WP_SEO_Settings()->set_option( 'demo', 'demo value' );
-		$html = get_echo( array( WP_SEO_Settings(), 'field' ), array( array( 'field' => 'demo' ) ) );
+		$html = get_echo( array( WP_SEO_Fields(), 'field' ), array( array( 'field' => 'demo' ) ) );
 		$this->assertRegExp( '/<input[^>]+type="text"[^>]+value="demo value"/', $html );
 
 		// Check the rendered field types.
-		$html = get_echo( array( WP_SEO_Settings(), 'field' ), array( array( 'field' => 'demo', 'type' => 'textarea' ) ) );
+		$html = get_echo( array( WP_SEO_Fields(), 'field' ), array( array( 'field' => 'demo', 'type' => 'textarea' ) ) );
 		$this->assertContains( '<textarea', $html );
 
 		$html = get_echo(
-			array( WP_SEO_Settings(), 'field' ),
+			array( WP_SEO_Fields(), 'field' ),
 			array(
 				array(
 					'field' => 'demo',
@@ -204,7 +204,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		);
 		$this->assertRegExp( '/<input[^>]+type="checkbox"/', $html );
 
-		$html = get_echo( array( WP_SEO_Settings(), 'field' ), array(
+		$html = get_echo( array( WP_SEO_Fields(), 'field' ), array(
 			array(
 				'field' => 'demo_repeatable', // Not "demo," which does have a value.
 				'type' => 'repeatable',
@@ -218,7 +218,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	 * Test the default text field output and the output with all args.
 	 */
 	function test_render_text_field() {
-		$html = get_echo( array( WP_SEO_Settings(), 'render_text_field' ), array(
+		$html = get_echo( array( WP_SEO_Fields(), 'render_text_field' ), array(
 			array( 'field' => 'demo', 'type' => 'text' ),
 			'demo value',
 		) );
@@ -231,7 +231,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		// Expect the field to have some size.
 		$this->assertRegExp( '/size="\d+"/', $html );
 
-		$html = get_echo( array( WP_SEO_Settings(), 'render_text_field' ), array(
+		$html = get_echo( array( WP_SEO_Fields(), 'render_text_field' ), array(
 			array( 'type' => 'number', 'field' => 'demo', 'size' => 5 ),
 			'40',
 		) );
@@ -244,7 +244,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	 * Test the default textarea output and the output with all args.
 	 */
 	function test_render_textarea() {
-		$html = get_echo( array( WP_SEO_Settings(), 'render_textarea' ), array(
+		$html = get_echo( array( WP_SEO_Fields(), 'render_textarea' ), array(
 			array( 'field' => 'demo' ),
 			'demo value',
 		) );
@@ -258,7 +258,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	}
 
 	function test_render_checkboxes() {
-		$html = get_echo( array( WP_SEO_Settings(), 'render_checkboxes' ), array(
+		$html = get_echo( array( WP_SEO_Fields(), 'render_checkboxes' ), array(
 			array(
 				'field' => 'demo',
 				'boxes' => array(
@@ -290,7 +290,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 			),
 		);
 
-		$html = get_echo( array( WP_SEO_Settings(), 'render_repeatable_field' ), array( $args, array() ) );
+		$html = get_echo( array( WP_SEO_Fields(), 'render_repeatable_field' ), array( $args, array() ) );
 
 		// Expect a "name" attribute in with the counter for the template.
 		$this->assertContains( 'name="wp-seo[demo][<%= i %>][first_name]"', $html );
@@ -306,7 +306,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		$args['size'] = '40';
 		$html = get_echo(
 			array(
-				WP_SEO_Settings(),
+				WP_SEO_Fields(),
 				'render_repeatable_field',
 			),
 			array(
