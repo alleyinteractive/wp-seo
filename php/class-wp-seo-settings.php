@@ -573,7 +573,6 @@ class WP_SEO_Settings {
 		 */
 		$sanitize_as_text_field = array_merge( apply_filters( 'wp_seo_sanitize_as_text_field', array() ), $sanitize_as_text_field );
 
-
 		/**
 		 * Filters the fields for sanitization as text.
 		 *
