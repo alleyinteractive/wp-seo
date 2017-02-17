@@ -167,9 +167,9 @@
 	 				evt.preventDefault();
 					frame = wp.media({
 						element: thisImage,
-						title: wp_seo_admin.media_modal_title,
+						title: wp_seo_admin.l10n.media_modal_title,
 						button: {
-							text: wp_seo_admin.media_modal_button
+							text: wp_seo_admin.l10n.media_modal_button
 						},
 						multiple: false  // Set to true to allow multiple files to be selected
 					});
