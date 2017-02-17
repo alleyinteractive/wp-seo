@@ -196,6 +196,15 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Method helper to return the slug.
+	 *
+	 * @return string Slug
+	 */
+	public function get_slug() {
+		return $this::SLUG;
+	}
+
+	/**
 	 * Get the $taxonomies property.
 	 *
 	 * @return array @see WP_SEO_Settings::taxonomies.

@@ -128,7 +128,7 @@ class WP_SEO_Fields {
 		printf(
 			'<input type="%s" name="%s[%s]" value="%s" size="%s" />',
 			esc_attr( $args['type'] ),
-			esc_attr( WP_SEO_Settings()::SLUG ),
+			esc_attr( WP_SEO_Settings()->get_slug() ),
 			esc_attr( $args['field'] ),
 			esc_attr( $value ),
 			esc_attr( $args['size'] )
@@ -155,7 +155,7 @@ class WP_SEO_Fields {
 
 		printf(
 			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
-			esc_attr( WP_SEO_Settings()::SLUG ),
+			esc_attr( WP_SEO_Settings()->get_slug() ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
@@ -182,7 +182,7 @@ class WP_SEO_Fields {
 						<input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>
 						%5$s
 					</label><br>',
-				esc_attr( WP_SEO_Settings()::SLUG ),
+				esc_attr( WP_SEO_Settings()->get_slug() ),
 				esc_attr( $args['field'] ),
 				esc_attr( $box_value ),
 				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
@@ -205,7 +205,7 @@ class WP_SEO_Fields {
 	 */
 	public function render_dropdown( $args, $values, $slug = false ) {
 		if ( ! $slug ) {
-			$slug = WP_SEO_Settings()::SLUG;
+			$slug = WP_SEO_Settings()->get_slug();
 		}
 		printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
 			esc_attr( $slug ),
@@ -228,7 +228,7 @@ class WP_SEO_Fields {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf(
 				'<option id="%1$s_%2$s_%3$s" value="%4$s" %5$s>%6$s</option>',
-				esc_attr( WP_SEO_Settings()::SLUG ),
+				esc_attr( WP_SEO_Settings()->get_slug() ),
 				esc_attr( $args['field'] ),
 				esc_attr( $count ),
 				esc_attr( $box_value ),
@@ -254,7 +254,7 @@ class WP_SEO_Fields {
 	 */
 	public function render_image_field( $args, $img_id, $slug = false ) {
 		if ( ! $slug ) {
-			$slug = WP_SEO_Settings()::SLUG;
+			$slug = WP_SEO_Settings()->get_slug();
 		}
 		wp_enqueue_media();
 		if ( ! empty( $img_id ) ) {
@@ -337,7 +337,7 @@ class WP_SEO_Fields {
 													%5$s
 												</label>
 												<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-												esc_attr( WP_SEO_Settings()::SLUG ),
+												esc_attr( WP_SEO_Settings()->get_slug() ),
 												esc_attr( $args['field'] ),
 												intval( $i ),
 												esc_attr( $name ),
@@ -360,7 +360,7 @@ class WP_SEO_Fields {
 												%5$s
 											</label>
 											<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-											esc_attr( WP_SEO_Settings()::SLUG ),
+											esc_attr( WP_SEO_Settings()->get_slug() ),
 											esc_attr( $args['field'] ),
 											0,
 											esc_attr( $name ),
@@ -385,7 +385,7 @@ class WP_SEO_Fields {
 											%5$s
 										</label>
 										<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-										esc_attr( WP_SEO_Settings()::SLUG ),
+										esc_attr( WP_SEO_Settings()->get_slug() ),
 										esc_attr( $args['field'] ),
 										'<%= i %>',
 										esc_attr( $name ),
