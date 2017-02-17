@@ -42,6 +42,10 @@ function wp_seo_get_key() {
 		$key = 'archive_' . get_queried_object()->name;
 	} elseif ( is_date() ) {
 		$key = 'archive_date';
+	} elseif ( is_404() ) {
+		$key = '404';
+	} elseif ( is_search() ) {
+		$key = 'search';
 	} else {
 		$key = false;
 	}
