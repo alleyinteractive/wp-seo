@@ -44,7 +44,7 @@ class WP_SEO_Settings {
 	 *
 	 * @var array Term objects.
 	 */
-	private $taxonomies = array();
+	public $taxonomies = array();
 
 	/**
 	 * Post types that can be viewed individually and have per-entry meta values.
@@ -53,7 +53,7 @@ class WP_SEO_Settings {
 	 *
 	 * @var array Post type objects.
 	 */
-	private $single_post_types = array();
+	public $single_post_types = array();
 
 	/**
 	 * Post types with archives, which can have meta fields set for them.
@@ -62,7 +62,7 @@ class WP_SEO_Settings {
 	 *
 	 * @var array Post type objects.
 	 */
-	private $archived_post_types = array();
+	public $archived_post_types = array();
 
 	const SLUG = 'wp-seo';
 
@@ -606,11 +606,13 @@ class WP_SEO_Settings {
 	 *                         of each dropdown option.
 	 * }
 	 * @param  array  $values Indexed array of current field values.
-	 * @param  string $this::SLUG Slug to use for the field.
 	 */
-	public function render_dropdown( $args, $values ) {
+	public function render_dropdown( $args, $values, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = $this::SLUG;
+		}
 		printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
-			esc_attr( $this::SLUG ),
+			esc_attr( $slug ),
 			esc_attr( $args['field'] )
 		);
 		$count = 0;
@@ -654,7 +656,10 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array $img_id Current image ID value.
 	 */
-	public function render_image_field( $args, $img_id ) {
+	public function render_image_field( $args, $img_id, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = $this::SLUG;
+		}
 		wp_enqueue_media();
 		if ( ! empty( $img_id ) ) {
 			$img_src = wp_get_attachment_image_src( $img_id, 'og_image' );
@@ -697,7 +702,7 @@ class WP_SEO_Settings {
 		echo '</p>';
 		echo sprintf(
 			'<input id="%1$s_%2$s" class="custom-img-id" name="%1$s[%2$s]" type="hidden" value="%3$s" />',
-			esc_attr( $this::SLUG ),
+			esc_attr( $slug ),
 			esc_attr( $args['field'] ),
 			esc_attr( $img_id )
 		);
@@ -879,6 +884,16 @@ class WP_SEO_Settings {
 			'home_description',
 			'home_keywords',
 		);
+		/**
+		 * Filters the fields to sanitize as text field.
+		 *
+		 * You might need this if you have added other fields.
+		 *
+		 * @since v0.13.0
+		 * @param string WP_SEO::whitelisted_fields The built-in fields
+		 */
+		$sanitize_as_text_field = array_merge( apply_filters( 'wp_seo_sanitize_as_text_field', array() ), $sanitize_as_text_field );
+
 		// Single post default formats.
 		foreach ( $this->single_post_types as $type ) {
 			$sanitize_as_text_field[] = "single_{$type->name}_title";
