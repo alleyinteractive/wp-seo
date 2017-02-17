@@ -877,22 +877,12 @@ class WP_SEO_Settings {
 		/**
 		 * Sanitize these as text fields and in the following order:
 		 */
-
 		// Home description and keywords.
 		$sanitize_as_text_field = array(
 			'home_title',
 			'home_description',
 			'home_keywords',
 		);
-		/**
-		 * Filters the fields to sanitize as text field.
-		 *
-		 * You might need this if you have added other fields.
-		 *
-		 * @since v0.13.0
-		 * @param string WP_SEO::whitelisted_fields The built-in fields
-		 */
-		$sanitize_as_text_field = array_merge( apply_filters( 'wp_seo_sanitize_as_text_field', array() ), $sanitize_as_text_field );
 
 		// Single post default formats.
 		foreach ( $this->single_post_types as $type ) {
@@ -913,8 +903,32 @@ class WP_SEO_Settings {
 		$sanitize_as_text_field[] = 'search_title';
 		$sanitize_as_text_field[] = '404_title';
 
+		/**
+		 * Adds to the fields for sanitization as text.
+		 *
+		 * You might need this if you have added other fields.
+		 *
+		 * @since v0.13.0
+		 */
+		$sanitize_as_text_field = array_merge( apply_filters( 'wp_seo_sanitize_as_text_field', array() ), $sanitize_as_text_field );
+
+
+		/**
+		 * Adds to the fields for sanitization as text.
+		 *
+		 * You might need this if you have added other fields.
+		 *
+		 * @since v0.13.0
+		 */
+		$sanitize_as_integer = array(); // No built-in fields use integers but custom ones may.
+		$sanitize_as_integer = array_merge( apply_filters( 'wp_seo_sanitize_as_integer', array() ), $sanitize_as_integer );
+
 		foreach ( $sanitize_as_text_field as $field ) {
 			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
+		}
+
+		foreach ( $sanitize_as_integer as $field ) {
+			$out[ $field ] = isset( $in[ $field ] ) && is_int( $in[ $field ] ) ? $in[ $field ] : null;
 		}
 
 		/**
