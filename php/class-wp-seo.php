@@ -141,10 +141,11 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
 
 			/**
-			 * Filter the whitelisted fields.
+			 * Filters the whitelisted fields.
 			 *
 			 * You might need this if you have added other fields.
 			 *
+			 * @since v0.13.0
 			 * @param string WP_SEO::whitelisted_fields The built-in fields
 			 */
 			$this->whitelisted_fields = apply_filters( 'wp_seo_whitelisted_fields', $this->whitelisted_fields );
