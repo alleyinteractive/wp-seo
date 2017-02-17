@@ -580,7 +580,7 @@ class WP_SEO_Settings {
 		}
 
 		foreach ( $sanitize_as_integer as $field ) {
-			$out[ $field ] = isset( $in[ $field ] ) && is_int( $in[ $field ] ) ? $in[ $field ] : null;
+			$out[ $field ] = isset( $in[ $field ] ) && is_int( intval( $in[ $field ] ) ) ? intval( $in[ $field ] ) : null;
 		}
 
 		/**
