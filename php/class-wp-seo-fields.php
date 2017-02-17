@@ -118,8 +118,13 @@ class WP_SEO_Fields {
 	 *     @type string $size   The field size. Default 80.
 	 * }
 	 * @param string $value The current field value.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints text field.
 	 */
-	public function render_text_field( $args, $value ) {
+	public function render_text_field( $args, $value, $slug = false  ) {
+		if ( ! $slug ) {
+			$slug = WP_SEO_Settings()->get_slug();
+		}
 		$args = wp_parse_args( $args, array(
 			'type' => 'text',
 			'size' => 80,
@@ -128,7 +133,7 @@ class WP_SEO_Fields {
 		printf(
 			'<input type="%s" name="%s[%s]" value="%s" size="%s" />',
 			esc_attr( $args['type'] ),
-			esc_attr( WP_SEO_Settings()->get_slug() ),
+			esc_attr( $slug ),
 			esc_attr( $args['field'] ),
 			esc_attr( $value ),
 			esc_attr( $args['size'] )
@@ -146,8 +151,13 @@ class WP_SEO_Fields {
 	 *     @type  int    $cols  Columns in the textarea. Default 80.
 	 * }
 	 * @param string $value The current field value.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints textarea field.
 	 */
-	public function render_textarea( $args, $value ) {
+	public function render_textarea( $args, $value, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = WP_SEO_Settings()->get_slug();
+		}
 		$args = wp_parse_args( $args, array(
 			'rows' => 2,
 			'cols' => 80,
@@ -166,23 +176,28 @@ class WP_SEO_Fields {
 	/**
 	 * Render settings checkboxes.
 	 *
-	 * @param  array $args {
+	 * @param  array  $args {
 	 *     An array of arguments for the checkboxes.
 	 *
 	 *     @type string $field The field name.
 	 *     @type array  $boxes An associative array of the value and label
 	 *                         of each checkbox.
 	 * }
-	 * @param  array $values Indexed array of current field values.
+	 * @param  array  $values Indexed array of current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints checkbox field.
 	 */
-	public function render_checkboxes( $args, $values ) {
+	public function render_checkboxes( $args, $values, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = WP_SEO_Settings()->get_slug();
+		}
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf( '
 					<label for="%1$s_%2$s_%3$s">
 						<input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>
 						%5$s
 					</label><br>',
-				esc_attr( WP_SEO_Settings()->get_slug() ),
+				esc_attr( $slug ),
 				esc_attr( $args['field'] ),
 				esc_attr( $box_value ),
 				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
@@ -202,6 +217,8 @@ class WP_SEO_Fields {
 	 *                         of each dropdown option.
 	 * }
 	 * @param  array  $values Indexed array of current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints dropdown field.
 	 */
 	public function render_dropdown( $args, $values, $slug = false ) {
 		if ( ! $slug ) {
@@ -228,7 +245,7 @@ class WP_SEO_Fields {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf(
 				'<option id="%1$s_%2$s_%3$s" value="%4$s" %5$s>%6$s</option>',
-				esc_attr( WP_SEO_Settings()->get_slug() ),
+				esc_attr( $slug ),
 				esc_attr( $args['field'] ),
 				esc_attr( $count ),
 				esc_attr( $box_value ),
@@ -243,14 +260,16 @@ class WP_SEO_Fields {
 	/**
 	 * Render image field.
 	 *
-	 * @param  array $args {
+	 * @param  array  $args {
 	 *     An array of arguments for the image field.
 	 *
 	 *     @type string $field The field name.
 	 *     @type array  $boxes An associative array of the value and label
 	 *                         of each dropdown option.
 	 * }
-	 * @param  array $img_id Current image ID value.
+	 * @param  array  $img_id Current image ID value.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints image field.
 	 */
 	public function render_image_field( $args, $img_id, $slug = false ) {
 		if ( ! $slug ) {
@@ -308,7 +327,7 @@ class WP_SEO_Fields {
 	/**
 	 * Render a repeatable text field.
 	 *
-	 * @param  array $args {
+	 * @param  array  $args {
 	 *     An array of arguments for setting up the repeatable fields.
 	 *
 	 *     @type string $field  The field name.
@@ -316,9 +335,14 @@ class WP_SEO_Fields {
 	 *                          include in each repeated instance of the field.
 	 *     @type string $size   Optional. The field size. Default 70.
 	 * }
-	 * @param  array $values The current field values.
+	 * @param  array  $values The current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints repeatable field.
 	 */
-	public function render_repeatable_field( $args, $values ) {
+	public function render_repeatable_field( $args, $values, $slug = false ) {
+		if ( ! $slug ) {
+			$slug = WP_SEO_Settings()->get_slug();
+		}
 		$args = wp_parse_args( $args, array(
 			'size' => 70,
 		) );
@@ -337,7 +361,7 @@ class WP_SEO_Fields {
 													%5$s
 												</label>
 												<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-												esc_attr( WP_SEO_Settings()->get_slug() ),
+												esc_attr( $slug ),
 												esc_attr( $args['field'] ),
 												intval( $i ),
 												esc_attr( $name ),
@@ -360,7 +384,7 @@ class WP_SEO_Fields {
 												%5$s
 											</label>
 											<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-											esc_attr( WP_SEO_Settings()->get_slug() ),
+											esc_attr( $slug ),
 											esc_attr( $args['field'] ),
 											0,
 											esc_attr( $name ),
@@ -385,7 +409,7 @@ class WP_SEO_Fields {
 											%5$s
 										</label>
 										<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-										esc_attr( WP_SEO_Settings()->get_slug() ),
+										esc_attr( $slug ),
 										esc_attr( $args['field'] ),
 										'<%= i %>',
 										esc_attr( $name ),
