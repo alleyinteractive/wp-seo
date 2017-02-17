@@ -20,3 +20,30 @@
 function wp_seo_intersect_args( $args, $defaults ) {
 	return array_intersect_key( $args, $defaults ) + $defaults;
 }
+
+
+/**
+ * Helper function for determining the 'key' for use in head
+ *
+ * @return string key
+ */
+function wp_seo_get_key() {
+	if ( is_singular() ) {
+		$post_type = get_post_type();
+		$key = "single_{$post_type}";
+	} elseif ( is_front_page() ) {
+		$key = 'home';
+	} elseif ( is_author() ) {
+		$key = 'archive_author';
+	} elseif ( is_category() || is_tag() || is_tax() ) {
+		$taxonomy = get_queried_object()->taxonomy;
+		$key = "archive_{$taxonomy}";
+	} elseif ( is_post_type_archive() ) {
+		$key = 'archive_' . get_queried_object()->name;
+	} elseif ( is_date() ) {
+		$key = 'archive_date';
+	} else {
+		$key = false;
+	}
+	return $key;
+}
