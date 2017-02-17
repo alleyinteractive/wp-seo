@@ -904,7 +904,7 @@ class WP_SEO_Settings {
 		$sanitize_as_text_field[] = '404_title';
 
 		/**
-		 * Adds to the fields for sanitization as text.
+		 * Filters the fields for sanitization as text.
 		 *
 		 * You might need this if you have added other fields.
 		 *
@@ -914,7 +914,7 @@ class WP_SEO_Settings {
 
 
 		/**
-		 * Adds to the fields for sanitization as text.
+		 * Filters the fields for sanitization as text.
 		 *
 		 * You might need this if you have added other fields.
 		 *
