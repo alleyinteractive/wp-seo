@@ -461,35 +461,19 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 *                       custom or formatted title exists.
 		 */
 		public function wp_title( $title, $sep ) {
+			$key = wp_seo_get_key();
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) && $meta_title = get_post_meta( get_the_ID(), '_meta_title', true ) ) {
 					$title_tag = $this->format( $meta_title );
 					$key = false;
-				} else {
-					$key = "single_{$post_type}_title";
 				}
-			} elseif ( is_front_page() ) {
-				$key = 'home_title';
-			} elseif ( is_author() ) {
-				$key = 'archive_author_title';
 			} elseif ( is_category() || is_tag() || is_tax() ) {
 				if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
 					$title_tag = $this->format( $option['title'] );
 					$key = false;
-				} else {
-					$key = "archive_{$taxonomy}_title";
 				}
-			} elseif ( is_post_type_archive() ) {
-				$key = 'archive_' . get_queried_object()->name . '_title';
-			} elseif ( is_date() ) {
-				$key = 'archive_date_title';
-			} elseif ( is_search() ) {
-				$key = 'search_title';
-			} elseif ( is_404() ) {
-				$key = '404_title';
-			} else {
+			} elseif ( false === $key ) {
 				$title_tag = false;
-				$key = false;
 			}
 
 			if ( $key ) {
@@ -546,30 +530,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		}
 
 		/**
-		 * Helper function for determining the 'key' for use in head
-		 */
-		public function get_key() {
-			if ( is_singular() ) {
-				$post_type = get_post_type();
-				$key = "single_{$post_type}";
-			} elseif ( is_front_page() ) {
-				$key = 'home';
-			} elseif ( is_author() ) {
-				$key = 'archive_author';
-			} elseif ( is_category() || is_tag() || is_tax() ) {
-				$taxonomy = get_queried_object()->taxonomy;
-				$key = "archive_{$taxonomy}";
-			} elseif ( is_post_type_archive() ) {
-				$key = 'archive_' . get_queried_object()->name;
-			} elseif ( is_date() ) {
-				$key = 'archive_date';
-			} else {
-				$key = false;
-			}
-			return $key;
-		}
-
-		/**
 		 * Determine the <meta> values for the current page.
 		 *
 		 * Unlike WP_SEO::wp_title(), custom per-entry and per-term values are not
@@ -578,7 +538,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
 		 */
 		public function wp_head() {
-			$key = $this->get_key();
+			$key = wp_seo_get_key();
 
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
