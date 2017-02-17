@@ -477,6 +477,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			}
 
 			if ( $key ) {
+				// Title format is key followed by `_title`.
+				$key .= '_title';
 				/**
 				 * Filter the format string of the title tag for the current page.
 				 *
