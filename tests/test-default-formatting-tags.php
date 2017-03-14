@@ -37,41 +37,41 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	 */
 	function _create_objects() {
 		$this->category = array( 'name' => 'Cat A', 'taxonomy' => 'category', 'description' => 'Cat A description' );
-		$this->category_ID = $this->factory->term->create( $this->category );
+		$this->category_id = $this->factory->term->create( $this->category );
 
 		$this->tag = array( 'name' => 'Tag A', 'taxonomy' => 'post_tag', 'description' => 'Tag A description' );
-		$this->tag_ID = $this->factory->term->create( $this->tag );
+		$this->tag_id = $this->factory->term->create( $this->tag );
 
 		register_taxonomy( 'demo_taxonomy', 'post' );
 
 		$this->term = array( 'name' => 'Term A', 'taxonomy' => 'demo_taxonomy', 'description' => 'Term A description' );
-		$this->term_ID = $this->factory->term->create( $this->term );
+		$this->term_id = $this->factory->term->create( $this->term );
 
 		$this->author = array( 'display_name' => 'User A', 'user_login' => 'user-a' );
-		$this->author_ID = $this->factory->user->create( $this->author );
+		$this->author_id = $this->factory->user->create( $this->author );
 
 		$this->post = array(
 			'post_title'    => 'hello-world',
 			'post_excerpt'  => rand_str(),
 			'post_date'     => '2007-09-04 12:34',
-			'post_author'   => $this->author_ID,
-			'post_category' => array( $this->category_ID ),
+			'post_author'   => $this->author_id,
+			'post_category' => array( $this->category_id ),
 			'tags_input'    => $this->tag['name'],
 		);
-		$this->post_ID = $this->factory->post->create( $this->post );
+		$this->post_id = $this->factory->post->create( $this->post );
 		// Trigger an update to "post_modified".
-		$this->factory->post->update_object( $this->post_ID, array() );
+		$this->factory->post->update_object( $this->post_id, array() );
 
 		$this->attachment_id = self::factory()->attachment->create_object( 'image.jpg', 0, array(
 			'post_mime_type' => 'image/jpeg',
 		) );
-		set_post_thumbnail( $this->post_ID, $this->attachment_id );
+		set_post_thumbnail( $this->post_id, $this->attachment_id );
 
 		$this->post_type = array( 'labels' => array( 'name' => 'Demo Post Types', 'singular_name' => 'Demo Post Type' ), 'rewrite' => true, 'has_archive' => true, 'public' => true, 'supports' => array( 'editor' ) );
 		register_post_type( 'demo_post_type', $this->post_type );
 
 		$this->demo = array( 'post_type' => 'demo_post_type' );
-		$this->demo_ID = $this->factory->post->create( $this->demo );
+		$this->demo_id = $this->factory->post->create( $this->demo );
 	}
 
 	/**
@@ -111,19 +111,19 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 		$destinations = array(
 			'home'              => '/',
 			'404'               => '/' . rand_str( 5 ),
-			'single'            => get_permalink( $this->post_ID ),
+			'single'            => get_permalink( $this->post_id ),
 			'date'              => get_day_link( '2007', '09', '04' ),
-			'author'            => get_author_posts_url( $this->author_ID ),
-			'category'          => get_term_link( $this->category_ID, 'category' ),
-			'tag'               => get_term_link( $this->tag_ID, 'post_tag' ),
-			'tax'               => get_term_link( $this->term_ID, 'demo_taxonomy' ),
+			'author'            => get_author_posts_url( $this->author_id ),
+			'category'          => get_term_link( $this->category_id, 'category' ),
+			'tag'               => get_term_link( $this->tag_id, 'post_tag' ),
+			'tax'               => get_term_link( $this->term_id, 'demo_taxonomy' ),
 			'post_type_archive' => get_post_type_archive_link( 'demo_post_type' ),
 			'search'            => get_search_link( 'wp-seo' ),
 		);
 
 		foreach ( $destinations as $destination => $url ) {
 			$this->go_to( $url );
-			if ( 'all' == $expected || in_array( $destination, $expected ) ) {
+			if ( 'all' === $expected || in_array( $destination, $expected ) ) {
 				$this->assertNotEmpty( $this->current_tag->get_value(), sprintf( 'Should have been truthy at %s', $url ) );
 			} else {
 				$this->assertFalse( $this->current_tag->get_value(), sprintf( 'Should not have been truthy at %s', $url ) );
@@ -175,13 +175,13 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), $this->post['post_title'] );
+		$this->_go_to_and_expect( get_permalink( $this->post_id ), $this->post['post_title'] );
 	}
 
 	// WP_SEO_Format_Title should be false if the post type doesn't support titles.
 	function test_title_no_post_type_support() {
 		$this->_set_current_tag( 'title' );
-		$this->_go_to_and_expect( get_permalink( $this->demo_ID ), false );
+		$this->_go_to_and_expect( get_permalink( $this->demo_id ), false );
 	}
 
 	function test_excerpt() {
@@ -191,7 +191,7 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), $this->post['post_excerpt'] );
+		$this->_go_to_and_expect( get_permalink( $this->post_id ), $this->post['post_excerpt'] );
 	}
 
 	function test_generated_excerpt() {
@@ -201,18 +201,18 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 			return '5';
 		} );
 
-		$post_ID = $this->factory->post->create( array(
+		$post_id = $this->factory->post->create( array(
 			'post_content' => 'Lorem ipsum dolor sit amet consectetur.',
 			'post_excerpt' => '',
 		) );
 
-		$this->_go_to_and_expect( get_permalink( $post_ID ), 'Lorem ipsum dolor sit amet' );
+		$this->_go_to_and_expect( get_permalink( $post_id ), 'Lorem ipsum dolor sit amet' );
 	}
 
 	// WP_SEO_Format_Excerpt should be false if the post type doesn't support excerpts.
 	function test_excerpt_no_post_type_support() {
 		$this->_set_current_tag( 'excerpt' );
-		$this->_go_to_and_expect( get_permalink( $this->demo_ID ), false );
+		$this->_go_to_and_expect( get_permalink( $this->demo_id ), false );
 	}
 
 	function test_date_published() {
@@ -222,7 +222,7 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), 'September 4, 2007' );
+		$this->_go_to_and_expect( get_permalink( $this->post_id ), 'September 4, 2007' );
 	}
 
 	function test_date_modified() {
@@ -233,7 +233,7 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 		$this->_truthy_on_only( array( 'single' ) );
 
 		// The modified date should be today, when we called wp_update_post().
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), date( 'F j, Y' ) );
+		$this->_go_to_and_expect( get_permalink( $this->post_id ), date( 'F j, Y' ) );
 	}
 
 	function test_author() {
@@ -243,8 +243,8 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single', 'author' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), $this->author['display_name'] );
-		$this->_go_to_and_expect( get_author_posts_url( $this->author_ID ), $this->author['display_name'] );
+		$this->_go_to_and_expect( get_permalink( $this->post_id ), $this->author['display_name'] );
+		$this->_go_to_and_expect( get_author_posts_url( $this->author_id ), $this->author['display_name'] );
 	}
 
 	/**
@@ -255,16 +255,16 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 	function test_author_with_get_the_author() {
 		$this->_set_current_tag( 'author' );
 
-		$author_ID = $this->factory->user->create( array(
+		$author_id = $this->factory->user->create( array(
 			'display_name' => 'test_author',
 		) );
 
-		$post_ID = $this->factory->post->create( array(
-			'post_author' => $author_ID,
+		$post_id = $this->factory->post->create( array(
+			'post_author' => $author_id,
 		) );
 
-		$this->go_to( get_permalink( $post_ID ) );
-		setup_postdata( get_post( $post_ID ) );
+		$this->go_to( get_permalink( $post_id ) );
+		setup_postdata( get_post( $post_id ) );
 
 		$this->assertEquals( 'test_author', $this->current_tag->get_value() );
 	}
@@ -276,13 +276,13 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), $this->category['name'] );
+		$this->_go_to_and_expect( get_permalink( $this->post_id ), $this->category['name'] );
 	}
 
 	// WP_SEO_Format_Categories should return false if the post type doesn't support categories.
 	function test_categories_no_post_type_support() {
 		$this->_set_current_tag( 'categories' );
-		$this->_go_to_and_expect( get_permalink( $this->demo_ID ), false );
+		$this->_go_to_and_expect( get_permalink( $this->demo_id ), false );
 	}
 
 	function test_tags() {
@@ -292,13 +292,13 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), $this->tag['name'] );
+		$this->_go_to_and_expect( get_permalink( $this->post_id ), $this->tag['name'] );
 	}
 
 	// WP_SEO_Format_Tags should return false if the post type doesn't support tags.
 	function test_tags_no_post_type_support() {
 		$this->_set_current_tag( 'tags' );
-		$this->_go_to_and_expect( get_permalink( $this->demo_ID ), false );
+		$this->_go_to_and_expect( get_permalink( $this->demo_id ), false );
 	}
 
 	function test_term_name() {
@@ -308,9 +308,9 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'category', 'tag', 'tax' ) );
 
-		$this->_go_to_and_expect( get_term_link( $this->category_ID, 'category' ), $this->category['name'] );
-		$this->_go_to_and_expect( get_term_link( $this->tag_ID, 'post_tag' ), $this->tag['name'] );
-		$this->_go_to_and_expect( get_term_link( $this->term_ID, 'demo_taxonomy' ), $this->term['name'] );
+		$this->_go_to_and_expect( get_term_link( $this->category_id, 'category' ), $this->category['name'] );
+		$this->_go_to_and_expect( get_term_link( $this->tag_id, 'post_tag' ), $this->tag['name'] );
+		$this->_go_to_and_expect( get_term_link( $this->term_id, 'demo_taxonomy' ), $this->term['name'] );
 	}
 
 	function test_term_description() {
@@ -320,9 +320,9 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'category', 'tag', 'tax' ) );
 
-		$this->_go_to_and_expect( get_term_link( $this->category_ID, 'category' ), $this->category['description'] );
-		$this->_go_to_and_expect( get_term_link( $this->tag_ID, 'post_tag' ), $this->tag['description'] );
-		$this->_go_to_and_expect( get_term_link( $this->term_ID, 'demo_taxonomy' ), $this->term['description'] );
+		$this->_go_to_and_expect( get_term_link( $this->category_id, 'category' ), $this->category['description'] );
+		$this->_go_to_and_expect( get_term_link( $this->tag_id, 'post_tag' ), $this->tag['description'] );
+		$this->_go_to_and_expect( get_term_link( $this->term_id, 'demo_taxonomy' ), $this->term['description'] );
 	}
 
 	function test_post_type_singular_name() {
@@ -332,7 +332,7 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single', 'post_type_archive' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->demo_ID ), $this->post_type['labels']['singular_name'] );
+		$this->_go_to_and_expect( get_permalink( $this->demo_id ), $this->post_type['labels']['singular_name'] );
 		$this->_go_to_and_expect( get_post_type_archive_link( 'demo_post_type' ), $this->post_type['labels']['singular_name'] );
 	}
 
@@ -343,7 +343,7 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single', 'post_type_archive' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->demo_ID ), 'Demo Post Types' );
+		$this->_go_to_and_expect( get_permalink( $this->demo_id ), 'Demo Post Types' );
 		$this->_go_to_and_expect( get_post_type_archive_link( 'demo_post_type' ), 'Demo Post Types' );
 	}
 
@@ -376,6 +376,6 @@ class WP_SEO_Default_Formatting_Tags_Tests extends WP_UnitTestCase {
 
 		$this->_truthy_on_only( array( 'single' ) );
 
-		$this->_go_to_and_expect( get_permalink( $this->post_ID ), wp_get_attachment_image_url( $this->attachment_id, 'full' ) );
+		$this->_go_to_and_expect( get_permalink( $this->post_id ), wp_get_attachment_image_url( $this->attachment_id, 'full' ) );
 	}
 }

@@ -49,7 +49,7 @@ class WP_SEO_Format_Tests extends WP_UnitTestCase {
 
 	function test_known_and_unknown_tags() {
 		$combined = sprintf( '%s | %s', $this->string_default_tag, $this->string_unknown_tag );
-		$this->assertSame( 'Welcome | Test Blog | '. $this->string_unknown_tag, WP_SEO()->format( $combined ) );
+		$this->assertSame( 'Welcome | Test Blog | ' . $this->string_unknown_tag, WP_SEO()->format( $combined ) );
 	}
 
 }

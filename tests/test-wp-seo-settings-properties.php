@@ -27,7 +27,7 @@ class WP_SEO_Settings_Properties_Tests extends WP_UnitTestCase {
 
 	function test_disallow_private_objects() {
 		register_post_type( 'demo_private', array( 'public' => false ) );
-		register_taxonomy ( 'demo_private', 'post', array( 'public' => false ) );
+		register_taxonomy( 'demo_private', 'post', array( 'public' => false ) );
 
 		WP_SEO_Settings()->set_properties();
 
