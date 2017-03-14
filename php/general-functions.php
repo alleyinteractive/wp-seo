@@ -28,7 +28,7 @@ function wp_seo_intersect_args( $args, $defaults ) {
  * @param object $query Optional query argument, defaults to wp_query.
  * @return string key
  */
-public function wp_seo_get_key( $query = false ) {
+function wp_seo_get_key( $query = false ) {
 	if ( ! $query ) {
 		global $wp_query;
 		$query = $wp_query;
