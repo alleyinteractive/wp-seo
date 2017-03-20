@@ -64,6 +64,14 @@ class WP_SEO_Settings {
 	 */
 	public $archived_post_types = array();
 
+	/**
+	 * Taxonomy 'archive' bug fixed.
+	 *
+	 * @var boolean
+	 * @since 0.13.0
+	 */
+	public $taxonomy_migration;
+
 	const SLUG = 'wp-seo';
 
 	/**
@@ -119,6 +127,7 @@ class WP_SEO_Settings {
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 		}
+		add_filter( 'pre_update_option_' . $this::SLUG, array( $this, 'process_migration' ) );
 	}
 
 	/**
@@ -162,6 +171,32 @@ class WP_SEO_Settings {
 		 * @param  array Associative array of setting names and values.
 		 */
 		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ), 'taxonomies' => array_keys( $this->taxonomies ) ) );
+
+		/**
+		 * Checks database to see if taxonomy migration has been run.
+		 *
+		 * @since v0.13.0
+		 */
+		$this->taxonomy_migration = get_option( $this::SLUG . '-taxonomy-migration', false );
+	}
+
+	/**
+	 * Process migration.
+	 *
+	 * @param array $new_value Associative array of new values.
+	 * @param array $old_value Associative array of old values.
+	 * @return array Associative array of filtered values.
+	 */
+	public function process_migration( $new_value, $old_value ) {
+		if ( ! $this->taxonomy_migration ) {
+			foreach ( $this->taxonomies as $taxonomy ) {
+				unset( $new_value[ "archive_{$taxonomy->name}_title" ] );
+				unset( $new_value[ "archive_{$taxonomy->name}_description" ] );
+				unset( $new_value[ "archive_{$taxonomy->name}_keywords" ] );
+			}
+			update_option( $this::SLUG . '-taxonomy-migration', true );
+		}
+		return $new_value;
 	}
 
 	/**
@@ -339,10 +374,10 @@ class WP_SEO_Settings {
 
 		foreach ( $this->taxonomies as $taxonomy ) {
 			/* translators: %s: taxonomy singular name */
-			add_settings_section( 'archive_' . $taxonomy->name, sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
-			add_settings_field( "archive_{$taxonomy->name}_title", __( 'Title Tag Format', 'wp-seo' ), array( WP_SEO_Fields(), 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'field' => "archive_{$taxonomy->name}_title" ) );
-			add_settings_field( "archive_{$taxonomy->name}_description", __( 'Meta Description Format', 'wp-seo' ), array( WP_SEO_Fields(), 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'type' => 'textarea', 'field' => "archive_{$taxonomy->name}_description" ) );
-			add_settings_field( "archive_{$taxonomy->name}_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( WP_SEO_Fields(), 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'field' => "archive_{$taxonomy->name}_keywords" ) );
+			add_settings_section( 'taxonomy_' . $taxonomy->name, sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
+			add_settings_field( "taxonomy_{$taxonomy->name}_title", __( 'Title Tag Format', 'wp-seo' ), array( WP_SEO_Fields(), 'field' ), $this::SLUG, 'taxonomy_' . $taxonomy->name, array( 'field' => "taxonomy_{$taxonomy->name}_title" ) );
+			add_settings_field( "taxonomy_{$taxonomy->name}_description", __( 'Meta Description Format', 'wp-seo' ), array( WP_SEO_Fields(), 'field' ), $this::SLUG, 'taxonomy_' . $taxonomy->name, array( 'type' => 'textarea', 'field' => "taxonomy_{$taxonomy->name}_description" ) );
+			add_settings_field( "taxonomy_{$taxonomy->name}_keywords", __( 'Meta Keywords Format', 'wp-seo' ), array( WP_SEO_Fields(), 'field' ), $this::SLUG, 'taxonomy_' . $taxonomy->name, array( 'field' => "taxonomy_{$taxonomy->name}_keywords" ) );
 		}
 
 		add_settings_section( 'archive_author', __( 'Author Archives', 'wp-seo' ), array( $this, 'example_author_archive' ), $this::SLUG );
@@ -416,7 +451,7 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_term_archive( $section ) {
-		if ( $term = get_terms( str_replace( 'archive_', '', $section['id'] ), array( 'number' => 1 ) ) ) {
+		if ( $term = get_terms( str_replace( 'taxonomy_', '', $section['id'] ), array( 'number' => 1 ) ) ) {
 			$this->example_url( $this->ex_text(), get_term_link( reset( $term ) ) );
 		} else {
 			$this->example_url( __( 'No terms yet.', 'wp-seo' ) );
@@ -559,6 +594,14 @@ class WP_SEO_Settings {
 			$sanitize_as_text_field[] = "archive_{$type}_title";
 			$sanitize_as_text_field[] = "archive_{$type}_description";
 			$sanitize_as_text_field[] = "archive_{$type}_keywords";
+		}
+		foreach ( $this->taxonomies as $type ) {
+			if ( is_object( $type ) ) {
+				$type = $type->name;
+			}
+			$sanitize_as_text_field[] = "taxonomy_{$type}_title";
+			$sanitize_as_text_field[] = "taxonomy_{$type}_description";
+			$sanitize_as_text_field[] = "taxonomy_{$type}_keywords";
 		}
 		// "Other Pages" titles.
 		$sanitize_as_text_field[] = 'search_title';
