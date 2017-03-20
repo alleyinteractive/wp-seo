@@ -87,7 +87,7 @@ class WP_SEO_Fields {
 					},
 					WP_SEO_Settings()->taxonomies
 				),
-				function( $value ) use ( &$args ) {
+				function( $value ) use ( $args ) {
 					return ( strpos( $args['field'], $value ) !== false);
 				}
 			)
