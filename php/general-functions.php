@@ -42,7 +42,7 @@ function wp_seo_get_key( $query = false ) {
 		$key = 'archive_author';
 	} elseif ( $query->is_category() || $query->is_tag() || $query->is_tax() ) {
 		$taxonomy = get_queried_object()->taxonomy;
-		$key = "archive_{$taxonomy}";
+		$key = "taxonomy_{$taxonomy}";
 	} elseif ( $query->is_post_type_archive() ) {
 		$key = 'archive_' . get_queried_object()->name;
 	} elseif ( $query->is_date() ) {
