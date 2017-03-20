@@ -187,7 +187,7 @@ class WP_SEO_Settings {
 	 * @param array $old_value Associative array of old values.
 	 * @return array Associative array of filtered values.
 	 */
-	public function process_migration( $new_value, $old_value ) {
+	public function process_migration( $new_value, $old_value = array() ) {
 		if ( ! $this->taxonomy_migration ) {
 			foreach ( $this->taxonomies as $taxonomy ) {
 				unset( $new_value[ "archive_{$taxonomy->name}_title" ] );
