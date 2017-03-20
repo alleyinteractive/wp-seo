@@ -77,9 +77,26 @@ class WP_SEO_Fields {
 		if ( empty( $args['type'] ) ) {
 			$args['type'] = 'text';
 		}
-
-		$value = ! empty( WP_SEO_Settings()->options[ $args['field'] ] ) ? WP_SEO_Settings()->options[ $args['field'] ] : '';
-
+		if (
+			! WP_SEO_Settings()->taxonomy_migration &&
+			substr( $args['field'], 0, 9 ) === 'taxonomy_' &&
+			array_filter(
+				array_map(
+					function( $taxonomy ) {
+						return $taxonomy->name;
+					},
+					WP_SEO_Settings()->taxonomies
+				),
+				function( $value ) use ( &$args ) {
+					return ( strpos( $args['field'], $value ) !== false);
+				}
+			)
+		) {
+			$legacy_field = str_replace( 'taxonomy_', 'archive_', $args['field'] );
+			$value = ! empty( WP_SEO_Settings()->options[ $legacy_field ] ) ? WP_SEO_Settings()->options[ $legacy_field ] : '';
+		} else {
+			$value = ! empty( WP_SEO_Settings()->options[ $args['field'] ] ) ? WP_SEO_Settings()->options[ $args['field'] ] : '';
+		}
 		switch ( $args['type'] ) {
 			case 'textarea' :
 				$this->render_textarea( $args, $value );
