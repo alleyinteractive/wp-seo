@@ -138,7 +138,7 @@ class WP_SEO_Fields {
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 * @return void Prints text field.
 	 */
-	public function render_text_field( $args, $value, $slug = false  ) {
+	public function render_text_field( $args, $value, $slug = false ) {
 		if ( ! $slug ) {
 			$slug = WP_SEO_Settings()->get_slug();
 		}
