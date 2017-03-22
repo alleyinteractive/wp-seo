@@ -43,7 +43,7 @@ require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
 require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
 
 // Included formatting tags.
-require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
+require_once WP_SEO_PATH . '/php/class-wp-seo-format-site-name.php';
 
 // General functions.
 require_once WP_SEO_PATH . '/php/general-functions.php';
