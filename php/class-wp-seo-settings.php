@@ -120,7 +120,6 @@ class WP_SEO_Settings {
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 		}
 		add_filter( 'pre_update_option_' . $this::SLUG, array( $this, 'process_migration' ) );
-		add_filter( 'update_option_' . $this::SLUG, array( $this, 'set_options' ) );
 	}
 
 	/**
