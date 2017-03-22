@@ -64,14 +64,6 @@ class WP_SEO_Settings {
 	 */
 	public $archived_post_types = array();
 
-	/**
-	 * Taxonomy 'archive' bug fixed.
-	 *
-	 * @var boolean
-	 * @since 0.13.0
-	 */
-	public $taxonomy_migration;
-
 	const SLUG = 'wp-seo';
 
 	/**
