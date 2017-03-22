@@ -826,7 +826,8 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_post_type_archive( $section ) {
-		if ( $url = get_post_type_archive_link( str_replace( 'archive_', '', $section['id'] ) ) ) {
+		$url = get_post_type_archive_link( str_replace( 'archive_', '', $section['id'] ) );
+		if ( $url ) {
 			$this->example_url( __( 'at ', 'wp-seo' ), $url );
 		}
 	}
