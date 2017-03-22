@@ -119,7 +119,6 @@ class WP_SEO_Settings {
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 		}
-		add_filter( 'pre_update_option_' . $this::SLUG, array( $this, 'process_migration' ) );
 	}
 
 	/**
@@ -162,26 +161,16 @@ class WP_SEO_Settings {
 		 *
 		 * @param  array Associative array of setting names and values.
 		 */
-		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ), 'taxonomies' => array_keys( $this->taxonomies ) ) );
-	}
-
-	/**
-	 * Process migration.
-	 *
-	 * @param array $new_value Associative array of new values.
-	 * @param array $old_value Associative array of old values.
-	 * @return array Associative array of filtered values.
-	 */
-	public function process_migration( $new_value, $old_value = array() ) {
-		if ( ! $this->has_taxonomy_migration_run() ) {
-			foreach ( $this->taxonomies as $taxonomy ) {
-				unset( $new_value[ "archive_{$taxonomy->name}_title" ] );
-				unset( $new_value[ "archive_{$taxonomy->name}_description" ] );
-				unset( $new_value[ "archive_{$taxonomy->name}_keywords" ] );
-			}
-			$new_value['internal']['archive_to_taxonomy_migration'] = true;
-		}
-		return $new_value;
+		$this->default_options = apply_filters(
+			'wp_seo_default_options',
+			array(
+				'post_types' => array_keys( $this->single_post_types ),
+				'taxonomies' => array_keys( $this->taxonomies ),
+				'internal'   => array(
+					'archive_to_taxonomy_migration' => true,
+				),
+			)
+		);
 	}
 
 	/**
@@ -584,7 +573,7 @@ class WP_SEO_Settings {
 			$sanitize_as_text_field[] = "single_{$type->name}_keywords";
 		}
 		// Post type, taxonomy, and other archives.
-		foreach ( array_merge( $this->archived_post_types, $this->taxonomies, array( 'author', 'date' ) ) as $type ) {
+		foreach ( array_merge( $this->archived_post_types, array( 'author', 'date' ) ) as $type ) {
 			if ( is_object( $type ) ) {
 				$type = $type->name;
 			}
