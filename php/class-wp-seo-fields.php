@@ -78,7 +78,7 @@ class WP_SEO_Fields {
 			$args['type'] = 'text';
 		}
 		if (
-			! WP_SEO_Settings()->taxonomy_migration &&
+			! WP_SEO_Settings()->has_taxonomy_migration_run() &&
 			substr( $args['field'], 0, 9 ) === 'taxonomy_' &&
 			array_filter(
 				array_map(
