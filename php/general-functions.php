@@ -33,6 +33,11 @@ function wp_seo_get_key( $query = false ) {
 		global $wp_query;
 		$query = $wp_query;
 	}
+	if ( WP_SEO_Settings()->has_taxonomy_migration_run() ) {
+		$taxonomy_slug = 'taxonomy';
+	} else {
+		$taxonomy_slug = 'archive';
+	}
 	if ( $query->is_singular() ) {
 		$post_type = get_post_type( get_queried_object() );
 		$key = "single_{$post_type}";
@@ -42,7 +47,7 @@ function wp_seo_get_key( $query = false ) {
 		$key = 'archive_author';
 	} elseif ( $query->is_category() || $query->is_tag() || $query->is_tax() ) {
 		$taxonomy = get_queried_object()->taxonomy;
-		$key = "taxonomy_{$taxonomy}";
+		$key = "{$taxonomy_slug}_{$taxonomy}";
 	} elseif ( $query->is_post_type_archive() ) {
 		$key = 'archive_' . get_queried_object()->name;
 	} elseif ( $query->is_date() ) {
