@@ -183,18 +183,13 @@ EOF;
 		$this->go_to( get_author_posts_url( $author_id ) );
 		$this->_assert_option_filters( 'archive_author' );
 	}
-	/**
-	 * @group failing
-	 */
+
 	function test_category() {
 		$category_id = $this->factory->term->create( array( 'name' => 'cat-a', 'taxonomy' => 'category' ) );
 		$this->go_to( get_term_link( $category_id, 'category' ) );
 		$this->_assert_option_filters( 'taxonomy_category' );
 	}
 
-	/**
-	 * @group failing
-	 */
 	function test_tax() {
 		$term_id = $this->factory->term->create( array( 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ) );
 		$this->go_to( get_term_link( $term_id, $this->taxonomy ) );
