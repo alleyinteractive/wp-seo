@@ -128,6 +128,7 @@ class WP_SEO_Settings {
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
 		}
 		add_filter( 'pre_update_option_' . $this::SLUG, array( $this, 'process_migration' ) );
+		add_filter( 'update_option_' . $this::SLUG, array( $this, 'set_options' ) );
 	}
 
 	/**
@@ -171,13 +172,6 @@ class WP_SEO_Settings {
 		 * @param  array Associative array of setting names and values.
 		 */
 		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ), 'taxonomies' => array_keys( $this->taxonomies ) ) );
-
-		/**
-		 * Checks database to see if taxonomy migration has been run.
-		 *
-		 * @since v0.13.0
-		 */
-		$this->taxonomy_migration = get_option( $this::SLUG . '-taxonomy-migration', false );
 	}
 
 	/**
@@ -188,13 +182,13 @@ class WP_SEO_Settings {
 	 * @return array Associative array of filtered values.
 	 */
 	public function process_migration( $new_value, $old_value = array() ) {
-		if ( ! $this->taxonomy_migration ) {
+		if ( ! $this->has_taxonomy_migration_run() ) {
 			foreach ( $this->taxonomies as $taxonomy ) {
 				unset( $new_value[ "archive_{$taxonomy->name}_title" ] );
 				unset( $new_value[ "archive_{$taxonomy->name}_description" ] );
 				unset( $new_value[ "archive_{$taxonomy->name}_keywords" ] );
 			}
-			update_option( $this::SLUG . '-taxonomy-migration', true );
+			$new_value['internal']['archive_to_taxonomy_migration'] = true;
 		}
 		return $new_value;
 	}
@@ -304,6 +298,18 @@ class WP_SEO_Settings {
 		return in_array( $taxonomy, $this->get_enabled_taxonomies() );
 	}
 
+	/**
+	 * Helper to see whether the 'archive' to 'taxonomy' migration has run.
+	 *
+	 * @return bool
+	 */
+	public function has_taxonomy_migration_run() {
+		$option = $this->get_option( 'internal', false );
+		if ( $option && isset( $option['archive_to_taxonomy_migration'] ) ) {
+			return $option['archive_to_taxonomy_migration'];
+		}
+		return false;
+	}
 	/**
 	 * Register the plugin options page.
 	 */
