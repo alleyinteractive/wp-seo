@@ -478,7 +478,7 @@ class WP_SEO_Settings {
 					'field' => "single_{$post_type->name}_keywords",
 				)
 			);
-		}
+		} // End foreach().
 
 		foreach ( $this->archived_post_types as $post_type ) {
 			/* translators: %s: post type singular name */
@@ -523,7 +523,7 @@ class WP_SEO_Settings {
 					'field' => "archive_{$post_type->name}_keywords",
 				)
 			);
-		}
+		} // End foreach().
 
 		// Post Formats have no UI, so they cannot have per-term fields.
 		add_settings_section( 'taxonomies', __( 'Taxonomies', 'wp-seo' ), '__return_false', $this::SLUG );
@@ -599,7 +599,7 @@ class WP_SEO_Settings {
 					'field' => "taxonomy_{$taxonomy->name}_keywords",
 				)
 			);
-		}
+		} // End foreach().
 
 		add_settings_section( 'archive_author', __( 'Author Archives', 'wp-seo' ), array( $this, 'example_author_archive' ), $this::SLUG );
 		add_settings_field(
@@ -691,7 +691,7 @@ class WP_SEO_Settings {
 			__( 'Title Tag Format', 'wp-seo' ),
 			array(
 				WP_SEO_Fields(),
-				'field'
+				'field',
 			),
 			$this::SLUG,
 			'search',
@@ -772,7 +772,23 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_permalink( $section ) {
-		if ( $post = get_posts( array( 'numberposts' => 1, 'post_type' => str_replace( array( 'single_', 'archive_' ), '', $section['id'] ), 'fields' => 'ids', 'suppress_filters' => false ) ) ) {
+		if (
+			$post = get_posts(
+				array(
+					'numberposts' => 1,
+					'post_type' => str_replace(
+						array(
+							'single_',
+							'archive_',
+						),
+						'',
+						$section['id']
+					),
+				'fields' => 'ids',
+				'suppress_filters' => false,
+				)
+			)
+		) {
 			$this->example_url( $this->ex_text(), get_permalink( reset( $post ) ) );
 		} else {
 			$this->example_url( __( 'No posts yet.', 'wp-seo' ) );
@@ -787,7 +803,17 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_term_archive( $section ) {
-		if ( $term = get_terms( str_replace( 'taxonomy_', '', $section['id'] ), array( 'number' => 1 ) ) ) {
+		$term = get_terms(
+			str_replace(
+				'taxonomy_',
+				'',
+				$section['id']
+			),
+			array(
+				'number' => 1,
+			)
+		);
+		if ( $term ) {
 			$this->example_url( $this->ex_text(), get_term_link( reset( $term ) ) );
 		} else {
 			$this->example_url( __( 'No terms yet.', 'wp-seo' ) );

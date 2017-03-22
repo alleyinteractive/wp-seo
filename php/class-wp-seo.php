@@ -463,12 +463,16 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public function wp_title( $title, $sep ) {
 			$key = wp_seo_get_key();
 			if ( is_singular() ) {
-				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) && $meta_title = get_post_meta( get_the_ID(), '_meta_title', true ) ) {
+				$meta_title = get_post_meta( get_the_ID(), '_meta_title', true );
+				 $post_type = get_post_type();
+				if ( WP_SEO_Settings()->has_post_fields( $post_type ) && $meta_title ) {
 					$title_tag = $this->format( $meta_title );
 					$key = false;
 				}
 			} elseif ( is_category() || is_tag() || is_tax() ) {
-				if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
+				$taxonomy = get_queried_object()->taxonomy;
+				$option = get_option( $this->get_term_option_name( get_queried_object() ) );
+				if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy ) ) && $option && ( ! empty( $option['title'] ) ) ) {
 					$title_tag = $this->format( $option['title'] );
 					$key = false;
 				}
@@ -543,12 +547,15 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			$key = wp_seo_get_key();
 
 			if ( is_singular() ) {
-				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
+				$post_type = get_post_type();
+				if ( WP_SEO_Settings()->has_post_fields( $post_type ) ) {
 					$meta_description = $this->format( get_post_meta( get_the_ID(), '_meta_description', true ) );
 					$meta_keywords = $this->format( get_post_meta( get_the_ID(), '_meta_keywords', true ) );
 				}
 			} elseif ( is_category() || is_tag() || is_tax() ) {
-				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
+				$taxonomy = get_queried_object()->taxonomy;
+				$option = get_option( $this->get_term_option_name( get_queried_object() ) );
+				if ( WP_SEO_Settings()->has_term_fields( $taxonomy ) && $option ) {
 					if ( isset( $option['description'] ) ) {
 						$meta_description = $this->format( $option['description'] );
 					}
