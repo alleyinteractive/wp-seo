@@ -464,7 +464,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			$key = wp_seo_get_key();
 			if ( is_singular() ) {
 				$meta_title = get_post_meta( get_the_ID(), '_meta_title', true );
-				 $post_type = get_post_type();
+				$post_type = get_post_type();
 				if ( WP_SEO_Settings()->has_post_fields( $post_type ) && $meta_title ) {
 					$title_tag = $this->format( $meta_title );
 					$key = false;
