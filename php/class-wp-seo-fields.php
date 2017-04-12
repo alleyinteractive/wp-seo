@@ -77,8 +77,14 @@ class WP_SEO_Fields {
 		if ( empty( $args['type'] ) ) {
 			$args['type'] = 'text';
 		}
+
+		/*
+		 * If the migration has not run and it should run,
+		 * place the contents of legacy fields in new fields.
+		 */
 		if (
 			! WP_SEO_Settings()->has_taxonomy_migration_run() &&
+			WP_SEO_Settings()->should_taxonomy_migration_run() &&
 			substr( $args['field'], 0, 9 ) === 'taxonomy_' &&
 			array_filter(
 				array_map(
