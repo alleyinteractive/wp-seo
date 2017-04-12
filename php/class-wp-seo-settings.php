@@ -565,7 +565,7 @@ class WP_SEO_Settings {
 		/*
 		 * If the migration has run or should run,
 		 * we'll find taxonomy data in new fields.
-		*/
+		 */
 		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
 			$prefix = 'taxonomy';
 		} else {
@@ -980,7 +980,7 @@ class WP_SEO_Settings {
 		/*
 		 * If the migration has run or should run,
 		 * we'll find taxonomy data in new fields.
-		*/
+		 */
 		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
 			$prefix = 'taxonomy';
 		} else {
