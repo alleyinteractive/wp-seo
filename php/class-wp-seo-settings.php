@@ -562,6 +562,10 @@ class WP_SEO_Settings {
 			)
 		);
 
+		/*
+		 * If the migration has run or should run,
+		 * we'll find taxonomy data in new fields.
+		*/
 		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
 			$prefix = 'taxonomy';
 		} else {
@@ -972,6 +976,11 @@ class WP_SEO_Settings {
 			$sanitize_as_text_field[] = "archive_{$type}_description";
 			$sanitize_as_text_field[] = "archive_{$type}_keywords";
 		}
+
+		/*
+		 * If the migration has run or should run,
+		 * we'll find taxonomy data in new fields.
+		*/
 		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
 			$prefix = 'taxonomy';
 		} else {
@@ -1038,6 +1047,12 @@ class WP_SEO_Settings {
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
 		}
+
+
+		/*
+		 * If the migration has not run and should not run,
+		 * update the internal option to make it explicit.
+		*/
 		if ( ! $this->has_taxonomy_migration_run() && ! $this->should_taxonomy_migration_run() ) {
 			$out['internal']['archive_to_taxonomy_migration'] = false;
 		}
