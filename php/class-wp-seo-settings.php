@@ -321,6 +321,15 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Helper to see whether the 'archive' to 'taxonomy' migration should run.
+	 *
+	 * @return bool
+	 */
+	public function should_taxonomy_migration_run() {
+		return (bool) apply_filters( 'wp_seo_should_taxonomy_migration_run', false );
+	}
+
+	/**
 	 * Helper to see whether the 'archive' to 'taxonomy' migration has run.
 	 *
 	 * @return bool
@@ -553,11 +562,20 @@ class WP_SEO_Settings {
 			)
 		);
 
+		/*
+		 * If the migration has run or should run,
+		 * we'll find taxonomy data in new fields.
+		 */
+		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
+			$prefix = 'taxonomy';
+		} else {
+			$prefix = 'archive';
+		}
 		foreach ( $this->taxonomies as $taxonomy ) {
 			/* translators: %s: taxonomy singular name */
 			add_settings_section( 'taxonomy_' . $taxonomy->name, sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
 			add_settings_field(
-				"taxonomy_{$taxonomy->name}_title",
+				"{$prefix}_{$taxonomy->name}_title",
 				__(
 					'Title Tag Format',
 					'wp-seo'
@@ -567,36 +585,36 @@ class WP_SEO_Settings {
 					'field',
 				),
 				$this::SLUG,
-				'taxonomy_' . $taxonomy->name,
+				"{$prefix}_{$taxonomy->name}",
 				array(
-					'field' => "taxonomy_{$taxonomy->name}_title",
+					'field' => "{$prefix}_{$taxonomy->name}_title",
 				)
 			);
 			add_settings_field(
-				"taxonomy_{$taxonomy->name}_description",
+				"{$prefix}_{$taxonomy->name}_description",
 				__( 'Meta Description Format', 'wp-seo' ),
 				array(
 					WP_SEO_Fields(),
 					'field',
 				),
 				$this::SLUG,
-				'taxonomy_' . $taxonomy->name,
+				"{$prefix}_{$taxonomy->name}",
 				array(
 					'type' => 'textarea',
-					'field' => "taxonomy_{$taxonomy->name}_description",
+					'field' => "{$prefix}_{$taxonomy->name}_description",
 				)
 			);
 			add_settings_field(
-				"taxonomy_{$taxonomy->name}_keywords",
+				"{$prefix}_{$taxonomy->name}_keywords",
 				__( 'Meta Keywords Format', 'wp-seo' ),
 				array(
 					WP_SEO_Fields(),
 					'field',
 				),
 				$this::SLUG,
-				'taxonomy_' . $taxonomy->name,
+				"{$prefix}_{$taxonomy->name}",
 				array(
-					'field' => "taxonomy_{$taxonomy->name}_keywords",
+					'field' => "{$prefix}_{$taxonomy->name}_keywords",
 				)
 			);
 		} // End foreach().
@@ -958,13 +976,23 @@ class WP_SEO_Settings {
 			$sanitize_as_text_field[] = "archive_{$type}_description";
 			$sanitize_as_text_field[] = "archive_{$type}_keywords";
 		}
+
+		/*
+		 * If the migration has run or should run,
+		 * we'll find taxonomy data in new fields.
+		 */
+		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
+			$prefix = 'taxonomy';
+		} else {
+			$prefix = 'archive';
+		}
 		foreach ( $this->taxonomies as $type ) {
 			if ( is_object( $type ) ) {
 				$type = $type->name;
 			}
-			$sanitize_as_text_field[] = "taxonomy_{$type}_title";
-			$sanitize_as_text_field[] = "taxonomy_{$type}_description";
-			$sanitize_as_text_field[] = "taxonomy_{$type}_keywords";
+			$sanitize_as_text_field[] = "{$prefix}_{$type}_title";
+			$sanitize_as_text_field[] = "{$prefix}_{$type}_description";
+			$sanitize_as_text_field[] = "{$prefix}_{$type}_keywords";
 		}
 		// "Other Pages" titles.
 		$sanitize_as_text_field[] = 'search_title';
@@ -1018,6 +1046,15 @@ class WP_SEO_Settings {
 				// Remove groups with only empty fields.
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
+		}
+
+
+		/*
+		 * If the migration has not run and should not run,
+		 * update the internal option to make it explicit.
+		 */
+		if ( ! $this->has_taxonomy_migration_run() && ! $this->should_taxonomy_migration_run() ) {
+			$out['internal']['archive_to_taxonomy_migration'] = false;
 		}
 		return $out;
 	}
