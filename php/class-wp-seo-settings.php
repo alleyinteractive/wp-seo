@@ -1047,7 +1047,6 @@ class WP_SEO_Settings {
 		endif;
 	}
 }
-
 /**
  * Helper function to use the class instance.
  *
