@@ -6,6 +6,17 @@
  */
 class WP_SEO_Taxonomy_Migration_Test extends WP_UnitTestCase {
 
+	function test_should_not_migrate() {
+		$this->assertFalse( WP_SEO_Settings()->should_taxonomy_migration_run() );
+	}
+
+	function test_should_migrate() {
+		add_filter( 'wp_seo_taxonomy_migration_opt_in', function() {
+			return true;
+		});
+		$this->assertTrue( WP_SEO_Settings()->should_taxonomy_migration_run() );
+	}
+
 	function test_has_not_migrated() {
 		$this->assertFalse( WP_SEO_Settings()->has_taxonomy_migration_run() );
 	}
