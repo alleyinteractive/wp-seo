@@ -78,4 +78,46 @@ class WP_SEO_Formatting_Functions_Tests extends WP_SEO_Testcase {
 			),
 		);
 	}
+
+	/**
+	 * Test wp_seo_get_the_display_character_count() with strings that can be counted.
+	 *
+	 * @dataProvider data_display_character_count_string_lengths
+	 */
+	function test_display_character_count_string_length( $string, $length ) {
+		$this->assertSame( wp_seo_get_the_display_character_count( $string ), $length );
+	}
+
+	/**
+	 * @return array {
+	 *     @type string String to count.
+	 *     @type string Expected length.
+	 * }
+	 */
+	function data_display_character_count_string_lengths() {
+		return array(
+			array( 'abcde', '5' ),
+		);
+	}
+
+	/**
+	 * Test wp_seo_get_the_display_character_count() with strings that should return descriptions.
+	 *
+	 * @dataProvider data_display_character_count_string_descriptions
+	 */
+	function test_display_character_count_string_description( $string ) {
+		$this->assertFalse( is_numeric( wp_seo_get_the_display_character_count( $string ) ) );
+	}
+
+	/**
+	 * @return array {
+	 *     @type string String to count.
+	 * }
+	 */
+	function data_display_character_count_string_descriptions() {
+		return array(
+			array( 'Hello #world#' ),
+			array( '#helloworld#' ),
+		);
+	}
 }

@@ -133,7 +133,8 @@ class WP_SEO_Format_Excerpt extends WP_SEO_Formatting_Tag {
 	 */
 	public function get_value() {
 		if ( is_singular() && post_type_supports( get_post_type(), 'excerpt' ) ) {
-			if ( $excerpt = get_the_excerpt() ) {
+			$excerpt = get_the_excerpt();
+			if ( $excerpt ) {
 				return $excerpt;
 			} else {
 				$post = get_post();
@@ -248,9 +249,11 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 	 */
 	public function get_value() {
 		if ( is_singular() && post_type_supports( get_post_type(), 'author' ) ) {
-			if ( $author = get_the_author() ) {
+			$author = get_the_author();
+			$post_author = get_post_field( 'post_author', get_the_ID() );
+			if ( $author ) {
 				return $author;
-			} elseif ( $post_author = get_post_field( 'post_author', get_the_ID() ) ) {
+			} elseif ( $post_author ) {
 				return apply_filters( 'the_author', get_the_author_meta( 'display_name', $post_author ) );
 			}
 		} elseif ( is_author() ) {
@@ -287,7 +290,8 @@ class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
 	 * @return mixed Category list, or false.
 	 */
 	public function get_value() {
-		if ( is_singular() && is_object_in_taxonomy( get_post_type(), 'category' ) && $categories = get_the_category() ) {
+		$categories = get_the_category();
+		if ( is_singular() && is_object_in_taxonomy( get_post_type(), 'category' ) && $categories ) {
 			return implode( __( ', ', 'wp-seo' ), wp_list_pluck( $categories, 'name' ) );
 		}
 
@@ -299,7 +303,6 @@ class WP_SEO_Format_Categories extends WP_SEO_Formatting_Tag {
  * Formatting tag for a post's tags.
  */
 class WP_SEO_Format_Tags extends WP_SEO_Formatting_Tag {
-
 	/**
 	 * (Formatting) tag name.
 	 *
@@ -322,7 +325,8 @@ class WP_SEO_Format_Tags extends WP_SEO_Formatting_Tag {
 	 * @return mixed Tag list, or false.
 	 */
 	public function get_value() {
-		if ( is_singular() && is_object_in_taxonomy( get_post_type(), 'post_tag' ) && $tags = get_the_tags() ) {
+		$tags = get_the_tags();
+		if ( is_singular() && is_object_in_taxonomy( get_post_type(), 'post_tag' ) && $tags ) {
 			return implode( __( ', ', 'wp-seo' ), wp_list_pluck( $tags, 'name' ) );
 		}
 
@@ -536,7 +540,8 @@ class WP_SEO_Format_Search_Term extends WP_SEO_Formatting_Tag {
 	 * @return mixed Search term, or false.
 	 */
 	public function get_value() {
-		return ( $term = get_search_query() ) ? $term : false;
+		$term = get_search_query();
+		return ( $term ) ? $term : false;
 	}
 }
 

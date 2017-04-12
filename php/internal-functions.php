@@ -14,6 +14,17 @@ function wp_seo_load_admin_files() {
 
 	// Admin-only template tags.
 	require_once WP_SEO_PATH . '/php/admin-template.php';
+
+	// Admin Ajax handlers.
+	if ( function_exists( 'wp_doing_ajax' ) ) {
+		if ( wp_doing_ajax() ) {
+			require_once WP_SEO_PATH . '/php/ajax-functions.php';
+		}
+	} else {
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			require_once WP_SEO_PATH . '/php/ajax-functions.php';
+		}
+	}
 }
 
 /**

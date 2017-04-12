@@ -14,6 +14,7 @@
  */
 
 add_action( 'admin_init',                                                       'wp_seo_load_admin_files', 0 );
+add_action( 'admin_enqueue_scripts',                                            'wp_seo_admin_scripts' );
 
 add_action( 'wp_seo_post_meta_fields',                                          'wp_seo_the_post_meta_fields' );
 add_action( 'wp_seo_post_meta_fields_title_label',                              'wp_seo_the_meta_title_label' );
@@ -44,3 +45,5 @@ add_action( 'wp_seo_edit_term_meta_fields_description_input',                   
 add_action( 'wp_seo_edit_term_meta_fields_after_description_input',             'wp_seo_term_data_to_the_description_character_count', 10, 2 );
 add_action( 'wp_seo_edit_term_meta_fields_keywords_label',                      'wp_seo_the_meta_keywords_label' );
 add_action( 'wp_seo_edit_term_meta_fields_keywords_input',                      'wp_seo_term_data_to_the_meta_keywords_input', 10, 2 );
+
+add_action( 'wp_ajax_wp_seo_display_character_count',                           'wp_seo_ajax_display_character_count' );
