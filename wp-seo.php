@@ -33,6 +33,9 @@ require_once WP_SEO_PATH . '/php/internal-functions.php';
 // Core filters for the page title and meta tags, and post and term metaboxes.
 require_once WP_SEO_PATH . '/php/class-wp-seo.php';
 
+// WP SEO fields.
+require_once WP_SEO_PATH . '/php/class-wp-seo-fields.php';
+
 // Settings page and option management.
 require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
 
@@ -40,7 +43,7 @@ require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
 require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
 
 // Included formatting tags.
-require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
+require_once WP_SEO_PATH . '/php/class-wp-seo-format-site-name.php';
 
 // General functions.
 require_once WP_SEO_PATH . '/php/general-functions.php';
