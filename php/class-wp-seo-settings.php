@@ -326,7 +326,7 @@ class WP_SEO_Settings {
 	 * @return bool
 	 */
 	public function should_taxonomy_migration_run() {
-		return apply_filters( 'wp_seo_taxonomy_migration_opt_in', false );
+		return (bool) apply_filters( 'wp_seo_should_taxonomy_migration_run', false );
 	}
 
 	/**
@@ -1052,7 +1052,7 @@ class WP_SEO_Settings {
 		/*
 		 * If the migration has not run and should not run,
 		 * update the internal option to make it explicit.
-		*/
+		 */
 		if ( ! $this->has_taxonomy_migration_run() && ! $this->should_taxonomy_migration_run() ) {
 			$out['internal']['archive_to_taxonomy_migration'] = false;
 		}

@@ -22,9 +22,7 @@ class WP_SEO_Taxonomy_Migration_Test extends WP_UnitTestCase {
 	}
 
 	function test_should_migration_run_with_filter() {
-		add_filter( 'wp_seo_taxonomy_migration_opt_in', function() {
-			return true;
-		});
+		add_filter( 'wp_seo_should_taxonomy_migration_run', '__return_true' );
 		$this->assertTrue( WP_SEO_Settings()->should_taxonomy_migration_run() );
 	}
 
