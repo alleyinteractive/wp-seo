@@ -321,6 +321,15 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Helper to see whether the 'archive' to 'taxonomy' migration should run.
+	 *
+	 * @return bool
+	 */
+	public function should_taxonomy_migration_run() {
+		return apply_filters( 'wp_seo_taxonomy_migration_opt_in', false );
+	}
+
+	/**
 	 * Helper to see whether the 'archive' to 'taxonomy' migration has run.
 	 *
 	 * @return bool
