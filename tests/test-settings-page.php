@@ -91,7 +91,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		$category_id = $this->factory->term->create( array( 'taxonomy' => 'category' ) );
 		wp_set_object_terms( $this->factory->post->create(), $category_id, 'category' );
 
-		$section = array( 'id' => 'archive_category' );
+		$section = array( 'id' => 'taxonomy_category' );
 		$html = get_echo( array( WP_SEO_Settings(), 'example_term_archive' ), array( $section ) );
 
 		$this->assertContains( get_term_link( $category_id, 'category' ), $html );
@@ -103,7 +103,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	function test_example_term_archive_no_terms() {
 		register_taxonomy( 'demo', 'post' );
 
-		$section = array( 'id' => 'archive_demo' );
+		$section = array( 'id' => 'taxonomy_demo' );
 		$html = get_echo( array( WP_SEO_Settings(), 'example_term_archive' ), array( $section ) );
 
 		$this->assertContains( 'No terms yet.', $html );

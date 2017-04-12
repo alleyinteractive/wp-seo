@@ -12,6 +12,7 @@ class WP_SEO_Has_Fields_Tests extends WP_UnitTestCase {
 			'post_types' => array( 'post' ),
 			'taxonomies' => array( 'category' ),
 		) );
+		WP_SEO_Settings()->set_options();
 	}
 
 	function tearDown() {

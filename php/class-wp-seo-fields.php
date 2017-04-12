@@ -78,8 +78,31 @@ class WP_SEO_Fields {
 			$args['type'] = 'text';
 		}
 
-		$value = ! empty( WP_SEO_Settings()->options[ $args['field'] ] ) ? WP_SEO_Settings()->options[ $args['field'] ] : '';
-
+		/*
+		 * If the migration has not run and it should run,
+		 * place the contents of legacy fields in new fields.
+		 */
+		if (
+			! WP_SEO_Settings()->has_taxonomy_migration_run() &&
+			WP_SEO_Settings()->should_taxonomy_migration_run() &&
+			substr( $args['field'], 0, 9 ) === 'taxonomy_' &&
+			array_filter(
+				array_map(
+					function( $taxonomy ) {
+						return $taxonomy->name;
+					},
+					WP_SEO_Settings()->taxonomies
+				),
+				function( $value ) use ( $args ) {
+					return ( strpos( $args['field'], $value ) !== false);
+				}
+			)
+		) {
+			$legacy_field = str_replace( 'taxonomy_', 'archive_', $args['field'] );
+			$value = ! empty( WP_SEO_Settings()->options[ $legacy_field ] ) ? WP_SEO_Settings()->options[ $legacy_field ] : '';
+		} else {
+			$value = ! empty( WP_SEO_Settings()->options[ $args['field'] ] ) ? WP_SEO_Settings()->options[ $args['field'] ] : '';
+		}
 		switch ( $args['type'] ) {
 			case 'textarea' :
 				$this->render_textarea( $args, $value );
@@ -121,7 +144,7 @@ class WP_SEO_Fields {
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 * @return void Prints text field.
 	 */
-	public function render_text_field( $args, $value, $slug = false  ) {
+	public function render_text_field( $args, $value, $slug = false ) {
 		if ( ! $slug ) {
 			$slug = WP_SEO_Settings()->get_slug();
 		}

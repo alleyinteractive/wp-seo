@@ -57,8 +57,8 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 			'single_post',
 			"single_{$this->post_type}",
 			'archive_author',
-			'archive_category',
-			"archive_{$this->taxonomy}",
+			'taxonomy_category',
+			"taxonomy_{$this->taxonomy}",
 			"archive_{$this->post_type}",
 			'archive_date',
 			'search',
@@ -69,7 +69,6 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 			$this->options[ "{$key}_description" ] = "demo_{$key}_description";
 			$this->options[ "{$key}_keywords" ]    = "demo_{$key}_keywords";
 		}
-
 		update_option( WP_SEO_Settings::SLUG, WP_SEO_Settings()->sanitize_options( $this->options ) );
 	}
 
@@ -188,13 +187,13 @@ EOF;
 	function test_category() {
 		$category_id = $this->factory->term->create( array( 'name' => 'cat-a', 'taxonomy' => 'category' ) );
 		$this->go_to( get_term_link( $category_id, 'category' ) );
-		$this->_assert_option_filters( 'archive_category' );
+		$this->_assert_option_filters( 'taxonomy_category' );
 	}
 
 	function test_tax() {
 		$term_id = $this->factory->term->create( array( 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ) );
 		$this->go_to( get_term_link( $term_id, $this->taxonomy ) );
-		$this->_assert_option_filters( "archive_{$this->taxonomy}" );
+		$this->_assert_option_filters( "taxonomy_{$this->taxonomy}" );
 	}
 
 	// A term with custom values should not use the archive_{taxonomy}_ fields.
