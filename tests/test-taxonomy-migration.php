@@ -6,19 +6,30 @@
  */
 class WP_SEO_Taxonomy_Migration_Test extends WP_UnitTestCase {
 
-	function test_should_not_migrate() {
+	function setUp() {
+		parent::setUp();
+		delete_option( WP_SEO_Settings::SLUG );
+		WP_SEO_Settings()->set_options();
+	}
+
+	function tearDown() {
+		parent::tearDown();
+		delete_option( WP_SEO_Settings::SLUG );
+	}
+
+	function test_should_migration_run() {
 		$this->assertFalse( WP_SEO_Settings()->should_taxonomy_migration_run() );
 	}
 
-	function test_should_migrate() {
+	function test_should_migration_run_with_filter() {
 		add_filter( 'wp_seo_taxonomy_migration_opt_in', function() {
 			return true;
 		});
 		$this->assertTrue( WP_SEO_Settings()->should_taxonomy_migration_run() );
 	}
 
-	function test_has_not_migrated() {
-		$this->assertFalse( WP_SEO_Settings()->has_taxonomy_migration_run() );
+	function test_new_site_has_migrated() {
+		$this->assertTrue( WP_SEO_Settings()->has_taxonomy_migration_run() );
 	}
 
 	function test_has_migrated() {
