@@ -1048,7 +1048,6 @@ class WP_SEO_Settings {
 			}
 		}
 
-
 		/*
 		 * If the migration has not run and should not run,
 		 * update the internal option to make it explicit.
