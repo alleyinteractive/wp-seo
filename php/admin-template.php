@@ -281,10 +281,12 @@ function wp_seo_the_title_character_count( $count ) {
 	?>
 	<p>
 		<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
-		<span class="title-character-count"></span>
-		<?php /* translators: %d: title character count */ ?>
-		<noscript><?php echo esc_html( sprintf( __( '%d (save changes to update)', 'wp-seo' ), $count ) ); ?></noscript>
+		<span class="title-character-count"><?php echo esc_html( $count ); ?></span>
 	</p>
+
+	<noscript>
+		<p><?php esc_html_e( 'Save changes to update.', 'wp-seo' ); ?></p>
+	</noscript>
 	<?php
 }
 
@@ -317,10 +319,12 @@ function wp_seo_the_description_character_count( $count ) {
 	?>
 	<p>
 		<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
-		<span class="description-character-count"></span>
-		<?php /* translators: %d: description character count */ ?>
-		<noscript><?php echo esc_html( sprintf( __( '%d (save changes to update)', 'wp-seo' ), $count ) ); ?></noscript>
+		<span class="description-character-count"><?php echo esc_html( $count ); ?></span>
 	</p>
+
+	<noscript>
+		<p><?php esc_html_e( 'Save changes to update.', 'wp-seo' ); ?></p>
+	</noscript>
 	<?php
 }
 
