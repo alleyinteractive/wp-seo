@@ -562,7 +562,7 @@ class WP_SEO_Settings {
 			)
 		);
 
-		if ( $this->has_taxonomy_migration_run() && $this->should_taxonomy_migration_run() ) {
+		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
 			$prefix = 'taxonomy';
 		} else {
 			$prefix = 'archive';
@@ -972,7 +972,7 @@ class WP_SEO_Settings {
 			$sanitize_as_text_field[] = "archive_{$type}_description";
 			$sanitize_as_text_field[] = "archive_{$type}_keywords";
 		}
-		if ( $this->has_taxonomy_migration_run() && $this->should_taxonomy_migration_run() ) {
+		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
 			$prefix = 'taxonomy';
 		} else {
 			$prefix = 'archive';
@@ -1037,6 +1037,9 @@ class WP_SEO_Settings {
 				// Remove groups with only empty fields.
 				$out[ $repeatable ] = array_filter( $out[ $repeatable ] );
 			}
+		}
+		if ( ! $this->should_taxonomy_migration_run() ) {
+			$out['internal']['archive_to_taxonomy_migration'] = false;
 		}
 		return $out;
 	}
