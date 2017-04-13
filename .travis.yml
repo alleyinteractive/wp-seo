@@ -5,6 +5,7 @@ language: php
 branches:
     only:
         - master
+        - /^v\d+\.\d+\.d+$/
 
 matrix:
     fast_finish: true
@@ -38,7 +39,7 @@ matrix:
         - php: 'hhvm'
 
 before_script:
-    - export PATH="$HOME/.composer/vendor/bin:$PATH" 
+    - export PATH="$HOME/.composer/vendor/bin:$PATH"
     - |
       if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
         composer global require "phpunit/phpunit=5.7.*"
