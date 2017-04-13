@@ -335,6 +335,8 @@ class WP_SEO_Settings {
 		 * taxonomy settings into the 'taxonomy_' namespace on the next option update. The new
 		 * namespace will also be passed to filters.
 		 *
+		 * New installations since v0.13.0 will use 'taxonomy_' namespace by default without a filter.
+		 *
 		 * @since 0.13.0
 		 *
 		 * @param bool $should_run Whether to run the migration. Default false.
