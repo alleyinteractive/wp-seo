@@ -249,6 +249,8 @@ class WP_SEO_Settings {
 	/**
 	 * Get the prefix of the keys in the settings array where SEO values are stored for a query.
 	 *
+	 * @since 0.13.0
+	 *
 	 * @param  WP_Query $query Query object.
 	 * @return string|bool     Settings array key prefix, or false if none exists.
 	 */
