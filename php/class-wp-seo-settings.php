@@ -326,11 +326,8 @@ class WP_SEO_Settings {
 	 * @return bool
 	 */
 	public function has_taxonomy_migration_run() {
-		$option = $this->get_option( 'internal', false );
-		if ( $option && isset( $option['archive_to_taxonomy_migration'] ) ) {
-			return $option['archive_to_taxonomy_migration'];
-		}
-		return false;
+		$option = $this->get_option( 'internal', array() );
+		return ! empty( $option['archive_to_taxonomy_migration'] );
 	}
 	/**
 	 * Register the plugin options page.
