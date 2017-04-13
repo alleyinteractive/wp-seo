@@ -239,7 +239,7 @@ class WP_SEO_Settings {
 	 * @param mixed  $default Optional default.
 	 * @return mixed The value, or null on failure.
 	 */
-	public function get_option( $key, $default = array() ) {
+	public function get_option( $key, $default = null ) {
 		if ( empty( $this->options ) ) {
 			$this->set_options();
 		}
