@@ -16,8 +16,8 @@ function wp_seo_admin_scripts() {
 		'l10n' => array(
 			'calculating_character_count'        => __( 'Calculating...', 'wp-seo' ),
 			'character_count_calculator_missing' => __( 'Error: Character count calculator is missing!', 'wp-seo' ),
-			'media_modal_button'                 => __( 'Select image', 'wp-seo' ),
-			'media_modal_title'                  => __( 'Choose an image', 'wp-seo' ),
+			'choose_an_image'                    => __( 'Choose an image', 'wp-seo' ),
+			'select_image'                       => __( 'Select image', 'wp-seo' ),
 		),
 		// Backcompat.
 		'repeatable_add_more_label' => __( 'Add another', 'wp-seo' ),

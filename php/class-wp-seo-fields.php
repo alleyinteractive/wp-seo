@@ -144,10 +144,7 @@ class WP_SEO_Fields {
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 * @return void Prints text field.
 	 */
-	public function render_text_field( $args, $value, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = WP_SEO_Settings()->get_slug();
-		}
+	public function render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
 		$args = wp_parse_args( $args, array(
 			'type' => 'text',
 			'size' => 80,
@@ -177,10 +174,7 @@ class WP_SEO_Fields {
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 * @return void Prints textarea field.
 	 */
-	public function render_textarea( $args, $value, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = WP_SEO_Settings()->get_slug();
-		}
+	public function render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
 		$args = wp_parse_args( $args, array(
 			'rows' => 2,
 			'cols' => 80,
@@ -188,7 +182,7 @@ class WP_SEO_Fields {
 
 		printf(
 			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
-			esc_attr( WP_SEO_Settings()->get_slug() ),
+			esc_attr( WP_SEO_Settings::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
@@ -210,10 +204,7 @@ class WP_SEO_Fields {
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 * @return void Prints checkbox field.
 	 */
-	public function render_checkboxes( $args, $values, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = WP_SEO_Settings()->get_slug();
-		}
+	public function render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
 			printf( '
 					<label for="%1$s_%2$s_%3$s">
@@ -243,10 +234,7 @@ class WP_SEO_Fields {
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 * @return void Prints dropdown field.
 	 */
-	public function render_dropdown( $args, $values, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = WP_SEO_Settings()->get_slug();
-		}
+	public function render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 		printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
 			esc_attr( $slug ),
 			esc_attr( $args['field'] )
@@ -294,10 +282,7 @@ class WP_SEO_Fields {
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 * @return void Prints image field.
 	 */
-	public function render_image_field( $args, $img_id, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = WP_SEO_Settings()->get_slug();
-		}
+	public function render_image_field( $args, $img_id, $slug = WP_SEO_Settings::SLUG ) {
 		wp_enqueue_media();
 		if ( ! empty( $img_id ) ) {
 			$img_src = wp_get_attachment_image_src( $img_id, 'og_image' );
@@ -362,10 +347,7 @@ class WP_SEO_Fields {
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 * @return void Prints repeatable field.
 	 */
-	public function render_repeatable_field( $args, $values, $slug = false ) {
-		if ( ! $slug ) {
-			$slug = WP_SEO_Settings()->get_slug();
-		}
+	public function render_repeatable_field( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 		$args = wp_parse_args( $args, array(
 			'size' => 70,
 		) );
@@ -458,4 +440,3 @@ class WP_SEO_Fields {
 function wp_seo_fields() {
 	return WP_SEO_Fields::instance();
 }
-add_action( 'after_setup_theme', 'wp_seo_fields', 9 );
