@@ -182,7 +182,7 @@ class WP_SEO_Fields {
 
 		printf(
 			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
-			esc_attr( WP_SEO_Settings()->get_slug() ),
+			esc_attr( WP_SEO_Settings::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
