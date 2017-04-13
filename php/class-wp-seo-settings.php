@@ -337,7 +337,8 @@ class WP_SEO_Settings {
 		/**
 		 * Filters the WP SEO page title.
 		 *
-		 * @since v0.13.0
+		 * @since 0.13.0
+		 *
 		 * @param string Title for WP SEO Settings page.
 		 */
 		$title = apply_filters( 'wp_seo_options_page_title', __( 'WP SEO Settings', 'wp-seo' ) );
@@ -345,7 +346,8 @@ class WP_SEO_Settings {
 		/**
 		 * Filters the WP SEO page title in menu.
 		 *
-		 * @since v0.13.0
+		 * @since 0.13.0
+		 *
 		 * @param string Title for WP SEO Settings page in menu.
 		 */
 		$menu_title = apply_filters( 'wp_seo_options_page_menu_title', __( 'SEO', 'wp-seo' ) );
@@ -991,7 +993,7 @@ class WP_SEO_Settings {
 		 *
 		 * You might need this if you have added other fields.
 		 *
-		 * @since v0.13.0
+		 * @since 0.13.0
 		 */
 		$sanitize_as_text_field = array_merge( apply_filters( 'wp_seo_sanitize_as_text_field', array() ), $sanitize_as_text_field );
 
@@ -1000,7 +1002,7 @@ class WP_SEO_Settings {
 		 *
 		 * You might need this if you have added other fields.
 		 *
-		 * @since v0.13.0
+		 * @since 0.13.0
 		 */
 		$sanitize_as_integer = array(); // No built-in fields use integers but custom ones may.
 		$sanitize_as_integer = array_merge( apply_filters( 'wp_seo_sanitize_as_integer', array() ), $sanitize_as_integer );
