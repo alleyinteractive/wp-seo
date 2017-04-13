@@ -247,6 +247,46 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Get the prefix of the keys in the settings array where SEO values are stored for a query.
+	 *
+	 * @since 0.13.0
+	 *
+	 * @param  WP_Query $query Query object.
+	 * @return string|bool     Settings array key prefix, or false if none exists.
+	 */
+	public function get_key( $query ) {
+		if ( $this->has_taxonomy_migration_run() ) {
+			$taxonomy_slug = 'taxonomy';
+		} else {
+			$taxonomy_slug = 'archive';
+		}
+
+		if ( $query->is_singular() ) {
+			$post_type = get_post_type( $query->get_queried_object() );
+			$key = "single_{$post_type}";
+		} elseif ( $query->is_front_page() ) {
+			$key = 'home';
+		} elseif ( $query->is_author() ) {
+			$key = 'archive_author';
+		} elseif ( $query->is_category() || $query->is_tag() || $query->is_tax() ) {
+			$taxonomy = $query->get_queried_object()->taxonomy;
+			$key = "{$taxonomy_slug}_{$taxonomy}";
+		} elseif ( $query->is_post_type_archive() ) {
+			$key = 'archive_' . $query->get_queried_object()->name;
+		} elseif ( $query->is_date() ) {
+			$key = 'archive_date';
+		} elseif ( $query->is_404() ) {
+			$key = '404';
+		} elseif ( $query->is_search() ) {
+			$key = 'search';
+		} else {
+			$key = false;
+		}
+
+		return $key;
+	}
+
+	/**
 	 * Get the $taxonomies property.
 	 *
 	 * @return array @see WP_SEO_Settings::taxonomies.
@@ -329,6 +369,7 @@ class WP_SEO_Settings {
 		$option = $this->get_option( 'internal', array() );
 		return ! empty( $option['archive_to_taxonomy_migration'] );
 	}
+
 	/**
 	 * Register the plugin options page.
 	 */

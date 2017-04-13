@@ -27,6 +27,15 @@
 define( 'WP_SEO_PATH', dirname( __FILE__ ) );
 define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
 
+/**
+ * Current plugin version.
+ *
+ * @since 0.13.0
+ *
+ * @var string $version
+ */
+define( 'WP_SEO_VERSION', '0.13.0' );
+
 // Behind-the-scenes functions.
 require_once WP_SEO_PATH . '/php/internal-functions.php';
 
@@ -43,7 +52,7 @@ require_once WP_SEO_PATH . '/php/class-wp-seo-settings.php';
 require_once WP_SEO_PATH . '/php/class-wp-seo-formatting-tag.php';
 
 // Included formatting tags.
-require_once WP_SEO_PATH . '/php/class-wp-seo-format-site-name.php';
+require_once WP_SEO_PATH . '/php/default-formatting-tags.php';
 
 // General functions.
 require_once WP_SEO_PATH . '/php/general-functions.php';
