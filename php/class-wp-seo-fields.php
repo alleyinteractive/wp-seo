@@ -440,4 +440,3 @@ class WP_SEO_Fields {
 function wp_seo_fields() {
 	return WP_SEO_Fields::instance();
 }
-add_action( 'after_setup_theme', 'wp_seo_fields', 9 );
