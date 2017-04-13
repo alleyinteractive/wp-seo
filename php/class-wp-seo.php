@@ -454,7 +454,10 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 *                       custom or formatted title exists.
 		 */
 		public function wp_title( $title, $sep ) {
-			$key = wp_seo_get_key();
+			global $wp_query;
+
+			$key = wp_seo_settings()->get_key( $wp_query );
+
 			if ( is_singular() ) {
 				$meta_title = get_post_meta( get_the_ID(), '_meta_title', true );
 				$post_type = get_post_type();
@@ -537,7 +540,9 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
 		 */
 		public function wp_head() {
-			$key = wp_seo_get_key();
+			global $wp_query;
+
+			$key = wp_seo_settings()->get_key( $wp_query );
 
 			if ( is_singular() ) {
 				$post_type = get_post_type();
