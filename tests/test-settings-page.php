@@ -342,4 +342,132 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		$this->assertRegExp( '/<input[^>]+class="repeatable"[^>]+\[2\]\[last_name\][^>]+value="Buchanan"[^>]+>/', $html );
 	}
 
+	/**
+	 * Test the default text field output and the output with all args.
+	 */
+	function test_render_text_field_backwards_compatible() {
+		$html = get_echo( array( WP_SEO_Settings(), 'render_text_field' ), array(
+			array( 'field' => 'demo', 'type' => 'text' ),
+			'demo value',
+		) );
+
+		// Look for the correct attributes: type of "text," field name and value.
+		$this->assertContains( 'type="text"', $html );
+		$this->assertContains( 'name="wp-seo[demo]"', $html );
+		$this->assertContains( 'value="demo value"', $html );
+
+		// Expect the field to have some size.
+		$this->assertRegExp( '/size="\d+"/', $html );
+
+		$html = get_echo( array( WP_SEO_Settings(), 'render_text_field' ), array(
+			array( 'type' => 'number', 'field' => 'demo', 'size' => 5 ),
+			'40',
+		) );
+		$this->assertContains( 'type="number"', $html );
+		$this->assertContains( 'value="40"', $html );
+		$this->assertContains( 'size="5"', $html );
+	}
+
+	/**
+	 * Test the default textarea output and the output with all args.
+	 */
+	function test_render_textarea_backwards_compatible() {
+		$html = get_echo( array( WP_SEO_Settings(), 'render_textarea' ), array(
+			array( 'field' => 'demo' ),
+			'demo value',
+		) );
+
+		// Expect at least a textarea, with with the field name and the correct value.
+		$this->assertRegExp( '/<textarea[^>]+name="wp-seo\[demo\]"[^>]+>demo value<\/textarea>/', $html );
+
+		// Expect some row and column sizes.
+		$this->assertRegExp( '/rows="\d+"/', $html );
+		$this->assertRegExp( '/cols="\d+"/', $html );
+	}
+
+	function test_render_checkboxes_backwards_compatible() {
+		$html = get_echo( array( WP_SEO_Settings(), 'render_checkboxes' ), array(
+			array(
+				'field' => 'demo',
+				'boxes' => array(
+					'page' => 'Page',
+					'post_tag' => 'Tag',
+				),
+			),
+			array( 'post_tag' ),
+		) );
+
+		// Expect two checkboxes.
+		$this->assertSame( substr_count( $html, 'type="checkbox"' ), 2 );
+		$this->assertContains( 'Page', $html );
+		$this->assertContains( 'Tag', $html );
+		// Expect only the "Tag" checkbox to be checked.
+		$this->assertRegExp( '/<input[^>]+type="checkbox"[^>]+value="post_tag"[^>]+checked/', $html );
+		$this->assertNotRegExp( '/<input[^>]+type="checkbox"[^>]+value="page"[^>]+checked/', $html );
+	}
+
+	/**
+	 * Test the default repeatable field output and the output with args.
+	 */
+	function test_render_repeatable_backwards_compatible() {
+		$args = array(
+			'field' => 'demo',
+			'repeat' => array(
+				'first_name' => 'First name',
+				'last_name' => 'Last Name',
+			),
+		);
+
+		$html = get_echo( array( WP_SEO_Settings(), 'render_repeatable_field' ), array( $args, array() ) );
+
+		// Expect a "name" attribute in with the counter for the template.
+		$this->assertContains( 'name="wp-seo[demo][<%= i %>][first_name]"', $html );
+
+		// No values: We repeat two fields, so expect four inputs, two each for input and the template.
+		$this->assertSame( substr_count( $html, '<input class="repeatable" type="text"' ), 4 );
+		// No values: The "name" attribute of our field should be "0", not "1."
+		$this->assertContains( 'name="wp-seo[demo][0][first_name]"', $html );
+		$this->assertNotContains( 'name="wp-seo[demo][1][first_name]"', $html );
+		// No values: Expect that the template starts at "1."
+		$this->assertContains( 'data-start="1"', $html );
+
+		$args['size'] = '40';
+		$html = get_echo(
+			array(
+				WP_SEO_Settings(),
+				'render_repeatable_field',
+			),
+			array(
+				$args,
+				array(
+					array(
+						'first_name' => 'Millard',
+						'last_name' => 'Fillmore',
+					),
+					array(
+						'first_name' => 'William Howard',
+						'last_name' => 'Taft',
+					),
+					array(
+						'first_name' => 'James',
+						'last_name' => 'Buchanan',
+					),
+				),
+			)
+		);
+
+		// Three values: Expect eight inputs (there isn't a blank one).
+		$this->assertSame( substr_count( $html, '<input class="repeatable"' ), 8 );
+		// $args changed: Each input should be size 40
+		$this->assertSame( substr_count( $html, 'size="40"' ), 8 );
+		// The "name" attribute should go up to "2."
+		$this->assertContains( 'name="wp-seo[demo][2][first_name]"', $html );
+		$this->assertNotContains( 'name="wp-seo[demo][3][first_name]"', $html );
+		// Expect that the template starts at "3."
+		$this->assertContains( 'data-start="3"', $html );
+		// Look for our field values.
+		$this->assertRegExp( '/<input[^>]+class="repeatable"[^>]+\[1\]\[first_name\][^>]+value="William Howard"[^>]+>/', $html );
+		$this->assertRegExp( '/<input[^>]+class="repeatable"[^>]+\[2\]\[last_name\][^>]+value="Buchanan"[^>]+>/', $html );
+	}
+
 }

@@ -919,6 +919,107 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Render a settings text field.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param array  $args {
+	 *     An array of arguments for the text field.
+	 *
+	 *     @type string $field  The field name.
+	 *     @type string $type   The field type. Default 'text'.
+	 *     @type string $size   The field size. Default 80.
+	 * }
+	 * @param string $value The current field value.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints text field.
+	 */
+	public function render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
+		WP_SEO_Fields()->render_text_field( $args, $value, $slug );
+	}
+
+	/**
+	 * Render a settings textarea.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param array  $args {
+	 *     An array of arguments for the textarea.
+	 *
+	 *     @type  string $field The field name.
+	 *     @type  int    $rows  Rows in the textarea. Default 2.
+	 *     @type  int    $cols  Columns in the textarea. Default 80.
+	 * }
+	 * @param string $value The current field value.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints textarea field.
+	 */
+	public function render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
+		WP_SEO_Fields()->render_textarea( $args, $value, $slug );
+	}
+
+	/**
+	 * Render settings checkboxes.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param  array  $args {
+	 *     An array of arguments for the checkboxes.
+	 *
+	 *     @type string $field The field name.
+	 *     @type array  $boxes An associative array of the value and label
+	 *                         of each checkbox.
+	 * }
+	 * @param  array  $values Indexed array of current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints checkbox field.
+	 */
+	public function render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+		WP_SEO_Fields()->render_checkboxes( $args, $values, $slug );
+	}
+
+	/**
+	 * Render settings dropdown.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param  array  $args {
+	 *     An array of arguments for the dropdown.
+	 *
+	 *     @type string $field The field name.
+	 *     @type array  $boxes An associative array of the value and label
+	 *                         of each dropdown option.
+	 * }
+	 * @param  array  $values Indexed array of current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints dropdown field.
+	 */
+	public function render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+		WP_SEO_Fields()->render_dropdown( $args, $value, $slug );
+	}
+
+	/**
+	 * Render a repeatable text field.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param  array  $args {
+	 *     An array of arguments for setting up the repeatable fields.
+	 *
+	 *     @type string $field  The field name.
+	 *     @type array  $repeat Associative array of field names and labels to
+	 *                          include in each repeated instance of the field.
+	 *     @type string $size   Optional. The field size. Default 70.
+	 * }
+	 * @param  array  $values The current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints repeatable field.
+	 */
+	public function render_repeatable_field( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+		WP_SEO_Fields()->render_repeatable_field( $args, $values, $slug );
+	}
+
+	/**
 	 * Render the settings page.
 	 */
 	public function view_settings_page() {
