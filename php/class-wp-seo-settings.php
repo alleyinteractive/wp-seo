@@ -844,6 +844,81 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Helper for gathering arguments to send to a field-rendering method.
+	 *
+	 * @param  array $args {
+	 *     An array of arguments for the type and details of the field.
+	 *
+	 *     @type  string $field The field name, used as the key in the option.
+	 *     @type  string $type  The field type. Use "textarea", "checkboxes", or
+	 *                          "repeatable" to call the relevant method; all
+	 *                          others become the "type" in render_text_field().
+	 *     @type  mixed         Optional. Other args for the render methods.
+	 *                          Refer to method called based on $type.
+	 * }
+	 */
+	public function field( $args ) {
+		if ( empty( $args['field'] ) ) {
+			return;
+		}
+
+		if ( empty( $args['type'] ) ) {
+			$args['type'] = 'text';
+		}
+
+		/*
+		 * If the migration has not run and it should run,
+		 * place the contents of legacy fields in new fields.
+		 */
+		if (
+			! $this->has_taxonomy_migration_run() &&
+			$this->should_taxonomy_migration_run() &&
+			substr( $args['field'], 0, 9 ) === 'taxonomy_' &&
+			array_filter(
+				array_map(
+					function( $taxonomy ) {
+						return $taxonomy->name;
+					},
+					$this->taxonomies
+				),
+				function( $value ) use ( $args ) {
+					return ( strpos( $args['field'], $value ) !== false);
+				}
+			)
+		) {
+			$legacy_field = str_replace( 'taxonomy_', 'archive_', $args['field'] );
+			$value = ! empty( $this->options[ $legacy_field ] ) ? $this->options[ $legacy_field ] : '';
+		} else {
+			$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
+		}
+		switch ( $args['type'] ) {
+			case 'textarea' :
+				WP_SEO_Fields()->render_textarea( $args, $value );
+				break;
+
+			case 'checkboxes' :
+				WP_SEO_Fields()->render_checkboxes( $args, $value );
+				break;
+
+			case 'repeatable' :
+				WP_SEO_Fields()->render_repeatable_field( $args, $value );
+				break;
+
+			case 'dropdown' :
+				WP_SEO_Fields()->render_dropdown( $args, $value );
+				break;
+
+			case 'image' :
+				WP_SEO_Fields()->render_image_field( $args, $value );
+				break;
+
+			default :
+				WP_SEO_Fields()->render_text_field( $args, $value );
+				break;
+		}
+	}
+
+	/**
 	 * Render the settings page.
 	 */
 	public function view_settings_page() {
