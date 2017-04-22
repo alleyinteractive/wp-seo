@@ -571,7 +571,7 @@ class WP_SEO_Settings {
 		}
 		foreach ( $this->taxonomies as $taxonomy ) {
 			/* translators: %s: taxonomy singular name */
-			add_settings_section( 'taxonomy_' . $taxonomy->name, sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
+			add_settings_section( "{$prefix}_{$taxonomy->name}", sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
 			add_settings_field(
 				"{$prefix}_{$taxonomy->name}_title",
 				__( 'Title Tag Format', 'wp-seo' ),
@@ -780,18 +780,13 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_term_archive( $section ) {
-		$term = get_terms(
-			str_replace(
-				'taxonomy_',
-				'',
-				$section['id']
-			),
-			array(
-				'number' => 1,
-			)
-		);
-		if ( $term ) {
-			$this->example_url( $this->ex_text(), get_term_link( reset( $term ) ) );
+		$term = get_terms( array(
+			'number' => 1,
+			'taxonomy' => preg_replace( '/^(?:archive|taxonomy)_/', '', $section['id'] ),
+		) );
+
+		if ( is_array( $term ) && isset( $term[0] ) && ( $term[0] instanceof WP_Term ) ) {
+			$this->example_url( $this->ex_text(), get_term_link( $term[0] ) );
 		} else {
 			$this->example_url( __( 'No terms yet.', 'wp-seo' ) );
 		}
