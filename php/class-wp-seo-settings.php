@@ -372,24 +372,24 @@ class WP_SEO_Settings {
 	 * Register the plugin options page.
 	 */
 	public function add_options_page() {
-
 		/**
-		 * Filters the WP SEO page title.
+		 * Filters the text to be displayed in the title tags of the WP SEO settings page.
 		 *
 		 * @since 0.13.0
 		 *
-		 * @param string Title for WP SEO Settings page.
+		 * @param string Title for the settings page.
 		 */
 		$title = apply_filters( 'wp_seo_options_page_title', __( 'WP SEO Settings', 'wp-seo' ) );
 
 		/**
-		 * Filters the WP SEO page title in menu.
+		 * Filters the text of the link to the WP SEO settings page in the menu.
 		 *
 		 * @since 0.13.0
 		 *
 		 * @param string Title for WP SEO Settings page in menu.
 		 */
 		$menu_title = apply_filters( 'wp_seo_options_page_menu_title', __( 'SEO', 'wp-seo' ) );
+
 		add_options_page( $title, $menu_title, $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
 	}
 
