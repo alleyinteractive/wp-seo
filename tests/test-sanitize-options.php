@@ -125,5 +125,33 @@ class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 		$this->assertInternalType( 'array', $actual['arbitrary_tags'] );
 	}
 
+	function test_no_new_internals() {
+		$key = 'foo';
+		$actual = $this->_sanitize( array( '_internal' => array( $key => 'bar' ) ) );
+		$this->assertArrayNotHasKey( $key, $actual );
+	}
+
+	function test_use_archive_key_with_existing_option() {
+		$key = 'archive_category_title';
+		$value = 'Foo';
+
+		// Make the "existing" option.
+		update_option( WP_SEO_Settings::SLUG, array( $key => $value ) );
+		wp_seo_settings()->set_options();
+		$this->assertSame( wp_seo_settings()->get_option( $key ), $value );
+
+		$actual = $this->_sanitize( array( $key => $value ) );
+		$this->assertArrayHasKey( $key, $actual );
+		$this->assertSame( $actual[ $key ], $value );
+		$this->assertSame( $actual['_internal']['taxonomy_settings_key'], 'archive' );
+	}
+
+	function test_use_taxonomy_key_with_new_option() {
+		delete_option( WP_SEO_Settings::SLUG );
+		wp_seo_settings()->set_options();
+		$actual = $this->_sanitize( array() );
+		$this->assertSame( $actual['_internal']['taxonomy_settings_key'], 'taxonomy' );
+	}
+
 }
 

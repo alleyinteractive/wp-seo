@@ -17,6 +17,9 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 		register_post_type( $this->post_type, array( 'rewrite' => true, 'has_archive' => true, 'public' => true ) );
 		WP_SEO_Settings()->set_properties();
 
+		// Make sure that internals() doesn't access a stale value.
+		wp_seo_settings()->set_options();
+
 		$this->_update_option_for_tests();
 		WP_SEO_Settings()->set_options();
 

@@ -64,6 +64,17 @@ class WP_SEO_Settings {
 	 */
 	public $archived_post_types = array();
 
+	/**
+	 * Default settings intended for plugin use only.
+	 *
+	 * @since 0.13.0
+	 *
+	 * @var array
+	 */
+	private $default_internals = array(
+		'taxonomy_settings_key' => 'taxonomy',
+	);
+
 	const SLUG = 'wp-seo';
 
 	/**
@@ -196,30 +207,29 @@ class WP_SEO_Settings {
 		);
 
 		/**
-		 * Filter the options to save by default.
+		 * Filters the options to save by default.
 		 *
 		 * These are also the settings shown when the option does not exist,
 		 * such as when the the plugin is first activated.
 		 *
-		 * @param  array Associative array of setting names and values.
+		 * @param array Associative array of setting names and values.
 		 */
-		$this->default_options = apply_filters(
-			'wp_seo_default_options',
-			array(
-				'post_types' => array_keys( $this->single_post_types ),
-				'taxonomies' => array_keys( $this->taxonomies ),
-				'internal'   => array(
-					'archive_to_taxonomy_migration' => true,
-				),
-			)
-		);
+		$this->default_options = apply_filters( 'wp_seo_default_options', array(
+			'post_types' => array_keys( $this->single_post_types ),
+			'taxonomies' => array_keys( $this->taxonomies ),
+		) );
 	}
 
 	/**
 	 * Set $options with the current database value.
 	 */
 	public function set_options() {
-		$this->options = get_option( $this::SLUG, $this->default_options );
+		$this->options = get_option( $this::SLUG, array_merge(
+			$this->default_options,
+			array(
+				'_internal' => $this->default_internals,
+			)
+		) );
 	}
 
 	/**
@@ -247,6 +257,20 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Get a value from the plugin's internal options.
+	 *
+	 * @since 0.13.0
+	 *
+	 * @param  string $key     Option key.
+	 * @param  mixed  $default Option default.
+	 * @return mixed           The option value or the default.
+	 */
+	private function internals( $key, $default = null ) {
+		$internal = $this->get_option( '_internal', array() );
+		return isset( $internal[ $key ] ) ? $internal[ $key ] : $default;
+	}
+
+	/**
 	 * Get the prefix of the keys in the settings array where SEO values are stored for a query.
 	 *
 	 * @since 0.13.0
@@ -255,12 +279,6 @@ class WP_SEO_Settings {
 	 * @return string|bool     Settings array key prefix, or false if none exists.
 	 */
 	public function get_key( $query ) {
-		if ( $this->has_taxonomy_migration_run() ) {
-			$taxonomy_slug = 'taxonomy';
-		} else {
-			$taxonomy_slug = 'archive';
-		}
-
 		if ( $query->is_singular() ) {
 			$post_type = get_post_type( $query->get_queried_object() );
 			$key = "single_{$post_type}";
@@ -269,8 +287,7 @@ class WP_SEO_Settings {
 		} elseif ( $query->is_author() ) {
 			$key = 'archive_author';
 		} elseif ( $query->is_category() || $query->is_tag() || $query->is_tax() ) {
-			$taxonomy = $query->get_queried_object()->taxonomy;
-			$key = "{$taxonomy_slug}_{$taxonomy}";
+			$key = $this->internals( 'taxonomy_settings_key', 'archive' ) . '_' . $query->get_queried_object()->taxonomy;
 		} elseif ( $query->is_post_type_archive() ) {
 			$key = 'archive_' . $query->get_queried_object()->name;
 		} elseif ( $query->is_date() ) {
@@ -349,25 +366,6 @@ class WP_SEO_Settings {
 	 */
 	public function has_term_fields( $taxonomy ) {
 		return in_array( $taxonomy, $this->get_enabled_taxonomies() );
-	}
-
-	/**
-	 * Helper to see whether the 'archive' to 'taxonomy' migration should run.
-	 *
-	 * @return bool
-	 */
-	public function should_taxonomy_migration_run() {
-		return (bool) apply_filters( 'wp_seo_should_taxonomy_migration_run', false );
-	}
-
-	/**
-	 * Helper to see whether the 'archive' to 'taxonomy' migration has run.
-	 *
-	 * @return bool
-	 */
-	public function has_taxonomy_migration_run() {
-		$option = $this->get_option( 'internal', array() );
-		return ! empty( $option['archive_to_taxonomy_migration'] );
 	}
 
 	/**
@@ -560,15 +558,7 @@ class WP_SEO_Settings {
 			)
 		);
 
-		/*
-		 * If the migration has run or should run,
-		 * we'll find taxonomy data in new fields.
-		 */
-		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
-			$prefix = 'taxonomy';
-		} else {
-			$prefix = 'archive';
-		}
+		$prefix = $this->internals( 'taxonomy_settings_key', 'archive' );
 		foreach ( $this->taxonomies as $taxonomy ) {
 			/* translators: %s: taxonomy singular name */
 			add_settings_section( "{$prefix}_{$taxonomy->name}", sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
@@ -931,22 +921,15 @@ class WP_SEO_Settings {
 			$sanitize_as_text_field[] = "archive_{$type}_keywords";
 		}
 
-		/*
-		 * If the migration has run or should run,
-		 * we'll find taxonomy data in new fields.
-		 */
-		if ( $this->has_taxonomy_migration_run() || $this->should_taxonomy_migration_run() ) {
-			$prefix = 'taxonomy';
-		} else {
-			$prefix = 'archive';
-		}
+		$taxonomy_settings_key = $this->internals( 'taxonomy_settings_key', 'archive' );
+
 		foreach ( $this->taxonomies as $type ) {
 			if ( is_object( $type ) ) {
 				$type = $type->name;
 			}
-			$sanitize_as_text_field[] = "{$prefix}_{$type}_title";
-			$sanitize_as_text_field[] = "{$prefix}_{$type}_description";
-			$sanitize_as_text_field[] = "{$prefix}_{$type}_keywords";
+			$sanitize_as_text_field[] = "{$taxonomy_settings_key}_{$type}_title";
+			$sanitize_as_text_field[] = "{$taxonomy_settings_key}_{$type}_description";
+			$sanitize_as_text_field[] = "{$taxonomy_settings_key}_{$type}_keywords";
 		}
 		// "Other Pages" titles.
 		$sanitize_as_text_field[] = 'search_title';
@@ -1002,13 +985,15 @@ class WP_SEO_Settings {
 			}
 		}
 
+		// No one should set this except us.
+		unset( $out['_internal'] );
+
 		/*
-		 * If the migration has not run and should not run,
-		 * update the internal option to make it explicit.
+		 * Ideally this would not be set in a sanitizing method, but there's no
+		 * other place where we can consistently apply our defaults.
 		 */
-		if ( ! $this->has_taxonomy_migration_run() && ! $this->should_taxonomy_migration_run() ) {
-			$out['internal']['archive_to_taxonomy_migration'] = false;
-		}
+		$out['_internal']['taxonomy_settings_key'] = $taxonomy_settings_key;
+
 		return $out;
 	}
 
