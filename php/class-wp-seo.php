@@ -32,15 +32,11 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public $formatting_tag_pattern = '';
 
 		/**
-		 * The fields whitelisted for use.
+		 * Registered meta keys.
 		 *
-		 * @var string.
+		 * @var array
 		 */
-		public $whitelisted_fields = array(
-			'title',
-			'description',
-			'keywords',
-		);
+		private $meta_keys;
 
 		/**
 		 * Unused.
@@ -132,17 +128,19 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 * @param string WP_SEO::formatting_tag_pattern The regex.
 			 */
 			$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
+		}
 
-			/**
-			 * Filters the whitelisted fields.
-			 *
-			 * You might need this if you have added other fields.
-			 *
-			 * @since 0.13.0
-			 *
-			 * @param string WP_SEO::whitelisted_fields The built-in fields
-			 */
-			$this->whitelisted_fields = apply_filters( 'wp_seo_whitelisted_fields', $this->whitelisted_fields );
+		public function register_meta( $meta_key, $args ) {
+			$args = wp_parse_args( $args, array(
+				'auth_callback' => null,
+				'sanitize_callback' => 'sanitize_text_field',
+			) );
+
+			foreach ( array( 'post', 'term' ) as $object_type ) {
+				register_meta( $object_type, $meta_key, $args['sanitize_callback'], $args['auth_callback'] );
+			}
+
+			$this->meta_keys[] = $meta_key;
 		}
 
 		/**
@@ -273,9 +271,19 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			if ( ! isset( $_POST['seo_meta'] ) ) {
 				$_POST['seo_meta'] = array();
 			}
-			foreach ( $this->whitelisted_fields as $field ) {
-				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
-				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
+
+			foreach ( $this->meta_keys as $meta_key ) {
+				$form_key = $meta_key;
+				if ( in_array( $meta_key, array( '_meta_title', '_meta_description', '_meta_keywords' ), true ) ) {
+					$form_key = str_replace( '_meta_', '', $form_key );
+				}
+
+				$value = '';
+				if ( isset( $_POST['seo_meta'][ $form_key ] ) ) {
+					$value = sanitize_meta( $meta_key, wp_unslash( $_POST['seo_meta'][ $form_key ] ), 'post' );
+				}
+
+				update_post_meta( $post_id, wp_slash( $meta_key ), wp_slash( $value ) );
 			}
 		}
 
@@ -375,8 +383,22 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( $this->whitelisted_fields as $field ) {
-				$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
+			foreach ( $this->meta_keys as $meta_key ) {
+				$form_key = $meta_key;
+				if ( in_array( $meta_key, array( '_meta_title', '_meta_description', '_meta_keywords' ), true ) ) {
+					$form_key = str_replace( '_meta_', '', $form_key );
+				}
+
+				$value = '';
+				if ( isset( $_POST['seo_meta'][ $form_key ] ) ) {
+					$value = sanitize_meta( $meta_key, wp_unslash( $_POST['seo_meta'][ $form_key ] ), 'term' );
+				}
+
+				if ( in_array( $meta_key, array( '_meta_title', '_meta_description', '_meta_keywords' ), true ) ) {
+					$data[ $form_key ] = $value;
+				} else {
+					update_term_meta( $term_id, wp_slash( $meta_key ), wp_slash( $value ) );
+				}
 			}
 
 			$name = $this->get_term_option_name( get_term( $term_id, $taxonomy ) );

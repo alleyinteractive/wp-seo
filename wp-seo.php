@@ -62,3 +62,23 @@ require_once WP_SEO_PATH . '/php/formatting-functions.php';
 
 // The plugin's default filters.
 require_once WP_SEO_PATH . '/php/default-filters.php';
+
+add_action( 'init', function() {
+	wp_seo()->register_meta( '_meta_title', array(
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+
+	wp_seo()->register_meta( '_meta_description', array(
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+
+	wp_seo()->register_meta( '_meta_keywords', array(
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+
+	wp_seo()->register_meta( '_meta_og_title', array(
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+
+	// ...
+} );
