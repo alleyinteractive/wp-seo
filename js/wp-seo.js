@@ -176,7 +176,11 @@
 					frame.on( 'select', function() {
 						var attachment = frame.state().get( 'selection' ).first().toJSON();
 						var img = document.createElement( 'IMG' );
-						img.src = attachment.url;
+						if (attachment.sizes.thumbnail.url) {
+							img.src = attachment.sizes.thumbnail.url;
+						} else {
+							img.src = attachment.url;
+						}
 						img.alt = attachment.alt;
 						frame.options.element[0].firstChild.append( img );
 						frame.options.element.find( '.custom-img-id' ).val( attachment.id );
