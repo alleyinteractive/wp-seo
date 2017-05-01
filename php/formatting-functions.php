@@ -64,12 +64,12 @@ function wp_seo_get_the_display_character_count( $string ) {
 }
 
 /**
- * Sanitizes image field.
+ * Sanitizes integer field.
  *
  * @param mixed $input The input's current value.
  * @return int $input The sanitized value.
  */
-function wp_seo_sanitize_image_field( $input ) {
+function wp_seo_sanitize_integer_field( $input ) {
 	if ( ! ctype_digit( $input ) || ! defined( 'FILTER_SANITIZE_NUMBER_INT' ) ) {
 		return;
 	}
