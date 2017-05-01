@@ -176,7 +176,7 @@
 					frame.on( 'select', function() {
 						var attachment = frame.state().get( 'selection' ).first().toJSON();
 						var img = document.createElement( 'IMG' );
-						if (attachment.sizes.thumbnail.url) {
+						if ( attachment.sizes.thumbnail.url ) {
 							img.src = attachment.sizes.thumbnail.url;
 						} else {
 							img.src = attachment.url;
