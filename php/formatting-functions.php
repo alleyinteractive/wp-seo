@@ -72,7 +72,7 @@ function wp_seo_get_the_display_character_count( $string ) {
  */
 function wp_seo_sanitize_integer_field( $input ) {
 	$input = (string) $input;
-	if ( ! ctype_digit( $input ) && defined( 'FILTER_SANITIZE_NUMBER_INT' ) ) {
+	if ( ! ctype_digit( $input ) || ! defined( 'FILTER_SANITIZE_NUMBER_INT' ) ) {
 		return;
 	}
 	return (int) filter_var( $input, FILTER_SANITIZE_NUMBER_INT );
