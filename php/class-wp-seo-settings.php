@@ -208,10 +208,21 @@ class WP_SEO_Settings {
 			array(
 				'post_types' => array_keys( $this->single_post_types ),
 				'taxonomies' => array_keys( $this->taxonomies ),
+			)
+		);
+
+		/**
+		* Add 'internal' late because it should not be modified in filter.
+		*
+		* @since 0.13.0
+		*/
+		$this->default_options = array_merge(
+			array(
 				'internal'   => array(
 					'archive_to_taxonomy_migration' => true,
 				),
-			)
+			),
+			$this->default_options
 		);
 	}
 
