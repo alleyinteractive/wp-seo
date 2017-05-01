@@ -33,3 +33,7 @@ table.wp-seo-post-meta-fields { width: 100%; }
 	 */
 	font-size: 13px;
 }
+
+.wp-seo-image-container .custom-img-container img {
+	max-width: 400px;
+}
