@@ -896,27 +896,27 @@ class WP_SEO_Settings {
 		}
 		switch ( $args['type'] ) {
 			case 'textarea' :
-				WP_SEO_Fields()->render_textarea( $args, $value );
+				wp_seo_render_textarea( $args, $value );
 				break;
 
 			case 'checkboxes' :
-				WP_SEO_Fields()->render_checkboxes( $args, $value );
+				wp_seo_render_checkboxes( $args, $value );
 				break;
 
 			case 'repeatable' :
-				WP_SEO_Fields()->render_repeatable_field( $args, $value );
+				wp_seo_render_repeatable_field( $args, $value );
 				break;
 
 			case 'dropdown' :
-				WP_SEO_Fields()->render_dropdown( $args, $value );
+				wp_seo_render_dropdown( $args, $value );
 				break;
 
 			case 'image' :
-				WP_SEO_Fields()->render_image_field( $args, $value );
+				wp_seo_render_image_field( $args, $value );
 				break;
 
 			default :
-				WP_SEO_Fields()->render_text_field( $args, $value );
+				wp_seo_render_text_field( $args, $value );
 				break;
 		}
 	}
@@ -938,7 +938,7 @@ class WP_SEO_Settings {
 	 * @return void Prints text field.
 	 */
 	public function render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
-		WP_SEO_Fields()->render_text_field( $args, $value, $slug );
+		wp_seo_render_text_field( $args, $value, $slug );
 	}
 
 	/**
@@ -958,7 +958,7 @@ class WP_SEO_Settings {
 	 * @return void Prints textarea field.
 	 */
 	public function render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
-		WP_SEO_Fields()->render_textarea( $args, $value, $slug );
+		wp_seo_render_textarea( $args, $value, $slug );
 	}
 
 	/**
@@ -978,7 +978,7 @@ class WP_SEO_Settings {
 	 * @return void Prints checkbox field.
 	 */
 	public function render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
-		WP_SEO_Fields()->render_checkboxes( $args, $values, $slug );
+		wp_seo_render_checkboxes( $args, $values, $slug );
 	}
 
 	/**
@@ -998,7 +998,7 @@ class WP_SEO_Settings {
 	 * @return void Prints dropdown field.
 	 */
 	public function render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
-		WP_SEO_Fields()->render_dropdown( $args, $value, $slug );
+		wp_seo_render_dropdown( $args, $value, $slug );
 	}
 
 	/**
@@ -1019,7 +1019,7 @@ class WP_SEO_Settings {
 	 * @return void Prints repeatable field.
 	 */
 	public function render_repeatable_field( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
-		WP_SEO_Fields()->render_repeatable_field( $args, $values, $slug );
+		wp_seo_render_repeatable_field( $args, $values, $slug );
 	}
 
 	/**
