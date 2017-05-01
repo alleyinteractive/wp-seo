@@ -184,8 +184,9 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		$this->assertRegExp( '/<input[^>]+type="text"[^>]+name="wp-seo\[demo\]"/', $html );
 
 		// Check that a value is passed.
-		WP_SEO_Settings()->set_option( 'demo', 'demo value' );
-		$html = get_echo( array( WP_SEO_Fields(), 'field' ), array( array( 'field' => 'demo' ) ) );
+		update_option( WP_SEO_Settings::SLUG, array( 'home_title' => 'demo value' ) );
+		WP_SEO_Settings()->set_options();
+		$html = get_echo( array( WP_SEO_Fields(), 'field' ), array( array( 'field' => 'home_title' ) ) );
 		$this->assertRegExp( '/<input[^>]+type="text"[^>]+value="demo value"/', $html );
 
 		// Check the rendered field types.
