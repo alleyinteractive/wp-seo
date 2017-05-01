@@ -196,64 +196,63 @@ class WP_SEO_Fields {
 	/**
 	 * Render image field.
 	 *
-	 * @param  array  $args {
+	 * @param array $args {
 	 *     An array of arguments for the image field.
 	 *
 	 *     @type string $field The field name.
-	 *     @type array  $boxes An associative array of the value and label
-	 *                         of each dropdown option.
+	 *     @type string $size  Optional. Preview image size. Default 'thumbnail'.
+	 *     @type string $slug  Optional. Form field name prefix. Default WP_SEO_Settings::SLUG.
 	 * }
-	 * @param  array  $img_id Current image ID value.
-	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
-	 * @return void Prints image field.
+	 * @param int   $value The current field value.
 	 */
-	public function render_image_field( $args, $img_id, $slug = WP_SEO_Settings::SLUG ) {
+	public function render_image_field( $args, $value ) {
+		$args = wp_parse_args( $args, array(
+			'size' => 'thumbnail',
+			'slug' => WP_SEO_Settings::SLUG,
+		) );
+
 		wp_enqueue_media();
-		if ( ! empty( $img_id ) ) {
-			$img_src = wp_get_attachment_image_src( $img_id, 'og_image' );
-			$has_img = is_array( $img_src );
-		} else {
-			$has_img = false;
+
+		$img_src = '';
+		if ( $value ) {
+			$img_src = wp_get_attachment_image_url( $value, $args['size'] );
 		}
-		$upload_link = esc_url( get_upload_iframe_src( 'image' ) );
+
 		echo '<div class="wp-seo-image-container">';
-		echo '<div class="custom-img-container">';
+
 		// If we have an image, output it.
-		if ( $has_img ) {
-			echo sprintf(
-				'<img src="%1$s" style="max-width:400px" />',
-				esc_url( $img_src[0] )
+		echo '<div class="custom-img-container">';
+		if ( $img_src ) {
+			printf(
+				'<img src="%1$s" alt="%2$s" />',
+				esc_url( $img_src ),
+				esc_attr( get_post_meta( $value, '_wp_attachment_image_alt', true ) )
 			);
 		}
 		echo '</div>';
-		echo '<p class="hide-if-no-js">';
+
 		// If we have an image, hide the add button, and vice versa.
-		if ( $has_img ) {
-			$upload_hidden = 'hidden';
-			$remove_hidden = '';
-		} else {
-			$upload_hidden = '';
-			$remove_hidden = 'hidden';
-		}
-		echo sprintf(
+		echo '<p class="hide-if-no-js">';
+		printf(
 			'<a class="upload-custom-img %1$s" href="%2$s">%3$s</a>',
-			esc_attr( $upload_hidden ),
-			esc_url( $upload_link ),
-			esc_html( __( 'Set custom image', 'wp-seo' ) )
+			esc_attr( $img_src ? 'hidden' : '' ),
+			esc_url( get_upload_iframe_src( 'image' ) ),
+			esc_html__( 'Set image', 'wp-seo' )
 		);
-		echo sprintf(
-			'<a class="delete-custom-img %1$s" href="%2$s">%3$s</a>',
-			esc_attr( $remove_hidden ),
-			'#',
-			esc_html( __( 'Remove this image', 'wp-seo' ) )
+		printf(
+			'<a class="delete-custom-img %1$s" href="#">%2$s</a>',
+			esc_attr( $img_src ? '' : 'hidden' ),
+			esc_html__( 'Remove this image', 'wp-seo' )
 		);
 		echo '</p>';
-		echo sprintf(
+
+		printf(
 			'<input id="%1$s_%2$s" class="custom-img-id" name="%1$s[%2$s]" type="hidden" value="%3$s" />',
-			esc_attr( $slug ),
+			esc_attr( $args['slug'] ),
 			esc_attr( $args['field'] ),
-			esc_attr( $img_id )
+			esc_attr( $value )
 		);
+
 		echo '</div>';
 	}
 
