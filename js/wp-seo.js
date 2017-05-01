@@ -171,7 +171,8 @@
 						button: {
 							text: wp_seo_admin.l10n.select_image
 						},
-						multiple: false  // Set to true to allow multiple files to be selected
+						multiple: false, // Set to true to allow multiple files to be selected
+						library: { type: 'image' },
 					});
 					frame.on( 'select', function() {
 						var attachment = frame.state().get( 'selection' ).first().toJSON();
