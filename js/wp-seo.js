@@ -171,12 +171,17 @@
 						button: {
 							text: wp_seo_admin.l10n.select_image
 						},
-						multiple: false  // Set to true to allow multiple files to be selected
+						multiple: false, // Set to true to allow multiple files to be selected
+						library: { type: 'image' },
 					});
 					frame.on( 'select', function() {
 						var attachment = frame.state().get( 'selection' ).first().toJSON();
 						var img = document.createElement( 'IMG' );
-						img.src = attachment.url;
+						if ( attachment.sizes.thumbnail.url ) {
+							img.src = attachment.sizes.thumbnail.url;
+						} else {
+							img.src = attachment.url;
+						}
 						img.alt = attachment.alt;
 						frame.options.element[0].firstChild.append( img );
 						frame.options.element.find( '.custom-img-id' ).val( attachment.id );
