@@ -219,7 +219,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	 * Test the default text field output and the output with all args.
 	 */
 	function test_render_text_field() {
-		$html = get_echo( array( WP_SEO_Fields(), 'render_text_field' ), array(
+		$html = get_echo( 'wp_seo_render_text_field', array(
 			array( 'field' => 'demo', 'type' => 'text' ),
 			'demo value',
 		) );
@@ -232,7 +232,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		// Expect the field to have some size.
 		$this->assertRegExp( '/size="\d+"/', $html );
 
-		$html = get_echo( array( WP_SEO_Fields(), 'render_text_field' ), array(
+		$html = get_echo( 'wp_seo_render_text_field', array(
 			array( 'type' => 'number', 'field' => 'demo', 'size' => 5 ),
 			'40',
 		) );
@@ -245,7 +245,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 	 * Test the default textarea output and the output with all args.
 	 */
 	function test_render_textarea() {
-		$html = get_echo( array( WP_SEO_Fields(), 'render_textarea' ), array(
+		$html = get_echo( 'wp_seo_render_textarea', array(
 			array( 'field' => 'demo' ),
 			'demo value',
 		) );
@@ -257,9 +257,11 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 		$this->assertRegExp( '/rows="\d+"/', $html );
 		$this->assertRegExp( '/cols="\d+"/', $html );
 	}
-
+	/**
+	 * Test the default checkbox output and the output with all args.
+	 */
 	function test_render_checkboxes() {
-		$html = get_echo( array( WP_SEO_Fields(), 'render_checkboxes' ), array(
+		$html = get_echo( 'wp_seo_render_checkboxes', array(
 			array(
 				'field' => 'demo',
 				'boxes' => array(
@@ -291,7 +293,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 			),
 		);
 
-		$html = get_echo( array( WP_SEO_Fields(), 'render_repeatable_field' ), array( $args, array() ) );
+		$html = get_echo( 'wp_seo_render_repeatable_field', array( $args, array() ) );
 
 		// Expect a "name" attribute in with the counter for the template.
 		$this->assertContains( 'name="wp-seo[demo][<%= i %>][first_name]"', $html );
@@ -306,10 +308,7 @@ class WP_SEO_Settings_Page_Tests extends WP_UnitTestCase {
 
 		$args['size'] = '40';
 		$html = get_echo(
-			array(
-				WP_SEO_Fields(),
-				'render_repeatable_field',
-			),
+			'wp_seo_render_repeatable_field',
 			array(
 				$args,
 				array(
