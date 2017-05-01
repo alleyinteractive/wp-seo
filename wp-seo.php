@@ -80,5 +80,4 @@ add_action( 'init', function() {
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 
-	// ...
 } );
