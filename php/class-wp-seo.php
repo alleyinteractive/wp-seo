@@ -32,17 +32,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public $formatting_tag_pattern = '';
 
 		/**
-		 * The fields whitelisted for use.
-		 *
-		 * @var string.
-		 */
-		public $whitelisted_fields = array(
-			'title',
-			'description',
-			'keywords',
-		);
-
-		/**
 		 * Unused.
 		 *
 		 * @codeCoverageIgnore
@@ -132,17 +121,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 * @param string WP_SEO::formatting_tag_pattern The regex.
 			 */
 			$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
-
-			/**
-			 * Filters the whitelisted fields.
-			 *
-			 * You might need this if you have added other fields.
-			 *
-			 * @since 0.13.0
-			 *
-			 * @param string WP_SEO::whitelisted_fields The built-in fields
-			 */
-			$this->whitelisted_fields = apply_filters( 'wp_seo_whitelisted_fields', $this->whitelisted_fields );
 		}
 
 		/**
@@ -273,7 +251,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			if ( ! isset( $_POST['seo_meta'] ) ) {
 				$_POST['seo_meta'] = array();
 			}
-			foreach ( $this->whitelisted_fields as $field ) {
+			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
 				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
 			}
@@ -375,7 +353,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( $this->whitelisted_fields as $field ) {
+			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
 				$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 			}
 
