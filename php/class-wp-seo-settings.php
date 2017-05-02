@@ -924,7 +924,7 @@ class WP_SEO_Settings {
 	/**
 	 * Render a settings text field.
 	 *
-	 * Backwards compatibility shim.
+	 * Backwards-compatibility shim.
 	 *
 	 * @param array  $args An array of arguments for the text field. @see wp_seo_render_text_field().
 	 * @param string $value The current field value.
@@ -937,7 +937,7 @@ class WP_SEO_Settings {
 	/**
 	 * Render a settings textarea.
 	 *
-	 * Backwards compatibility shim.
+	 * Backwards-compatibility shim.
 	 *
 	 * @param array  $args An array of arguments for the textarea. @see wp_seo_render_textarea().
 	 * @param string $value The current field value.
@@ -950,7 +950,7 @@ class WP_SEO_Settings {
 	/**
 	 * Render settings checkboxes.
 	 *
-	 * Backwards compatibility shim.
+	 * Backwards-compatibility shim.
 	 *
 	 * @param array  $args An array of arguments for the checkboxes. @see wp_seo_render_checkboxes().
 	 * @param array  $values Indexed array of current field values.
@@ -963,7 +963,7 @@ class WP_SEO_Settings {
 	/**
 	 * Render settings dropdown.
 	 *
-	 * Backwards compatibility shim.
+	 * Backwards-compatibility shim.
 	 *
 	 * @param array  $args An array of arguments for the dropdown. @see wp_seo_render_dropdown().
 	 * @param array  $values Indexed array of current field values.
@@ -976,7 +976,7 @@ class WP_SEO_Settings {
 	/**
 	 * Render a repeatable text field.
 	 *
-	 * Backwards compatibility shim.
+	 * Backwards-compatibility shim.
 	 *
 	 * @param array  $args   An array of arguments for setting up the repeatable
 	 *                       fields. @see wp_seo_render_repeatable_field().
