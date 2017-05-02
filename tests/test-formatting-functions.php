@@ -136,7 +136,7 @@ class WP_SEO_Formatting_Functions_Tests extends WP_SEO_Testcase {
 	 *     @type int The expected sanitized value.
 	 * }
 	 */
-	public function data_integer_field_inputs() {
+	public function data_sanitize_integer_field_inputs() {
 		return array(
 			array( 2, 2 ),
 			array( '3', 3 ),
