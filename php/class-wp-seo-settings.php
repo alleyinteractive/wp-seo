@@ -419,7 +419,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'home_title',
 			__( 'Title Tag Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG, 'home',
 			array(
 				'field' => 'home_title',
@@ -428,7 +428,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'home_description',
 			__( 'Meta Description Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG, 'home',
 			array(
 				'type' => 'textarea',
@@ -438,7 +438,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'home_keywords',
 			__( 'Meta Keywords Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'home',
 			array(
@@ -450,7 +450,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'post_types',
 			__( 'Add SEO fields to individual:', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'post_types',
 			array(
@@ -472,7 +472,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"single_{$post_type->name}_title",
 				__( 'Title Tag Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				'single_' . $post_type->name,
 				array(
@@ -482,7 +482,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"single_{$post_type->name}_description",
 				__( 'Meta Description Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				'single_' . $post_type->name,
 				array(
@@ -493,7 +493,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"single_{$post_type->name}_keywords",
 				__( 'Meta Keywords Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				'single_' . $post_type->name,
 				array(
@@ -508,7 +508,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"archive_{$post_type->name}_title",
 				__( 'Title Tag Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				'archive_' . $post_type->name,
 				array(
@@ -518,7 +518,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"archive_{$post_type->name}_description",
 				__( 'Meta Description Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				'archive_' . $post_type->name,
 				array(
@@ -529,7 +529,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"archive_{$post_type->name}_keywords",
 				__( 'Meta Keywords Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				'archive_' . $post_type->name,
 				array(
@@ -542,7 +542,7 @@ class WP_SEO_Settings {
 		add_settings_section( 'taxonomies', __( 'Taxonomies', 'wp-seo' ), '__return_false', $this::SLUG );
 		add_settings_field(
 			'taxonomies', __( 'Add SEO fields to individual:', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'taxonomies',
 			array(
@@ -578,7 +578,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"{$prefix}_{$taxonomy->name}_title",
 				__( 'Title Tag Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				"{$prefix}_{$taxonomy->name}",
 				array(
@@ -588,7 +588,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"{$prefix}_{$taxonomy->name}_description",
 				__( 'Meta Description Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				"{$prefix}_{$taxonomy->name}",
 				array(
@@ -599,7 +599,7 @@ class WP_SEO_Settings {
 			add_settings_field(
 				"{$prefix}_{$taxonomy->name}_keywords",
 				__( 'Meta Keywords Format', 'wp-seo' ),
-				array( WP_SEO_Fields(), 'field' ),
+				array( $this, 'field' ),
 				$this::SLUG,
 				"{$prefix}_{$taxonomy->name}",
 				array(
@@ -612,7 +612,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'archive_author_title',
 			__( 'Title Tag Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'archive_author',
 			array(
@@ -622,7 +622,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'archive_author_description',
 			__( 'Meta Description Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'archive_author',
 			array(
@@ -633,7 +633,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'archive_author_keywords',
 			__( 'Meta Keywords Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'archive_author',
 			array(
@@ -645,7 +645,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'archive_date_title',
 			__( 'Title Tag Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'archive_date',
 			array(
@@ -655,7 +655,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'archive_date_description',
 			__( 'Meta Description Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'archive_date',
 			array(
@@ -666,7 +666,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'archive_date_keywords',
 			__( 'Meta Keywords Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'archive_date',
 			array(
@@ -678,7 +678,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'search_title',
 			__( 'Title Tag Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'search',
 			array(
@@ -690,7 +690,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'404_title',
 			__( 'Title Tag Format', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'404',
 			array(
@@ -702,7 +702,7 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'arbitrary_tags',
 			__( 'Tags', 'wp-seo' ),
-			array( WP_SEO_Fields(), 'field' ),
+			array( $this, 'field' ),
 			$this::SLUG,
 			'arbitrary',
 			array(
@@ -844,6 +844,182 @@ class WP_SEO_Settings {
 	 */
 	public function example_404_page() {
 		$this->example_url( $this->ex_text(), trailingslashit( get_bloginfo( 'url' ) ) . md5( get_bloginfo( 'url' ) ) );
+	}
+
+	/**
+	 * Helper for gathering arguments to send to a field-rendering method.
+	 *
+	 * @param  array $args {
+	 *     An array of arguments for the type and details of the field.
+	 *
+	 *     @type  string $field The field name, used as the key in the option.
+	 *     @type  string $type  The field type. Use "textarea", "checkboxes", or
+	 *                          "repeatable" to call the relevant method; all
+	 *                          others become the "type" in render_text_field().
+	 *     @type  mixed         Optional. Other args for the render methods.
+	 *                          Refer to method called based on $type.
+	 * }
+	 */
+	public function field( $args ) {
+		if ( empty( $args['field'] ) ) {
+			return;
+		}
+
+		if ( empty( $args['type'] ) ) {
+			$args['type'] = 'text';
+		}
+
+		/*
+		 * If the migration has not run and it should run,
+		 * place the contents of legacy fields in new fields.
+		 */
+		if (
+			! $this->has_taxonomy_migration_run() &&
+			$this->should_taxonomy_migration_run() &&
+			substr( $args['field'], 0, 9 ) === 'taxonomy_' &&
+			array_filter(
+				array_map(
+					function( $taxonomy ) {
+						return $taxonomy->name;
+					},
+					$this->taxonomies
+				),
+				function( $value ) use ( $args ) {
+					return ( strpos( $args['field'], $value ) !== false);
+				}
+			)
+		) {
+			$legacy_field = str_replace( 'taxonomy_', 'archive_', $args['field'] );
+			$value = ! empty( $this->options[ $legacy_field ] ) ? $this->options[ $legacy_field ] : '';
+		} else {
+			$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
+		}
+		switch ( $args['type'] ) {
+			case 'textarea' :
+				wp_seo_render_textarea( $args, $value );
+				break;
+
+			case 'checkboxes' :
+				wp_seo_render_checkboxes( $args, $value );
+				break;
+
+			case 'repeatable' :
+				wp_seo_render_repeatable_field( $args, $value );
+				break;
+
+			case 'dropdown' :
+				wp_seo_render_dropdown( $args, $value );
+				break;
+
+			case 'image' :
+				wp_seo_render_image_field( $args, $value );
+				break;
+
+			default :
+				wp_seo_render_text_field( $args, $value );
+				break;
+		}
+	}
+
+	/**
+	 * Render a settings text field.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param array  $args {
+	 *     An array of arguments for the text field.
+	 *
+	 *     @type string $field  The field name.
+	 *     @type string $type   The field type. Default 'text'.
+	 *     @type string $size   The field size. Default 80.
+	 * }
+	 * @param string $value The current field value.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints text field.
+	 */
+	public function render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
+		wp_seo_render_text_field( $args, $value, $slug );
+	}
+
+	/**
+	 * Render a settings textarea.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param array  $args {
+	 *     An array of arguments for the textarea.
+	 *
+	 *     @type  string $field The field name.
+	 *     @type  int    $rows  Rows in the textarea. Default 2.
+	 *     @type  int    $cols  Columns in the textarea. Default 80.
+	 * }
+	 * @param string $value The current field value.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints textarea field.
+	 */
+	public function render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
+		wp_seo_render_textarea( $args, $value, $slug );
+	}
+
+	/**
+	 * Render settings checkboxes.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param  array  $args {
+	 *     An array of arguments for the checkboxes.
+	 *
+	 *     @type string $field The field name.
+	 *     @type array  $boxes An associative array of the value and label
+	 *                         of each checkbox.
+	 * }
+	 * @param  array  $values Indexed array of current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints checkbox field.
+	 */
+	public function render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+		wp_seo_render_checkboxes( $args, $values, $slug );
+	}
+
+	/**
+	 * Render settings dropdown.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param  array  $args {
+	 *     An array of arguments for the dropdown.
+	 *
+	 *     @type string $field The field name.
+	 *     @type array  $boxes An associative array of the value and label
+	 *                         of each dropdown option.
+	 * }
+	 * @param  array  $values Indexed array of current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints dropdown field.
+	 */
+	public function render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+		wp_seo_render_dropdown( $args, $value, $slug );
+	}
+
+	/**
+	 * Render a repeatable text field.
+	 *
+	 * Backwards compatibility shim.
+	 *
+	 * @param  array  $args {
+	 *     An array of arguments for setting up the repeatable fields.
+	 *
+	 *     @type string $field  The field name.
+	 *     @type array  $repeat Associative array of field names and labels to
+	 *                          include in each repeated instance of the field.
+	 *     @type string $size   Optional. The field size. Default 70.
+	 * }
+	 * @param  array  $values The current field values.
+	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @return void Prints repeatable field.
+	 */
+	public function render_repeatable_field( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+		wp_seo_render_repeatable_field( $args, $values, $slug );
 	}
 
 	/**
