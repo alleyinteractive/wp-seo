@@ -351,6 +351,8 @@ function wp_seo_the_meta_keywords_input( $value ) {
 /**
  * Render a text field.
  *
+ * @since 0.13.0
+ *
  * @param array  $args {
  *     An array of arguments for the text field.
  *
@@ -381,6 +383,8 @@ function wp_seo_render_text_field( $args, $value ) {
 /**
  * Render a textarea.
  *
+ * @since 0.13.0
+ *
  * @param array  $args {
  *     An array of arguments for the textarea.
  *
@@ -410,6 +414,8 @@ function wp_seo_render_textarea( $args, $value ) {
 
 /**
  * Render checkboxes.
+ *
+ * @since 0.13.0
  *
  * @param array $args {
  *     An array of arguments for the checkboxes.
@@ -443,6 +449,8 @@ function wp_seo_render_checkboxes( $args, $values ) {
 
 /**
  * Render dropdown.
+ *
+ * @since 0.13.0
  *
  * @param array $args {
  *     An array of arguments for the dropdown.
@@ -488,6 +496,8 @@ function wp_seo_render_dropdown( $args, $values ) {
 
 /**
  * Render image field.
+ *
+ * @since 0.13.0
  *
  * @param array $args {
  *     An array of arguments for the image field.
@@ -551,6 +561,8 @@ function wp_seo_render_image_field( $args, $value ) {
 
 /**
  * Render a repeatable text field.
+ *
+ * @since 0.13.0
  *
  * @param array $args {
  *     An array of arguments for setting up the repeatable fields.
