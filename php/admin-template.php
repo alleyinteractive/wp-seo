@@ -349,7 +349,7 @@ function wp_seo_the_meta_keywords_input( $value ) {
 }
 
 /**
- * Render a settings text field.
+ * Render a text field.
  *
  * @param array  $args {
  *     An array of arguments for the text field.
@@ -379,7 +379,7 @@ function wp_seo_render_text_field( $args, $value ) {
 }
 
 /**
- * Render a settings textarea.
+ * Render a textarea.
  *
  * @param array  $args {
  *     An array of arguments for the textarea.
@@ -409,7 +409,7 @@ function wp_seo_render_textarea( $args, $value ) {
 }
 
 /**
- * Render settings checkboxes.
+ * Render checkboxes.
  *
  * @param array $args {
  *     An array of arguments for the checkboxes.
@@ -442,7 +442,7 @@ function wp_seo_render_checkboxes( $args, $values ) {
 }
 
 /**
- * Render settings dropdown.
+ * Render dropdown.
  *
  * @param array $args {
  *     An array of arguments for the dropdown.
