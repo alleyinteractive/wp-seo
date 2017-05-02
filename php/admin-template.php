@@ -475,7 +475,7 @@ function wp_seo_render_dropdown( $args, $values ) {
 		'<option value="" %1$s %2$s>%3$s</option>',
 		esc_attr( $selected ),
 		esc_attr( $disabled ),
-		esc_html( __( 'Select', 'wp-seo' ) )
+		esc_html__( 'Select', 'wp-seo' )
 	);
 	foreach ( $args['boxes'] as $box_value => $box_label ) {
 		printf(
