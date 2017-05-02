@@ -2,6 +2,7 @@
 	var $document, addtag, frame, metabox;
 
 	$document = $( document );
+	$body     = $( 'body' );
 	addtag    = document.getElementById( 'addtag' );
 	images    = $( '.wp-seo-image-container' );
 
@@ -126,7 +127,7 @@
 	/**
 	 * Add a repeatable group on click.
 	 */
-	$( '#wp_seo_settings' ).on( 'click', '.wp-seo-add', function( e ) {
+	$body.on( 'click', '.wp-seo-add', function( e ) {
 		e.preventDefault();
 		var $tpl = $( this ).siblings( '.wp-seo-template' );
 		var html = _.template( $tpl.html() );
@@ -138,7 +139,7 @@
 	/**
 	 * Remove a repeatable group on click.
 	 */
-	$( '#wp_seo_settings' ).on( 'click', '.wp-seo-delete', function( e ) {
+	$body.on( 'click', '.wp-seo-delete', function( e ) {
 		e.preventDefault();
 		$( this ).parent().hide( 'fast', function(){
 			$parent = $( this ).parent();
