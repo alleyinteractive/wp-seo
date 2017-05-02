@@ -46,6 +46,43 @@ class WP_SEO_WP_SEO_Tests extends WP_SEO_Testcase {
 			WP_SEO::instance()->intersect_term_option( array() ),
 			'Unexpectedly missing default term option key'
 		);
+	}
 
+	public function test_register_meta_registers_callbacks() {
+		$meta_key = rand_str();
+		$object_type = 'foo';
+		$auth_callback = 'is_super_admin';
+		$sanitize_callback = 'wp_kses_post';
+
+		wp_seo()->register_meta( $meta_key, array(
+			'auth_callback' => $auth_callback,
+			'object_type' => array( $object_type ),
+			'sanitize_callback' => $sanitize_callback,
+		) );
+
+		$this->assertNotFalse( has_filter(
+			"auth_{$object_type}_meta_{$meta_key}",
+			$auth_callback
+		) );
+
+		$this->assertNotFalse( has_filter(
+			"sanitize_{$object_type}_meta_{$meta_key}",
+			$sanitize_callback
+		) );
+	}
+
+	public function test_register_meta_must_register_sanitize_callback() {
+		$meta_key = rand_str();
+		$object_type = 'foo';
+
+		wp_seo()->register_meta( $meta_key, array(
+			'object_type' => $object_type,
+			'sanitize_callback' => false,
+		) );
+
+		$this->assertNotFalse( has_filter(
+			"sanitize_{$object_type}_meta_{$meta_key}",
+			'sanitize_text_field'
+		) );
 	}
 }
