@@ -354,23 +354,24 @@ function wp_seo_the_meta_keywords_input( $value ) {
  * @param array  $args {
  *     An array of arguments for the text field.
  *
- *     @type string $field  The field name.
- *     @type string $type   The field type. Default 'text'.
- *     @type string $size   The field size. Default 80.
+ *     @type string $field The field name.
+ *     @type string $type  The field type. Default 'text'.
+ *     @type string $size  The field size. Default 80.
+ *     @type string $slug  Optional. Form field name prefix. Default WP_SEO_Settings::SLUG.
  * }
  * @param string $value The current field value.
- * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
  */
-function wp_seo_render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
+function wp_seo_render_text_field( $args, $value ) {
 	$args = wp_parse_args( $args, array(
 		'type' => 'text',
 		'size' => 80,
+		'slug' => WP_SEO_Settings::SLUG,
 	) );
 
 	printf(
 		'<input type="%s" name="%s[%s]" value="%s" size="%s" />',
 		esc_attr( $args['type'] ),
-		esc_attr( $slug ),
+		esc_attr( $args['slug'] ),
 		esc_attr( $args['field'] ),
 		esc_attr( $value ),
 		esc_attr( $args['size'] )
@@ -383,22 +384,23 @@ function wp_seo_render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG 
  * @param array  $args {
  *     An array of arguments for the textarea.
  *
- *     @type  string $field The field name.
- *     @type  int    $rows  Rows in the textarea. Default 2.
- *     @type  int    $cols  Columns in the textarea. Default 80.
+ *     @type string $field The field name.
+ *     @type int    $rows  Rows in the textarea. Default 2.
+ *     @type int    $cols  Columns in the textarea. Default 80.
+ *     @type string $slug  Optional. Form field name prefix. Default WP_SEO_Settings::SLUG.
  * }
  * @param string $value The current field value.
- * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
  */
-function wp_seo_render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
+function wp_seo_render_textarea( $args, $value ) {
 	$args = wp_parse_args( $args, array(
 		'rows' => 2,
 		'cols' => 80,
+		'slug' => WP_SEO_Settings::SLUG,
 	) );
 
 	printf(
 		'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
-		esc_attr( WP_SEO_Settings::SLUG ),
+		esc_attr( $args['slug'] ),
 		esc_attr( $args['field'] ),
 		esc_attr( $args['rows'] ),
 		esc_attr( $args['cols'] ),
@@ -409,24 +411,28 @@ function wp_seo_render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) 
 /**
  * Render settings checkboxes.
  *
- * @param  array  $args {
+ * @param array $args {
  *     An array of arguments for the checkboxes.
  *
  *     @type string $field The field name.
  *     @type array  $boxes An associative array of the value and label
  *                         of each checkbox.
+ *     @type string $slug  Optional. Form field name prefix. Default WP_SEO_Settings::SLUG.
  * }
- * @param  array  $values Indexed array of current field values.
- * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+ * @param array $values Indexed array of current field values.
  */
-function wp_seo_render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+function wp_seo_render_checkboxes( $args, $values ) {
+	$args = wp_parse_args( $args, array(
+		'slug' => WP_SEO_Settings::SLUG,
+	) );
+
 	foreach ( $args['boxes'] as $box_value => $box_label ) {
 		printf( '
 				<label for="%1$s_%2$s_%3$s">
 					<input id="%1$s_%2$s_%3$s" type="checkbox" name="%1$s[%2$s][]" value="%3$s" %4$s>
 					%5$s
 				</label><br>',
-			esc_attr( $slug ),
+			esc_attr( $args['slug'] ),
 			esc_attr( $args['field'] ),
 			esc_attr( $box_value ),
 			is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
@@ -438,19 +444,23 @@ function wp_seo_render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG
 /**
  * Render settings dropdown.
  *
- * @param  array  $args {
+ * @param array $args {
  *     An array of arguments for the dropdown.
  *
  *     @type string $field The field name.
  *     @type array  $boxes An associative array of the value and label
  *                         of each dropdown option.
+ *     @type string $slug  Optional. Form field name prefix. Default WP_SEO_Settings::SLUG.
  * }
- * @param  array  $values Indexed array of current field values.
- * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+ * @param array $values Indexed array of current field values.
  */
-function wp_seo_render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+function wp_seo_render_dropdown( $args, $values ) {
+	$args = wp_parse_args( $args, array(
+		'slug' => WP_SEO_Settings::SLUG,
+	) );
+
 	printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
-		esc_attr( $slug ),
+		esc_attr( $args['slug'] ),
 		esc_attr( $args['field'] )
 	);
 	$count = 0;
@@ -470,7 +480,7 @@ function wp_seo_render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG )
 	foreach ( $args['boxes'] as $box_value => $box_label ) {
 		printf(
 			'<option id="%1$s_%2$s_%3$s" value="%4$s" %5$s>%6$s</option>',
-			esc_attr( $slug ),
+			esc_attr( $args['slug'] ),
 			esc_attr( $args['field'] ),
 			esc_attr( $count ),
 			esc_attr( $box_value ),
@@ -548,20 +558,21 @@ function wp_seo_render_image_field( $args, $value ) {
 /**
  * Render a repeatable text field.
  *
- * @param  array  $args {
+ * @param array $args {
  *     An array of arguments for setting up the repeatable fields.
  *
  *     @type string $field  The field name.
  *     @type array  $repeat Associative array of field names and labels to
  *                          include in each repeated instance of the field.
  *     @type string $size   Optional. The field size. Default 70.
+ *     @type string $slug   Optional. Form field name prefix. Default WP_SEO_Settings::SLUG.
  * }
- * @param  array  $values The current field values.
- * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
+ * @param array $values The current field values.
  */
-function wp_seo_render_repeatable_field( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
+function wp_seo_render_repeatable_field( $args, $values ) {
 	$args = wp_parse_args( $args, array(
 		'size' => 70,
+		'slug' => WP_SEO_Settings::SLUG,
 	) );
 	$data_start = ( 0 === count( $values ) ) ? 1 : count( $values );
 	?>
@@ -578,7 +589,7 @@ function wp_seo_render_repeatable_field( $args, $values, $slug = WP_SEO_Settings
 												%5$s
 											</label>
 											<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-											esc_attr( $slug ),
+											esc_attr( $args['slug'] ),
 											esc_attr( $args['field'] ),
 											intval( $i ),
 											esc_attr( $name ),
@@ -601,7 +612,7 @@ function wp_seo_render_repeatable_field( $args, $values, $slug = WP_SEO_Settings
 											%5$s
 										</label>
 										<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-										esc_attr( $slug ),
+										esc_attr( $args['slug'] ),
 										esc_attr( $args['field'] ),
 										0,
 										esc_attr( $name ),
@@ -626,7 +637,7 @@ function wp_seo_render_repeatable_field( $args, $values, $slug = WP_SEO_Settings
 										%5$s
 									</label>
 									<input class="repeatable" type="text" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" size="%6$s" value="%7$s" />',
-									esc_attr( $slug ),
+									esc_attr( $args['slug'] ),
 									esc_attr( $args['field'] ),
 									'<%= i %>',
 									esc_attr( $name ),

@@ -928,10 +928,9 @@ class WP_SEO_Settings {
 	 *
 	 * @param array  $args An array of arguments for the text field. @see wp_seo_render_text_field().
 	 * @param string $value The current field value.
-	 * @param string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 */
-	public function render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
-		wp_seo_render_text_field( $args, $value, $slug );
+	public function render_text_field( $args, $value ) {
+		wp_seo_render_text_field( $args, $value );
 	}
 
 	/**
@@ -941,10 +940,9 @@ class WP_SEO_Settings {
 	 *
 	 * @param array  $args An array of arguments for the textarea. @see wp_seo_render_textarea().
 	 * @param string $value The current field value.
-	 * @param string $slug Optional slug for context use, defaults to WP_SEO slug.
 	 */
-	public function render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
-		wp_seo_render_textarea( $args, $value, $slug );
+	public function render_textarea( $args, $value ) {
+		wp_seo_render_textarea( $args, $value );
 	}
 
 	/**
@@ -952,12 +950,11 @@ class WP_SEO_Settings {
 	 *
 	 * Backwards-compatibility shim.
 	 *
-	 * @param array  $args An array of arguments for the checkboxes. @see wp_seo_render_checkboxes().
-	 * @param array  $values Indexed array of current field values.
-	 * @param string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @param array $args An array of arguments for the checkboxes. @see wp_seo_render_checkboxes().
+	 * @param array $values Indexed array of current field values.
 	 */
-	public function render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
-		wp_seo_render_checkboxes( $args, $values, $slug );
+	public function render_checkboxes( $args, $values ) {
+		wp_seo_render_checkboxes( $args, $values );
 	}
 
 	/**
@@ -965,12 +962,11 @@ class WP_SEO_Settings {
 	 *
 	 * Backwards-compatibility shim.
 	 *
-	 * @param array  $args An array of arguments for the dropdown. @see wp_seo_render_dropdown().
-	 * @param array  $values Indexed array of current field values.
-	 * @param string $slug Optional slug for context use, defaults to WP_SEO slug.
+	 * @param array $args An array of arguments for the dropdown. @see wp_seo_render_dropdown().
+	 * @param array $values Indexed array of current field values.
 	 */
-	public function render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
-		wp_seo_render_dropdown( $args, $value, $slug );
+	public function render_dropdown( $args, $values ) {
+		wp_seo_render_dropdown( $args, $value );
 	}
 
 	/**
@@ -978,13 +974,12 @@ class WP_SEO_Settings {
 	 *
 	 * Backwards-compatibility shim.
 	 *
-	 * @param array  $args   An array of arguments for setting up the repeatable
+	 * @param array $args   An array of arguments for setting up the repeatable
 	 *                       fields. @see wp_seo_render_repeatable_field().
-	 * @param array  $values The current field values.
-	 * @param string $slug   Optional slug for context use, defaults to WP_SEO slug.
+	 * @param array $values The current field values.
 	 */
-	public function render_repeatable_field( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
-		wp_seo_render_repeatable_field( $args, $values, $slug );
+	public function render_repeatable_field( $args, $values ) {
+		wp_seo_render_repeatable_field( $args, $values );
 	}
 
 	/**
