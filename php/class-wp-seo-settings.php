@@ -841,31 +841,8 @@ class WP_SEO_Settings {
 			$args['type'] = 'text';
 		}
 
-		/*
-		 * If the migration has not run and it should run,
-		 * place the contents of legacy fields in new fields.
-		 */
-		if (
-			! $this->has_taxonomy_migration_run() &&
-			$this->should_taxonomy_migration_run() &&
-			substr( $args['field'], 0, 9 ) === 'taxonomy_' &&
-			array_filter(
-				array_map(
-					function( $taxonomy ) {
-						return $taxonomy->name;
-					},
-					$this->taxonomies
-				),
-				function( $value ) use ( $args ) {
-					return ( strpos( $args['field'], $value ) !== false);
-				}
-			)
-		) {
-			$legacy_field = str_replace( 'taxonomy_', 'archive_', $args['field'] );
-			$value = ! empty( $this->options[ $legacy_field ] ) ? $this->options[ $legacy_field ] : '';
-		} else {
-			$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
-		}
+		$value = $this->get_option( $args['field'], '' );
+
 		switch ( $args['type'] ) {
 			case 'textarea' :
 				wp_seo_render_textarea( $args, $value );
