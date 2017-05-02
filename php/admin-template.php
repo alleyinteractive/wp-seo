@@ -360,7 +360,6 @@ function wp_seo_the_meta_keywords_input( $value ) {
  * }
  * @param string $value The current field value.
  * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
- * @return void Prints text field.
  */
 function wp_seo_render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
 	$args = wp_parse_args( $args, array(
@@ -390,7 +389,6 @@ function wp_seo_render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG 
  * }
  * @param string $value The current field value.
  * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
- * @return void Prints textarea field.
  */
 function wp_seo_render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
 	$args = wp_parse_args( $args, array(
@@ -420,7 +418,6 @@ function wp_seo_render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) 
  * }
  * @param  array  $values Indexed array of current field values.
  * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
- * @return void Prints checkbox field.
  */
 function wp_seo_render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 	foreach ( $args['boxes'] as $box_value => $box_label ) {
@@ -450,7 +447,6 @@ function wp_seo_render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG
  * }
  * @param  array  $values Indexed array of current field values.
  * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
- * @return void Prints dropdown field.
  */
 function wp_seo_render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 	printf( '<select id="%1$s_%2$s" name="%1$s[%2$s]">',
@@ -562,7 +558,6 @@ function wp_seo_render_image_field( $args, $value ) {
  * }
  * @param  array  $values The current field values.
  * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
- * @return void Prints repeatable field.
  */
 function wp_seo_render_repeatable_field( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 	$args = wp_parse_args( $args, array(

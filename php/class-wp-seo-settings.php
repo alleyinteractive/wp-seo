@@ -935,7 +935,6 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
-	 * @return void Prints text field.
 	 */
 	public function render_text_field( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
 		wp_seo_render_text_field( $args, $value, $slug );
@@ -955,7 +954,6 @@ class WP_SEO_Settings {
 	 * }
 	 * @param string $value The current field value.
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
-	 * @return void Prints textarea field.
 	 */
 	public function render_textarea( $args, $value, $slug = WP_SEO_Settings::SLUG ) {
 		wp_seo_render_textarea( $args, $value, $slug );
@@ -975,7 +973,6 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array  $values Indexed array of current field values.
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
-	 * @return void Prints checkbox field.
 	 */
 	public function render_checkboxes( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 		wp_seo_render_checkboxes( $args, $values, $slug );
@@ -995,7 +992,6 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array  $values Indexed array of current field values.
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
-	 * @return void Prints dropdown field.
 	 */
 	public function render_dropdown( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 		wp_seo_render_dropdown( $args, $value, $slug );
@@ -1016,7 +1012,6 @@ class WP_SEO_Settings {
 	 * }
 	 * @param  array  $values The current field values.
 	 * @param  string $slug Optional slug for context use, defaults to WP_SEO slug.
-	 * @return void Prints repeatable field.
 	 */
 	public function render_repeatable_field( $args, $values, $slug = WP_SEO_Settings::SLUG ) {
 		wp_seo_render_repeatable_field( $args, $values, $slug );
