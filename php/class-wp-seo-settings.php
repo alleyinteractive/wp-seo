@@ -223,16 +223,6 @@ class WP_SEO_Settings {
 	}
 
 	/**
-	 * Override the value of an option in the variable.
-	 *
-	 * @param string $key     The option key sought.
-	 * @param mixed  $value   The option value.
-	 */
-	public function set_option( $key, $value ) {
-		$this->options[ $key ] = $value;
-	}
-
-	/**
 	 * Get an option value.
 	 *
 	 * @param string $key     The option key sought.
@@ -357,6 +347,19 @@ class WP_SEO_Settings {
 	 * @return bool
 	 */
 	public function should_taxonomy_migration_run() {
+		/**
+		 * Filters whether to migrate option array keys for taxonomy data to the 'taxonomy_' prefix.
+		 *
+		 * Options could not be saved for post types that shared a `name` with a taxonomy until
+		 * WP SEO 0.13.0, when the 'taxonomy_' namespace was introduced for taxonomy settings. Sites
+		 * affected by the bug can return a truthy value to this filter to move their existing
+		 * taxonomy settings into the 'taxonomy_' namespace on the next option update. The new
+		 * namespace will also be passed to filters.
+		 *
+		 * @since 0.13.0
+		 *
+		 * @param bool $should_run Whether to run the migration. Default false.
+		 */
 		return (bool) apply_filters( 'wp_seo_should_taxonomy_migration_run', false );
 	}
 
