@@ -463,18 +463,12 @@ function wp_seo_render_dropdown( $args, $values ) {
 		esc_attr( $args['slug'] ),
 		esc_attr( $args['field'] )
 	);
+
 	$count = 0;
-	if ( empty( $values ) ) {
-		$selected = 'selected';
-		$disabled = 'disabled';
-	} else {
-		$selected = '';
-		$disabled = '';
-	}
+
 	printf(
-		'<option value="" %1$s %2$s>%3$s</option>',
-		esc_attr( $selected ),
-		esc_attr( $disabled ),
+		'<option value="" %1$s>%2$s</option>',
+		esc_attr( $values ? '' : 'selected' ),
 		esc_html__( 'Select', 'wp-seo' )
 	);
 	foreach ( $args['boxes'] as $box_value => $box_label ) {
