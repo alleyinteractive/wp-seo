@@ -32,6 +32,20 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public $formatting_tag_pattern = '';
 
 		/**
+		 * Object meta keys and description data registered with the plugin.
+		 *
+		 * @var array
+		 */
+		private $meta_keys = array();
+
+		/**
+		 * Object meta keys bundled with the plugin.
+		 *
+		 * @var array
+		 */
+		private $default_meta_keys = array( '_meta_title', '_meta_description', '_meta_keywords' );
+
+		/**
 		 * Unused.
 		 *
 		 * @codeCoverageIgnore
@@ -121,6 +135,51 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 * @param string WP_SEO::formatting_tag_pattern The regex.
 			 */
 			$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
+
+			// Register the default plugin object meta keys.
+			foreach ( $this->default_meta_keys as $meta_key ) {
+				$this->register_meta( $meta_key, array(
+					'object_type' => array( 'post', 'term' ),
+					'sanitize_callback' => 'sanitize_text_field',
+				) );
+			}
+		}
+
+		/**
+		 * Register a meta key with the plugin.
+		 *
+		 * WP SEO will save meta values for each registered meta key alongside
+		 * its own default metadata, allowing extensions to take advantage of
+		 * the plugin's presave verification checks and other logic.
+		 *
+		 * @see register_meta().
+		 *
+		 * @param string $meta_key Meta key.
+		 * @param array  $args {
+		 *     Meta registration arguments.
+		 *
+		 *     @type callable $auth_callback     Optional. Capability-check callback.
+		 *     @type array    $object_type       Optional. Types of objects to register the meta
+		 *                                       with. Default 'post' and 'term'.
+		 *     @type string   $sanitize_callback Optional. Meta value sanitization callback.
+		 * }
+		 */
+		public function register_meta( $meta_key, $args ) {
+			$args = wp_parse_args( $args, array(
+				'auth_callback' => null,
+				'object_type' => array( 'post', 'term' ),
+				'sanitize_callback' => '',
+			) );
+
+			if ( ! $args['sanitize_callback'] ) {
+				$args['sanitize_callback'] = 'sanitize_text_field';
+			}
+
+			foreach ( (array) $args['object_type'] as $object_type ) {
+				register_meta( $object_type, $meta_key, $args['sanitize_callback'], $args['auth_callback'] );
+			}
+
+			$this->meta_keys[ $meta_key ] = $args;
 		}
 
 		/**
@@ -251,9 +310,28 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			if ( ! isset( $_POST['seo_meta'] ) ) {
 				$_POST['seo_meta'] = array();
 			}
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
-				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
-				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
+
+			foreach ( $this->meta_keys as $meta_key => $args ) {
+				$object_type = 'post';
+
+				if ( ! in_array( $object_type, $args['object_type'], true ) ) {
+					continue;
+				}
+
+				$form_key = $meta_key;
+
+				// Compatibility with existing bundled field names.
+				if ( in_array( $meta_key, $this->default_meta_keys, true ) ) {
+					$form_key = str_replace( '_meta_', '', $form_key );
+				}
+
+				$meta_value = '';
+
+				if ( isset( $_POST['seo_meta'][ $form_key ] ) ) {
+					$meta_value = wp_unslash( $_POST['seo_meta'][ $form_key ] ); // Sanitized in update_post_meta(). sanitization ok.
+				}
+
+				update_post_meta( $post_id, wp_slash( $meta_key ), wp_slash( $meta_value ) );
 			}
 		}
 
@@ -353,8 +431,33 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
-				$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
+			$data = array();
+
+			foreach ( $this->meta_keys as $meta_key => $args ) {
+				$object_type = 'term';
+
+				if ( ! in_array( $object_type, $args['object_type'], true ) ) {
+					continue;
+				}
+
+				$form_key = $meta_key;
+
+				// Compatibility with existing bundled field names.
+				if ( in_array( $meta_key, $this->default_meta_keys, true ) ) {
+					$form_key = str_replace( '_meta_', '', $form_key );
+				}
+
+				$meta_value = '';
+
+				if ( isset( $_POST['seo_meta'][ $form_key ] ) ) {
+					$meta_value = wp_unslash( $_POST['seo_meta'][ $form_key ] ); // Sanitized below or in update_term_meta(). sanitization ok.
+				}
+
+				if ( in_array( $meta_key, $this->default_meta_keys, true ) ) {
+					$data[ $form_key ] = sanitize_meta( $meta_key, $meta_value, 'term' );
+				} else {
+					update_term_meta( $term_id, wp_slash( $meta_key ), wp_slash( $meta_value ) );
+				}
 			}
 
 			$name = $this->get_term_option_name( get_term( $term_id, $taxonomy ) );

@@ -21,6 +21,14 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		wp_set_current_user( 1 );
 	}
 
+	public function sanitize_extension_meta( $meta_value ) {
+		/*
+		 * If an error occurs because an array is passed to strtoupper(), it
+		 * means the meta was incorrectly sanitized twice.
+		 */
+		return array( strtoupper( $meta_value ) );
+	}
+
 	function test_add_meta_boxes() {
 		WP_SEO()->add_meta_boxes( 'post' );
 
@@ -141,6 +149,36 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertEquals( $title, get_post_meta( $post_id, '_meta_title', true ) );
 		$this->assertEquals( $description, get_post_meta( $post_id, '_meta_description', true ) );
 		$this->assertEquals( $keywords, get_post_meta( $post_id, '_meta_keywords', true ) );
+
+		$extension_meta_key = 'extension_post_meta';
+		// Unregistered key.
+		$this->assertSame( '', get_post_meta( $post_id, $extension_meta_key, true ) );
+
+		$extension_meta_value = 'foobar';
+		$_POST['seo_meta'][ $extension_meta_key ] = add_magic_quotes( $extension_meta_value );
+
+		wp_seo()->save_post_fields( $post_id );
+		// Still unregistered.
+		$this->assertSame( '', get_post_meta( $post_id, $extension_meta_key, true ) );
+
+		wp_seo()->register_meta( $extension_meta_key, array(
+			'object_type' => array( 'term' ),
+		) );
+
+		wp_seo()->save_post_fields( $post_id );
+		// Registered to the wrong type.
+		$this->assertSame( '', get_post_meta( $post_id, $extension_meta_key, true ) );
+
+		wp_seo()->register_meta( $extension_meta_key, array(
+			'object_type' => array( 'post' ),
+			'sanitize_callback' => array( $this, 'sanitize_extension_meta' ),
+		) );
+
+		wp_seo()->save_post_fields( $post_id );
+		$this->assertSame(
+			call_user_func( array( $this, 'sanitize_extension_meta' ), $extension_meta_value ),
+			get_post_meta( $post_id, $extension_meta_key, true )
+		);
 	}
 
 	/**
@@ -273,6 +311,38 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 			),
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
+
+		$extension_meta_key = 'extension_term_meta';
+		// Unregistered key.
+		$this->assertSame( '', get_term_meta( $category_id, $extension_meta_key, true ) );
+
+		$extension_meta_value = 'foobar';
+		$_POST['seo_meta'][ $extension_meta_key ] = add_magic_quotes( $extension_meta_value );
+
+		wp_seo()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' );
+		// Still unregistered.
+		$this->assertSame( '', get_term_meta( $category_id, $extension_meta_key, true ) );
+
+		wp_seo()->register_meta( $extension_meta_key, array(
+			'object_type' => array( 'post' ),
+		) );
+
+		wp_seo()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' );
+		// Registered to the wrong type.
+		$this->assertSame( '', get_term_meta( $category_id, $extension_meta_key, true ) );
+
+		wp_seo()->register_meta( $extension_meta_key, array(
+			'object_type' => array( 'term' ),
+			'sanitize_callback' => array( $this, 'sanitize_extension_meta' ),
+		) );
+
+		wp_seo()->save_term_fields( $category_id, $category->term_taxonomy_id, 'category' );
+		$this->assertSame(
+			call_user_func( array( $this, 'sanitize_extension_meta' ), $extension_meta_value ),
+			get_term_meta( $category_id, $extension_meta_key, true )
+		);
+
+		$this->assertArrayNotHasKey( $extension_meta_key, get_option( WP_SEO()->get_term_option_name( $category ) ) );
 	}
 
 }
