@@ -120,4 +120,33 @@ class WP_SEO_Formatting_Functions_Tests extends WP_SEO_Testcase {
 			array( '#helloworld#' ),
 		);
 	}
+
+	/**
+	 * Test wp_seo_sanitize_integer_field() with various inputs.
+	 *
+	 * @dataProvider data_sanitize_integer_field_inputs
+	 */
+	public function test_sanitize_integer_field( $input, $expected ) {
+		$this->assertSame( $expected, wp_seo_sanitize_integer_field( $input ) );
+	}
+
+	/**
+	 * @return array {
+	 *     @type mixed Value to sanitize.
+	 *     @type int The expected sanitized value.
+	 * }
+	 */
+	public function data_integer_field_inputs() {
+		return array(
+			array( 2, 2 ),
+			array( '3', 3 ),
+			array( 'foo', 0 ),
+			array( '+42', 0 ),
+			array( '-42', 0 ),
+			array( -42, 0 ),
+			array( array(), 0 ),
+			array( array( 'foo', 'bar' ), 1 ),
+			array( new WP_Error, 0 ),
+		);
+	}
 }

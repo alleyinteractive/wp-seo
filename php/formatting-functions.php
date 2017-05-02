@@ -62,3 +62,31 @@ function wp_seo_get_the_display_character_count( $string ) {
 
 	return (string) strlen( $string );
 }
+
+/**
+ * Sanitizes a submitted variable into an integer after casting as string for consistency.
+ *
+ * @param mixed $input The input's current value.
+ * @return int $input The sanitized value, or 0 on failure.
+ */
+function wp_seo_sanitize_integer_field( $input ) {
+	if ( ! function_exists( 'ctype_digit' ) || ! defined( 'FILTER_SANITIZE_NUMBER_INT' ) ) {
+		return intval( $input );
+	}
+
+	if ( ! is_scalar( $input ) ) {
+		if ( is_object( $input ) ) {
+			return 0;
+		}
+
+		$input = intval( $input );
+	}
+
+	$input = (string) $input;
+
+	if ( ! ctype_digit( $input ) ) {
+		return 0;
+	}
+
+	return (int) filter_var( $input, FILTER_SANITIZE_NUMBER_INT );
+}
