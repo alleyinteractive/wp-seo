@@ -233,16 +233,6 @@ class WP_SEO_Settings {
 	}
 
 	/**
-	 * Override the value of an option in the variable.
-	 *
-	 * @param string $key     The option key sought.
-	 * @param mixed  $value   The option value.
-	 */
-	public function set_option( $key, $value ) {
-		$this->options[ $key ] = $value;
-	}
-
-	/**
 	 * Get an option value.
 	 *
 	 * @param string $key     The option key sought.
