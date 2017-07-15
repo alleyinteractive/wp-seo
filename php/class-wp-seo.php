@@ -497,10 +497,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @param string $content The value of the "content" attribute.
 		 */
 		private function meta_field( $name, $content ) {
-			if ( ! is_string( $name ) || ! is_string( $content ) ) {
-				return;
-			}
-
 			/**
 			 * Filters the "content" attribute value of the <meta /> field.
 			 *
@@ -511,7 +507,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 */
 			$content = apply_filters( 'wp_seo_meta_field_content', $content, $name );
 
-			if ( ! is_string( $content ) ) {
+			if ( ! is_string( $name ) || ! is_string( $content ) ) {
 				return;
 			}
 
