@@ -134,6 +134,9 @@ When "safe mode" is disabled, WP SEO will include the unrecognized formatting ta
 
 == Changelog ==
 
+= Unreleased =
+* Added: 'wp_seo_meta_field_content' filter. Props Arun Chaitanya Jami.
+
 = 0.12.0 =
 * Added: `#thumbnail_url#` formatting tag, which represents the URL for the featured image of the content being viewed.
 * Added: Formatting Tag "Safe Mode" for preventing the display of unrecognized formatting tags.

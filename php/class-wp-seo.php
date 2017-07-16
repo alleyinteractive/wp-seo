@@ -493,10 +493,20 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 *
 		 * @since 0.12.0 An HTML comment was added to the output.
 		 *
-		 * @param  string $name  The content of the "name" attribute.
-		 * @param  string $content The content of the "content" attribute.
+		 * @param string $name    The value of the "name" attribute.
+		 * @param string $content The value of the "content" attribute.
 		 */
 		private function meta_field( $name, $content ) {
+			/**
+			 * Filters the "content" attribute value of the <meta /> field.
+			 *
+			 * @since 0.13.0
+			 *
+			 * @param string $content The "content" attribute value.
+			 * @param string $name    The "name" attribute value.
+			 */
+			$content = apply_filters( 'wp_seo_meta_field_content', $content, $name );
+
 			if ( ! is_string( $name ) || ! is_string( $content ) ) {
 				return;
 			}
