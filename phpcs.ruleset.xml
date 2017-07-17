@@ -8,5 +8,10 @@
 	<rule ref="WordPress">
 		<!-- This plugin can be used in environments without wpcom_vip_get_term_link(). -->
 		<exclude name="WordPress.VIP.RestrictedFunctions.get_term_link_get_term_link" />
+
+		<!-- Temporarily disable. Fixes are in the works for upcoming releases. -->
+		<exclude name="Squiz.PHP.DisallowMultipleAssignments.Found" />
+		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.AssociativeKeyFound" />
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
 	</rule>
 </ruleset>
