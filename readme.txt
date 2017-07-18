@@ -1,9 +1,9 @@
 === WP SEO ===
-Contributors: alleyinteractive, mboynes, dlh
+Contributors: alleyinteractive, mboynes, potatomaster, davisshaver, dlh
 Tags: seo
-Requires at least: 4.4.0
-Tested up to: 4.6.0
-Stable tag: 0.12.0
+Requires at least: 4.6.0
+Tested up to: 4.8.0
+Stable tag: 0.13.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -133,6 +133,11 @@ When "safe mode" is disabled, WP SEO will include the unrecognized formatting ta
 3. Setting title and meta fields for a post
 
 == Changelog ==
+
+= 0.13.0 =
+* Added: 'wp_seo_meta_field_content' filter. Props Arun Chaitanya Jami.
+* Changed: Improve post meta box UI when placed in the sidebar. Props John Blackbourn.
+* Changed: Raised minimum WordPress version to 4.6.0.
 
 = 0.12.0 =
 * Added: `#thumbnail_url#` formatting tag, which represents the URL for the featured image of the content being viewed.
