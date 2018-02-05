@@ -452,14 +452,21 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$key = false;
 			}
 
+			$title_string = null;
 			if ( $key ) {
-				/**
-				 * Filter the format string of the title tag for the current page.
-				 *
-				 * @param  string		The format string retrieved from the settings.
-				 * @param  string $key 	The key of the setting retrieved.
-				 */
-				$title_string = apply_filters( 'wp_seo_title_tag_format', WP_SEO_Settings()->get_option( $key ), $key );
+				$title_string = WP_SEO_Settings()->get_option( $key );
+			}
+
+			/**
+			 * Filter the format string of the title tag for the current page.
+			 *
+			 * @param  string $title_string The format string retrieved from the settings.
+			 * @param  string $key 	The key of the setting retrieved.
+			 */
+			$title_string = apply_filters( 'wp_seo_title_tag_format', $title_string, $key );
+
+			// Format the title string if set.
+			if ( ! empty( $title_string ) ) {
 				$title_tag = $this->format( $title_string );
 				if ( $title_tag && ! is_wp_error( $title_tag ) ) {
 					$title = $title_tag;
