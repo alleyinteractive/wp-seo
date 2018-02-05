@@ -460,7 +460,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			/**
 			 * Filter the format string of the title tag for the current page.
 			 *
-			 * @param  string		The format string retrieved from the settings.
+			 * @param  string $title_string The format string retrieved from the settings.
 			 * @param  string $key 	The key of the setting retrieved.
 			 */
 			$title_string = apply_filters( 'wp_seo_title_tag_format', $title_string, $key );
