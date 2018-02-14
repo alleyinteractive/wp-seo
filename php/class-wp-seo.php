@@ -554,36 +554,42 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$key = false;
 			}
 
-			if ( $key ) {
-				if ( empty( $meta_description ) ) {
-					/**
-					 * Filter the format string of the meta description for this page.
-					 *
-					 * @param  string 		The format string retrieved from the settings.
-					 * @param  string $key	The key of the setting retrieved.
-					 */
-					$description_string = apply_filters( 'wp_seo_meta_description_format', WP_SEO_Settings()->get_option( "{$key}_description" ), $key );
-					$meta_description = $this->format( $description_string );
-				}
+			if ( empty( $meta_description ) ) {
+				/**
+				 * Filter the format string of the meta description for this page.
+				 *
+				 * @param  string 		The format string retrieved from the settings.
+				 * @param  string $key	The key of the setting retrieved.
+				 */
+				$description_string = apply_filters(
+					'wp_seo_meta_description_format',
+					! empty( $key ) ? WP_SEO_Settings()->get_option( "{$key}_description" ) : '',
+					$key
+				);
+				$meta_description = $this->format( $description_string );
+			}
 
-				if ( $meta_description && ! is_wp_error( $meta_description ) ) {
-					$this->meta_field( 'description', $meta_description );
-				}
+			if ( ! empty( $meta_description ) && ! is_wp_error( $meta_description ) ) {
+				$this->meta_field( 'description', $meta_description );
+			}
 
-				if ( empty( $meta_keywords ) ) {
-					/**
-					 * Filter the format string of the meta keywords for this page.
-					 *
-					 * @param  string 		The format string retrieved from the settings.
-					 * @param  string $key	The key of the setting retrieved.
-					 */
-					$keywords_string = apply_filters( 'wp_seo_meta_keywords_format', WP_SEO_Settings()->get_option( "{$key}_keywords" ), $key );
-					$meta_keywords = $this->format( $keywords_string );
-				}
+			if ( empty( $meta_keywords ) ) {
+				/**
+				 * Filter the format string of the meta keywords for this page.
+				 *
+				 * @param  string 		The format string retrieved from the settings.
+				 * @param  string $key	The key of the setting retrieved.
+				 */
+				$keywords_string = apply_filters(
+					'wp_seo_meta_keywords_format',
+					! empty( $key ) ? WP_SEO_Settings()->get_option( "{$key}_keywords" ) : '',
+					$key
+				);
+				$meta_keywords = $this->format( $keywords_string );
+			}
 
-				if ( $meta_keywords && ! is_wp_error( $meta_keywords ) ) {
-					$this->meta_field( 'keywords', $meta_keywords );
-				}
+			if ( ! empty( $meta_keywords ) && ! is_wp_error( $meta_keywords ) ) {
+				$this->meta_field( 'keywords', $meta_keywords );
 			}
 
 			/**
