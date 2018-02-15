@@ -558,8 +558,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				/**
 				 * Filter the format string of the meta description for this page.
 				 *
-				 * @param  string 		The format string retrieved from the settings.
-				 * @param  string $key	The key of the setting retrieved.
+				 * @param  string      The format string retrieved from the settings.
+				 * @param  string $key The key of the setting retrieved.
 				 */
 				$description_string = apply_filters(
 					'wp_seo_meta_description_format',
@@ -577,8 +577,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				/**
 				 * Filter the format string of the meta keywords for this page.
 				 *
-				 * @param  string 		The format string retrieved from the settings.
-				 * @param  string $key	The key of the setting retrieved.
+				 * @param  string      The format string retrieved from the settings.
+				 * @param  string $key The key of the setting retrieved.
 				 */
 				$keywords_string = apply_filters(
 					'wp_seo_meta_keywords_format',
