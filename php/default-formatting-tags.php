@@ -254,7 +254,9 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 				return apply_filters( 'the_author', get_the_author_meta( 'display_name', $post_author ) );
 			}
 		} elseif ( is_author() ) {
-			return get_the_author_meta( 'display_name', get_queried_object_id() );
+			$author = get_queried_object();
+
+			return $author->display_name;
 		}
 
 		return false;
