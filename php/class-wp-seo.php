@@ -243,7 +243,13 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
+			/**
+			 * Filter the fields that can be saved.
+			 *
+			 * @param array $fields Array of field names that can be saved to the post meta.
+			 */
+			$fields = (array) apply_filters( 'wp_seo_saveable_fields', array( 'title', 'description', 'keywords' ) );
+			foreach ( $fields as $field ) {
 				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
 			}

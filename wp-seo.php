@@ -58,7 +58,13 @@ function wp_seo_admin_scripts() {
 	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.11.1', true );
 	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', array(
 		'repeatable_add_more_label' => __( 'Add another', 'wp-seo' ),
-		'repeatable_remove_label' => __( 'Remove group', 'wp-seo' ),
+		'repeatable_remove_label'   => __( 'Remove group', 'wp-seo' ),
+		/**
+		 * Filter the fields that support character counts.
+		 *
+		 * @param array $fields Fields that support character counters.
+		 */
+		'character_count_fields'    => (array) apply_filters( 'wp_seo_character_count_fields', [ 'title', 'description' ] ),
 	) );
 
 	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.13.0' );
