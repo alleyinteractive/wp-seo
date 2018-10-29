@@ -22,7 +22,7 @@
 	 * Update the description and title character counts displayed to the user.
 	 */
 	function wp_seo_update_character_counts() {
-		_.each( ['title', 'description'], function( field ) {
+		_.each( wp_seo_admin.character_count_fields, function( field ) {
 			var input = $( '#wp_seo_meta_' + field );
 			if ( input.length > 0 ) {
 				$( '.' + field + '-character-count' ).html( input.val().length );

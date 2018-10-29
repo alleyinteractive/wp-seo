@@ -88,6 +88,14 @@ function wp_seo_the_post_meta_fields( $post ) {
 					?>
 				</td>
 			</tr>
+			<?php
+			/**
+			 * Fires after the other SEO fields are rendered.
+			 *
+			 * @param int $post_id The ID of the post being edited.
+			 */
+			do_action( 'wp_seo_after_post_meta_fields', $post->ID );
+			?>
 		</tbody>
 	</table>
 	<?php
