@@ -1,0 +1,10 @@
+{
+    "name": "alleyinteractive/wp-seo",
+    "description": "WP SEO is designed for professionals who want to build a solid foundation for an SEO-friendly website.",
+    "type": "wordpress-plugin",
+    "keywords": ["wordpress", "plugin", "seo"],
+    "license" : "GPL-3.0+",
+    "require": {
+        "composer/installers": "~1.0"
+    }
+}
