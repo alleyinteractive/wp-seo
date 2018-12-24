@@ -27,7 +27,6 @@ matrix:
 before_script:
   # Turn off Xdebug. See https://core.trac.wordpress.org/changeset/40138.
   - phpenv config-rm xdebug.ini || echo "Xdebug not available"
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
 
   # Couple the PHPUnit version to the PHP version.
   - |
@@ -45,6 +44,10 @@ before_script:
       exit 1
       ;;
     esac
+
+    export PATH="$HOME/.composer/vendor/bin:$PATH"
+    # After CodeSniffer install you should refresh your path.
+    phpenv rehash
 
   - |
     if [[ ! -z "$WP_VERSION" ]] ; then
@@ -73,8 +76,11 @@ script:
         phpcs -n
       fi
 
-    - export WP_MULTISITE=0 && phpunit
-    - export WP_MULTISITE=1 && phpunit
+    - |
+      if [[ ! -z "$WP_VERSION" ]] ; then
+        phpunit
+        WP_MULTISITE=1 phpunit
+      fi
 
 notifications:
     email: false
