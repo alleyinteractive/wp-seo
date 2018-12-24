@@ -27,6 +27,7 @@ matrix:
 before_script:
   # Turn off Xdebug. See https://core.trac.wordpress.org/changeset/40138.
   - phpenv config-rm xdebug.ini || echo "Xdebug not available"
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
 
   # Couple the PHPUnit version to the PHP version.
   - |
@@ -45,7 +46,6 @@ before_script:
       ;;
     esac
 
-    export PATH="$HOME/.composer/vendor/bin:$PATH"
     # After CodeSniffer install you should refresh your path.
     phpenv rehash
 
@@ -63,6 +63,9 @@ before_script:
     if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
       composer global require automattic/vipwpcs
       phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs,$HOME/.composer/vendor/automattic/vipwpcs
+
+      # After CodeSniffer install you should refresh your path.
+      phpenv rehash
     fi
 
 script:
