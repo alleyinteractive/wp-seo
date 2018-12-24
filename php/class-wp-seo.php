@@ -536,7 +536,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
 		 */
 		public function wp_head() {
-
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
 					$meta_description = get_post_meta( get_the_ID(), '_meta_description', true );
