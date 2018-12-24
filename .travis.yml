@@ -11,45 +11,68 @@ matrix:
 
     include:
         - php: '5.6'
-          env: WP_VERSION=master PHP_LINT=1 WP_PHPCS=1
+          env: WP_VERSION=latest PHP_LINT=1 WP_PHPCS=1
         - php: '5.6'
-          env: WP_VERSION=4.8
+          env: WP_VERSION=latest
         - php: '5.6'
-          env: WP_VERSION=4.7
+          env: WP_VERSION=latest
 
-        - php: '7.0'
-          env: WP_VERSION=master PHP_LINT=1
-        - php: '7.0'
-          env: WP_VERSION=4.8
-        - php: '7.0'
-          env: WP_VERSION=4.7
-
-        - php: 'hhvm'
-          env: WP_VERSION=master PHP_LINT=1
-
-    allow_failures:
-        - php: 'hhvm'
+        - php: '7.2'
+          env: WP_VERSION=nightly PHP_LINT=1
+        - php: '7.2'
+          env: WP_VERSION=latest
+        - php: '7.2'
+          env: WP_VERSION=latest
 
 before_script:
-    - export WP_TESTS_DIR=/tmp/wordpress/tests/phpunit
-    - export WP_CORE_DIR=/tmp/wordpress/src/
-    - git clone --depth=1 --branch="$WP_VERSION" git://develop.git.wordpress.org/ /tmp/wordpress
-    - mysql -e "CREATE DATABASE wordpress_tests;" -uroot
-    - cp /tmp/wordpress/wp-tests-config-sample.php /tmp/wordpress/wp-tests-config.php
-    - sed -i "s/youremptytestdbnamehere/wordpress_tests/" /tmp/wordpress/wp-tests-config.php
-    - sed -i "s/yourusernamehere/travis/" /tmp/wordpress/wp-tests-config.php
-    - sed -i "s/yourpasswordhere//" /tmp/wordpress/wp-tests-config.php
-    - |
-      if [[ "$WP_PHPCS" == "1" ]]; then
-          git clone --depth=1 --branch=2.9 https://github.com/squizlabs/PHP_CodeSniffer.git /tmp/php-codesniffer
-          git clone --depth=1 https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards.git --branch master /tmp/wordpress-coding-standards
-          /tmp/php-codesniffer/scripts/phpcs --config-set installed_paths /tmp/wordpress-coding-standards
-          phpenv rehash
-      fi
+  # Turn off Xdebug. See https://core.trac.wordpress.org/changeset/40138.
+  - phpenv config-rm xdebug.ini || echo "Xdebug not available"
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+
+  # Couple the PHPUnit version to the PHP version.
+  - |
+    case "$TRAVIS_PHP_VERSION" in
+    7.2|7.0|nightly)
+      echo "Using PHPUnit 6.1"
+      composer global require "phpunit/phpunit=6.1.*"
+      ;;
+    5.6)
+      echo "Using PHPUnit 4.8"
+      composer global require "phpunit/phpunit=4.8.*"
+      ;;
+    *)
+      echo "No PHPUnit version handling for PHP version $TRAVIS_PHP_VERSION"
+      exit 1
+      ;;
+    esac
+
+  - |
+    if [[ ! -z "$WP_VERSION" ]] ; then
+      bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+
+      # For debugging.
+      which phpunit
+      phpunit --version
+    fi
+
+  # Set up phpcs.
+  - |
+    if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
+      composer global require automattic/vipwpcs
+      phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs,$HOME/.composer/vendor/automattic/vipwpcs
+    fi
 
 script:
-    - if [[ "$PHP_LINT" == "1" ]]; then find . -type "f" -iname "*.php" | xargs -L "1" php -l; fi
-    - if [[ "$WP_PHPCS" == "1" ]]; then /tmp/php-codesniffer/scripts/phpcs -p -s -v -n --standard=./phpcs.ruleset.xml; fi
+    - |
+      if [[ "$PHP_LINT" == "1" ]]; then
+        find . -type "f" -iname "*.php" | xargs -L "1" php -l;
+      fi
+
+    - |
+      if [[ "$WP_PHPCS" == "1" ]] ; then
+        phpcs -n
+      fi
+
     - export WP_MULTISITE=0 && phpunit
     - export WP_MULTISITE=1 && phpunit
 
