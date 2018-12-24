@@ -243,7 +243,13 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
+			/**
+			 * Filter the fields that can be saved.
+			 *
+			 * @param array $fields Array of field names that can be saved to the post meta.
+			 */
+			$fields = (array) apply_filters( 'wp_seo_saveable_fields', array( 'title', 'description', 'keywords' ) );
+			foreach ( $fields as $field ) {
 				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
 			}
@@ -530,6 +536,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
 		 */
 		public function wp_head() {
+
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
 					$meta_description = get_post_meta( get_the_ID(), '_meta_description', true );
@@ -556,40 +563,60 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 
 			if ( empty( $meta_description ) ) {
 				/**
-				 * Filter the format string of the meta description for this page.
+				 * Filter the fallback format of the meta description for this page.
 				 *
 				 * @param  string      The format string retrieved from the settings.
 				 * @param  string $key The key of the setting retrieved.
 				 */
-				$description_string = apply_filters(
+				$meta_description = apply_filters(
 					'wp_seo_meta_description_format',
 					! empty( $key ) ? WP_SEO_Settings()->get_option( "{$key}_description" ) : '',
 					$key
 				);
-				$meta_description = $this->format( $description_string );
 			}
 
-			if ( ! empty( $meta_description ) && ! is_wp_error( $meta_description ) ) {
-				$this->meta_field( 'description', $meta_description );
+			/**
+			 * Filter the meta description for this page.
+			 *
+			 * @param string $meta_description Meta description for the page.
+			 */
+			$meta_description = apply_filters( 'wp_seo_meta_description', $meta_description );
+
+			if ( ! empty( $meta_description ) ) {
+				$meta_description = $this->format( $meta_description );
+
+				if ( ! empty( $meta_description ) && ! is_wp_error( $meta_description ) ) {
+					$this->meta_field( 'description', $meta_description );
+				}
 			}
 
 			if ( empty( $meta_keywords ) ) {
 				/**
 				 * Filter the format string of the meta keywords for this page.
 				 *
-				 * @param  string      The format string retrieved from the settings.
+				 * @param  string $meta_keywords The format string retrieved from the settings.
 				 * @param  string $key The key of the setting retrieved.
 				 */
-				$keywords_string = apply_filters(
+				$meta_keywords = apply_filters(
 					'wp_seo_meta_keywords_format',
 					! empty( $key ) ? WP_SEO_Settings()->get_option( "{$key}_keywords" ) : '',
 					$key
 				);
-				$meta_keywords = $this->format( $keywords_string );
 			}
 
-			if ( ! empty( $meta_keywords ) && ! is_wp_error( $meta_keywords ) ) {
-				$this->meta_field( 'keywords', $meta_keywords );
+			/**
+			 * Filter the meta keywords for this page.
+			 *
+			 * @param string $meta_keywords Meta keywords for the page.
+			 */
+			$meta_keywords = apply_filters( 'wp_seo_meta_keywords', $meta_keywords );
+
+			if ( ! empty( $meta_keywords ) ) {
+				$meta_keywords = $this->format( $meta_keywords );
+
+				if ( ! empty( $meta_keywords ) && ! is_wp_error( $meta_keywords ) ) {
+					$this->meta_field( 'keywords', $meta_keywords );
+				}
 			}
 
 			/**
@@ -608,7 +635,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 					$this->meta_field( $tag['name'], $this->format( $tag['content'] ) );
 				}
 			}
-
 		}
 	}
 
