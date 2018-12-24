@@ -430,9 +430,12 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 *                       custom or formatted title exists.
 		 */
 		public function wp_title( $title, $sep ) {
+			$title_string = null;
+			$key = false;
+
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) && $meta_title = get_post_meta( get_the_ID(), '_meta_title', true ) ) {
-					return $meta_title;
+					$title_string = $meta_title;
 				} else {
 					$key = "single_{$post_type}_title";
 				}
@@ -442,7 +445,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$key = 'archive_author_title';
 			} elseif ( is_category() || is_tag() || is_tax() ) {
 				if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
-					return $option['title'];
+					$title_string = $option['title'];
 				} else {
 					$key = "archive_{$taxonomy}_title";
 				}
@@ -454,12 +457,9 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$key = 'search_title';
 			} elseif ( is_404() ) {
 				$key = '404_title';
-			} else {
-				$key = false;
 			}
 
-			$title_string = null;
-			if ( $key ) {
+			if ( empty( $title_string ) && $key ) {
 				$title_string = WP_SEO_Settings()->get_option( $key );
 			}
 
