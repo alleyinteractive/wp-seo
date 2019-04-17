@@ -578,7 +578,7 @@ class WP_SEO_Settings {
 		$args = wp_parse_args( $args, array(
 			'size' => 70,
 		) );
-		$data_start = ( 0 === count( $values ) ) ? 1 : count( $values );
+		$data_start = ( ! is_array( $values ) || 0 === count( $values ) ) ? 1 : count( $values );
 		?>
 			<div class="wp-seo-repeatable">
 				<div class="nodes">
