@@ -543,7 +543,7 @@ class WP_SEO_Settings {
 	 *     @type array  $boxes An associative array of the value and label
 	 *                         of each checkbox.
 	 * }
-	 * @param  array $values Indexed array of current field values.
+	 * @param  array|string $values Indexed array of current field values.
 	 */
 	public function render_checkboxes( $args, $values ) {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {
@@ -555,7 +555,7 @@ class WP_SEO_Settings {
 				esc_attr( $this::SLUG ),
 				esc_attr( $args['field'] ),
 				esc_attr( $box_value ),
-				checked( in_array( $box_value, $values ), true, false ),
+				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
 				esc_html( $box_label )
 			);
 		}
