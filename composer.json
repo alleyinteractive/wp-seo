@@ -6,9 +6,5 @@
     "license" : "GPL-3.0+",
     "require": {
         "composer/installers": "~1.0"
-    },
-    "require-dev": {
-        "phpstan/phpstan-shim": "^0.11.12",
-        "szepeviktor/phpstan-wordpress": "^0.2.0"
     }
 }
