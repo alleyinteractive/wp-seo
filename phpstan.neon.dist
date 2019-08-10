@@ -1,0 +1,21 @@
+includes:
+    - phar://phpstan.phar/conf/bleedingEdge.neon
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+parameters:
+#    level: max
+    level: 5
+    inferPrivatePropertyTypeFromConstructor: true
+    paths:
+        - %currentWorkingDirectory%/wp-seo.php
+        - %currentWorkingDirectory%/php/
+    autoload_files:
+        - %currentWorkingDirectory%/wp-seo.php
+        - %currentWorkingDirectory%/php/admin-functions.php
+        - %currentWorkingDirectory%/php/admin-template.php
+    ignoreErrors:
+        # Uses func_get_args()
+        - '#^Function apply_filters invoked with [34567] parameters, 2 required\.$#'
+        - '#^Function do_action invoked with [3456] parameters, 1-2 required\.$#'
+        - '#^Function current_user_can invoked with 2 parameters, 1 required\.$#'
+        # WordPress core problem
+        - '#^Parameter \#1 \$term of method WP_SEO::get_term_option_name\(\) expects WP_Term, object given\.$#'

@@ -20,7 +20,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		/**
 		 * Associative array of WP_SEO_Formatting_Tag instances.
 		 *
-		 * @var array.
+		 * @var array<string, \WP_SEO_Formatting_Tag>
 		 */
 		public $formatting_tags = array();
 
@@ -118,7 +118,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 *
 			 * You might need this if you want to add unusual custom tags.
 			 *
-			 * @param string WP_SEO::formatting_tag_pattern The regex.
+			 * @param string $formatting_tag_pattern The regex.
 			 */
 			$this->formatting_tag_pattern = apply_filters( 'wp_seo_formatting_tag_pattern', '/#[a-zA-Z\_]+#/' );
 		}
@@ -360,7 +360,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				// Don't create an option unless at least one field exists.
 				$filtered_data = array_filter( $data );
 				if ( ! empty( $filtered_data ) ) {
-					add_option( $name, $data, null, false );
+					add_option( $name, $data, '', false );
 				}
 			} else {
 				update_option( $name, $data );
@@ -400,7 +400,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 					 *
 					 * @see wp_seo_default_formatting_tags() for the defaults' keys.
 					 *
-					 * @param  string The value returned by the formatting tag.
+					 * @param  string $value The value returned by the formatting tag.
 					 */
 					$replacements[ $tag->tag ] = apply_filters( "wp_seo_format_{$id}", $tag->get_value() );
 				}
@@ -564,8 +564,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				/**
 				 * Filter the format string of the meta description for this page.
 				 *
-				 * @param  string      The format string retrieved from the settings.
-				 * @param  string $key The key of the setting retrieved.
+				 * @param  string $description The format string retrieved from the settings.
+				 * @param  string $key         The key of the setting retrieved.
 				 */
 				$description_string = apply_filters(
 					'wp_seo_meta_description_format',
@@ -583,8 +583,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				/**
 				 * Filter the format string of the meta keywords for this page.
 				 *
-				 * @param  string      The format string retrieved from the settings.
-				 * @param  string $key The key of the setting retrieved.
+				 * @param  string $keywords The format string retrieved from the settings.
+				 * @param  string $key      The key of the setting retrieved.
 				 */
 				$keywords_string = apply_filters(
 					'wp_seo_meta_keywords_format',
@@ -601,9 +601,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			/**
 			 * Filter the artibrary meta tags that display on this page.
 			 *
-			 * @param  array {
+			 * @param  array<string, string> $arbitrary_tags {
 			 *     Meta tag data.
-			 *
 			 *     @type  string $name    The field "name" attribute.
 			 *     @type  string $content The field "content" attribute.
 			 * }

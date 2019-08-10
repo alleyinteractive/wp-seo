@@ -283,7 +283,7 @@ function wp_seo_the_meta_title_input( $value ) {
 /**
  * Prints markup for displaying a meta title input's character count.
  *
- * @param string $count The starting character count.
+ * @param int $count The starting character count.
  */
 function wp_seo_the_title_character_count( $count ) {
 	?>
@@ -319,7 +319,7 @@ function wp_seo_the_meta_description_input( $value ) {
 /**
  * Prints markup for displaying a meta description input's character count.
  *
- * @param string $count The starting character count.
+ * @param int $count The starting character count.
  */
 function wp_seo_the_description_character_count( $count ) {
 	?>

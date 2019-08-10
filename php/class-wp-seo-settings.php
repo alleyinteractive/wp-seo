@@ -128,28 +128,28 @@ class WP_SEO_Settings {
 		/**
 		 * Filter the capability required to access the settings page.
 		 *
-		 * @param string The default capability.
+		 * @param string $capability The default capability.
 		 */
 		$this->options_capability = apply_filters( 'wp_seo_options_capability', 'manage_options' );
 
 		/**
 		 * Filter the post types that support per-entry SEO fields.
 		 *
-		 * @param array Associative array of post type keys and objects.
+		 * @param array $keys_objects Associative array of post type keys and objects.
 		 */
 		$this->single_post_types = apply_filters( 'wp_seo_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 
 		/**
 		 * Filter the post types that support SEO fields on their archive pages.
 		 *
-		 * @param array Associative array of post type keys and objects.
+		 * @param array $keys_objects Associative array of post type keys and objects.
 		 */
 		$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 
 		/**
 		 * Filter the taxonomies that support SEO fields on term archive pages.
 		 *
-		 * @param  array Associative array of taxonomy keys and objects.
+		 * @param  array $keys_objects Associative array of taxonomy keys and objects.
 		 */
 		$this->taxonomies = apply_filters( 'wp_seo_taxonomies', wp_list_filter( get_taxonomies( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 
@@ -159,7 +159,7 @@ class WP_SEO_Settings {
 		 * These are also the settings shown when the option does not exist,
 		 * such as when the the plugin is first activated.
 		 *
-		 * @param  array Associative array of setting names and values.
+		 * @param  array $names_values Associative array of setting names and values.
 		 */
 		$this->default_options = apply_filters( 'wp_seo_default_options', array( 'post_types' => array_keys( $this->single_post_types ), 'taxonomies' => array_keys( $this->taxonomies ) ) );
 	}
@@ -326,7 +326,7 @@ class WP_SEO_Settings {
 		add_settings_section( '404', __( '404 Page', 'wp-seo' ), array( $this, 'example_404_page' ), $this::SLUG );
 		add_settings_field( '404_title', __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, '404', array( 'field' => '404_title' ) );
 
-		add_settings_section( 'arbitrary', __( 'Other Meta Tags', 'wp-seo' ), false, $this::SLUG );
+		add_settings_section( 'arbitrary', __( 'Other Meta Tags', 'wp-seo' ), '__return_true', $this::SLUG );
 		add_settings_field( 'arbitrary_tags', __( 'Tags', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'arbitrary', array( 'type' => 'repeatable', 'field' => 'arbitrary_tags', 'repeat' => array( 'name' => __( 'Name', 'lin' ), 'content' => __( 'Content', 'lin' ) ) ) );
 	}
 
@@ -543,7 +543,7 @@ class WP_SEO_Settings {
 	 *     @type array  $boxes An associative array of the value and label
 	 *                         of each checkbox.
 	 * }
-	 * @param  array $values Indexed array of current field values.
+	 * @param  array|string $values Indexed array of current field values.
 	 */
 	public function render_checkboxes( $args, $values ) {
 		foreach ( $args['boxes'] as $box_value => $box_label ) {

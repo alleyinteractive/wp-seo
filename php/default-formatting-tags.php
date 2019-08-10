@@ -250,7 +250,8 @@ class WP_SEO_Format_Author extends WP_SEO_Formatting_Tag {
 		if ( is_singular() && post_type_supports( get_post_type(), 'author' ) ) {
 			if ( $author = get_the_author() ) {
 				return $author;
-			} elseif ( $post_author = get_post_field( 'post_author', get_the_ID() ) ) {
+			}
+			if ( $post_author = (int) get_post_field( 'post_author', get_the_ID() ) ) {
 				return apply_filters( 'the_author', get_the_author_meta( 'display_name', $post_author ) );
 			}
 		} elseif ( is_author() ) {
@@ -578,8 +579,8 @@ class WP_SEO_Format_Thumbnail_URL extends WP_SEO_Formatting_Tag {
 /**
  * Register the default formatting tags.
  *
- * @param  array $tags Associated array of formatting tags to load.
- * @return array       Tags to load, including these.
+ * @param  array $tags                           Associated array of formatting tags to load.
+ * @return array<string, \WP_SEO_Formatting_Tag> Tags to load, including these.
  */
 function wp_seo_default_formatting_tags( $tags ) {
 	$tags['site_name'] = new WP_SEO_Format_Site_Name;
