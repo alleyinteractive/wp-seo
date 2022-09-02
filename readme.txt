@@ -3,7 +3,7 @@ Contributors: alleyinteractive, mboynes, potatomaster, davisshaver, dlh
 Tags: seo
 Requires at least: 4.6.0
 Tested up to: 4.8.0
-Stable tag: 0.13.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -133,6 +133,13 @@ When "safe mode" is disabled, WP SEO will include the unrecognized formatting ta
 3. Setting title and meta fields for a post
 
 == Changelog ==
+
+= 1.0.0 =
+This is the final major version release planned for WP SEO. There are no plans for additional feature development.
+
+* Breaking change: Always filter the title, description, and keyword formats. Props Sean Fisher.
+* Added: `wp_seo_after_post_meta_fields` action, `wp_seo_saveable_fields` filter, and `wp_seo_character_count_fields` filter. Props Sean Fisher.
+* Added: Composer installation support. Props Griffen Fargo.
 
 = 0.13.0 =
 * Added: 'wp_seo_meta_field_content' filter. Props Arun Chaitanya Jami.

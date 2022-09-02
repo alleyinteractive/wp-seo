@@ -3,7 +3,7 @@
  * Plugin Name: WP SEO
  * Plugin URI: https://github.com/alleyinteractive/wp-seo
  * Description: An SEO plugin that stays out of your way. Just the facts, Jack.
- * Version: 0.13.0
+ * Version: 1.0.0
  * Author: Alley Interactive
  * Author URI: https://www.alleyinteractive.com/
  *
@@ -67,6 +67,6 @@ function wp_seo_admin_scripts() {
 		'character_count_fields'    => (array) apply_filters( 'wp_seo_character_count_fields', [ 'title', 'description' ] ),
 	) );
 
-	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '0.13.0' );
+	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '1.0.0' );
 }
 add_action( 'admin_enqueue_scripts', 'wp_seo_admin_scripts' );
