@@ -652,7 +652,12 @@ class WP_SEO_Settings {
 								?>
 							</div><!-- .wp-seo-repeatable-field -->
 						<?php endforeach; ?>
-						<a href="#" class="wp-seo-delete"><%= wp_seo_admin.repeatable_remove_label %></a>
+						<?php
+							printf(
+								'<a href="#" class="wp-seo-delete">%1$s</a>',
+								'<%= wp_seo_admin.repeatable_remove_label %>'
+							);
+						?>
 					</div><!-- .wp-seo-repeatable-group -->
 				</script>
 			</div><!-- .wp-seo-repeatable -->
