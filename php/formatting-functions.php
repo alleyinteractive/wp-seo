@@ -17,14 +17,12 @@ function wp_seo_match_all_formatting_tags( $string ) {
 	$formatting_tags = [];
 
 	$pattern = WP_SEO()->formatting_tag_pattern;
-	if ( empty( $pattern ) ) {
-		return $formatting_tags;
-	}
+	if ( ! empty( $pattern ) ) {
+		preg_match_all( $pattern, $string, $matches, PREG_PATTERN_ORDER );
 
-	preg_match_all( WP_SEO()->formatting_tag_pattern, $string, $matches, PREG_PATTERN_ORDER );
-
-	if ( ! empty( $matches[0] ) ) {
-		$formatting_tags = $matches[0];
+		if ( ! empty( $matches[0] ) ) {
+			$formatting_tags = $matches[0];
+		}
 	}
 
 	return $formatting_tags;
