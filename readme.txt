@@ -13,7 +13,7 @@ An SEO plugin that stays out of your way.
 
 WP SEO is designed for professionals who want to build a solid foundation for an SEO-friendly website.
 
-It allows you to create templates for the title tag, meta description, and meta keywords on your posts, pages, custom post types, archives, and more. The templates can be populated dynamically with built-in formatting tags like `#title#` or `#author_name#`. You can even allow authors to create custom title and meta values for individual entries.
+It allows you to create templates for the title tag, meta description, and meta keywords on your posts, pages, custom post types, archives, and more. The templates can be populated dynamically with built-in formatting tags like `#title#` or `#Alley Interactive#`. You can even allow authors to create custom title and meta values for individual entries.
 
 Meanwhile, it leaves other features like Open Graph metadata and XML sitemaps to more-specialized plugins.
 

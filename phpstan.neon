@@ -1,0 +1,20 @@
+includes:
+  - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+	# Level 9 is the highest level
+	level: max
+
+	paths:
+		- blocks/
+		- entries/
+		- src/
+		- wp-seo.php
+
+#    ignoreErrors:
+#        - '#PHPDoc tag @var#'
+#
+#    excludePaths:
+#        - ./*/*/FileToBeExcluded.php
+#
+#    checkMissingIterableValueType: false
