@@ -1,22 +1,22 @@
+<?xml version="1.0"?>
 <phpunit
-	bootstrap="tests/bootstrap.php"
-	backupGlobals="false"
-	colors="true"
-	convertErrorsToExceptions="true"
-	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
-	>
-	<testsuites>
-		<testsuite>
-			<directory prefix="test-" suffix=".php">./tests/</directory>
-		</testsuite>
-	</testsuites>
-	<filter>
-		<whitelist processUncoveredFilesFromWhitelist="true">
-			<directory suffix=".php">./</directory>
-			<exclude>
-				<directory suffix=".php">./tests/</directory>
-			</exclude>
-		</whitelist>
-	</filter>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+  bootstrap="tests/bootstrap.php"
+  backupGlobals="false"
+  colors="true"
+  cacheDirectory=".phpunit.result.cache"
+>
+  <testsuites>
+    <testsuite name="Feature">
+      <directory suffix=".php">tests/Feature</directory>
+    </testsuite>
+    <testsuite name="Unit">
+      <directory suffix=".php">tests/Unit</directory>
+    </testsuite>
+  </testsuites>
+  <php>
+    <env name="MANTLE_USE_SQLITE" value="true" />
+    <env name="WP_SKIP_DB_CREATE" value="true" />
+  </php>
 </phpunit>

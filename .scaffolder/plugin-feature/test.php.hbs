@@ -1,0 +1,25 @@
+<?php
+/**
+ * {{ psr4ClassName name }} test class file
+ *
+ * @package create-wordpress-plugin
+ */
+
+namespace Alley\WP\Create_WordPress_Plugin\\{{ wpNamespace inputs.featureName prefix="Tests\Features" }};
+
+use Create_WordPress_Plugin\Tests\TestCase;
+use Create_WordPress_Plugin\\{{ wpNamespace inputs.featureName prefix="Features" }}\\{{ wpClassName inputs.featureName }};
+
+/**
+ * {{ replace (psr4ClassName inputs.featureName) "_" " " }} Test for the {{ wpClassName inputs.featureName }} class.
+ *
+ * @link https://mantle.alley.com/docs/testing
+ */
+class {{ psr4ClassName inputs.featureName suffix="Test" }} extends TestCase {
+	/**
+	 * An example test for the feature.
+	 */
+	public function test_example() {
+		$this->assertTrue( true );
+	}
+}

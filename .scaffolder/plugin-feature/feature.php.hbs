@@ -1,0 +1,27 @@
+<?php
+/**
+ * {{ wpClassName inputs.featureName }} class file
+ *
+ * @package Create_WordPress_Plugin
+ */
+
+namespace Alley\WP\Create_WordPress_Plugin\\{{ wpNamespace inputs.featureName prefix="Features" }};
+
+use Alley\WP\Types\Feature;
+
+/**
+ * {{ replace (wpClassName inputs.featureName) "_" " " }} Feature
+ */
+final class {{ wpClassName inputs.featureName }} implements Feature {
+	/**
+	 * Set up the feature.
+	 */
+	public function __construct() {}
+
+	/**
+	 * Boot the feature.
+	 */
+	public function boot(): void {
+		// Add any actions or filters here.
+	}
+}
