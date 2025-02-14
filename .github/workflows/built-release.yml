@@ -1,0 +1,18 @@
+name: Built Branch and Release
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - production
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: "Built Branch and Release"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: alleyinteractive/action-release@develop
