@@ -1,0 +1,40 @@
+# This workflow is used on alleyinteractive/create-wordpress-plugin to merge the
+# develop branch into the scaffold branch and is NOT meant to be used on other
+# repositories. This workflow will be deleted automatically when the
+# configuration script is run.
+
+name: Merge Develop to Scaffold Branch
+
+on:
+  push:
+    branches:
+      - develop
+      - remove-scaffold
+
+jobs:
+  merge-develop-to-scaffold:
+    name: merge develop to scaffold
+    if: ${{ github.repository == 'alleyinteractive/create-wordpress-plugin' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Merge develop to scaffold
+        shell: bash
+        env:
+          DEVELOP_BRANCH: develop
+          SCAFFOLD_BRANCH: scaffold
+
+          TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git config --global user.name "$GITHUB_ACTOR"
+          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+          echo "Cloning alleyinteractive/create-wordpress-plugin..."
+          git clone --recursive --quiet https://$TOKEN@github.com/alleyinteractive/create-wordpress-plugin.git create-wordpress-plugin -b $SCAFFOLD_BRANCH
+          cd create-wordpress-plugin
+
+          git fetch origin $DEVELOP_BRANCH
+          git fetch origin $SCAFFOLD_BRANCH
+
+          git merge origin/$DEVELOP_BRANCH --no-edit
+          git push -u origin $SCAFFOLD_BRANCH
