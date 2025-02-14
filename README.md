@@ -1,22 +1,30 @@
 # WP SEO
 
-Contributors: alleyinteractive
+**Contributors:** alleyinteractive\
+**Tags:** alleyinteractive, wp-seo\
+**Stable tag:** 0.0.0\
+**Requires at least:** 6.3\
+**Tested up to:** 6.7\
+**Requires PHP:** 8.2\
+**License:** GPL v2 or later
 
-Tags: alleyinteractive, wp-seo
 
-Stable tag: 0.0.0
-
-Requires at least: 6.3
-
-Tested up to: 6.7
-
-Requires PHP: 8.2
-
-License: GPL v2 or later
-
-[![Testing Suite](https://github.com/alleyinteractive/wp-seo/actions/workflows/all-pr-tests.yml/badge.svg)](https://github.com/alleyinteractive/wp-seo/actions/workflows/all-pr-tests.yml)
 
 Enterprise SEO for large, performant sites.
+
+---
+
+## Description
+
+WP SEO is designed for professionals who want to build a solid foundation for an SEO-friendly website.
+
+It allows you to create templates for the title tag, meta description, and meta keywords on your posts, pages, custom post types, archives, and more. The templates can be populated dynamically with built-in formatting tags like `#title#` or `#Alley Interactive#`. You can even allow authors to create custom title and meta values for individual entries.
+
+Meanwhile, it leaves other features like Open Graph metadata and XML sitemaps to more specialized plugins.
+
+For developers, WP SEO is welcoming. It applies filters all over the place, and extending the plugin with your own custom formatting tags is a cinch.
+
+---
 
 ## Installation
 
@@ -26,129 +34,127 @@ You can install the package via Composer:
 composer require alleyinteractive/wp-seo
 ```
 
+Or manually:
+
+1. Upload to the `/wp-content/plugins/` directory.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. Visit **Settings > SEO** to begin setting up the plugin.
+
+---
+
 ## Usage
 
-Activate the plugin in WordPress and use it like so:
+WP SEO allows you to customize the default format of `<title>` tags, `<meta>` descriptions, and `<meta>` keywords for your home page, single posts and custom post types, taxonomy and date archives, and more.
+
+Most of this customization happens on the WP SEO settings page, which you can access in the Dashboard at **Settings > SEO**.
+
+### Basic Usage
+
+The settings page has headings for each group of fields you can customize. Groups are hidden by default; click the heading to expand it.
+
+For example:
+
+- To customize the defaults for your **Posts**, use the fields under **Single Post Defaults**.
+- To customize the defaults for **author archives**, use the fields under **Author Archives**.
+
+After editing fields, save your changes using the button at the bottom of the page.
+
+A "format" can be regular text. For example, you could set the `<title>` tag of all date archives to be:
+
+> "Posts from our time machine."
+
+#### Formatting Tags
+
+The power of formats comes from **formatting tags**, which dynamically generate text based on page content.
+
+A formatting tag looks like `#site_name#`, `#author#`, or `#archive_date#`.
+
+Example:
+
+- Setting the `<title>` tag format of your **date archive** to:
+  > "Time machine set to #archive\_date#" would display something like: "Time machine set to September 2014" The date updates automatically based on the archive the user is viewing.
+
+WP SEO includes many formatting tags out-of-the-box:
+
+```
+#archive_date#  #author#  #categories#  #date_modified#  #date_published#
+#excerpt#  #post_type_plural_name#  #post_type_singular_name#  #search_term#
+#site_description#  #site_name#  #tags#  #term_description#  #term_name#
+#thumbnail_url#  #title#
+```
+
+Third-party plugins can register additional tags. For instance, a social media plugin could add a `#twitter_handle#` tag to display an author's Twitter username.
+
+More details about each tag are available under the **Help** button in the upper-right corner of the settings page.
+
+---
+
+### Per-Entry and Per-Term Fields
+
+The WP SEO settings page allows you to set **global defaults**, but you can also customize title, description, and keyword values for individual entries and taxonomy terms.
+
+- **Per-post type fields**: Enable these under **Post Types** on the settings page. The fields will appear on the "Edit" page for each post type.
+- **Per-taxonomy fields**: Enable these under **Taxonomies** on the settings page. The fields will appear in the "Add New" and "Edit" forms for each taxonomy term.
+
+---
+
+### Custom Meta Tags
+
+In addition to `<meta>` descriptions and keywords, WP SEO allows you to set **custom **``** tags** site-wide. These are managed under **Other Meta Tags** in the settings.
+
+For example, to add a Google Verification meta tag:
+
+1. Go to **Other Meta Tags**.
+2. Add `google-site-verification` under **Name**.
+3. Add the verification code under **Content**.
+4. Use the **Add another** button to add more custom `<meta>` tags as needed.
+5. Use **Remove group** to delete a custom `<meta>` tag.
+
+---
+
+## Frequently Asked Questions
+
+### How can I change who has access to the SEO settings page?
+
+In your plugin or theme, return your desired capability to the `'wp_seo_options_capability'` filter.
 
 ```php
-$plugin = Create_WordPress_Plugin\WP_SEO\WP_SEO();
-$plugin->perform_magic();
+// Allow users with the 'edit_posts' capability to access Settings > SEO.
+add_filter( 'wp_seo_options_capability', function () {
+    return 'edit_posts';
+} );
+
+// Do not allow anyone to access Settings > SEO.
+add_filter( 'wp_seo_options_capability', function () {
+    return 'do_not_allow';
+} );
 ```
 
-## Testing
+---
 
-Run `npm run test` to run Jest tests against JavaScript files. Run
-`npm run test:watch` to keep the test runner open and watching for changes.
+## Formatting Tag "Safe Mode"
 
-Run `npm run lint` to run ESLint against all JavaScript files. Linting will also
-happen when running development or production builds.
+Enable **safe mode** by calling `wp_seo_enable_formatting_tag_safe_mode()` in your plugin or theme:
 
-Run `composer test` to run tests against PHPUnit and the PHP code in the plugin.
-Unit testing code is written in PSR-4 format and can be found in the `tests`
-directory.
-
-### The `entries` directory and entry points
-
-All directories created in the `entries` directory can serve as entry points and will be compiled with [@wordpress/scripts](https://github.com/WordPress/gutenberg/blob/trunk/packages/scripts/README.md#scripts) into the `build` directory with an accompanied `index.asset.php` asset map.
-
-#### Scaffolding an entry point
-
-To generate a new entry point, run the following command:
-
-```sh
-npm run create-entry
+```php
+add_action( 'template_redirect', 'wp_seo_enable_formatting_tag_safe_mode' );
 ```
 
-To generate a new slotfill, run the following command:
+### What does "Safe Mode" do?
 
-```sh
-npm run create-slotfill
-```
+- Prevents WP SEO from setting `<title>` or `<meta>` tags with **unrecognized** formatting tags.
+- Unrecognized tags may be typos (e.g., `#categoories#`) or tags from an uninstalled plugin.
+- If safe mode is **disabled**, WP SEO will include the unrecognized formatting tag as regular text.
+- Safe mode is **disabled by default**.
 
-The command will prompt the user through several options for creating an entry or slotfill. The entries are scaffolded with the `@alleyinteractive/create-entry` script. Run the help command to see all the options:
+You can choose the mode based on your needs. **Disabled mode** makes it easier to spot mistakes, while **enabled mode** prevents broken metadata.
 
-```sh
-npx @alleyinteractive/create-entry --help
-```
-[Visit the package README](https://www.npmjs.com/package/@alleyinteractive/create-entry) for more information.
+---
 
-#### Enqueuing Entry Points
+## Screenshots
 
-You can also include an `index.php` file in the entry point directory for enqueueing or registering a script. This file will then be moved to the build directory and will be auto-loaded with the `load_scripts()` function in the `functions.php` file. Alternatively, if a script is to be enqueued elsewhere there are helper functions in the `src/assets.php` file for getting the assets.
+1. **Settings page**
+2. **On-screen documentation** for included formatting tags
+3. **Title and meta fields** for a post
 
-### Scaffold a dynamic block with `create-block`
-
-Use the `create-block` command to create custom blocks with [@alleyinteractive/create-block](https://github.com/alleyinteractive/alley-scripts/tree/main/packages/create-block) script and follow the prompts to generate all the block assets in the `blocks/` directory.
-Block registration, script creation, etc will be scaffolded from the `create-block` script. Run `npm run build` to compile and build the custom block. Blocks are enqueued using the `load_scripts()` function in `src/assets.php`.
-
-### Updating WP Dependencies
-
-Update the [WordPress dependency packages](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-scripts/#packages-update) used in the project to their latest version.
-
-To update `@wordpress` dependencies to their latest version use the packages-update command:
-
-```sh
-npx wp-scripts packages-update
-```
-
-This script provides the following custom options:
-
--   `--dist-tag` – allows specifying a custom dist-tag when updating npm packages. Defaults to `latest`. This is especially useful when using [`@wordpress/dependency-extraction-webpack-plugin`](https://www.npmjs.com/package/@wordpress/dependency-extraction-webpack-plugin). It lets installing the npm dependencies at versions used by the given WordPress major version for local testing, etc. Example:
-
-```sh
-npx wp-scripts packages-update --dist-tag=wp-WPVERSION`
-```
-
-Where `WPVERSION` is the version of WordPress you are targeting. The version
-must include both the major and minor version (e.g., `6.7`). For example:
-
-```sh
-npx wp-scripts packages-update --dist-tag=wp-6.7`
-```
-
-
-## Releasing the Plugin
-
-The plugin uses
-[action-release](https://github.com/alleyinteractive/action-release) via a
-[built release workflow](./.github/workflows/built-release.yml) to compile and
-tag releases. Whenever a new version is detected in the root plugin's headers in
-the `wp-seo.php` file or in the `composer.json` file, the workflow will
-automatically build the plugin and tag it with a new version. The built tag will
-contain all the required front-end assets the plugin may require. This works
-well for publishing to WordPress.org or for submodule-ing.
-
-When you are ready to release a new version of the plugin, you can run
-`npm run release`/`composer release` to start the process of setting up a new
-release. If you want to do this manually you can follow these steps:
-
-1. Change the `Version` in the `wp-seo.php` file to a new higher-level version.
-
-	```diff
-	- * Version: 0.0.0
-	+ * Version: 0.0.1
-	```
-
-	**✨ `npm run release` will do this for you automatically.**
-
-2. Commit your changes and push to the repository.
-3. Check the actions tab in the repository to see the progress of the release.
-   The action will automatically create a new tag and release for the plugin.
-   You are done!
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Credits
-
-This project is actively maintained by [Alley
-Interactive](https://github.com/alleyinteractive). Like what you see? [Come work
-with us](https://alley.co/careers/).
-
-- [Alley Interactive](https://github.com/Alley Interactive)
-- [All Contributors](../../contributors)
-
-## License
-
-The GNU General Public License (GPL) license. Please see [License File](LICENSE) for more information.
+---
