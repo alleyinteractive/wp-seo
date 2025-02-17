@@ -1,11 +1,16 @@
 <?php
 /**
- * Tests for whether submitted data are sanitized correctly before saving as options.
+ * WP SEO Tests: Tests for whether submitted data are sanitized correctly before saving as options.
  *
- * @package WP SEO
+ * @package wp-seo
  */
-class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 
+namespace Alley\WP\WP_SEO\Tests\Feature;
+
+use Alley\WP\WP_SEO\Tests\TestCase;
+use WP_SEO_Settings;
+
+class SanitizeOptionsTest extends TestCase {
 	var $option_valid = array(
 		'home_title'       => 'Home | Alley Interactive',
 		'home_description' => 'We are a team of experienced digital professionals who tackle the most complex challenges facing top publishers.',
@@ -76,11 +81,11 @@ class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 			'arbitrary_tags' => null,
 		) );
 		$this->assertEmpty( $actual['post_types'] );
-		$this->assertInternalType( 'array', $actual['post_types'] );
+		$this->assertIsArray( $actual['post_types'] );
 		$this->assertEmpty( $actual['taxonomies'] );
-		$this->assertInternalType( 'array', $actual['taxonomies'] );
+		$this->assertIsArray( $actual['taxonomies'] );
 		$this->assertArrayNotHasKey( 'unknown_key', $actual );
-		$this->assertInternalType( 'array', $actual['arbitrary_tags'] );
+		$this->assertIsArray( $actual['arbitrary_tags'] );
 	}
 
 	function test_invalid_repeatables() {
@@ -116,11 +121,11 @@ class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 	function test_double_sanitizing() {
 		$actual = $this->_sanitize( $this->option_empty_repeatable );
 		$actual = $this->_sanitize( $actual );
-		$this->assertInternalType( 'array', $actual['arbitrary_tags'] );
+		$this->assertIsArray( $actual['arbitrary_tags'] );
 
 		$actual = $this->_sanitize( $this->option_many_empty_repeatables );
 		$actual = $this->_sanitize( $actual );
-		$this->assertInternalType( 'array', $actual['arbitrary_tags'] );
+		$this->assertIsArray( $actual['arbitrary_tags'] );
 	}
 
 }
