@@ -1,11 +1,15 @@
 <?php
 /**
- * Tests for internal-functions.php.
+ * WP SEO Tests: Tests for internal-functions.php.
  *
- * @package WP_SEO
+ * @package wp-seo
  */
 
-class WP_SEO_Internal_Functions_Tests extends WP_SEO_Testcase {
+namespace Alley\WP\WP_SEO\Tests\Feature;
+
+use Alley\WP\WP_SEO\Tests\TestCase;
+
+class InternalFunctionsTest extends TestCase {
 	/**
 	 * Test that enabling formatting-tag safe mode has the expected effects.
 	 */

@@ -162,7 +162,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 */
 		public function add_meta_boxes( $post_type ) {
 			if ( WP_SEO_Settings()->has_post_fields( $post_type ) ) {
-				add_meta_box(
+				\add_meta_box(
 					'wp_seo',
 					wp_seo_get_box_title(),
 					array( $this, 'post_meta_fields' ),
