@@ -9,7 +9,6 @@ class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 	var $option_valid = array(
 		'home_title'       => 'Home | Alley Interactive',
 		'home_description' => 'We are a team of experienced digital professionals who tackle the most complex challenges facing top publishers.',
-		'home_keywords'    => 'WordPress, Drupal, Open Source',
 		'arbitrary_tags'   => array(
 			array( 'name' => 'viewport', 'content' => 'width=device-width, initial-scale=1' ),
 		),
@@ -61,7 +60,6 @@ class WP_SEO_Sanitize_Options_Tests extends WP_UnitTestCase {
 			'home_title' => '',
 			'home_description' => '',
 		) );
-		$this->assertArrayHasKey( 'home_keywords', $actual );
 		$this->assertArrayHasKey( 'arbitrary_tags', $actual );
 	}
 
