@@ -1,20 +1,26 @@
 <?php
 /**
- * Tests for whether post types and taxonomies have per-object fields enabled.
+ * WP SEO Tests: Tests for whether post types and taxonomies have per-object fields enabled.
  *
- * @package WP SEO
+ * @package wp-seo
  */
-class WP_SEO_Has_Fields_Tests extends WP_UnitTestCase {
 
-	function setUp() {
+namespace Alley\WP\WP_SEO\Tests\Feature;
+
+use Alley\WP\WP_SEO\Tests\TestCase;
+use WP_SEO_Settings;
+
+class HasFieldsTest extends TestCase {
+	function setUp(): void {
 		parent::setUp();
-		update_option( WP_SEO_Settings::SLUG, array(
-			'post_types' => array( 'post' ),
-			'taxonomies' => array( 'category' ),
-		) );
+		update_option( WP_SEO_Settings::SLUG, [
+			'post_types' => [ 'post' ],
+			'taxonomies' => [ 'category' ],
+		] );
+		WP_SEO_Settings()->set_options();
 	}
 
-	function tearDown() {
+	function tearDown(): void {
 		parent::tearDown();
 		// Clean up after ourselves.
 		delete_option( WP_SEO_Settings::SLUG );

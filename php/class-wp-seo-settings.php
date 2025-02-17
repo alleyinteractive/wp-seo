@@ -237,7 +237,7 @@ class WP_SEO_Settings {
 	 * @return bool
 	 */
 	public function has_post_fields( $post_type ) {
-		return in_array( $post_type, $this->get_enabled_post_types() );
+		return in_array( $post_type, $this->get_enabled_post_types(), true );
 	}
 
 	/**
@@ -247,7 +247,7 @@ class WP_SEO_Settings {
 	 * @return bool
 	 */
 	public function has_term_fields( $taxonomy ) {
-		return in_array( $taxonomy, $this->get_enabled_taxonomies() );
+		return in_array( $taxonomy, $this->get_enabled_taxonomies(), true );
 	}
 
 	/**
@@ -549,7 +549,7 @@ class WP_SEO_Settings {
 				esc_attr( $this::SLUG ),
 				esc_attr( $args['field'] ),
 				esc_attr( $box_value ),
-				is_array( $values ) ? checked( in_array( $box_value, $values ), true, false ) : '',
+				is_array( $values ) ? checked( in_array( $box_value, $values, true ), true, false ) : '',
 				esc_html( $box_label )
 			);
 		}

@@ -1,11 +1,15 @@
 <?php
 /**
- * Tests for general-functions.php.
+ * WP SEO Tests: Tests for general-functions.php.
  *
- * @package WP_SEO
+ * @package wp-seo
  */
 
-class WP_SEO_General_Functions_Tests extends WP_UnitTestCase {
+namespace Alley\WP\WP_SEO\Tests\Feature;
+
+use Alley\WP\WP_SEO\Tests\TestCase;
+
+class GeneralFunctionsTest extends TestCase {
 	/**
 	 * Test wp_seo_intersect_args() with args combinations.
 	 *
@@ -27,7 +31,7 @@ class WP_SEO_General_Functions_Tests extends WP_UnitTestCase {
 	 *     @type array $message Failure message.
 	 * }
 	 */
-	function data_intersect_args() {
+	static function data_intersect_args() {
 		$key_1 = rand_str();
 		$key_2 = rand_str();
 
@@ -36,31 +40,31 @@ class WP_SEO_General_Functions_Tests extends WP_UnitTestCase {
 		$val_3 = rand_str();
 		$val_4 = rand_str();
 
-		return array(
-			array(
-				array(),
-				array( $key_1 => $val_1, $key_2 => $val_2 ),
-				array( $key_1 => $val_1, $key_2 => $val_2 ),
+		return [
+			[
+				[],
+				[ $key_1 => $val_1, $key_2 => $val_2 ],
+				[ $key_1 => $val_1, $key_2 => $val_2 ],
 				'Should return $defaults if no $args are passed'
-			),
-			array(
-				array( $key_1 => $val_3 ),
-				array( $key_1 => $val_1, $key_2 => $val_2 ),
-				array( $key_1 => $val_3, $key_2 => $val_2 ),
+			],
+			[
+				[ $key_1 => $val_3 ],
+				[ $key_1 => $val_1, $key_2 => $val_2 ],
+				[ $key_1 => $val_3, $key_2 => $val_2 ],
 				'Should return any passed $args values whose keys are in $defaults'
-			),
-			array(
-				array( $key_1 => $val_3, $key_2 => $val_4 ),
-				array( $key_1 => $val_1, $key_2 => $val_2 ),
-				array( $key_1 => $val_3, $key_2 => $val_4 ),
+			],
+			[
+				[ $key_1 => $val_3, $key_2 => $val_4 ],
+				[ $key_1 => $val_1, $key_2 => $val_2 ],
+				[ $key_1 => $val_3, $key_2 => $val_4 ],
 				'Should return all passed $args values whose keys are in $defaults'
-			),
-			array(
-				array( $key_1 => $val_1 ),
-				array( $key_2 => $val_2 ),
-				array( $key_2 => $val_2 ),
+			],
+			[
+				[ $key_1 => $val_1 ],
+				[ $key_2 => $val_2 ],
+				[ $key_2 => $val_2 ],
 				'Should reject passed $args whose keys are not in defaults'
-			),
-		);
+			],
+		];
 	}
 }
