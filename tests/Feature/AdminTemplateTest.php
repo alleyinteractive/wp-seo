@@ -34,86 +34,86 @@ class AdminTemplateTest extends TestCase {
 		$str = rand_str();
 		$num = rand( 1, 10 );
 
-		return array(
-			array(
+		return [
+			[
 				'wp_seo_the_post_meta_fields',
 				'Should print a table',
 				'#<table[^>]*?>.+?</table>#s',
-				array( static::factory()->post->create_and_get() ),
-			),
-			array(
+				[ static::factory()->post->create_and_get() ],
+			],
+			[
 				'wp_seo_the_add_term_meta_fields',
 				'Should print a heading',
 				'#<h(\d)[^>]*?>.+?</h\1>#',
-				array( static::factory()->term->create_and_get(), $str ),
-			),
-			array(
+				[ static::factory()->term->create_and_get(), $str ],
+			],
+			[
 				'wp_seo_the_edit_term_meta_fields',
 				'Should print a heading',
 				'#<h(\d)[^>]*?>.+?</h\1>#',
-				array( static::factory()->term->create_and_get(), $str ),
-			),
-			array(
+				[ static::factory()->term->create_and_get(), $str ],
+			],
+			[
 				'wp_seo_the_edit_term_meta_fields',
 				'Should print a table',
 				'#<table[^>]*?>.+?</table>#s',
-				array( static::factory()->term->create_and_get(), $str ),
-			),
-			array(
+				[ static::factory()->term->create_and_get(), $str ],
+			],
+			[
 				'wp_seo_the_meta_title_label',
 				'Should print a label',
 				'#<label[^>]*?>.+?</label>#',
-				array(),
-			),
-			array(
+				[],
+			],
+			[
 				'wp_seo_the_meta_title_input',
 				'Should print an input',
 				'#<input[^>]+? />#',
-				array( '' ),
-			),
-			array(
+				[ '' ],
+			],
+			[
 				'wp_seo_the_meta_title_input',
 				'Should print the passed value',
 				'#value=(.)\1#',
-				array( '' ),
-			),
-			array(
+				[ '' ],
+			],
+			[
 				'wp_seo_the_meta_title_input',
 				'Should print the passed value',
 				'#value=(.)' . $str . '\1#',
-				array( $str ),
-			),
-			array(
+				[ $str ],
+			],
+			[
 				'wp_seo_the_title_character_count',
 				'Should print the passed number',
 				"#{$num} \(save changes to update\)#s",
-				array( $num ),
-			),
-			array(
+				[ $num ],
+			],
+			[
 				'wp_seo_the_meta_description_label',
 				'Should print a label',
 				'#<label[^>]*?>.+?</label>#',
-				array(),
-			),
-			array(
+				[],
+			],
+			[
 				'wp_seo_the_meta_description_input',
 				'Should print an input',
 				'#<textarea[^>]*?></textarea>#',
-				array( '' ),
-			),
-			array(
+				[ '' ],
+			],
+			[
 				'wp_seo_the_meta_description_input',
 				'Should print the passed value',
 				"#<textarea[^>]*?>{$str}</textarea>#",
-				array( $str ),
-			),
-			array(
+				[ $str ],
+			],
+			[
 				'wp_seo_the_description_character_count',
 				'Should print the passed number',
 				"#{$num} \(save changes to update\)#s",
-				array( $num ),
-			),
-		);
+				[ $num ],
+			],
+		];
 	}
 
 	/**
@@ -123,7 +123,7 @@ class AdminTemplateTest extends TestCase {
 	 */
 	function test_template_tag_hooks( $function, $fires, $matching, $args ) {
 		$ma = new Mock_Action();
-		add_action( 'all', array( $ma, 'action' ) );
+		add_action( 'all', [ $ma, 'action' ] );
 
 		$function( ...$args );
 
@@ -139,25 +139,25 @@ class AdminTemplateTest extends TestCase {
 	 * }
 	 */
 	static function data_template_tag_hooks() {
-		return array(
-			array(
+		return [
+			[
 				'wp_seo_the_post_meta_fields',
 				6,
 				'/^wp_seo_post_meta_fields/',
-				array( static::factory()->post->create_and_get() ),
-			),
-			array(
+				[ static::factory()->post->create_and_get() ],
+			],
+			[
 				'wp_seo_the_add_term_meta_fields',
 				6,
 				'/^wp_seo_add_term_meta_fields/',
-				array( static::factory()->term->create_and_get(), rand_str() ),
-			),
-			array(
+				[ static::factory()->term->create_and_get(), rand_str() ],
+			],
+			[
 				'wp_seo_the_edit_term_meta_fields',
 				6,
 				'/^wp_seo_edit_term_meta_fields/',
-				array( static::factory()->term->create_and_get(), rand_str() ),
-			),
-		);
+				[ static::factory()->term->create_and_get(), rand_str() ],
+			],
+		];
 	}
 }

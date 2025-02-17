@@ -1,11 +1,15 @@
 <?php
 /**
- * Tests for converting strings with and without formatting tags.
+ * WP SEO Tests: Tests for converting strings with and without formatting tags.
  *
- * @package  WP SEO
+ * @package wp-seo
  */
-class WP_SEO_Format_Tests extends WP_UnitTestCase {
 
+namespace Alley\WP\WP_SEO\Tests\Feature;
+
+use Alley\WP\WP_SEO\Tests\TestCase;
+
+class FormatTest extends TestCase {
 	/**
 	 * String with no formatting tags (but some complex characters).
 	 *
@@ -40,7 +44,7 @@ class WP_SEO_Format_Tests extends WP_UnitTestCase {
 	}
 
 	function test_default_tag() {
-		$this->assertSame( 'Welcome | Test Blog', WP_SEO()->format( $this->string_default_tag ) );
+		$this->assertSame( 'Welcome | Test Site', WP_SEO()->format( $this->string_default_tag ) );
 	}
 
 	function test_unknown_tag() {
@@ -49,7 +53,7 @@ class WP_SEO_Format_Tests extends WP_UnitTestCase {
 
 	function test_known_and_unknown_tags() {
 		$combined = sprintf( '%s | %s', $this->string_default_tag, $this->string_unknown_tag );
-		$this->assertSame( 'Welcome | Test Blog | '. $this->string_unknown_tag, WP_SEO()->format( $combined ) );
+		$this->assertSame( 'Welcome | Test Site | '. $this->string_unknown_tag, WP_SEO()->format( $combined ) );
 	}
 
 }
