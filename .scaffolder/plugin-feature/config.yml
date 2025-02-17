@@ -1,0 +1,17 @@
+name: create-wordpress-plugin@plugin-feature
+
+inputs:
+  - name: featureName
+    description: "Feature Name"
+    type: string
+  - name: tests
+    description: "Include Tests?"
+    type: boolean
+    default: true
+
+files:
+  - source: feature.php.hbs
+    destination: src/features/{{ wpClassFilename inputs.featureName }}
+  - source: test.php.hbs
+    if: "{{ inputs.tests }}"
+    destination: tests/Features/{{ psr4ClassFilename inputs.featureName suffix="Test.php" }}

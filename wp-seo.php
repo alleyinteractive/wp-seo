@@ -2,29 +2,72 @@
 /**
  * Plugin Name: WP SEO
  * Plugin URI: https://github.com/alleyinteractive/wp-seo
- * Description: An SEO plugin that stays out of your way. Just the facts, Jack.
- * Version: 1.0.0
+ * Description: Enterprise SEO for large, performant sites
+ * Version: 2.0.0
  * Author: Alley Interactive
- * Author URI: https://www.alleyinteractive.com/
+ * Author URI: https://github.com/alleyinteractive/wp-seo
+ * Requires at least: 5.9
+ * Requires PHP: 8.2
+ * Tested up to: 6.7
  *
- * @package WP_SEO
+ * Text Domain: wp-seo
+ * Domain Path: /languages/
+ *
+ * @package wp-seo
  */
 
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+namespace Alley\WP\WP_SEO;
 
-define( 'WP_SEO_PATH', dirname( __FILE__ ) );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Root directory to this plugin.
+ */
+define( 'WP_SEO_DIR', __DIR__ );
+
+// Check if Composer is installed (remove if Composer is not required for your plugin).
+if ( ! file_exists( __DIR__ . '/vendor/wordpress-autoload.php' ) ) {
+	// Will also check for the presence of an already loaded Composer autoloader
+	// to see if the Composer dependencies have been installed in a parent
+	// folder. This is useful for when the plugin is loaded as a Composer
+	// dependency in a larger project.
+	if ( ! class_exists( \Composer\InstalledVersions::class ) ) {
+		\add_action(
+			'admin_notices',
+			function () {
+				?>
+				<div class="notice notice-error">
+					<p><?php esc_html_e( 'Composer is not installed and wp-seo cannot load. Try using a `*-built` branch if the plugin is being loaded as a submodule.', 'wp-seo' ); ?></p>
+				</div>
+				<?php
+			}
+		);
+
+		return;
+	}
+} else {
+	// Load Composer dependencies.
+	require_once __DIR__ . '/vendor/wordpress-autoload.php';
+}
+
+// Load the plugin's main files.
+require_once __DIR__ . '/src/assets.php';
+require_once __DIR__ . '/src/meta.php';
+require_once __DIR__ . '/src/main.php';
+
+load_scripts();
+register_post_meta_from_defs();
+main();
+
+/**
+ * Start Legacy Code
+ *
+ * This is legacy code that should be modified to use the new plugin structure.
+ * It is included here to ensure that the plugin continues to work as expected.
+ */
+define( 'WP_SEO_PATH', __DIR__ );
 define( 'WP_SEO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
 
 // Behind-the-scenes functions.
@@ -54,9 +97,9 @@ require_once WP_SEO_PATH . '/php/default-filters.php';
 /**
  * Enqueues scripts and styles for administration pages.
  */
-function wp_seo_admin_scripts() {
-	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', array( 'jquery', 'underscore' ), '0.11.1', true );
-	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', array(
+function wp_seo_admin_scripts(): void {
+	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', [ 'jquery', 'underscore' ], '0.11.1', true );
+	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', [
 		'repeatable_add_more_label' => __( 'Add another', 'wp-seo' ),
 		'repeatable_remove_label'   => __( 'Remove group', 'wp-seo' ),
 		/**
@@ -65,8 +108,9 @@ function wp_seo_admin_scripts() {
 		 * @param array $fields Fields that support character counters.
 		 */
 		'character_count_fields'    => (array) apply_filters( 'wp_seo_character_count_fields', [ 'title', 'description' ] ),
-	) );
+	] );
 
-	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', array(), '1.0.0' );
+	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', [], '1.0.0' );
 }
-add_action( 'admin_enqueue_scripts', 'wp_seo_admin_scripts' );
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\wp_seo_admin_scripts' );
+/* End Legacy Code */

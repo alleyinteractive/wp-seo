@@ -1,0 +1,19 @@
+name: Update WordPress Plugin
+
+on:
+  schedule:
+    - cron: '0 6 1 * *' # Run on the first day of every month at 6am UTC.
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-plugin:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: alleyinteractive/action-update-wordpress-plugin@v2.0.0
+      with:
+        plugin-file: 'plugin.php'
+        upgrade-npm-dependencies: "true"

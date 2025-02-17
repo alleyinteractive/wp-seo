@@ -1,0 +1,17 @@
+{
+  "extends": "@alleyinteractive/tsconfig/base.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "noImplicitAny": true,
+    "outDir": "build",
+    "paths": {
+      "@/*": ["*"]
+    }
+  },
+  "exclude": [
+    "vendor",
+    "node_modules",
+    "build/**/*"
+  ]
+}

@@ -1,10 +1,68 @@
 {
     "name": "alleyinteractive/wp-seo",
-    "description": "WP SEO is designed for professionals who want to build a solid foundation for an SEO-friendly website.",
+    "description": "Enterprise SEO for large, performant sites",
     "type": "wordpress-plugin",
-    "keywords": ["wordpress", "plugin", "seo"],
-    "license" : "GPL-3.0+",
+    "keywords": [
+        "alleyinteractive",
+        "wp-seo"
+    ],
+    "homepage": "https://github.com/alleyinteractive/wp-seo",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Alley Interactive",
+            "email": "opensource@alley.com"
+        }
+    ],
     "require": {
-        "composer/installers": "~1.0"
+        "php": "^8.2",
+        "alleyinteractive/composer-wordpress-autoloader": "^1.0",
+        "alleyinteractive/wp-type-extensions": "^2.1"
+    },
+    "require-dev": {
+        "alleyinteractive/alley-coding-standards": "^2.0",
+        "mantle-framework/testkit": "^1.4",
+        "szepeviktor/phpstan-wordpress": "^2.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "alleyinteractive/composer-wordpress-autoloader": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "pestphp/pest-plugin": true
+        },
+        "sort-packages": true
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Alley\\WP\\WP_SEO\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "wordpress-autoloader": {
+            "autoload": {
+                "Alley\\WP\\WP_SEO\\": "src"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "phpcbf": "phpcbf .",
+        "phpcs": "phpcs .",
+        "phpstan": "phpstan --memory-limit=512M",
+        "lint": [
+            "@phpcs",
+            "@phpstan"
+        ],
+        "lint:fix": [
+            "@phpcbf"
+        ],
+        "phpunit": "phpunit",
+        "release": "npx @alleyinteractive/create-release@latest",
+        "test": [
+            "@phpcs",
+            "@phpstan",
+            "@phpunit"
+        ]
     }
 }
