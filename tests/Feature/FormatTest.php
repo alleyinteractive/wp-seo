@@ -36,7 +36,7 @@ class FormatTest extends TestCase {
 	}
 
 	function test_not_a_string() {
-		$this->assertWPError( WP_SEO()->format( array() ) );
+		$this->assertWPError( WP_SEO()->format( [] ) );
 	}
 
 	function test_string_no_tags() {
