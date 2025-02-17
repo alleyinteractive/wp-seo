@@ -165,7 +165,7 @@ class DefaultFormattingTagsTest extends TestCase {
 	 * Test that the current tag has a description.
 	 */
 	function _has_description() {
-		// $this->assertInternalType( 'string', $this->current_tag->get_description() );
+		$this->assertIsString( $this->current_tag->get_description() );
 		$this->assertNotSame( '', $this->current_tag->get_description() );
 	}
 

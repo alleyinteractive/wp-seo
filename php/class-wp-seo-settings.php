@@ -745,6 +745,8 @@ class WP_SEO_Settings {
 		// "Other Pages" titles.
 		$sanitize_as_text_field[] = 'search_title';
 		$sanitize_as_text_field[] = '404_title';
+		$sanitize_as_text_field[] = 'home_title';
+		$sanitize_as_text_field[] = 'home_description';
 
 		foreach ( $sanitize_as_text_field as $field ) {
 			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
