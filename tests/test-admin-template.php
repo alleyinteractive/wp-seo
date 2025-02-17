@@ -106,24 +106,6 @@ class WP_SEO_Admin_Template_Tests extends WP_UnitTestCase {
 				"#{$num} \(save changes to update\)#s",
 				array( $num ),
 			),
-			array(
-				'wp_seo_the_meta_keywords_label',
-				'Should print a label',
-				'#<label[^>]*?>.+?</label>#',
-				array(),
-			),
-			array(
-				'wp_seo_the_meta_keywords_input',
-				'Should print an input',
-				'#<textarea[^>]*?></textarea>#',
-				array( '' ),
-			),
-			array(
-				'wp_seo_the_meta_keywords_input',
-				'Should print the passed value',
-				"#<textarea[^>]*?>{$str}</textarea>#",
-				array( $str ),
-			),
 		);
 	}
 

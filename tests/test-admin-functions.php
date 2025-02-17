@@ -33,13 +33,11 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 	function data_post_id_to_functions() {
 		$meta_title       = rand_str( rand( 32, 64 ) );
 		$meta_description = rand_str( rand( 32, 64 ) );
-		$meta_keywords    = rand_str( rand( 32, 64 ) );
 
 		$post_id = $this->factory->post->create( array(
 			'meta_input' => array(
 				'_meta_title'       => $meta_title,
 				'_meta_description' => $meta_description,
-				'_meta_keywords'    => $meta_keywords,
 			),
 		) );
 
@@ -68,12 +66,6 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 				(string) strlen( $meta_description ),
 				array( $post_id ),
 			),
-			array(
-				'wp_seo_post_id_to_the_meta_keywords_input',
-				'Should print the keyword value in post meta',
-				$meta_keywords,
-				array( $post_id ),
-			),
 		);
 	}
 
@@ -87,12 +79,10 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 	function data_term_data_to_functions() {
 		$title       = rand_str( rand( 32, 64 ) );
 		$description = rand_str( rand( 32, 64 ) );
-		$keywords    = rand_str( rand( 32, 64 ) );
 
 		$term = $this->create_and_get_term_with_option( array(
 			'title' => $title,
 			'description' => $description,
-			'keywords' => $keywords,
 		) );
 
 		return array(
@@ -118,12 +108,6 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 				'wp_seo_term_data_to_the_description_character_count',
 				'Should count the description value in the term options',
 				(string) strlen( $description ),
-				array( $term->term_id, $term->taxonomy ),
-			),
-			array(
-				'wp_seo_term_data_to_the_meta_keywords_input',
-				'Should print the keyword value in the term options',
-				$keywords,
 				array( $term->term_id, $term->taxonomy ),
 			),
 		);

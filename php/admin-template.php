@@ -68,26 +68,6 @@ function wp_seo_the_post_meta_fields( $post ) {
 					?>
 				<td>
 			</tr>
-			<tr>
-				<th scope="row">
-					<?php
-					/**
-					 * Fires to print the meta keywords label in the post metabox.
-					 */
-					do_action( 'wp_seo_post_meta_fields_keywords_label' );
-					?>
-				</th>
-				<td>
-					<?php
-					/**
-					 * Fires to print the meta keywords input in the post metabox.
-					 *
-					 * @param int $post_id The ID of the post being edited.
-					 */
-					do_action( 'wp_seo_post_meta_fields_keywords_input', $post->ID );
-					?>
-				</td>
-			</tr>
 			<?php
 			/**
 			 * Fires after the other SEO fields are rendered.
@@ -145,19 +125,6 @@ function wp_seo_the_add_term_meta_fields( $taxonomy ) {
 			 * Fires after the meta description input with the add-term meta fields.
 			 */
 			do_action( 'wp_seo_add_term_meta_fields_after_description_input' );
-			?>
-		</div>
-		<div class="form-field">
-			<?php
-			/**
-			 * Fires to print the meta keywords label with the add-term meta fields.
-			 */
-			do_action( 'wp_seo_add_term_meta_fields_keywords_label' );
-
-			/**
-			 * Fires to print the meta keywords input with the add-term meta fields.
-			 */
-			do_action( 'wp_seo_add_term_meta_fields_keywords_input' );
 			?>
 		</div>
 	</div>
@@ -234,27 +201,6 @@ function wp_seo_the_edit_term_meta_fields( $tag, $taxonomy ) {
 					?>
 				<td>
 			</tr>
-			<tr class="form-field">
-				<th scope="row">
-					<?php
-					/**
-					 * Fires to print the meta keywords label with the edit-term meta fields.
-					 */
-					do_action( 'wp_seo_edit_term_meta_fields_keywords_label' );
-					?>
-				</th>
-				<td>
-					<?php
-					/**
-					 * Fires to print the meta keywords input with the edit-term meta fields.
-					 *
-					 * @param int $term_id The term ID of the term being edited.
-					 * @param string $taxonomy The taxonomy slug.
-					 */
-					do_action( 'wp_seo_edit_term_meta_fields_keywords_input', $tag->term_id, $taxonomy );
-					?>
-				</td>
-			</tr>
 		</tbody>
 	</table>
 	<?php
@@ -329,25 +275,5 @@ function wp_seo_the_description_character_count( $count ) {
 		<?php /* translators: %d: description character count */ ?>
 		<noscript><?php echo esc_html( sprintf( __( '%d (save changes to update)', 'wp-seo' ), $count ) ); ?></noscript>
 	</p>
-	<?php
-}
-
-/**
- * Prints a form label for a meta keywords input.
- */
-function wp_seo_the_meta_keywords_label() {
-	?>
-	<label for="wp_seo_meta_keywords"><?php esc_html_e( 'Meta Keywords', 'wp-seo' ); ?></label>
-	<?php
-}
-
-/**
- * Prints a form input for meta keywords.
- *
- * @param string $value The input's current value.
- */
-function wp_seo_the_meta_keywords_input( $value ) {
-	?>
-	<textarea id="wp_seo_meta_keywords" name="seo_meta[keywords]" rows="2" cols="96"><?php echo esc_textarea( $value ); ?></textarea>
 	<?php
 }

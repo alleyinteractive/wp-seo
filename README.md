@@ -18,7 +18,7 @@ Enterprise SEO for large, performant sites.
 
 WP SEO is designed for professionals who want to build a solid foundation for an SEO-friendly website.
 
-It allows you to create templates for the title tag, meta description, and meta keywords on your posts, pages, custom post types, archives, and more. The templates can be populated dynamically with built-in formatting tags like `#title#` or `#Alley Interactive#`. You can even allow authors to create custom title and meta values for individual entries.
+It allows you to create templates for the title tag and meta description on your posts, pages, custom post types, archives, and more. The templates can be populated dynamically with built-in formatting tags like `#title#` or `#Alley Interactive#`. You can even allow authors to create custom title and meta values for individual entries.
 
 Meanwhile, it leaves other features like Open Graph metadata and XML sitemaps to more specialized plugins.
 
@@ -44,7 +44,7 @@ Or manually:
 
 ## Usage
 
-WP SEO allows you to customize the default format of `<title>` tags, `<meta>` descriptions, and `<meta>` keywords for your home page, single posts and custom post types, taxonomy and date archives, and more.
+WP SEO allows you to customize the default format of `<title>` tags and `<meta>` descriptions for your home page, single posts and custom post types, taxonomy and date archives, and more.
 
 Most of this customization happens on the WP SEO settings page, which you can access in the Dashboard at **Settings > SEO**.
 
@@ -100,7 +100,7 @@ The WP SEO settings page allows you to set **global defaults**, but you can also
 
 ### Custom Meta Tags
 
-In addition to `<meta>` descriptions and keywords, WP SEO allows you to set **custom **``** tags** site-wide. These are managed under **Other Meta Tags** in the settings.
+In addition to `<meta>` descriptions, WP SEO allows you to set **custom **``** tags** site-wide. These are managed under **Other Meta Tags** in the settings.
 
 For example, to add a Google Verification meta tag:
 

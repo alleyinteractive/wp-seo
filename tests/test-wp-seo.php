@@ -40,12 +40,5 @@ class WP_SEO_WP_SEO_Tests extends WP_SEO_Testcase {
 			WP_SEO::instance()->intersect_term_option( array() ),
 			'Unexpectedly missing default term option key'
 		);
-
-		$this->assertArrayHasKey(
-			'keywords',
-			WP_SEO::instance()->intersect_term_option( array() ),
-			'Unexpectedly missing default term option key'
-		);
-
 	}
 }
