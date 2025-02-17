@@ -57,10 +57,8 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$post_ID = $this->factory->post->create();
 		$title = rand_str();
 		$description = rand_str();
-		$keywords = rand_str();
 		add_post_meta( $post_ID, '_meta_title', $title );
 		add_post_meta( $post_ID, '_meta_description', $description );
-		add_post_meta( $post_ID, '_meta_keywords', $keywords );
 
 		$post = get_post( $post_ID );
 		$html = get_echo( array( WP_SEO(), 'post_meta_fields' ), array( $post ) );
@@ -70,7 +68,6 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
 		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
-		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
 	}
 
 	/**
@@ -122,40 +119,33 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		WP_SEO()->save_post_fields( $post_ID );
 		$this->assertEmpty( get_post_meta( $post_ID, '_meta_title', true ) );
 		$this->assertEmpty( get_post_meta( $post_ID, '_meta_description', true ) );
-		$this->assertEmpty( get_post_meta( $post_ID, '_meta_keywords', true ) );
 
 		$title = rand_str();
 		$description = rand_str();
-		$keywords = rand_str();
 
 		// add_magic_quotes() to simulate wp_magic_quotes().
 		$_POST['seo_meta'] = add_magic_quotes( array(
 			'title' => $title,
 			'description' => $description . '<script>meta</script>',
-			'keywords' => $keywords,
 		) );
 
 		// Successful save.
 		WP_SEO()->save_post_fields( $post_ID );
 		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
 		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
-		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
 
 		$title = "Is your name O'Reilly?";
 		$description = 'What is Folder\SubFolder\File.txt?';
-		$keywords = '';
 
 		// Successfully save data with slashes. add_magic_quotes() to simulate wp_magic_quotes().
 		$_POST['seo_meta'] = add_magic_quotes( array(
 			'title'       => $title,
 			'description' => $description,
-			'keywords'    => $keywords,
 		) );
 
 		WP_SEO()->save_post_fields( $post_ID );
 		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
 		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
-		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
 	}
 
 	/**
@@ -178,7 +168,6 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertRegExp( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
 		$this->assertContains( 'name="seo_meta[title]"', $html );
 		$this->assertContains( 'name="seo_meta[description]"', $html );
-		$this->assertContains( 'name="seo_meta[keywords]"', $html );
 	}
 
 	/**
@@ -190,14 +179,12 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 
 		$title = rand_str();
 		$description = rand_str();
-		$keywords = rand_str();
 
 		update_option(
 			WP_SEO()->get_term_option_name( $category ),
 			array(
 				'title' => $title,
 				'description' => $description,
-				'keywords' => $keywords,
 			)
 		);
 
@@ -208,7 +195,6 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $title ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
 		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
-		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
 	}
 
 	function test_save_term_fields() {
@@ -249,12 +235,10 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 
 		$title = rand_str();
 		$description = rand_str();
-		$keywords = rand_str();
 
 		$_POST['seo_meta'] = array(
 			'title' => $title,
 			'description' => $description . '<script>meta</script>',
-			'keywords' => $keywords,
 		);
 
 		// Successful add_option().
@@ -263,17 +247,14 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 			array(
 				'title' => $title,
 				'description' => $description,
-				'keywords' => $keywords,
 			),
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
 
 		$updated_title = rand_str();
-		$updated_keywords = rand_str();
 
 		$_POST['seo_meta'] = array(
 			'title' => $updated_title,
-			'keywords' => $updated_keywords,
 		);
 
 		// Successful update_option().
@@ -282,7 +263,6 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 			array(
 				'title' => $updated_title,
 				'description' => '',
-				'keywords' => $updated_keywords,
 			),
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
