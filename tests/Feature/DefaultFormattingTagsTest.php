@@ -230,7 +230,7 @@ class DefaultFormattingTagsTest extends TestCase {
 
 		$this->_truthy_on_only( 'all' );
 
-		$this->assertSame( 'Test Site', $this->current_tag->get_value() );
+		$this->assertSame( 'Test Blog', $this->current_tag->get_value() );
 	}
 
 	function test_title() {
