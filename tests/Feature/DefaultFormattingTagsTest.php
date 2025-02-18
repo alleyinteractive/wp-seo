@@ -195,6 +195,7 @@ class DefaultFormattingTagsTest extends TestCase {
 			'post_type_archive' => get_post_type_archive_link( 'demo_post_type' ),
 			'search'            => get_search_link( 'wp-seo' ),
 		];
+		var_dump( $destinations );
 
 		foreach ( $destinations as $destination => $url ) {
 			$this->go_to( $url );
