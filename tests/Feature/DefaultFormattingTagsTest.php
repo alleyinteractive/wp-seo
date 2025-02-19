@@ -200,6 +200,8 @@ class DefaultFormattingTagsTest extends TestCase {
 		foreach ( $destinations as $destination => $url ) {
 			$this->go_to( $url );
 			if ( 'all' === $expected || in_array( $destination, $expected ) ) {
+				var_dump( $this->current_tag );
+				var_dump( $this->current_tag->get_value() );
 				$this->assertNotEmpty( $this->current_tag->get_value(), sprintf( 'Should have been truthy at %s (%s)', $url, $this->current_tag->get_value() ) );
 			} else {
 				$this->assertFalse( $this->current_tag->get_value(), sprintf( 'Should not have been truthy at %s', $url ) );
