@@ -44,7 +44,7 @@ class FormatTest extends TestCase {
 	}
 
 	function test_default_tag() {
-		$this->assertSame( 'Welcome | Test Blog', WP_SEO()->format( $this->string_default_tag ) );
+		$this->assertSame( sprintf ( 'Welcome | %s', get_option( 'blogname' ) ), WP_SEO()->format( $this->string_default_tag ) );
 	}
 
 	function test_unknown_tag() {
@@ -53,7 +53,14 @@ class FormatTest extends TestCase {
 
 	function test_known_and_unknown_tags() {
 		$combined = sprintf( '%s | %s', $this->string_default_tag, $this->string_unknown_tag );
-		$this->assertSame( 'Welcome | Test Blog | '. $this->string_unknown_tag, WP_SEO()->format( $combined ) );
+		$this->assertSame(
+			sprintf(
+				'Welcome | %s | %s',
+				get_option( 'blogname' ),
+				$this->string_unknown_tag
+			),
+			WP_SEO()->format( $combined )
+		);
 	}
 
 }
