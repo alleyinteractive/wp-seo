@@ -734,6 +734,12 @@ class WP_SEO_Settings {
 			$sanitize_as_text_field[] = "single_{$type->name}_title";
 			$sanitize_as_text_field[] = "single_{$type->name}_description";
 		}
+
+		// Home description and keywords.
+		$sanitize_as_text_field = array(
+			'home_title',
+			'home_description',
+		);
 		// Post type, taxonomy, and other archives.
 		foreach ( array_merge( $this->archived_post_types, $this->taxonomies, array( 'author', 'date' ) ) as $type ) {
 			if ( is_object( $type ) ) {
@@ -745,8 +751,6 @@ class WP_SEO_Settings {
 		// "Other Pages" titles.
 		$sanitize_as_text_field[] = 'search_title';
 		$sanitize_as_text_field[] = '404_title';
-		$sanitize_as_text_field[] = 'home_title';
-		$sanitize_as_text_field[] = 'home_description';
 
 		foreach ( $sanitize_as_text_field as $field ) {
 			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
