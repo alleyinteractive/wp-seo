@@ -729,7 +729,7 @@ class WP_SEO_Settings {
 		 * Sanitize these as text fields and in the following order:
 		 */
 
-		 // Home description and keywords.
+		// Home description and keywords.
 		$sanitize_as_text_field = array(
 			'home_title',
 			'home_description',
@@ -739,7 +739,6 @@ class WP_SEO_Settings {
 			$sanitize_as_text_field[] = "single_{$type->name}_title";
 			$sanitize_as_text_field[] = "single_{$type->name}_description";
 		}
-
 		// Post type, taxonomy, and other archives.
 		foreach ( array_merge( $this->archived_post_types, $this->taxonomies, array( 'author', 'date' ) ) as $type ) {
 			if ( is_object( $type ) ) {
