@@ -28,6 +28,9 @@ class MetaboxesTest extends TestCase {
 		wp_set_current_user( 1 );
 	}
 
+	/**
+	 * These tests can be reenabled once we have a way to mock being in wp-admin context.
+	 */
 	// function test_add_meta_boxes() {
 	// 	WP_SEO()->add_meta_boxes( 'post' );
 
