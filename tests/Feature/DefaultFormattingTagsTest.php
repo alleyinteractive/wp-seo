@@ -195,13 +195,10 @@ class DefaultFormattingTagsTest extends TestCase {
 			'post_type_archive' => get_post_type_archive_link( 'demo_post_type' ),
 			'search'            => get_search_link( 'wp-seo' ),
 		];
-		var_dump( $destinations );
 
 		foreach ( $destinations as $destination => $url ) {
 			$this->go_to( $url );
-			if ( 'all' === $expected || in_array( $destination, $expected ) ) {
-				var_dump( $this->current_tag );
-				var_dump( $this->current_tag->get_value() );
+			if ( 'all' === $expected || in_array( $destination, $expected, true ) ) {
 				$this->assertNotEmpty( $this->current_tag->get_value(), sprintf( 'Should have been truthy at %s (%s)', $url, $this->current_tag->get_value() ) );
 			} else {
 				$this->assertFalse( $this->current_tag->get_value(), sprintf( 'Should not have been truthy at %s', $url ) );
