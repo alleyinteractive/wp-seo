@@ -152,7 +152,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			return wp_seo_intersect_args( $option_value, array(
 				'title'       => '',
 				'description' => '',
-				'keywords'    => '',
 			) );
 		}
 
@@ -248,7 +247,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 *
 			 * @param array $fields Array of field names that can be saved to the post meta.
 			 */
-			$fields = (array) apply_filters( 'wp_seo_saveable_fields', array( 'title', 'description', 'keywords' ) );
+			$fields = (array) apply_filters( 'wp_seo_saveable_fields', array( 'title', 'description' ) );
 			foreach ( $fields as $field ) {
 				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
@@ -351,7 +350,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
+			foreach ( array( 'title', 'description' ) as $field ) {
 				$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
 			}
 
@@ -539,7 +538,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
 					$meta_description = get_post_meta( get_the_ID(), '_meta_description', true );
-					$meta_keywords = get_post_meta( get_the_ID(), '_meta_keywords', true );
 				}
 				$key = "single_{$post_type}";
 			} elseif ( is_front_page() ) {
@@ -549,7 +547,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			} elseif ( is_category() || is_tag() || is_tax() ) {
 				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
 					$meta_description = $option['description'];
-					$meta_keywords = $option['keywords'];
 				}
 				$key = "archive_{$taxonomy}";
 			} elseif ( is_post_type_archive() ) {
@@ -577,25 +574,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 
 			if ( ! empty( $meta_description ) && ! is_wp_error( $meta_description ) ) {
 				$this->meta_field( 'description', $meta_description );
-			}
-
-			if ( empty( $meta_keywords ) ) {
-				/**
-				 * Filter the format string of the meta keywords for this page.
-				 *
-				 * @param  string      The format string retrieved from the settings.
-				 * @param  string $key The key of the setting retrieved.
-				 */
-				$keywords_string = apply_filters(
-					'wp_seo_meta_keywords_format',
-					! empty( $key ) ? WP_SEO_Settings()->get_option( "{$key}_keywords" ) : '',
-					$key
-				);
-				$meta_keywords = $this->format( $keywords_string );
-			}
-
-			if ( ! empty( $meta_keywords ) && ! is_wp_error( $meta_keywords ) ) {
-				$this->meta_field( 'keywords', $meta_keywords );
 			}
 
 			/**

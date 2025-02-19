@@ -36,7 +36,7 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Update the plugin option with titles, descriptions, and keywords for each test.
+	 * Update the plugin option with titles and descriptions for each test.
 	 *
 	 * This option should include all of the expected values used in these
 	 * tests. Not each test uses all values, but setting them all is a little
@@ -67,7 +67,6 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 		) as $key ) {
 			$this->options[ "{$key}_title" ]       = "demo_{$key}_title";
 			$this->options[ "{$key}_description" ] = "demo_{$key}_description";
-			$this->options[ "{$key}_keywords" ]    = "demo_{$key}_keywords";
 		}
 
 		update_option( WP_SEO_Settings::SLUG, WP_SEO_Settings()->sanitize_options( $this->options ) );
@@ -90,12 +89,10 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	 * Test that WP_SEO::wp_head() echoes all <meta> tags with expected values.
 	 *
 	 * @param  string $description The expected meta description content.
-	 * @param  string $keywords The expected meta keywords content.
 	 */
-	function _assert_all_meta( $description, $keywords ) {
+	function _assert_all_meta( $description ) {
 		$expected = <<<EOF
 <meta name='description' content='{$description}' /><!-- WP SEO -->
-<meta name='keywords' content='{$keywords}' /><!-- WP SEO -->
 <meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
 EOF;
 		$this->assertSame( strip_ws( $expected ), strip_ws( get_echo( array( WP_SEO(), 'wp_head' ) ) ) );
@@ -115,11 +112,11 @@ EOF;
 	 * Wrapper for checking _assert_title() and _assert_all_meta() on option values.
 	 *
 	 * @param  string $key The option to test. Use a name that prefixes
-	 *     '_title', '_description', and '_keywords' in the option, like 'home'.
+	 *     '_title' and '_description' in the option, like 'home'.
 	 */
 	function _assert_option_filters( $key ) {
 		$this->_assert_title( $this->options[ "{$key}_title" ] );
-		$this->_assert_all_meta( $this->options["{$key}_description"], $this->options["{$key}_keywords"] );
+		$this->_assert_all_meta( $this->options["{$key}_description"] );
 	}
 
 	/**
@@ -143,9 +140,8 @@ EOF;
 		$this->go_to( get_permalink( $post_ID = $this->factory->post->create() ) );
 		update_post_meta( $post_ID, '_meta_title', '_custom_meta_title' );
 		update_post_meta( $post_ID, '_meta_description', '_custom_meta_description' );
-		update_post_meta( $post_ID, '_meta_keywords', '_custom_meta_keywords' );
 		$this->_assert_title( '_custom_meta_title' );
-		$this->_assert_all_meta( '_custom_meta_description', '_custom_meta_keywords' );
+		$this->_assert_all_meta( '_custom_meta_description' );
 	}
 
 	// If there is no format string, return the original post title.
@@ -186,10 +182,10 @@ EOF;
 	// A term with custom values should not use the archive_{taxonomy}_ fields.
 	function test_category_custom() {
 		$term_ID = $this->factory->term->create( array( 'name' => 'cat-b', 'taxonomy' => 'category' ) );
-		update_option( WP_SEO()->get_term_option_name( get_term( $term_ID, 'category' ) ), array( 'title' => '_custom_title', 'description' => '_custom_description', 'keywords' => '_custom_keywords' ) );
+		update_option( WP_SEO()->get_term_option_name( get_term( $term_ID, 'category' ) ), array( 'title' => '_custom_title', 'description' => '_custom_description' ) );
 		$this->go_to( get_term_link( $term_ID, 'category' ) );
 		$this->_assert_title( '_custom_title' );
-		$this->_assert_all_meta( '_custom_description', '_custom_keywords' );
+		$this->_assert_all_meta( '_custom_description' );
 	}
 
 	function test_post_type_archive() {
