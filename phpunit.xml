@@ -17,6 +17,6 @@
   </testsuites>
   <php>
     <env name="MANTLE_USE_SQLITE" value="false" />
-    <env name="WP_SKIP_DB_CREATE" value="true" />
+    <env name="WP_SKIP_DB_CREATE" value="false" />
   </php>
 </phpunit>
