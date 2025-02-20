@@ -19,15 +19,33 @@ final class Open_Graph implements Feature {
 	 * Boot the feature.
 	 */
 	public function boot(): void {
+		add_action( 'init', [ $this, 'add_post_type_support' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_block_editor_assets' ] );
-		add_action( 'init', [ $this, 'add_meta_fields' ], 100 );
+		add_action( 'init', [ $this, 'add_meta_fields' ] );
 		add_action( 'wp_head', [ $this, 'render_open_graph_tags' ] );
 	}
+
+	/**
+	 * Add post type support.
+	 *
+	 * @todo: Supported post types should be configurable from admin page.
+	 */
+	public function add_post_type_support() {
+		add_post_type_support( 'post', 'open-graph' );
+		add_post_type_support( 'page', 'open-graph' );
+	}
+
 
 	/**
 	 * Enqueue block editor assets.
 	 */
 	public function enqueue_block_editor_assets() {
+		global $post;
+
+		if ( ! is_admin() || ! isset( $post ) || ! post_type_supports( get_post_type( $post ), 'open-graph' ) ) {
+			return;
+		}
+
 		wp_enqueue_script( 'wp-seo-open-graph-js' );
 	}
 
@@ -37,7 +55,7 @@ final class Open_Graph implements Feature {
 	public function add_meta_fields(): void {
 		register_meta_helper(
 			'post',
-			[ 'post', 'page' ],
+			get_post_types_by_support( 'open-graph' ),
 			'wp_seo_open_graph_title',
 			[
 				'sanitize_callback' => 'wp_kses_post',
@@ -49,7 +67,7 @@ final class Open_Graph implements Feature {
 
 		register_meta_helper(
 			'post',
-			[ 'post', 'page' ],
+			get_post_types_by_support( 'open-graph' ),
 			'wp_seo_open_graph_description',
 			[
 				'sanitize_callback' => 'wp_kses_post',
@@ -61,7 +79,7 @@ final class Open_Graph implements Feature {
 
 		register_meta_helper(
 			'post',
-			[ 'post', 'page' ],
+			get_post_types_by_support( 'open-graph' ),
 			'wp_seo_open_graph_image',
 			[
 				'sanitize_callback' => 'wp_kses_post',
@@ -111,7 +129,12 @@ final class Open_Graph implements Feature {
 	 * Render Open Graph tags.
 	 */
 	public function render_open_graph_tags(): void {
-		$post_id     = get_the_ID();
+		$post_id = get_the_ID();
+
+		if ( ! post_type_supports( get_post_type( $post_id ), 'open-graph' ) ) {
+			return;
+		}
+
 		$title       = $this->get_title( $post_id );
 		$description = $this->get_description( $post_id );
 		$image       = $this->get_image( $post_id );
