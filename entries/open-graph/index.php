@@ -31,14 +31,3 @@ function wp_seo_register_open_graph_scripts() {
 	wp_set_script_translations( 'wp-seo-open-graph-js', 'wp-seo' );
 }
 add_action( 'init', 'wp_seo_register_open_graph_scripts' );
-
-/**
- * Enqueue block editor assets for the open-graph slotfill.
- *
- * This function is called by the enqueue_block_editor_assets hook. Use it to
- * enqueue assets that are loaded in the block editor.
- */
-function wp_seo_enqueue_open_graph_assets() {
-	wp_enqueue_script( 'wp-seo-open-graph-js' );
-}
-add_action( 'enqueue_block_editor_assets', 'wp_seo_enqueue_open_graph_assets' );

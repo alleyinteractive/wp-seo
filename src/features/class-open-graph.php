@@ -19,8 +19,16 @@ final class Open_Graph implements Feature {
 	 * Boot the feature.
 	 */
 	public function boot(): void {
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_block_editor_assets' ] );
 		add_action( 'init', [ $this, 'add_meta_fields' ], 100 );
 		add_action( 'wp_head', [ $this, 'render_open_graph_tags' ] );
+	}
+
+	/**
+	 * Enqueue block editor assets.
+	 */
+	public function enqueue_block_editor_assets() {
+		wp_enqueue_script( 'wp-seo-open-graph-js' );
 	}
 
 	/**
