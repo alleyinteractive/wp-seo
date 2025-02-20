@@ -29,7 +29,7 @@ final class Open_Graph implements Feature {
 	public function add_meta_fields(): void {
 		register_meta_helper(
 			'post',
-			['post'], // @todo Suppprted post types only.
+			['post', 'page'],
 			'wp_seo_open_graph_title',
 			[
 				'sanitize_callback' => 'wp_kses_post',
@@ -41,7 +41,7 @@ final class Open_Graph implements Feature {
 
 		register_meta_helper(
 			'post',
-			['post'],
+			['post', 'page'],
 			'wp_seo_open_graph_description',
 			[
 				'sanitize_callback' => 'wp_kses_post',
@@ -53,7 +53,7 @@ final class Open_Graph implements Feature {
 
 		register_meta_helper(
 			'post',
-			['post'],
+			['post', 'page'],
 			'wp_seo_open_graph_image',
 			[
 				'sanitize_callback' => 'wp_kses_post',
