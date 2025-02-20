@@ -37,7 +37,7 @@ final class Open_Graph implements Feature {
 	public function add_meta_fields(): void {
 		register_meta_helper(
 			'post',
-			['post', 'page'],
+			[ 'post', 'page' ],
 			'wp_seo_open_graph_title',
 			[
 				'sanitize_callback' => 'wp_kses_post',
@@ -49,7 +49,7 @@ final class Open_Graph implements Feature {
 
 		register_meta_helper(
 			'post',
-			['post', 'page'],
+			[ 'post', 'page' ],
 			'wp_seo_open_graph_description',
 			[
 				'sanitize_callback' => 'wp_kses_post',
@@ -61,7 +61,7 @@ final class Open_Graph implements Feature {
 
 		register_meta_helper(
 			'post',
-			['post', 'page'],
+			[ 'post', 'page' ],
 			'wp_seo_open_graph_image',
 			[
 				'sanitize_callback' => 'wp_kses_post',
@@ -73,14 +73,48 @@ final class Open_Graph implements Feature {
 	}
 
 	/**
+	 * Get the title with a fallback.
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return string The title.
+	 */
+	public static function get_title( $post_id ): string {
+		return get_post_meta( $post_id, 'wp_seo_open_graph_title', true ) ?? get_the_title( $post_id );
+	}
+
+	/**
+	 * Get the description with a fallback.
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return string The description.
+	 */
+	public static function get_description( $post_id ): string {
+		return get_post_meta( $post_id, 'wp_seo_open_graph_description', true ) ?? get_the_excerpt( $post_id );
+	}
+
+	/**
+	 * Get the image with a fallback.
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return string|false The image URL or false if no assigned images.
+	 */
+	public static function get_image( $post_id ): string|bool {
+		return ! empty( get_post_meta( $post_id, 'wp_seo_open_graph_image', true ) )
+			? wp_get_attachment_image_url( get_post_meta( $post_id, 'wp_seo_open_graph_image', true ), 'full' )
+			: get_the_post_thumbnail_url( $post_id, 'full' );
+	}
+
+	/**
 	 * Render Open Graph tags.
 	 */
 	public function render_open_graph_tags(): void {
-		$title	     = get_post_meta( get_the_ID(), 'wp_seo_open_graph_title', true ) ?? get_the_title();
-		$description = get_post_meta( get_the_ID(), 'wp_seo_open_graph_description', true ) ?? get_the_excerpt();
-		$image	     = ! empty( get_post_meta( get_the_ID(), 'wp_seo_open_graph_image', true ) )
-			? wp_get_attachment_image_url( get_post_meta( get_the_ID(), 'wp_seo_open_graph_image', true ), 'full' )
-			: get_the_post_thumbnail_url( get_the_ID(), 'full' );
+		$post_id     = get_the_ID();
+		$title       = $this->get_title( $post_id );
+		$description = $this->get_description( $post_id );
+		$image       = $this->get_image( $post_id );
 
 		printf(
 			<<<'HTML'
@@ -95,7 +129,7 @@ HTML,
 			esc_attr( $title ),
 			esc_attr( $description ),
 			esc_url( get_permalink() ),
-			! empty ( $image ) ? sprintf( '<meta property="og:image" content="%s" />', esc_url( $image ) ) : ''
+			! empty( $image ) ? sprintf( '<meta property="og:image" content="%s" />', esc_url( $image ) ) : ''
 		);
 	}
 }
