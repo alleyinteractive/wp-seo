@@ -2,7 +2,7 @@
 /**
  * Open_Graph class file
  *
- * @package WP_SEO
+ * @package wp-seo
  */
 
 namespace Alley\WP\WP_SEO\Features;

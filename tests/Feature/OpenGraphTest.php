@@ -1,8 +1,8 @@
 <?php
 /**
- * Undefined test class file
+ * OpenGraphTest class file
  *
- * @package create-wordpress-plugin
+ * @package wp-seo
  */
 
 namespace Alley\WP\WP_SEO\Tests\Features;
