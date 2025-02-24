@@ -10,9 +10,10 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use WP_SEO_Settings;
 use WP_SEO;
-
+use Mantle\Testing\Concerns\Admin_Screen;
 
 class SettingsPageTest extends TestCase {
+	use Admin_Screen;
 
 	/**
 	 * Make sure we have a settings page.
