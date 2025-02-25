@@ -1,6 +1,6 @@
 <?php
 /**
- * open-graph slotfill script registration and enqueue.
+ * Open-graph slotfill script registration and enqueue.
  *
  * This file will be copied to the assets output directory
  * with Webpack using wp-scripts build. The build command must
