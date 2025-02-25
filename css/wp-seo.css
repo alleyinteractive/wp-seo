@@ -2,12 +2,15 @@ table.wp-seo-post-meta-fields { width: 100%; }
 #side-sortables .wp-seo-post-meta-fields th { display: block; max-width: none; text-align: left; }
 #side-sortables .wp-seo-post-meta-fields td { display: block; }
 .wp-seo-post-meta-fields th { padding: 3px; vertical-align: top; text-align: right; }
-.wp-seo-post-meta-fields textarea { height: 4em; width: 98%; }
+.wp-seo-post-meta-fields textarea { height: 4em; width: 98%; display: block; }
 .wp-seo-post-meta-fields input { width: 98%; }
+.wp-seo-post-meta-fields p { margin: 0.25rem 0 1.25rem; }
 #tab-panel-formatting-tags h1 { font-size: 1.3em; margin: 1em 0; }
 #tab-panel-formatting-tags .formatting-tag-name { font-family: monospace; }
+.wp-seo-repeatable-group { margin-bottom: 2rem; }
+.wp-seo-repeatable-field { margin-bottom: 0.5rem; }
 .wp-seo-repeatable-field label { min-width: 80px; display: inline-block; font-style: italic; }
-.wp-seo-delete { font-size: smaller; }
+.wp-seo-delete { font-size: smaller; border: 0; padding: 0; background: transparent; color: #2271b1; text-decoration: underline; cursor: pointer; }
 
 /* Display formatting tags in the help menu in two columns on shorter screens */
 #tab-panel-formatting-tags .formatting-tags {

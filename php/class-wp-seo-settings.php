@@ -648,7 +648,7 @@ class WP_SEO_Settings {
 						<?php endforeach; ?>
 						<?php
 							printf(
-								'<a href="#" class="wp-seo-delete">%1$s</a>',
+								'<button type="button" class="wp-seo-delete">%1$s</button>',
 								'<%= wp_seo_admin.repeatable_remove_label %>'
 							);
 						?>
