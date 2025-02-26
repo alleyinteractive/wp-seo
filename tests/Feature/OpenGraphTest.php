@@ -87,11 +87,11 @@ class OpenGraphTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_open_graph_image' => "url-to-open-graph.jpg",
+				'wp_seo_open_graph_image' => "007",
 			]
 		)
 		->create();
-		$this->assertEquals( 'url-to-open-graph.jpg', Open_Graph::get_image( $post_id ) );
+		$this->assertEquals( '007', Open_Graph::get_image( $post_id ) );
 	}
 
 	/**
