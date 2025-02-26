@@ -19,8 +19,10 @@
  * @return void
  */
 function wp_seo_register_open_graph_scripts() {
-	// Automatically load dependencies and version.
-	/** @var array{
+	/**
+	 * Asset file to automatically load dependencies and version.
+	 *
+	 * @var array{
 	 *      dependencies: string[],
 	 *      version: string,
 	 * } $asset_file
