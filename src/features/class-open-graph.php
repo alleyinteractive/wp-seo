@@ -29,6 +29,8 @@ final class Open_Graph implements Feature {
 	 * Add post type support.
 	 *
 	 * @todo: Supported post types should be configurable from admin page.
+	 *
+	 * @return void
 	 */
 	public function add_post_type_support() {
 		add_post_type_support( 'post', 'open-graph' );
@@ -38,11 +40,21 @@ final class Open_Graph implements Feature {
 
 	/**
 	 * Enqueue block editor assets.
+	 *
+	 * @return void
 	 */
 	public function enqueue_block_editor_assets() {
 		global $post;
 
-		if ( ! is_admin() || ! isset( $post ) || ! post_type_supports( get_post_type( $post ), 'open-graph' ) ) {
+		if ( ! is_admin()
+			|| ! ( $post instanceof \WP_Post || is_int( $post ) || is_null( $post ) )
+		) {
+			return;
+		}
+
+		$post_type = get_post_type( $post );
+
+		if ( empty( $post_type ) || ! post_type_supports( $post_type, 'open-graph' ) ) {
 			return;
 		}
 
@@ -98,7 +110,13 @@ final class Open_Graph implements Feature {
 	 * @return string The title.
 	 */
 	public static function get_title( $post_id ): string {
-		return get_post_meta( $post_id, 'wp_seo_open_graph_title', true ) ?? get_the_title( $post_id );
+		$open_graph_title = get_post_meta( $post_id, 'wp_seo_open_graph_title', true );
+
+		if ( ! empty( $open_graph_title ) && is_string( $open_graph_title ) ) {
+			return $open_graph_title;
+		}
+
+		return get_the_title( $post_id );
 	}
 
 	/**
@@ -109,7 +127,13 @@ final class Open_Graph implements Feature {
 	 * @return string The description.
 	 */
 	public static function get_description( $post_id ): string {
-		return get_post_meta( $post_id, 'wp_seo_open_graph_description', true ) ?? get_the_excerpt( $post_id );
+		$open_graph_description = get_post_meta( $post_id, 'wp_seo_open_graph_description', true );
+
+		if ( ! empty( $open_graph_description ) && is_string( $open_graph_description ) ) {
+			return $open_graph_description;
+		}
+
+		return get_the_excerpt( $post_id );
 	}
 
 	/**
@@ -120,9 +144,13 @@ final class Open_Graph implements Feature {
 	 * @return string|false The image URL or false if no assigned images.
 	 */
 	public static function get_image( $post_id ): string|bool {
-		return ! empty( get_post_meta( $post_id, 'wp_seo_open_graph_image', true ) )
-			? wp_get_attachment_image_url( get_post_meta( $post_id, 'wp_seo_open_graph_image', true ), 'full' )
-			: get_the_post_thumbnail_url( $post_id, 'full' );
+		$open_graph_image = get_post_meta( $post_id, 'wp_seo_open_graph_image', true );
+
+		if ( ! empty( $open_graph_image ) && is_numeric( $open_graph_image ) ) {
+			return wp_get_attachment_image_url( (int) $open_graph_image, 'full' );
+		}
+
+		return get_the_post_thumbnail_url( $post_id, 'full' );
 	}
 
 	/**
@@ -131,13 +159,20 @@ final class Open_Graph implements Feature {
 	public function render_open_graph_tags(): void {
 		$post_id = get_the_ID();
 
-		if ( ! post_type_supports( get_post_type( $post_id ), 'open-graph' ) ) {
+		if ( ! is_int( $post_id ) ) {
+			return;
+		}
+
+		$post_type = get_post_type( $post_id );
+
+		if ( empty( $post_type ) || ! post_type_supports( $post_type, 'open-graph' ) ) {
 			return;
 		}
 
 		$title       = $this->get_title( $post_id );
 		$description = $this->get_description( $post_id );
 		$image       = $this->get_image( $post_id );
+		$permalink   = ! empty( get_permalink( $post_id ) ) ? get_permalink( $post_id ) : '';
 
 		printf(
 			<<<'HTML'
@@ -151,7 +186,7 @@ final class Open_Graph implements Feature {
 HTML,
 			esc_attr( $title ),
 			esc_attr( $description ),
-			esc_url( get_permalink() ),
+			esc_url( $permalink ),
 			! empty( $image ) ? sprintf( '<meta property="og:image" content="%s" />', esc_url( $image ) ) : ''
 		);
 	}

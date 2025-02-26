@@ -15,9 +15,16 @@
 /**
  * Registers all open-graph slotfill assets so that they can be enqueued in
  * the corresponding context.
+ *
+ * @return void
  */
 function wp_seo_register_open_graph_scripts() {
 	// Automatically load dependencies and version.
+	/** @var array{
+	 *      dependencies: string[],
+	 *      version: string,
+	 * } $asset_file
+	 * */
 	$asset_file = include __DIR__ . '/index.asset.php';
 
 	// Register the open-graph script.
