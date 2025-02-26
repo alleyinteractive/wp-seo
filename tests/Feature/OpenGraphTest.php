@@ -35,13 +35,16 @@ class OpenGraphTest extends TestCase {
 	 */
 	public function test_get_title_fallback() {
 		$post_id = $this->factory->post
-		->with_title( 'Post Title' )
 		->with_meta(
 			[
 				'wp_seo_open_graph_title' => '',
 			]
 		)
-		->create();
+		->create(
+			[
+				'post_title' => 'Post Title',
+			]
+		);
 		$this->assertEquals( 'Post Title', Open_Graph::get_title( $post_id ) );
 	}
 
@@ -64,13 +67,16 @@ class OpenGraphTest extends TestCase {
 	 */
 	public function test_get_description_fallback() {
 		$post_id = $this->factory->post
-		->with_post_content( 'Post Content' )
 		->with_meta(
 			[
 				'wp_seo_open_graph_description' => '',
 			]
 		)
-		->create();
+		->create(
+			[
+				'post_excerpt' => 'Post Content',
+			]
+		);
 		$this->assertEquals( 'Post Content', Open_Graph::get_description( $post_id ) );
 	}
 
