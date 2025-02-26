@@ -8,6 +8,7 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use Mantle\Testing\Utils;
 use WP_SEO_Settings;
 use WP_SEO;
 
@@ -102,11 +103,7 @@ class WPTitleWPHeadTest extends TestCase {
 <meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
 EOF;
 
-		ob_start();
-		WP_SEO()->wp_head();
-		$html = ob_get_clean();
-
-		$this->assertSame( strip_ws( $expected ), strip_ws( $html ) );
+		$this->assertSame( strip_ws( $expected ), strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
 	}
 
 	/**
@@ -117,11 +114,7 @@ EOF;
 <meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
 EOF;
 
-		ob_start();
-		WP_SEO()->wp_head();
-		$html = ob_get_clean();
-
-		$this->assertSame( strip_ws( $expected ), strip_ws( $html ) );
+		$this->assertSame( strip_ws( $expected ), strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
 	}
 
 	/**
@@ -260,11 +253,7 @@ EOF;
 		$sep = rand_str();
 		$this->assertStringContainsString( $sep, wp_title( $sep, false ) );
 
-		ob_start();
-		WP_SEO()->wp_head();
-		$html = ob_get_clean();
-
-		$this->assertEmpty( $html );
+		$this->assertEmpty( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) );
 	}
 
 	/**
@@ -283,11 +272,7 @@ EOF;
 
 		$this->go_to( '/' );
 
-		ob_start();
-		WP_SEO()->wp_head();
-		$html = ob_get_clean();
-
-		$this->assertEmpty( $html );
+		$this->assertEmpty( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) );
 	}
 
 }
