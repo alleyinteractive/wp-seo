@@ -19,7 +19,7 @@ class SettingsPageTest extends TestCase {
 	/**
 	 * Make sure we have a settings page.
 	 */
-	function test_add_options_page() {
+	public function test_add_options_page() {
 		wp_set_current_user( 1 );
 		WP_SEO_Settings()->add_options_page();
 
