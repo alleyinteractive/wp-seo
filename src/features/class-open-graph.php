@@ -70,7 +70,7 @@ final class Open_Graph implements Feature {
 			get_post_types_by_support( 'open-graph' ),
 			'wp_seo_open_graph_title',
 			[
-				'sanitize_callback' => 'wp_kses_post',
+				'sanitize_callback' => 'sanitize_text_field',
 				'single'            => true,
 				'type'              => 'string',
 				'show_in_rest'      => true,
@@ -82,7 +82,7 @@ final class Open_Graph implements Feature {
 			get_post_types_by_support( 'open-graph' ),
 			'wp_seo_open_graph_description',
 			[
-				'sanitize_callback' => 'wp_kses_post',
+				'sanitize_callback' => 'sanitize_text_field',
 				'single'            => true,
 				'type'              => 'string',
 				'show_in_rest'      => true,
@@ -94,7 +94,7 @@ final class Open_Graph implements Feature {
 			get_post_types_by_support( 'open-graph' ),
 			'wp_seo_open_graph_image',
 			[
-				'sanitize_callback' => 'wp_kses_post',
+				'sanitize_callback' => 'intval',
 				'single'            => true,
 				'type'              => 'integer',
 				'show_in_rest'      => true,
