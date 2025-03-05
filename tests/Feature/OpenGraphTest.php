@@ -85,13 +85,13 @@ class OpenGraphTest extends TestCase {
 	 */
 	public function test_get_image() {
 		$post_id = $this->factory->post
-		->with_meta(
-			[
-				'wp_seo_open_graph_image' => 007,
-			]
-		)
+		->with_thumbnail()
 		->create();
-		$this->assertNotFalse( Open_Graph::get_image( $post_id ) );
+
+		$thumb_id = get_post_meta( $post_id, '_thumbnail_id', true );
+		$thumb_url = wp_get_attachment_image_url( $thumb_id, 'full' );
+
+		$this->assertEquals($thumb_url, Open_Graph::get_image( $post_id ) );
 	}
 
 	/**
