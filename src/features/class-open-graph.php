@@ -145,13 +145,17 @@ final class Open_Graph implements Feature {
 	 */
 	public static function get_image( $post_id ): string|bool {
 		$open_graph_image_id  = get_post_meta( $post_id, 'wp_seo_open_graph_image', true );
-		$open_graph_image_url = wp_get_attachment_image_url( (int) $open_graph_image_id, 'full' );
+		$open_graph_image_url = is_int( $open_graph_image_id ) ? wp_get_attachment_image_url( $open_graph_image_id, 'full' ) : '';
 
-		if ( ! empty( $open_graph_image_url ) && ! is_wp_error( $open_graph_image_url ) ) {
-			return $open_graph_image_url;
+		if ( empty( $open_graph_image_url ) ) {
+			$open_graph_image_url = new \WP_Error( 'no_image', 'No image found' );
 		}
 
-		return get_the_post_thumbnail_url( $post_id, 'full' );
+		if ( is_wp_error( $open_graph_image_url ) ) {
+			return get_the_post_thumbnail_url( $post_id, 'full' );
+		}
+
+		return $open_graph_image_url;
 	}
 
 	/**
