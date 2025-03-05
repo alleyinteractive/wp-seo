@@ -9,7 +9,7 @@ interface SearchPreviewProps {
   link: string;
   postType: string;
   siteTitle: string;
-  siteIcon: string;
+  siteIcon?: string;
   siteTimezone: string;
 }
 
