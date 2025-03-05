@@ -56,7 +56,7 @@ function OpenGraphSlotfill() {
         onClick={openModal}
         variant="secondary"
       >
-        Preview
+        {__('Preview', 'wp-seo')}
       </Button>
       {showModal ? (
         <PreviewModal
