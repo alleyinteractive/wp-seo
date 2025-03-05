@@ -144,10 +144,11 @@ final class Open_Graph implements Feature {
 	 * @return string|false The image URL or false if no assigned images.
 	 */
 	public static function get_image( $post_id ): string|bool {
-		$open_graph_image = get_post_meta( $post_id, 'wp_seo_open_graph_image', true );
+		$open_graph_image_id  = get_post_meta( $post_id, 'wp_seo_open_graph_image', true );
+		$open_graph_image_url = wp_get_attachment_image_url( (int) $open_graph_image_id, 'full' );
 
-		if ( ! empty( $open_graph_image ) && is_numeric( $open_graph_image ) ) {
-			return wp_get_attachment_image_url( (int) $open_graph_image, 'full' );
+		if ( ! empty( $open_graph_image_url ) && ! is_wp_error( $open_graph_image_url ) ) {
+			return $open_graph_image_url;
 		}
 
 		return get_the_post_thumbnail_url( $post_id, 'full' );
