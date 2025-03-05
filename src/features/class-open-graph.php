@@ -148,7 +148,7 @@ final class Open_Graph implements Feature {
 		$open_graph_image_url = is_int( $open_graph_image_id ) ? wp_get_attachment_image_url( $open_graph_image_id, 'full' ) : '';
 
 		if ( empty( $open_graph_image_url ) ) {
-			$open_graph_image_url = new \WP_Error( 'no_image', 'No image found' );
+			$open_graph_image_url = new \WP_Error( 'no_open_graph_image', 'No Open Graph image found' );
 		}
 
 		if ( is_wp_error( $open_graph_image_url ) ) {
