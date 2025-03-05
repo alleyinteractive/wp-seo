@@ -91,7 +91,7 @@ class OpenGraphTest extends TestCase {
 			]
 		)
 		->create();
-		$this->assertNotEmpty( Open_Graph::get_image( $post_id ) );
+		$this->assertNotFalse( Open_Graph::get_image( $post_id ) );
 	}
 
 	/**
