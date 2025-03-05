@@ -3,7 +3,7 @@ import { useMedia } from '@alleyinteractive/block-editor-tools';
 interface SocialPreviewProps {
   title: string;
   description: string;
-  imageId: number;
+  imageId?: number;
   siteUrl: string;
 }
 
