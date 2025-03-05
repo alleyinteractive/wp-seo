@@ -94,7 +94,7 @@ final class Open_Graph implements Feature {
 			get_post_types_by_support( 'open-graph' ),
 			'wp_seo_open_graph_image',
 			[
-				'sanitize_callback' => 'intval',
+				'sanitize_callback' => 'absint',
 				'single'            => true,
 				'type'              => 'integer',
 				'show_in_rest'      => true,
