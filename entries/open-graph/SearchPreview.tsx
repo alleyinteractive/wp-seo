@@ -4,7 +4,7 @@ import { useMedia } from '@alleyinteractive/block-editor-tools';
 interface SearchPreviewProps {
   title: string;
   description: string;
-  imageId: number;
+  imageId?: number;
   date: string;
   link: string;
   postType: string;
