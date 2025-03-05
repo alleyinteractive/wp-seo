@@ -145,7 +145,9 @@ final class Open_Graph implements Feature {
 	 */
 	public static function get_image( $post_id ): string|bool {
 		$open_graph_image_id  = get_post_meta( $post_id, 'wp_seo_open_graph_image', true );
-		$open_graph_image_url = is_int( $open_graph_image_id ) ? wp_get_attachment_image_url( $open_graph_image_id, 'full' ) : false;
+		$open_graph_image_url = ( ! empty( $open_graph_image_id ) && is_string( $open_graph_image_id ) )
+		? wp_get_attachment_image_url( (int) $open_graph_image_id, 'full' )
+		: false;
 
 		if ( empty( $open_graph_image_url ) ) {
 			$open_graph_image_url = new \WP_Error( 'no_open_graph_image', 'No Open Graph image found' );
