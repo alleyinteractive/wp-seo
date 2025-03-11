@@ -40,3 +40,11 @@ function wp_seo_register_open_graph_scripts() {
 	wp_set_script_translations( 'wp-seo-open-graph-js', 'wp-seo' );
 }
 add_action( 'init', 'wp_seo_register_open_graph_scripts' );
+
+/**
+ * Enqueue open graph slotfill styles.
+ */
+function wp_seo_register_open_graph_styles() {
+	wp_enqueue_style( 'wp-seo-open-graph', plugins_url( '../style-open-graph/index.css', __FILE__ ), [], '1.0.0' );
+}
+add_action( 'enqueue_block_editor_assets', 'wp_seo_register_open_graph_styles' );

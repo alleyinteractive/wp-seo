@@ -31,6 +31,7 @@
     "@wordpress/blocks": "^13.8.5",
     "@wordpress/components": "^28.8.11",
     "@wordpress/data": "^10.8.3",
+    "@wordpress/date": "^5.19.0",
     "@wordpress/edit-post": "^8.8.18",
     "@wordpress/editor": "^14.18.0",
     "@wordpress/i18n": "^5.8.2",
