@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { Button, TextareaControl, TextControl } from '@wordpress/components';
-import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
-
+import {
+  PanelBody,
+  Button,
+  TextareaControl,
+  TextControl,
+} from '@wordpress/components';
 import {
   ImagePicker,
   usePostMetaValue,
 } from '@alleyinteractive/block-editor-tools';
+
 import PreviewModal from './PreviewModal';
 
 import './style.scss';
@@ -26,10 +30,9 @@ function OpenGraphSlotfill() {
   };
 
   return (
-    <PluginDocumentSettingPanel
-      icon="share"
-      name="opengraph"
+    <PanelBody
       title={__('Open Graph', 'wp-seo')}
+      initialOpen
     >
       <TextControl
         label={__('Title', 'wp-seo')}
@@ -66,7 +69,7 @@ function OpenGraphSlotfill() {
           openGraphImageId={image}
         />
       ) : null}
-    </PluginDocumentSettingPanel>
+    </PanelBody>
   );
 }
 
