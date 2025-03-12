@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { __ } from '@wordpress/i18n';
+import { select } from '@wordpress/data';
 import {
   PanelBody,
   Button,
@@ -16,10 +17,17 @@ import PreviewModal from './PreviewModal';
 import './style.scss';
 
 function OpenGraphSlotfill() {
+  const currentPostType = select('core/editor').getCurrentPostType();
+  const postType = select('core').getEntityRecord('root', 'postType', currentPostType);
+
   const [title, setTitle] = usePostMetaValue('wp_seo_open_graph_title');
   const [description, setDescription] = usePostMetaValue('wp_seo_open_graph_description');
   const [image, setImage] = usePostMetaValue('wp_seo_open_graph_image');
   const [showModal, setShowModal] = useState(false);
+
+  if (!postType?.supports['open-graph']) {
+    return null;
+  }
 
   const openModal = () => {
     setShowModal(true);
