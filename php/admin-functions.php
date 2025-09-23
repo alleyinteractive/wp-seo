@@ -65,6 +65,69 @@ function wp_seo_post_id_to_the_meta_keywords_input( $post_id ) {
 }
 
 /**
+ * Call printing function for the meta canonical URL input for a given post.
+ *
+ * @param int $post_id Post ID.
+ */
+function wp_seo_post_id_to_the_meta_canonical_url_input( $post_id ) {
+	wp_seo_the_meta_canonical_url_input( get_post_meta( $post_id, '_meta_canonical_url', true ) );
+}
+
+/**
+ * Call printing function for the meta robots noindex input for a given post.
+ *
+ * @param int $post_id Post ID.
+ */
+function wp_seo_post_id_to_the_meta_robots_noindex_input( $post_id ) {
+	wp_seo_the_meta_robots_noindex_input( get_post_meta( $post_id, '_meta_robots_noindex', true ) );
+}
+
+/**
+ * Call printing function for the meta robots nofollow input for a given post.
+ *
+ * @param int $post_id Post ID.
+ */
+function wp_seo_post_id_to_the_meta_robots_nofollow_input( $post_id ) {
+	wp_seo_the_meta_robots_nofollow_input( get_post_meta( $post_id, '_meta_robots_nofollow', true ) );
+}
+
+/**
+ * Call printing function for the meta robots noarchive input for a given post.
+ *
+ * @param int $post_id Post ID.
+ */
+function wp_seo_post_id_to_the_meta_robots_noarchive_input( $post_id ) {
+	wp_seo_the_meta_robots_noarchive_input( get_post_meta( $post_id, '_meta_robots_noarchive', true ) );
+}
+
+/**
+ * Call printing function for the meta robots nosnippet input for a given post.
+ *
+ * @param int $post_id Post ID.
+ */
+function wp_seo_post_id_to_the_meta_robots_nosnippet_input( $post_id ) {
+	wp_seo_the_meta_robots_nosnippet_input( get_post_meta( $post_id, '_meta_robots_nosnippet', true ) );
+}
+
+/**
+ * Call printing function for the meta robots noimageindex input for a given post.
+ *
+ * @param int $post_id Post ID.
+ */
+function wp_seo_post_id_to_the_meta_robots_noimageindex_input( $post_id ) {
+	wp_seo_the_meta_robots_noimageindex_input( get_post_meta( $post_id, '_meta_robots_noimageindex', true ) );
+}
+
+/**
+ * Call printing function for the meta robots notranslate input for a given post.
+ *
+ * @param int $post_id Post ID.
+ */
+function wp_seo_post_id_to_the_meta_robots_notranslate_input( $post_id ) {
+	wp_seo_the_meta_robots_notranslate_input( get_post_meta( $post_id, '_meta_robots_notranslate', true ) );
+}
+
+/**
  * Call printing function for the meta title input for a given term.
  *
  * @param int    $term_id  Term ID.

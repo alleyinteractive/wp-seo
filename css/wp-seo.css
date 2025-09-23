@@ -3,7 +3,8 @@ table.wp-seo-post-meta-fields { width: 100%; }
 #side-sortables .wp-seo-post-meta-fields td { display: block; }
 .wp-seo-post-meta-fields th { padding: 3px; vertical-align: top; text-align: right; }
 .wp-seo-post-meta-fields textarea { height: 4em; width: 98%; }
-.wp-seo-post-meta-fields input { width: 98%; }
+.wp-seo-post-meta-fields input:not([type=checkbox]) { width: 98%; }
+.wp-seo-post-meta-fields input[type=url]::placeholder { color: gray; }
 #tab-panel-formatting-tags h1 { font-size: 1.3em; margin: 1em 0; }
 #tab-panel-formatting-tags .formatting-tag-name { font-family: monospace; }
 .wp-seo-repeatable-field label { min-width: 80px; display: inline-block; font-style: italic; }

@@ -90,6 +90,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			add_filter( 'pre_get_document_title', array( $this, 'pre_get_document_title' ), 20 );
 			add_filter( 'wp_title', array( $this, 'wp_title' ), 20, 2 );
 			add_filter( 'wp_head', array( $this, 'wp_head' ), 5 );
+			add_filter( 'wp_robots', array( $this, 'wp_robots' ) );
+			add_filter( 'get_canonical_url', array( $this, 'get_canonical_url' ), 10, 2 );
 		}
 
 		/**
@@ -248,10 +250,24 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 *
 			 * @param array $fields Array of field names that can be saved to the post meta.
 			 */
-			$fields = (array) apply_filters( 'wp_seo_saveable_fields', array( 'title', 'description', 'keywords' ) );
+			$fields = (array) apply_filters( 'wp_seo_saveable_fields', array( 'title', 'canonical_url', 'description', 'keywords', 'robots_noindex', 'robots_nofollow', 'robots_noarchive', 'robots_nosnippet', 'robots_noimageindex', 'robots_notranslate' ) );
 			foreach ( $fields as $field ) {
 				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
-				update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
+
+				// If this is the canonical URL field, validate it as a URL.
+				if ( 'canonical_url' === $field ) {
+					// Only save if empty or valid URL.
+					if ( empty( $data ) ) {
+						update_post_meta( $post_id, wp_slash( '_meta_' . $field ), '' );
+					} else {
+						$valid_url = filter_var( $data, FILTER_VALIDATE_URL );
+						if ( $valid_url ) {
+							update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $valid_url ) );
+						}
+					}
+				} else {
+					update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
+				}
 			}
 		}
 
@@ -615,6 +631,63 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				}
 			}
 
+		}
+
+		/**
+		 * Filters the directives to be included in the 'robots' meta tag.
+		 * 
+		 * @param array $robots Associative array of directives.
+		 */
+		function wp_robots( $robots ) {
+			if ( ! is_singular() ) {
+				return $robots;
+			}
+
+			$post_id = get_queried_object_id();
+
+			if ( empty( $post_id ) ) {
+				return $robots;
+			}
+
+			$post_meta = get_post_meta( $post_id );
+
+			if ( empty( $post_meta ) ) {
+				return $robots;
+			}
+
+			// List of possible robots directives.
+			$robots_directives = [
+				'noindex',
+				'nofollow',
+				'noarchive',
+				'nosnippet',
+				'noimageindex',
+				'notranslate',
+			];
+
+			// Check the meta value for each directive and set it to true if present.
+			foreach ( $robots_directives as $directive ) {
+				if ( ! empty( $post_meta[ "_meta_robots_{$directive}" ][0] ) ) {
+					$robots[ $directive ] = true;
+				}
+			}
+
+			return $robots;
+		}
+
+		/**
+		 * Filters the canonical URL.
+		 * 
+		 * @param string  $canonical_url The post's canonical URL.
+		 * @param WP_Post $post          Post object.
+		 */
+		function get_canonical_url( $canonical_url, $post ) {
+			if ( empty( $post ) || ! $post instanceof WP_Post || ! is_singular() ) {
+				return $canonical_url;
+			}
+
+			// Use the post's custom canonical URL if present.
+			return get_post_meta( $post->ID, '_meta_canonical_url', true ) ?: $canonical_url;
 		}
 	}
 
