@@ -48,4 +48,67 @@ class WP_SEO_WP_SEO_Tests extends WP_SEO_Testcase {
 		);
 
 	}
+
+	function test_get_canonical_url() {
+		$post_ID = $this->factory->post->create();
+		$post = get_post( $post_ID );
+		$custom_url = 'https://example.com/' . rand_str();
+		update_post_meta( $post_ID, '_meta_canonical_url', $custom_url );
+
+		// Should return custom canonical URL if set.
+		$this->assertSame(
+			$custom_url,
+			WP_SEO::instance()->get_canonical_url( 'https://default.com/', $post )
+		);
+
+		// Should return default if not set.
+		delete_post_meta( $post_ID, '_meta_canonical_url' );
+		$this->assertSame(
+			'https://default.com/',
+			WP_SEO::instance()->get_canonical_url( 'https://default.com/', $post )
+		);
+	}
+
+	function test_wp_robots() {
+		$post_ID = $this->factory->post->create();
+		$post = get_post( $post_ID );
+
+		// Simulate WP environment for is_singular().
+		global $wp_query;
+		$wp_query->post = $post;
+		$wp_query->queried_object_id = $post_ID;
+		$wp_query->is_singular = true;
+
+		$directives = [
+			'noindex',
+			'nofollow',
+			'noarchive',
+			'nosnippet',
+			'noimageindex',
+			'notranslate',
+		];
+
+		// Verify that all directives are set when all are enabled.
+		foreach ( $directives as $directive ) {
+			update_post_meta( $post_ID, '_meta_robots_' . $directive, '1' );
+		}
+
+		$robots = WP_SEO::instance()->wp_robots( [] );
+
+		foreach ( $directives as $directive ) {
+			$this->assertArrayHasKey( $directive, $robots );
+			$this->assertTrue( $robots[ $directive ] );
+		}
+
+		// Verify that no directives are set when none are enabled.
+		foreach ( $directives as $directive ) {
+			delete_post_meta( $post_ID, '_meta_robots_' . $directive );
+		}
+
+		$robots = WP_SEO::instance()->wp_robots( [] );
+
+		foreach ( $directives as $directive ) {
+			$this->assertArrayNotHasKey( $directive, $robots );
+		}
+	}
 }

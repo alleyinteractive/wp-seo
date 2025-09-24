@@ -31,15 +31,23 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 	 * }
 	 */
 	function data_post_id_to_functions() {
-		$meta_title       = rand_str( rand( 32, 64 ) );
-		$meta_description = rand_str( rand( 32, 64 ) );
-		$meta_keywords    = rand_str( rand( 32, 64 ) );
+		$meta_title         = rand_str( rand( 32, 64 ) );
+		$meta_description   = rand_str( rand( 32, 64 ) );
+		$meta_keywords      = rand_str( rand( 32, 64 ) );
+		$meta_canonical_url = 'https://example.com/canonical-url';
 
 		$post_id = $this->factory->post->create( array(
 			'meta_input' => array(
-				'_meta_title'       => $meta_title,
-				'_meta_description' => $meta_description,
-				'_meta_keywords'    => $meta_keywords,
+				'_meta_title'               => $meta_title,
+				'_meta_description'         => $meta_description,
+				'_meta_keywords'            => $meta_keywords,
+				'_meta_canonical_url'       => $meta_canonical_url,
+				'_meta_robots_noindex'      => '1',
+				'_meta_robots_nofollow'     => '1',
+				'_meta_robots_noarchive'    => '1',
+				'_meta_robots_nosnippet'    => '1',
+				'_meta_robots_noimageindex' => '1',
+				'_meta_robots_notranslate'  => '1',
 			),
 		) );
 
@@ -72,6 +80,48 @@ class WP_SEO_Admin_Functions_Tests extends WP_SEO_Testcase {
 				'wp_seo_post_id_to_the_meta_keywords_input',
 				'Should print the keyword value in post meta',
 				$meta_keywords,
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_canonical_url_input',
+				'Should print the canonical URL value in post meta',
+				$meta_canonical_url,
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_robots_noindex_input',
+				'Should check the noindex checkbox when the noindex meta is set',
+				'checked="checked"',
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_robots_nofollow_input',
+				'Should check the nofollow checkbox when the nofollow meta is set',
+				'checked="checked"',
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_robots_noarchive_input',
+				'Should check the noarchive checkbox when the noarchive meta is set',
+				'checked="checked"',
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_robots_nosnippet_input',
+				'Should check the nosnippet checkbox when the nosnippet meta is set',
+				'checked="checked"',
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_robots_noimageindex_input',
+				'Should check the noimageindex checkbox when the noimageindex meta is set',
+				'checked="checked"',
+				array( $post_id ),
+			),
+			array(
+				'wp_seo_post_id_to_the_meta_robots_notranslate_input',
+				'Should check the notranslate checkbox when the notranslate meta is set',
+				'checked="checked"',
 				array( $post_id ),
 			),
 		);

@@ -58,9 +58,22 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
+		$canonical_url = 'https://example.com/' . rand_str();
+		$robots = [
+			'robots_noindex' => '1',
+			'robots_nofollow' => '1',
+			'robots_noarchive' => '',
+			'robots_nosnippet' => '1',
+			'robots_noimageindex' => '',
+			'robots_notranslate' => '1',
+		];
 		add_post_meta( $post_ID, '_meta_title', $title );
 		add_post_meta( $post_ID, '_meta_description', $description );
 		add_post_meta( $post_ID, '_meta_keywords', $keywords );
+		add_post_meta( $post_ID, '_meta_canonical_url', $canonical_url );
+		foreach ( $robots as $field => $value ) {
+			add_post_meta( $post_ID, '_meta_' . $field, $value );
+		}
 
 		$post = get_post( $post_ID );
 		$html = get_echo( array( WP_SEO(), 'post_meta_fields' ), array( $post ) );
@@ -71,6 +84,17 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$this->assertRegExp( "/<textarea.*?>{$description}<\/textarea>/", $html );
 		$this->assertContains( sprintf( '<noscript>%d (save changes to update)</noscript>', strlen( $description ) ), $html );
 		$this->assertRegExp( "/<textarea.*?>{$keywords}<\/textarea>/", $html );
+
+		// Canonical URL field.
+		$this->assertContains( 'name="seo_meta[canonical_url]"', $html );
+		$this->assertContains( 'type="url"', $html );
+		$this->assertContains( 'value="' . $canonical_url . '"', $html );
+
+		// Robots checkboxes.
+		foreach ( array_keys( $robots ) as $field ) {
+			$this->assertContains( 'name="seo_meta[' . $field . ']"', $html );
+			$this->assertContains( 'type="checkbox"', $html );
+		}
 	}
 
 	/**
@@ -127,19 +151,38 @@ class WP_SEO_Metaboxes_Tests extends WP_UnitTestCase {
 		$title = rand_str();
 		$description = rand_str();
 		$keywords = rand_str();
+		$canonical_url = 'https://example.com/' . rand_str();
+		$robots = [
+			'robots_noindex' => '1',
+			'robots_nofollow' => '1',
+			'robots_noarchive' => '',
+			'robots_nosnippet' => '1',
+			'robots_noimageindex' => '',
+			'robots_notranslate' => '1',
+		];
 
 		// add_magic_quotes() to simulate wp_magic_quotes().
 		$_POST['seo_meta'] = add_magic_quotes( array(
 			'title' => $title,
 			'description' => $description . '<script>meta</script>',
 			'keywords' => $keywords,
-		) );
+			'canonical_url' => $canonical_url,
+		) + $robots );
 
 		// Successful save.
 		WP_SEO()->save_post_fields( $post_ID );
 		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
 		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
 		$this->assertEquals( $keywords, get_post_meta( $post_ID, '_meta_keywords', true ) );
+		$this->assertEquals( $canonical_url, get_post_meta( $post_ID, '_meta_canonical_url', true ) );
+		foreach ( $robots as $field => $value ) {
+			$this->assertEquals( $value, get_post_meta( $post_ID, '_meta_' . $field, true ) );
+		}
+
+		// Verify that an invalid canonical URL is not saved.
+		$_POST['seo_meta']['canonical_url'] = 'not-a-url';
+		WP_SEO()->save_post_fields( $post_ID );
+		$this->assertEquals( $canonical_url, get_post_meta( $post_ID, '_meta_canonical_url', true ) );
 
 		$title = "Is your name O'Reilly?";
 		$description = 'What is Folder\SubFolder\File.txt?';
