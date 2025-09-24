@@ -678,7 +678,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		/**
 		 * Filters the canonical URL.
 		 * 
-		 * @param string  $canonical_url The post's canonical URL.
+		 * @param string $canonical_url The post's canonical URL.
 		 * @param WP_Post $post          Post object.
 		 */
 		function get_canonical_url( $canonical_url, $post ) {

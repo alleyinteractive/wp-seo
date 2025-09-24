@@ -173,7 +173,7 @@ function wp_seo_the_post_meta_fields( $post ) {
 
 					/**
 					 * Fires after the meta robots nofollow input in the post metabox.
-					 * 
+					 *
 					 * @param int $post_id The ID of the post being edited.
 					 */
 					do_action( 'wp_seo_post_meta_fields_fields_after_robots_nofollow_input', $post->ID );
@@ -200,7 +200,7 @@ function wp_seo_the_post_meta_fields( $post ) {
 
 					/**
 					 * Fires after the meta robots noarchive input in the post metabox.
-					 * 
+					 *
 					 * @param int $post_id The ID of the post being edited.
 					 */
 					do_action( 'wp_seo_post_meta_fields_fields_after_robots_noarchive_input', $post->ID );
@@ -227,7 +227,7 @@ function wp_seo_the_post_meta_fields( $post ) {
 
 					/**
 					 * Fires after the meta robots nosnippet input in the post metabox.
-					 * 
+					 *
 					 * @param int $post_id The ID of the post being edited.
 					 */
 					do_action( 'wp_seo_post_meta_fields_fields_after_robots_nosnippet_input', $post->ID );
@@ -254,7 +254,7 @@ function wp_seo_the_post_meta_fields( $post ) {
 
 					/**
 					 * Fires after the meta robots noimageindex input in the post metabox.
-					 * 
+					 *
 					 * @param int $post_id The ID of the post being edited.
 					 */
 					do_action( 'wp_seo_post_meta_fields_fields_after_robots_noimageindex_input', $post->ID );
@@ -281,7 +281,7 @@ function wp_seo_the_post_meta_fields( $post ) {
 
 					/**
 					 * Fires after the meta robots notranslate input in the post metabox.
-					 * 
+					 *
 					 * @param int $post_id The ID of the post being edited.
 					 */
 					do_action( 'wp_seo_post_meta_fields_fields_after_robots_notranslate_input', $post->ID );
@@ -601,7 +601,7 @@ function wp_seo_the_meta_robots_noindex_label() {
 
 /**
  * Prints a form input for a meta robots noindex checkbox.
- * 
+ *
  * @param string $value The input's current value.
  */
 function wp_seo_the_meta_robots_noindex_input( $value ) {
@@ -628,7 +628,7 @@ function wp_seo_the_meta_robots_nofollow_label() {
 
 /**
  * Prints a form input for a meta robots nofollow checkbox.
- * 
+ *
  * @param string $value The input's current value.
  */
 function wp_seo_the_meta_robots_nofollow_input( $value ) {
@@ -655,7 +655,7 @@ function wp_seo_the_meta_robots_noarchive_label() {
 
 /**
  * Prints a form input for a meta robots noarchive checkbox.
- * 
+ *
  * @param string $value The input's current value.
  */
 function wp_seo_the_meta_robots_noarchive_input( $value ) {
@@ -682,7 +682,7 @@ function wp_seo_the_meta_robots_nosnippet_label() {
 
 /**
  * Prints a form input for a meta robots nosnippet checkbox.
- * 
+ *
  * @param string $value The input's current value.
  */
 function wp_seo_the_meta_robots_nosnippet_input( $value ) {
@@ -709,7 +709,7 @@ function wp_seo_the_meta_robots_noimageindex_label() {
 
 /**
  * Prints a form input for a meta robots noimageindex checkbox.
- * 
+ *
  * @param string $value The input's current value.
  */
 function wp_seo_the_meta_robots_noimageindex_input( $value ) {
@@ -736,7 +736,7 @@ function wp_seo_the_meta_robots_notranslate_label() {
 
 /**
  * Prints a form input for a meta robots notranslate checkbox.
- * 
+ *
  * @param string $value The input's current value.
  */
 function wp_seo_the_meta_robots_notranslate_input( $value ) {
