@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginSidebar } from '@wordpress/editor';
