@@ -24,8 +24,8 @@ function SearchPreview({
   siteIcon,
   siteTimezone,
 }: SearchPreviewProps) {
-  const icon = useMedia(siteIcon);
-  const searchImage = useMedia(imageId);
+  const icon: any = useMedia(siteIcon);
+  const searchImage: any = useMedia(imageId);
 
   const previewDate = postType === 'post' ? (
     <span className="search-preview-date">{wpDate('F j, Y', date, siteTimezone)}</span>

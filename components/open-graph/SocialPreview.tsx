@@ -13,7 +13,7 @@ function SocialPreview({
   imageId,
   siteUrl,
 }: SocialPreviewProps) {
-  const socialImage = useMedia(imageId);
+  const socialImage: any = useMedia(imageId);
 
   return (
     <div className="wp-seo-social-preview">
