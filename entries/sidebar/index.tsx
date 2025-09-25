@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginSidebar } from '@wordpress/editor';
 import OpenGraphSlotfill from '@/components/open-graph';
+import SearchEngineSlotfill from '@/components/search-engine';
 
 function MetaSidebar() {
   return (
@@ -10,6 +11,7 @@ function MetaSidebar() {
       icon="share"
       title={__('WP SEO', 'wp-seo')}
     >
+      <SearchEngineSlotfill />
       <OpenGraphSlotfill />
     </PluginSidebar>
   );
