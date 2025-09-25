@@ -6,6 +6,7 @@ import {
   Button,
   TextareaControl,
   TextControl,
+  __experimentalVStack as VStack,
 } from '@wordpress/components';
 import {
   ImagePicker,
@@ -42,41 +43,42 @@ function OpenGraphSlotfill() {
       title={__('Open Graph', 'wp-seo')}
       initialOpen
     >
-      <TextControl
-        label={__('Title', 'wp-seo')}
-        onChange={(next) => setTitle(next)}
-        value={title}
-        __next40pxDefaultSize
-        __nextHasNoMarginBottom
-      />
-      <br />
-      <TextareaControl
-        label={__('Description', 'wp-seo')}
-        onChange={(next) => setDescription(next)}
-        value={description}
-        __nextHasNoMarginBottom
-      />
-      <br />
-      <ImagePicker
-        onReset={() => setImage(0)}
-        onUpdate={({ id: next }) => setImage(next)}
-        value={image}
-      />
-      <br />
-      <Button
-        onClick={openModal}
-        variant="secondary"
-      >
-        {__('Preview', 'wp-seo')}
-      </Button>
-      {showModal ? (
-        <PreviewModal
-          onClose={closeModal}
-          openGraphTitle={title}
-          openGraphDescription={description}
-          openGraphImageId={image}
+      <VStack spacing="3">
+        <TextControl
+          label={__('Title', 'wp-seo')}
+          onChange={(next) => setTitle(next)}
+          value={title}
+          __next40pxDefaultSize
+          __nextHasNoMarginBottom
         />
-      ) : null}
+        <TextareaControl
+          label={__('Description', 'wp-seo')}
+          onChange={(next) => setDescription(next)}
+          value={description}
+          __nextHasNoMarginBottom
+        />
+        <ImagePicker
+          onReset={() => setImage(0)}
+          onUpdate={({ id: next }) => setImage(next)}
+          value={image}
+        />
+        <div>
+          <Button
+            onClick={openModal}
+            variant="secondary"
+          >
+            {__('Preview', 'wp-seo')}
+          </Button>
+        </div>
+        {showModal ? (
+          <PreviewModal
+            onClose={closeModal}
+            openGraphTitle={title}
+            openGraphDescription={description}
+            openGraphImageId={image}
+          />
+        ) : null}
+      </VStack>
     </PanelBody>
   );
 }
