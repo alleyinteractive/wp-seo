@@ -68,6 +68,195 @@ function wp_seo_the_post_meta_fields( $post ) {
 					?>
 				<td>
 			</tr>
+			<tr>
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta canonical URL input label in the post metabox.
+					 */
+					do_action( 'wp_seo_post_meta_fields_canonical_url_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta canonical URL input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_canonical_url_input', $post->ID );
+
+					/**
+					 * Fires after the meta canonical URL input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_after_canonical_url_input', $post->ID );
+					?>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots noindex label in the post metabox.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_noindex_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots noindex input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_noindex_input', $post->ID );
+
+					/**
+					 * Fires after the meta robots noindex input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_after_robots_noindex_input', $post->ID );
+					?>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots nofollow label in the post metabox.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_nofollow_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots nofollow input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_nofollow_input', $post->ID );
+
+					/**
+					 * Fires after the meta robots nofollow input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_after_robots_nofollow_input', $post->ID );
+					?>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots noarchive label in the post metabox.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_noarchive_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots noarchive input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_noarchive_input', $post->ID );
+
+					/**
+					 * Fires after the meta robots noarchive input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_after_robots_noarchive_input', $post->ID );
+					?>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots nosnippet label in the post metabox.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_nosnippet_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots nosnippet input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_nosnippet_input', $post->ID );
+
+					/**
+					 * Fires after the meta robots nosnippet input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_after_robots_nosnippet_input', $post->ID );
+					?>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots noimageindex label in the post metabox.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_noimageindex_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots noimageindex input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_noimageindex_input', $post->ID );
+
+					/**
+					 * Fires after the meta robots noimageindex input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_after_robots_noimageindex_input', $post->ID );
+					?>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots notranslate label in the post metabox.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_notranslate_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots notranslate input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_robots_notranslate_input', $post->ID );
+
+					/**
+					 * Fires after the meta robots notranslate input in the post metabox.
+					 *
+					 * @param int $post_id The ID of the post being edited.
+					 */
+					do_action( 'wp_seo_post_meta_fields_after_robots_notranslate_input', $post->ID );
+					?>
+				</td>
+			</tr>
 			<?php
 			/**
 			 * Fires after the other SEO fields are rendered.
@@ -125,6 +314,132 @@ function wp_seo_the_add_term_meta_fields( $taxonomy ) {
 			 * Fires after the meta description input with the add-term meta fields.
 			 */
 			do_action( 'wp_seo_add_term_meta_fields_after_description_input' );
+			?>
+		</div>
+		<div class="form-field">
+			<?php
+			/**
+			 * Fires to print the meta canonical URL input label with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_canonical_url_label' );
+
+			/**
+			 * Fires to print the meta canonical URL input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_canonical_url_input' );
+
+			/**
+			 * Fires after the meta canonical URL input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_after_canonical_url_input' );
+			?>
+		</div>
+		<div class="form-field">
+			<?php
+			/**
+			 * Fires to print the meta robots noindex label with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_noindex_label' );
+
+			/**
+			 * Fires to print the meta robots noindex input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_noindex_input' );
+
+			/**
+			 * Fires after the meta robots noindex input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_after_robots_noindex_input' );
+			?>
+		</div>
+		<div class="form-field">
+			<?php
+			/**
+			 * Fires to print the meta robots nofollow label with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_nofollow_label' );
+
+			/**
+			 * Fires to print the meta robots nofollow input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_nofollow_input' );
+
+			/**
+			 * Fires after the meta robots nofollow input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_after_robots_nofollow_input' );
+			?>
+		</div>
+		<div class="form-field">
+			<?php
+			/**
+			 * Fires to print the meta robots noarchive label with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_noarchive_label' );
+
+			/**
+			 * Fires to print the meta robots noarchive input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_noarchive_input' );
+
+			/**
+			 * Fires after the meta robots noarchive input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_after_robots_noarchive_input' );
+			?>
+		</div>
+		<div class="form-field">
+			<?php
+			/**
+			 * Fires to print the meta robots nosnippet label with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_nosnippet_label' );
+
+			/**
+			 * Fires to print the meta robots nosnippet input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_nosnippet_input' );
+
+			/**
+			 * Fires after the meta robots nosnippet input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_after_robots_nosnippet_input' );
+			?>
+		</div>
+		<div class="form-field">
+			<?php
+			/**
+			 * Fires to print the meta robots noimageindex label with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_noimageindex_label' );
+
+			/**
+			 * Fires to print the meta robots noimageindex input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_noimageindex_input' );
+
+			/**
+			 * Fires after the meta robots noimageindex input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_after_robots_noimageindex_input' );
+			?>
+		</div>
+		<div class="form-field">
+			<?php
+			/**
+			 * Fires to print the meta robots notranslate label with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_notranslate_label' );
+
+			/**
+			 * Fires to print the meta robots notranslate input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_robots_notranslate_input' );
+
+			/**
+			 * Fires after the meta robots notranslate input with the add-term meta fields.
+			 */
+			do_action( 'wp_seo_add_term_meta_fields_after_robots_notranslate_input' );
 			?>
 		</div>
 	</div>
@@ -201,6 +516,209 @@ function wp_seo_the_edit_term_meta_fields( $tag, $taxonomy ) {
 					?>
 				<td>
 			</tr>
+			<tr class="form-field">
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta canonical URL input label with the edit-term meta fields.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_canonical_url_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta canonical URL input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_canonical_url_input', $tag->term_id, $taxonomy );
+
+					/**
+					 * Fires after the meta canonical URL input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_after_canonical_url_input', $tag->term_id, $taxonomy );
+					?>
+				</td>
+			</tr>
+			<tr class="form-field">
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots noindex label with the edit-term meta fields.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_noindex_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots noindex input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_noindex_input', $tag->term_id, $taxonomy );
+
+					/**
+					 * Fires after the meta robots noindex input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_after_robots_noindex_input', $tag->term_id, $taxonomy );
+					?>
+				</td>
+			</tr>
+			<tr class="form-field">
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots nofollow label with the edit-term meta fields.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_nofollow_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots nofollow input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_nofollow_input', $tag->term_id, $taxonomy );
+
+					/**
+					 * Fires after the meta robots nofollow input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_after_robots_nofollow_input', $tag->term_id, $taxonomy );
+					?>
+				</td>
+			</tr>
+			<tr class="form-field">
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots noarchive label with the edit-term meta fields.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_noarchive_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots noarchive input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_noarchive_input', $tag->term_id, $taxonomy );
+
+					/**
+					 * Fires after the meta robots noarchive input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_after_robots_noarchive_input', $tag->term_id, $taxonomy );
+					?>
+				</td>
+			</tr>
+			<tr class="form-field">
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots nosnippet label with the edit-term meta fields.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_nosnippet_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots nosnippet input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_nosnippet_input', $tag->term_id, $taxonomy );
+
+					/**
+					 * Fires after the meta robots nosnippet input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_after_robots_nosnippet_input', $tag->term_id, $taxonomy );
+					?>
+				</td>
+			</tr>
+			<tr class="form-field">
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots noimageindex label with the edit-term meta fields.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_noimageindex_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots noimageindex input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_noimageindex_input', $tag->term_id, $taxonomy );
+
+					/**
+					 * Fires after the meta robots noimageindex input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_after_robots_noimageindex_input', $tag->term_id, $taxonomy );
+					?>
+				</td>
+			</tr>
+			<tr class="form-field">
+				<th scope="row">
+					<?php
+					/**
+					 * Fires to print the meta robots notranslate label with the edit-term meta fields.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_notranslate_label' );
+					?>
+				</th>
+				<td>
+					<?php
+					/**
+					 * Fires to print the meta robots notranslate input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_robots_notranslate_input', $tag->term_id, $taxonomy );
+
+					/**
+					 * Fires after the meta robots notranslate input with the edit-term meta fields.
+					 *
+					 * @param int $term_id The term ID of the term being edited.
+					 * @param string $taxonomy The taxonomy slug.
+					 */
+					do_action( 'wp_seo_edit_term_meta_fields_after_robots_notranslate_input', $tag->term_id, $taxonomy );
+					?>
+				</td>
+			</tr>
 		</tbody>
 	</table>
 	<?php
@@ -276,4 +794,197 @@ function wp_seo_the_description_character_count( $count ) {
 		<noscript><?php echo esc_html( sprintf( __( '%d (save changes to update)', 'wp-seo' ), $count ) ); ?></noscript>
 	</p>
 	<?php
+}
+
+/**
+ * Prints a form label for a meta canonical URL input.
+ */
+function wp_seo_the_meta_canonical_url_label() {
+	?>
+	<label for="wp_seo_meta_canonical_url"><?php esc_html_e( 'Canonical URL', 'wp-seo' ); ?></label>
+	<?php
+}
+
+/**
+ * Prints a form input for a meta canonical URL.
+ *
+ * @param string $value The input's current value.
+ */
+function wp_seo_the_meta_canonical_url_input( $value ) {
+	?>
+	<input type="url" id="wp_seo_meta_canonical_url" name="seo_meta[canonical_url]" value="<?php echo esc_attr( $value ); ?>" size="96" placeholder="https://" pattern="https?://.+" />
+	<?php
+}
+
+/**
+ * Prints a description for a meta canonical URL input.
+ */
+function wp_seo_the_meta_canonical_url_after_input() {
+	?>
+	<p>
+		<?php esc_html_e( 'Canonical URL must be a valid URL', 'wp-seo' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Prints a form label for a meta robots noindex label.
+ */
+function wp_seo_the_meta_robots_noindex_label() {
+	?>
+	<label for="wp_seo_meta_robots_noindex"><?php esc_html_e( 'Meta Robots noindex', 'wp-seo' ); ?></label>
+	<?php
+}
+
+/**
+ * Prints a form input for a meta robots noindex checkbox.
+ *
+ * @param string $value The input's current value.
+ */
+function wp_seo_the_meta_robots_noindex_input( $value ) {
+	?>
+	<input type="checkbox" id="wp_seo_meta_robots_noindex" name="seo_meta[robots_noindex]" value="1" <?php checked( $value, '1' ); ?> />
+	<?php
+}
+
+/**
+ * Prints a description for a meta robots noindex input.
+ */
+function wp_seo_the_meta_robots_noindex_after_input() {
+	esc_html_e( 'Request that robots not index the page', 'wp-seo' );
+}
+
+/**
+ * Prints a form label for a meta robots nofollow label.
+ */
+function wp_seo_the_meta_robots_nofollow_label() {
+	?>
+	<label for="wp_seo_meta_robots_nofollow"><?php esc_html_e( 'Meta Robots nofollow', 'wp-seo' ); ?></label>
+	<?php
+}
+
+/**
+ * Prints a form input for a meta robots nofollow checkbox.
+ *
+ * @param string $value The input's current value.
+ */
+function wp_seo_the_meta_robots_nofollow_input( $value ) {
+	?>
+	<input type="checkbox" id="wp_seo_meta_robots_nofollow" name="seo_meta[robots_nofollow]" value="1" <?php checked( $value, '1' ); ?> />
+	<?php
+}
+
+/**
+ * Prints a description for a meta robots nofollow input.
+ */
+function wp_seo_the_meta_robots_nofollow_after_input() {
+	esc_html_e( 'Request that robots not follow the links on the page', 'wp-seo' );
+}
+
+/**
+ * Prints a form label for a meta robots noarchive label.
+ */
+function wp_seo_the_meta_robots_noarchive_label() {
+	?>
+	<label for="wp_seo_meta_robots_noarchive"><?php esc_html_e( 'Meta Robots noarchive', 'wp-seo' ); ?></label>
+	<?php
+}
+
+/**
+ * Prints a form input for a meta robots noarchive checkbox.
+ *
+ * @param string $value The input's current value.
+ */
+function wp_seo_the_meta_robots_noarchive_input( $value ) {
+	?>
+	<input type="checkbox" id="wp_seo_meta_robots_noarchive" name="seo_meta[robots_noarchive]" value="1" <?php checked( $value, '1' ); ?> />
+	<?php
+}
+
+/**
+ * Prints a description for a meta robots noarchive input.
+ */
+function wp_seo_the_meta_robots_noarchive_after_input() {
+	esc_html_e( 'Request that search engines not cache the page content', 'wp-seo' );
+}
+
+/**
+ * Prints a form label for a meta robots nosnippet label.
+ */
+function wp_seo_the_meta_robots_nosnippet_label() {
+	?>
+	<label for="wp_seo_meta_robots_nosnippet"><?php esc_html_e( 'Meta Robots nosnippet', 'wp-seo' ); ?></label>
+	<?php
+}
+
+/**
+ * Prints a form input for a meta robots nosnippet checkbox.
+ *
+ * @param string $value The input's current value.
+ */
+function wp_seo_the_meta_robots_nosnippet_input( $value ) {
+	?>
+	<input type="checkbox" id="wp_seo_meta_robots_nosnippet" name="seo_meta[robots_nosnippet]" value="1" <?php checked( $value, '1' ); ?> />
+	<?php
+}
+
+/**
+ * Prints a description for a meta robots nosnippet input.
+ */
+function wp_seo_the_meta_robots_nosnippet_after_input() {
+	esc_html_e( 'Request that search engines not display any description of the page in search results', 'wp-seo' );
+}
+
+/**
+ * Prints a form label for a meta robots noimageindex label.
+ */
+function wp_seo_the_meta_robots_noimageindex_label() {
+	?>
+	<label for="wp_seo_meta_robots_noimageindex"><?php esc_html_e( 'Meta Robots noimageindex', 'wp-seo' ); ?></label>
+	<?php
+}
+
+/**
+ * Prints a form input for a meta robots noimageindex checkbox.
+ *
+ * @param string $value The input's current value.
+ */
+function wp_seo_the_meta_robots_noimageindex_input( $value ) {
+	?>
+	<input type="checkbox" id="wp_seo_meta_robots_noimageindex" name="seo_meta[robots_noimageindex]" value="1" <?php checked( $value, '1' ); ?> />
+	<?php
+}
+
+/**
+ * Prints a description for a meta robots noimageindex input.
+ */
+function wp_seo_the_meta_robots_noimageindex_after_input() {
+	esc_html_e( 'Request that search engines not index images on this page', 'wp-seo' );
+}
+
+/**
+ * Prints a form label for a meta robots notranslate label.
+ */
+function wp_seo_the_meta_robots_notranslate_label() {
+	?>
+	<label for="wp_seo_meta_robots_notranslate"><?php esc_html_e( 'Meta Robots notranslate', 'wp-seo' ); ?></label>
+	<?php
+}
+
+/**
+ * Prints a form input for a meta robots notranslate checkbox.
+ *
+ * @param string $value The input's current value.
+ */
+function wp_seo_the_meta_robots_notranslate_input( $value ) {
+	?>
+	<input type="checkbox" id="wp_seo_meta_robots_notranslate" name="seo_meta[robots_notranslate]" value="1" <?php checked( $value, '1' ); ?> />
+	<?php
+}
+
+/**
+ * Prints a description for a meta robots notranslate input.
+ */
+function wp_seo_the_meta_robots_notranslate_after_input() {
+	esc_html_e( 'Request that search engines not offer translations of this page in search results', 'wp-seo' );
 }

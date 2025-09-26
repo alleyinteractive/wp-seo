@@ -5,6 +5,7 @@ All notable changes to `WP SEO` will be documented in this file.
 ## 2.0.0 ##
 Just kidding about the "no plans for additional feature development" thing, we're back!
 
+* Added: Support for canonical URL and robots meta.
 * Changed: Rebase plugin on @alleyinteractive/create-wordpress-plugin.
 * Removed: Support for keywords which are no longer used by search engines.
 
