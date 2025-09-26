@@ -44,7 +44,7 @@ add_action( 'init', 'wp_seo_register_sidebar_scripts' );
 /**
  * Enqueue sidebar assets.
  */
-function wp_seo_register_sidebar_assets() {
+function wp_seo_register_sidebar_assets(): void {
 	wp_enqueue_script( 'wp-seo-sidebar' );
 	wp_enqueue_style( 'wp-seo-sidebar', plugins_url( '../style-sidebar/index.css', __FILE__ ), [], '1.0.0' );
 }
