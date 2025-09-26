@@ -13,56 +13,412 @@
  * @package WP_SEO
  */
 
-add_action( 'admin_init',                                                       'wp_seo_load_admin_files', 0 );
+add_action(
+	'admin_init',
+	'wp_seo_load_admin_files',
+	0,
+);
 
-add_action( 'wp_seo_post_meta_fields',                                          'wp_seo_the_post_meta_fields' );
-add_action( 'wp_seo_post_meta_fields_title_label',                              'wp_seo_the_meta_title_label' );
-add_action( 'wp_seo_post_meta_fields_title_input',                              'wp_seo_post_id_to_the_meta_title_input' );
-add_action( 'wp_seo_post_meta_fields_after_title_input',                        'wp_seo_post_id_to_the_title_character_count' );
-add_action( 'wp_seo_post_meta_fields_description_label',                        'wp_seo_the_meta_description_label' );
-add_action( 'wp_seo_post_meta_fields_description_input',                        'wp_seo_post_id_to_the_meta_description_input' );
-add_action( 'wp_seo_post_meta_fields_after_description_input',                  'wp_seo_post_id_to_the_description_character_count' );
-add_action( 'wp_seo_post_meta_fields_keywords_label',                           'wp_seo_the_meta_keywords_label' );
-add_action( 'wp_seo_post_meta_fields_keywords_input',                           'wp_seo_post_id_to_the_meta_keywords_input' );
-add_action( 'wp_seo_post_meta_fields_canonical_url_label',                      'wp_seo_the_meta_canonical_url_label' );
-add_action( 'wp_seo_post_meta_fields_canonical_url_input',                      'wp_seo_post_id_to_the_meta_canonical_url_input' );
-add_action( 'wp_seo_post_meta_fields_after_canonical_url_input',                'wp_seo_the_meta_canonical_url_description' );
-add_action( 'wp_seo_post_meta_fields_robots_heading',                           'wp_seo_the_meta_robots_heading' );
-add_action( 'wp_seo_post_meta_fields_robots_noindex_label',                     'wp_seo_the_meta_robots_noindex_label' );
-add_action( 'wp_seo_post_meta_fields_robots_noindex_input',                     'wp_seo_post_id_to_the_meta_robots_noindex_input' );
-add_action( 'wp_seo_post_meta_fields_fields_after_robots_noindex_input',        'wp_seo_the_meta_robots_noindex_description' );
-add_action( 'wp_seo_post_meta_fields_robots_nofollow_label',                    'wp_seo_the_meta_robots_nofollow_label' );
-add_action( 'wp_seo_post_meta_fields_robots_nofollow_input',                    'wp_seo_post_id_to_the_meta_robots_nofollow_input' );
-add_action( 'wp_seo_post_meta_fields_fields_after_robots_nofollow_input',       'wp_seo_the_meta_robots_nofollow_description' );
-add_action( 'wp_seo_post_meta_fields_robots_noarchive_label',                   'wp_seo_the_meta_robots_noarchive_label' );
-add_action( 'wp_seo_post_meta_fields_robots_noarchive_input',                   'wp_seo_post_id_to_the_meta_robots_noarchive_input' );
-add_action( 'wp_seo_post_meta_fields_fields_after_robots_noarchive_input',      'wp_seo_the_meta_robots_noarchive_description' );
-add_action( 'wp_seo_post_meta_fields_robots_nosnippet_label',                   'wp_seo_the_meta_robots_nosnippet_label' );
-add_action( 'wp_seo_post_meta_fields_robots_nosnippet_input',                   'wp_seo_post_id_to_the_meta_robots_nosnippet_input' );
-add_action( 'wp_seo_post_meta_fields_fields_after_robots_nosnippet_input',      'wp_seo_the_meta_robots_nosnippet_description' );
-add_action( 'wp_seo_post_meta_fields_robots_noimageindex_label',                'wp_seo_the_meta_robots_noimageindex_label' );
-add_action( 'wp_seo_post_meta_fields_robots_noimageindex_input',                'wp_seo_post_id_to_the_meta_robots_noimageindex_input' );
-add_action( 'wp_seo_post_meta_fields_fields_after_robots_noimageindex_input',   'wp_seo_the_meta_robots_noimageindex_description' );
-add_action( 'wp_seo_post_meta_fields_robots_notranslate_label',                 'wp_seo_the_meta_robots_notranslate_label' );
-add_action( 'wp_seo_post_meta_fields_robots_notranslate_input',                 'wp_seo_post_id_to_the_meta_robots_notranslate_input' );
-add_action( 'wp_seo_post_meta_fields_fields_after_robots_notranslate_input',    'wp_seo_the_meta_robots_notranslate_description' );
+// Post page.
+add_action(
+	'wp_seo_post_meta_fields',
+	'wp_seo_the_post_meta_fields'
+);
+add_action(
+	'wp_seo_post_meta_fields_title_label',
+	'wp_seo_the_meta_title_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_title_input',
+	'wp_seo_post_id_to_the_meta_title_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_after_title_input',
+	'wp_seo_post_id_to_the_title_character_count'
+);
+add_action(
+	'wp_seo_post_meta_fields_description_label',
+	'wp_seo_the_meta_description_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_description_input',
+	'wp_seo_post_id_to_the_meta_description_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_after_description_input',
+	'wp_seo_post_id_to_the_description_character_count'
+);
+add_action(
+	'wp_seo_post_meta_fields_keywords_label',
+	'wp_seo_the_meta_keywords_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_keywords_input',
+	'wp_seo_post_id_to_the_meta_keywords_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_canonical_url_label',
+	'wp_seo_the_meta_canonical_url_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_canonical_url_input',
+	'wp_seo_post_id_to_the_meta_canonical_url_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_after_canonical_url_input',
+	'wp_seo_the_meta_canonical_url_description'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_heading',
+	'wp_seo_the_meta_robots_heading'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_noindex_label',
+	'wp_seo_the_meta_robots_noindex_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_noindex_input',
+	'wp_seo_post_id_to_the_meta_robots_noindex_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_fields_after_robots_noindex_input',
+	'wp_seo_the_meta_robots_noindex_description'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_nofollow_label',
+	'wp_seo_the_meta_robots_nofollow_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_nofollow_input',
+	'wp_seo_post_id_to_the_meta_robots_nofollow_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_fields_after_robots_nofollow_input',
+	'wp_seo_the_meta_robots_nofollow_description'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_noarchive_label',
+	'wp_seo_the_meta_robots_noarchive_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_noarchive_input',
+	'wp_seo_post_id_to_the_meta_robots_noarchive_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_fields_after_robots_noarchive_input',
+	'wp_seo_the_meta_robots_noarchive_description'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_nosnippet_label',
+	'wp_seo_the_meta_robots_nosnippet_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_nosnippet_input',
+	'wp_seo_post_id_to_the_meta_robots_nosnippet_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_fields_after_robots_nosnippet_input',
+	'wp_seo_the_meta_robots_nosnippet_description'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_noimageindex_label',
+	'wp_seo_the_meta_robots_noimageindex_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_noimageindex_input',
+	'wp_seo_post_id_to_the_meta_robots_noimageindex_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_fields_after_robots_noimageindex_input',
+	'wp_seo_the_meta_robots_noimageindex_description'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_notranslate_label',
+	'wp_seo_the_meta_robots_notranslate_label'
+);
+add_action(
+	'wp_seo_post_meta_fields_robots_notranslate_input',
+	'wp_seo_post_id_to_the_meta_robots_notranslate_input'
+);
+add_action(
+	'wp_seo_post_meta_fields_fields_after_robots_notranslate_input',
+	'wp_seo_the_meta_robots_notranslate_description'
+);
 
-add_action( 'wp_seo_add_term_meta_fields',                                      'wp_seo_the_add_term_meta_fields' );
-add_action( 'wp_seo_add_term_meta_fields_title_label',                          'wp_seo_the_meta_title_label' );
-add_action( 'wp_seo_add_term_meta_fields_title_input',                          'wp_seo_the_meta_title_input' );
-add_action( 'wp_seo_add_term_meta_fields_after_title_input',                    'wp_seo_the_title_character_count' );
-add_action( 'wp_seo_add_term_meta_fields_description_label',                    'wp_seo_the_meta_description_label' );
-add_action( 'wp_seo_add_term_meta_fields_description_input',                    'wp_seo_the_meta_description_input' );
-add_action( 'wp_seo_add_term_meta_fields_after_description_input',              'wp_seo_the_description_character_count' );
-add_action( 'wp_seo_add_term_meta_fields_keywords_label',                       'wp_seo_the_meta_keywords_label' );
-add_action( 'wp_seo_add_term_meta_fields_keywords_input',                       'wp_seo_the_meta_keywords_input' );
+// Add term page.
+add_action(
+	'wp_seo_add_term_meta_fields',
+	'wp_seo_the_add_term_meta_fields'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_title_label',
+	'wp_seo_the_meta_title_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_title_input',
+	'wp_seo_the_meta_title_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_after_title_input',
+	'wp_seo_the_title_character_count'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_description_label',
+	'wp_seo_the_meta_description_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_description_input',
+	'wp_seo_the_meta_description_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_after_description_input',
+	'wp_seo_the_description_character_count'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_keywords_label',
+	'wp_seo_the_meta_keywords_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_keywords_input',
+	'wp_seo_the_meta_keywords_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_canonical_url_label',
+	'wp_seo_the_meta_canonical_url_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_canonical_url_input',
+	'wp_seo_the_meta_canonical_url_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_after_canonical_url_input',
+	'wp_seo_the_meta_canonical_url_description'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_heading',
+	'wp_seo_the_meta_robots_heading'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_noindex_label',
+	'wp_seo_the_meta_robots_noindex_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_noindex_input',
+	'wp_seo_the_meta_robots_noindex_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_fields_after_robots_noindex_input',
+	'wp_seo_the_meta_robots_noindex_description'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_nofollow_label',
+	'wp_seo_the_meta_robots_nofollow_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_nofollow_input',
+	'wp_seo_the_meta_robots_nofollow_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_fields_after_robots_nofollow_input',
+	'wp_seo_the_meta_robots_nofollow_description'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_noarchive_label',
+	'wp_seo_the_meta_robots_noarchive_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_noarchive_input',
+	'wp_seo_the_meta_robots_noarchive_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_fields_after_robots_noarchive_input',
+	'wp_seo_the_meta_robots_noarchive_description'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_nosnippet_label',
+	'wp_seo_the_meta_robots_nosnippet_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_nosnippet_input',
+	'wp_seo_the_meta_robots_nosnippet_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_fields_after_robots_nosnippet_input',
+	'wp_seo_the_meta_robots_nosnippet_description'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_noimageindex_label',
+	'wp_seo_the_meta_robots_noimageindex_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_noimageindex_input',
+	'wp_seo_the_meta_robots_noimageindex_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_fields_after_robots_noimageindex_input',
+	'wp_seo_the_meta_robots_noimageindex_description'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_notranslate_label',
+	'wp_seo_the_meta_robots_notranslate_label'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_robots_notranslate_input',
+	'wp_seo_the_meta_robots_notranslate_input'
+);
+add_action(
+	'wp_seo_add_term_meta_fields_fields_after_robots_notranslate_input',
+	'wp_seo_the_meta_robots_notranslate_description'
+);
 
-add_action( 'wp_seo_edit_term_meta_fields',                                     'wp_seo_the_edit_term_meta_fields', 10, 2 );
-add_action( 'wp_seo_edit_term_meta_fields_title_label',                         'wp_seo_the_meta_title_label' );
-add_action( 'wp_seo_edit_term_meta_fields_title_input',                         'wp_seo_term_data_to_the_meta_title_input', 10, 2 );
-add_action( 'wp_seo_edit_term_meta_fields_after_title_input',                   'wp_seo_term_data_to_the_title_character_count', 10, 2 );
-add_action( 'wp_seo_edit_term_meta_fields_description_label',                   'wp_seo_the_meta_description_label' );
-add_action( 'wp_seo_edit_term_meta_fields_description_input',                   'wp_seo_term_data_to_the_meta_description_input', 10, 2 );
-add_action( 'wp_seo_edit_term_meta_fields_after_description_input',             'wp_seo_term_data_to_the_description_character_count', 10, 2 );
-add_action( 'wp_seo_edit_term_meta_fields_keywords_label',                      'wp_seo_the_meta_keywords_label' );
-add_action( 'wp_seo_edit_term_meta_fields_keywords_input',                      'wp_seo_term_data_to_the_meta_keywords_input', 10, 2 );
+// Edit term page.
+add_action(
+	'wp_seo_edit_term_meta_fields',
+	'wp_seo_the_edit_term_meta_fields',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_title_label',
+	'wp_seo_the_meta_title_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_title_input',
+	'wp_seo_term_data_to_the_meta_title_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_after_title_input',
+	'wp_seo_term_data_to_the_title_character_count',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_description_label',
+	'wp_seo_the_meta_description_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_description_input',
+	'wp_seo_term_data_to_the_meta_description_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_after_description_input',
+	'wp_seo_term_data_to_the_description_character_count',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_keywords_label',
+	'wp_seo_the_meta_keywords_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_keywords_input',
+	'wp_seo_term_data_to_the_meta_keywords_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_canonical_url_label',
+	'wp_seo_the_meta_canonical_url_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_canonical_url_input',
+	'wp_seo_term_data_to_the_meta_canonical_url_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_after_canonical_url_input',
+	'wp_seo_the_meta_canonical_url_description'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_heading',
+	'wp_seo_the_meta_robots_heading'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_noindex_label',
+	'wp_seo_the_meta_robots_noindex_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_noindex_input',
+	'wp_seo_term_data_to_the_meta_robots_noindex_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_fields_after_robots_noindex_input',
+	'wp_seo_the_meta_robots_noindex_description'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_nofollow_label',
+	'wp_seo_the_meta_robots_nofollow_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_nofollow_input',
+	'wp_seo_term_data_to_the_meta_robots_nofollow_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_fields_after_robots_nofollow_input',
+	'wp_seo_the_meta_robots_nofollow_description'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_noarchive_label',
+	'wp_seo_the_meta_robots_noarchive_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_noarchive_input',
+	'wp_seo_term_data_to_the_meta_robots_noarchive_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_fields_after_robots_noarchive_input',
+	'wp_seo_the_meta_robots_noarchive_description'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_nosnippet_label',
+	'wp_seo_the_meta_robots_nosnippet_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_nosnippet_input',
+	'wp_seo_term_data_to_the_meta_robots_nosnippet_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_fields_after_robots_nosnippet_input',
+	'wp_seo_the_meta_robots_nosnippet_description'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_noimageindex_label',
+	'wp_seo_the_meta_robots_noimageindex_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_noimageindex_input',
+	'wp_seo_term_data_to_the_meta_robots_noimageindex_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_fields_after_robots_noimageindex_input',
+	'wp_seo_the_meta_robots_noimageindex_description'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_notranslate_label',
+	'wp_seo_the_meta_robots_notranslate_label'
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_robots_notranslate_input',
+	'wp_seo_term_data_to_the_meta_robots_notranslate_input',
+	10,
+	2,
+);
+add_action(
+	'wp_seo_edit_term_meta_fields_fields_after_robots_notranslate_input',
+	'wp_seo_the_meta_robots_notranslate_description'
+);

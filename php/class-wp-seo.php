@@ -22,7 +22,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 *
 		 * @var array.
 		 */
-		public $formatting_tags = array();
+		public $formatting_tags = [];
 
 		/**
 		 * The regular expression used to find formatting tags.
@@ -77,21 +77,21 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @codeCoverageIgnore
 		 */
 		protected function setup() {
-			add_action( 'wp_loaded', array( $this, 'set_properties' ) );
+			add_action( 'wp_loaded', [ $this, 'set_properties' ] );
 
 			if ( is_admin() ) {
-				add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
-				add_action( 'save_post', array( $this, 'save_post_fields' ) );
-				add_action( 'edit_attachment', array( $this, 'save_post_fields' ) );
-				add_action( 'add_attachment', array( $this, 'save_post_fields' ) );
-				add_action( 'admin_init', array( $this, 'add_term_boxes' ) );
+				add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
+				add_action( 'save_post', [ $this, 'save_post_fields' ] );
+				add_action( 'edit_attachment', [ $this, 'save_post_fields' ] );
+				add_action( 'add_attachment', [ $this, 'save_post_fields' ] );
+				add_action( 'admin_init', [ $this, 'add_term_boxes' ] );
 			}
 
-			add_filter( 'pre_get_document_title', array( $this, 'pre_get_document_title' ), 20 );
-			add_filter( 'wp_title', array( $this, 'wp_title' ), 20, 2 );
-			add_filter( 'wp_head', array( $this, 'wp_head' ), 5 );
-			add_filter( 'wp_robots', array( $this, 'wp_robots' ) );
-			add_filter( 'get_canonical_url', array( $this, 'get_canonical_url' ), 10, 2 );
+			add_filter( 'pre_get_document_title', [ $this, 'pre_get_document_title' ], 20 );
+			add_filter( 'wp_title', [ $this, 'wp_title' ], 20, 2 );
+			remove_action( 'wp_head', 'rel_canonical' ); // We handle canonical URLs ourselves.
+			add_filter( 'wp_head', [ $this, 'wp_head' ], 5 );
+			add_filter( 'wp_robots', [ $this, 'wp_robots' ] );
 		}
 
 		/**
@@ -100,7 +100,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * The filter for adding custom formatting tags is applied here.
 		 */
 		public function set_properties() {
-			$tags = array();
+			$tags = [];
 			/**
 			 * Filter the available formatting tags.
 			 *
@@ -151,11 +151,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @return array Option values with default keys and values.
 		 */
 		public function intersect_term_option( $option_value ) {
-			return wp_seo_intersect_args( $option_value, array(
-				'title'       => '',
-				'description' => '',
-				'keywords'    => '',
-			) );
+			return wp_seo_intersect_args( $option_value, [] );
 		}
 
 		/**
@@ -168,7 +164,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				add_meta_box(
 					'wp_seo',
 					wp_seo_get_box_title(),
-					array( $this, 'post_meta_fields' ),
+					[ $this, 'post_meta_fields' ],
 					$post_type,
 					/**
 					 * Filter the screen context where the fields should display.
@@ -242,7 +238,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			$post_id = absint( $_POST['post_ID'] );
 
 			if ( ! isset( $_POST['seo_meta'] ) ) {
-				$_POST['seo_meta'] = array();
+				$_POST['seo_meta'] = [];
 			}
 
 			/**
@@ -250,23 +246,44 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 *
 			 * @param array $fields Array of field names that can be saved to the post meta.
 			 */
-			$fields = (array) apply_filters( 'wp_seo_saveable_fields', array( 'title', 'canonical_url', 'description', 'keywords', 'robots_noindex', 'robots_nofollow', 'robots_noarchive', 'robots_nosnippet', 'robots_noimageindex', 'robots_notranslate' ) );
+			$fields = (array) apply_filters(
+				'wp_seo_saveable_fields',
+				[
+					'title',
+					'canonical_url',
+					'description',
+					'keywords',
+					'robots_noindex',
+					'robots_nofollow',
+					'robots_noarchive',
+					'robots_nosnippet',
+					'robots_noimageindex',
+					'robots_notranslate',
+				]
+			);
 			foreach ( $fields as $field ) {
-				$data = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
+				$meta_key = wp_slash( '_meta_' . $field );
 
 				// If this is the canonical URL field, validate it as a URL.
 				if ( 'canonical_url' === $field ) {
+					$value = ! empty( $_POST['seo_meta'][ $field ] )
+						? wp_unslash( $_POST['seo_meta'][ $field ] )
+						: '';
+
 					// Only save if empty or valid URL.
-					if ( empty( $data ) ) {
-						update_post_meta( $post_id, wp_slash( '_meta_' . $field ), '' );
+					if ( empty( $value ) ) {
+						update_post_meta( $post_id, $meta_key, '' );
 					} else {
-						$valid_url = filter_var( $data, FILTER_VALIDATE_URL );
+						$valid_url = filter_var( $value, FILTER_VALIDATE_URL );
 						if ( $valid_url ) {
-							update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $valid_url ) );
+							update_post_meta( $post_id, $meta_key, wp_slash( $valid_url ) );
 						}
 					}
 				} else {
-					update_post_meta( $post_id, wp_slash( '_meta_' . $field ), wp_slash( $data ) );
+					$value = ! empty( $_POST['seo_meta'][ $field ] )
+						? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) )
+						: '';
+					update_post_meta( $post_id, $meta_key, wp_slash( $value ) );
 				}
 			}
 		}
@@ -276,11 +293,11 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 */
 		public function add_term_boxes() {
 			foreach ( WP_SEO_Settings()->get_enabled_taxonomies() as $slug ) {
-				add_action( $slug . '_add_form_fields', array( $this, 'add_term_meta_fields' ) );
-				add_action( $slug . '_edit_form', array( $this, 'edit_term_meta_fields' ), 10, 2 );
+				add_action( $slug . '_add_form_fields', [ $this, 'add_term_meta_fields' ] );
+				add_action( $slug . '_edit_form', [ $this, 'edit_term_meta_fields' ], 10, 2 );
 			}
-			add_action( 'created_term', array( $this, 'save_term_fields' ), 10, 3 );
-			add_action( 'edited_term', array( $this, 'save_term_fields' ), 10, 3 );
+			add_action( 'created_term', [ $this, 'save_term_fields' ], 10, 3 );
+			add_action( 'edited_term', [ $this, 'save_term_fields' ], 10, 3 );
 		}
 
 		/**
@@ -364,11 +381,39 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			}
 
 			if ( ! isset( $_POST['seo_meta'] ) ) {
-				$_POST['seo_meta'] = array();
+				$_POST['seo_meta'] = [];
 			}
 
-			foreach ( array( 'title', 'description', 'keywords' ) as $field ) {
-				$data[ $field ] = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
+			$data = [];
+
+			foreach (
+				[
+					'title',
+					'canonical_url',
+					'description',
+					'keywords',
+					'robots_noindex',
+					'robots_nofollow',
+					'robots_noarchive',
+					'robots_nosnippet',
+					'robots_noimageindex',
+					'robots_notranslate'
+				] as $field ) {
+				$value = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
+
+        if ( 'canonical_url' === $field ) {
+					// Only save if empty or valid URL.
+					if ( empty( $value ) ) {
+						$data[ $field ] = '';
+					} else {
+						$valid_url = filter_var( $value, FILTER_VALIDATE_URL );
+						if ( $valid_url ) {
+							$data[ $field ] = $valid_url;
+						}
+					}
+        } else {
+					$data[ $field ] = $value;
+        }
 			}
 
 			$name = $this->get_term_option_name( get_term( $term_id, $taxonomy ) );
@@ -401,7 +446,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				return $string;
 			}
 
-			$replacements = array();
+			$replacements = [];
 			$unique_matches = array_unique( $matches );
 
 			foreach ( $this->formatting_tags as $id => $tag ) {
@@ -544,18 +589,46 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		}
 
 		/**
-		 * Determine the <meta> values for the current page.
+		 * Render a <link /> field.
+		 *
+		 * @access private.
+		 *
+		 * @param string $rel  The value of the "rel" attribute.
+		 * @param string $href The value of the "href" attribute.
+		 */
+		private function link_field( $rel, $href ) {
+			/**
+			 * Filters the "content" attribute value of the <meta /> field.
+			 *
+			 * @since 1.0.1
+			 *
+			 * @param string $href The "href" attribute value.
+			 * @param string $rel  The "rel" attribute value.
+			 */
+			$href = apply_filters( 'wp_seo_link_field_href', $href, $rel );
+
+			if ( ! is_string( $rel ) || ! is_string( $rel ) ) {
+				return;
+			}
+
+			echo "<link rel='" . esc_attr( $rel ) . "' href='" . esc_url( $href ) . "' /><!-- WP SEO -->\n";
+		}
+
+		/**
+		 * Determine the <meta> and <link> values for the current page.
 		 *
 		 * Unlike WP_SEO::wp_title(), custom per-entry and per-term values are not
 		 * returned immediately but rendered at the end of the method.
 		 *
-		 * @see WP_SEO::meta_field() for detail on how the values are rendered.
+		 * @see WP_SEO::meta_field() and link_field() for detail on how the values are rendered.
 		 */
 		public function wp_head() {
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
-					$meta_description = get_post_meta( get_the_ID(), '_meta_description', true );
-					$meta_keywords = get_post_meta( get_the_ID(), '_meta_keywords', true );
+					$post_id = get_the_ID();
+					$meta_description = get_post_meta( $post_id, '_meta_description', true );
+					$meta_keywords = get_post_meta( $post_id, '_meta_keywords', true );
+					$canonical_url = get_post_meta( $post_id, '_meta_canonical_url', true );
 				}
 				$key = "single_{$post_type}";
 			} elseif ( is_front_page() ) {
@@ -566,6 +639,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
 					$meta_description = $option['description'];
 					$meta_keywords = $option['keywords'];
+					$canonical_url = $option['canonical_url'];
 				}
 				$key = "archive_{$taxonomy}";
 			} elseif ( is_post_type_archive() ) {
@@ -631,6 +705,24 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				}
 			}
 
+			// Output the canonical URL if set.
+			if ( empty( $canonical_url ) ) {
+				/**
+				 * Filter the format string of the canonical URL for this page.
+				 * @param  string      The format string retrieved from the settings.
+				 * @param  string $key The key of the setting retrieved.
+				 */
+				$canonical_string = apply_filters(
+					'wp_seo_canonical_url_format',
+					! empty( $key ) ? WP_SEO_Settings()->get_option( "{$key}_canonical_url" ) : '',
+					$key
+				);
+				$canonical_url = $this->format( $canonical_string );
+			}
+
+			if ( ! empty( $canonical_url ) && ! is_wp_error( $canonical_url ) ) {
+				$this->link_field( 'canonical', $canonical_url );
+			}
 		}
 
 		/**
@@ -638,23 +730,112 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * 
 		 * @param array $robots Associative array of directives.
 		 */
-		function wp_robots( $robots ) {
-			if ( ! is_singular() ) {
+		public function wp_robots( $robots ) {
+			$key = '';
+
+			// Singular posts.
+			if ( is_singular() ) {
+				$post_type = get_post_type( get_queried_object_id() );
+
+				if ( empty( $post_type )
+					|| ! WP_SEO_Settings()->has_post_fields( $post_type )
+				) {
+					return $robots;
+				}
+
+				$key = "single_{$post_type}";
+			}
+			
+			// Term archives.
+			if ( is_category() || is_tag() || is_tax() ) {
+				$term = get_queried_object();
+
+				if ( ! $term instanceof WP_Term
+					|| empty( $term->taxonomy )
+					|| ! WP_SEO_Settings()->has_term_fields( $term->taxonomy )
+				) {
+					return $robots;
+				}
+
+				$key = "archive_{$term->taxonomy}";
+			}
+
+			// Homepage.
+			if ( is_front_page() ) {
+				$key = 'home';
+			}
+
+			// Author archives.
+			if ( is_author() ) {
+				$key = 'archive_author';
+			}
+
+			// Post type archives.
+			if ( is_post_type_archive() ) {
+				$key = 'archive_' . get_queried_object()->name;
+			}
+
+			// Date archives.
+			if ( is_date() ) {
+				$key = 'archive_date';
+			}
+
+			if ( empty( $key ) ) {
 				return $robots;
 			}
 
-			$post_id = get_queried_object_id();
+			$robots = $this->filter_robots_meta( $robots, $key );
 
-			if ( empty( $post_id ) ) {
-				return $robots;
+			return $robots;
+		}
+
+		/**
+		 * Get the post meta or term option for the current object.
+		 * 
+		 * @return array Associative array of meta/option values, or empty array if none exist.
+		 */
+		public function get_current_object_options(): array {
+			// Singular posts.
+			if ( is_singular() ) {
+				$post_id = get_queried_object_id();
+				if ( empty( $post_id ) ) {
+					return [];
+				}
+
+				$post_meta = get_post_meta( $post_id );
+
+				return ! empty( $post_meta ) && is_array( $post_meta )
+					? $post_meta
+					: [];
+
+			}
+			
+			// Term archives.
+			if ( is_category() || is_tag() || is_tax() ) {
+				$term = get_queried_object();
+				if ( empty( $term ) || ! $term instanceof WP_Term ) {
+					return [];
+				}
+
+				$term_options = get_option( $this->get_term_option_name( $term ) );
+
+				return ! empty( $term_options ) && is_array( $term_options )
+					? $term_options
+					: [];
 			}
 
-			$post_meta = get_post_meta( $post_id );
+			return [];
+		}
 
-			if ( empty( $post_meta ) ) {
-				return $robots;
-			}
-
+		/**
+		 * Set the robots meta directives based on current object
+		 * options (post meta or term options), or settings.
+		 * 
+		 * @param array  $robots Associative array of directives.
+		 * @param string $key    The settings key for the current page type.
+		 * @return array Updated associative array of directives.
+		 */
+		public function filter_robots_meta( array $robots, string $key ): array {
 			// List of possible robots directives.
 			$robots_directives = [
 				'noindex',
@@ -665,29 +846,45 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				'notranslate',
 			];
 
+			if ( empty( $key ) ) {
+				return $robots;
+			}
+
+			// Get the data for the current object (post meta or term options), if any.
+			$object_data = $this->get_current_object_options();
+
+			// Get the settings from the settings page.
+			$settings = WP_SEO_Settings()->get_option( "{$key}_robots" );
+
 			// Check the meta value for each directive and set it to true if present.
 			foreach ( $robots_directives as $directive ) {
-				if ( ! empty( $post_meta[ "_meta_robots_{$directive}" ][0] ) ) {
+				$robots_meta = [];
+
+				if ( is_singular() && ! empty( $object_data ) ) {
+					$robots_meta = $object_data[ "_meta_robots_{$directive}" ][0] ?? '';
+				} elseif ( ( is_category() || is_tag() || is_tax() ) && ! empty( $object_data ) ) {
+					$robots_meta = $object_data[ "robots_{$directive}" ] ?? '';
+				}
+
+				if ( empty( $robots_meta ) ) {
+					/**
+					 * Filter the robots meta directive for this page.
+					 * @param  string      The value retrieved from the settings.
+					 * @param  string $key The key of the setting retrieved.
+					 */
+					$robots_meta = apply_filters(
+						"wp_seo_robots_{$directive}_value",
+						in_array( $directive, $settings ) ? '1' : '',
+						$key
+					);
+				}
+
+				if ( ! empty( $robots_meta ) ) {
 					$robots[ $directive ] = true;
 				}
 			}
 
 			return $robots;
-		}
-
-		/**
-		 * Filters the canonical URL.
-		 * 
-		 * @param string $canonical_url The post's canonical URL.
-		 * @param WP_Post $post          Post object.
-		 */
-		function get_canonical_url( $canonical_url, $post ) {
-			if ( empty( $post ) || ! $post instanceof WP_Post || ! is_singular() ) {
-				return $canonical_url;
-			}
-
-			// Use the post's custom canonical URL if present.
-			return get_post_meta( $post->ID, '_meta_canonical_url', true ) ?: $canonical_url;
 		}
 	}
 

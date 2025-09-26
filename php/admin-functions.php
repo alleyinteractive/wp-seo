@@ -135,7 +135,7 @@ function wp_seo_post_id_to_the_meta_robots_notranslate_input( $post_id ) {
  */
 function wp_seo_term_data_to_the_meta_title_input( $term_id, $taxonomy ) {
 	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
-	wp_seo_the_meta_title_input( $term_option['title'] );
+	wp_seo_the_meta_title_input( $term_option['title'] ?? '' );
 }
 
 /**
@@ -146,7 +146,7 @@ function wp_seo_term_data_to_the_meta_title_input( $term_id, $taxonomy ) {
  */
 function wp_seo_term_data_to_the_title_character_count( $term_id, $taxonomy ) {
 	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
-	wp_seo_the_title_character_count( strlen( $term_option['title'] ) );
+	wp_seo_the_title_character_count( strlen( $term_option['title'] ?? '' ) );
 }
 
 /**
@@ -157,7 +157,7 @@ function wp_seo_term_data_to_the_title_character_count( $term_id, $taxonomy ) {
  */
 function wp_seo_term_data_to_the_meta_description_input( $term_id, $taxonomy ) {
 	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
-	wp_seo_the_meta_description_input( $term_option['description'] );
+	wp_seo_the_meta_description_input( $term_option['description'] ?? '' );
 }
 
 /**
@@ -168,7 +168,7 @@ function wp_seo_term_data_to_the_meta_description_input( $term_id, $taxonomy ) {
  */
 function wp_seo_term_data_to_the_description_character_count( $term_id, $taxonomy ) {
 	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
-	wp_seo_the_description_character_count( strlen( $term_option['description'] ) );
+	wp_seo_the_description_character_count( strlen( $term_option['description'] ?? '' ) );
 }
 
 /**
@@ -179,5 +179,82 @@ function wp_seo_term_data_to_the_description_character_count( $term_id, $taxonom
  */
 function wp_seo_term_data_to_the_meta_keywords_input( $term_id, $taxonomy ) {
 	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
-	wp_seo_the_meta_keywords_input( $term_option['keywords'] );
+	wp_seo_the_meta_keywords_input( $term_option['keywords'] ?? '' );
+}
+
+/**
+ * Call printing function for the meta canonical URL input for a given term.
+ *
+ * @param int    $term_id  Term ID.
+ * @param string $taxonomy The taxonomy slug.
+ */
+function wp_seo_term_data_to_the_meta_canonical_url_input( $term_id, $taxonomy ) {
+	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
+	wp_seo_the_meta_canonical_url_input( $term_option['canonical_url'] ?? '' );
+}
+
+/**
+ * Call printing function for the meta robots noindex input for a given term.
+ *
+ * @param int    $term_id  Term ID.
+ * @param string $taxonomy The taxonomy slug.
+ */
+function wp_seo_term_data_to_the_meta_robots_noindex_input( $term_id, $taxonomy ) {
+	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
+	wp_seo_the_meta_robots_noindex_input( $term_option['robots_noindex'] ?? '' );
+}
+
+/**
+ * Call printing function for the meta robots nofollow input for a given term.
+ *
+ * @param int    $term_id  Term ID.
+ * @param string $taxonomy The taxonomy slug.
+ */
+function wp_seo_term_data_to_the_meta_robots_nofollow_input( $term_id, $taxonomy ) {
+	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
+	wp_seo_the_meta_robots_nofollow_input( $term_option['robots_nofollow'] ?? '' );
+}
+
+/**
+ * Call printing function for the meta robots noarchive input for a given term.
+ *
+ * @param int    $term_id  Term ID.
+ * @param string $taxonomy The taxonomy slug.
+ */
+function wp_seo_term_data_to_the_meta_robots_noarchive_input( $term_id, $taxonomy ) {
+	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
+	wp_seo_the_meta_robots_noarchive_input( $term_option['robots_noarchive'] ?? '' );
+}
+
+/**
+ * Call printing function for the meta robots nosnippet input for a given term.
+ *
+ * @param int    $term_id  Term ID.
+ * @param string $taxonomy The taxonomy slug.
+ */
+function wp_seo_term_data_to_the_meta_robots_nosnippet_input( $term_id, $taxonomy ) {
+	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
+	wp_seo_the_meta_robots_nosnippet_input( $term_option['robots_nosnippet'] ?? '' );
+}
+
+/**
+ * Call printing function for the meta robots noimageindex input for a given term.
+ *
+ * @param int    $term_id  Term ID.
+ * @param string $taxonomy The taxonomy slug.
+ */
+function wp_seo_term_data_to_the_meta_robots_noimageindex_input( $term_id, $taxonomy ) {
+	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
+	wp_seo_the_meta_robots_noimageindex_input( $term_option['robots_noimageindex'] ?? '' );
+}
+
+/**
+ * Call printing function for the meta robots notranslate input for a given term.
+ *
+ * @param int    $term_id  Term ID.
+ * @param string $taxonomy The taxonomy slug.
+ */
+function wp_seo_term_data_to_the_meta_robots_notranslate_input( $term_id, $taxonomy ) {
+	$term_option = WP_SEO()->intersect_term_option( (array) WP_SEO()->get_term_option( $term_id, $taxonomy ) );
+	wp_seo_the_meta_robots_notranslate_input( $term_option['robots_notranslate'] ?? '');
 }
