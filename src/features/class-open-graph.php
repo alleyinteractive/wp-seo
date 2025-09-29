@@ -199,13 +199,14 @@ final class Open_Graph implements Feature {
 		printf(
 			<<<'HTML'
 <!-- Start Open Graph -->
-<meta property="og:type" content="website" />
-<meta property="og:title" content="%1$s" />
-<meta property="og:description" content="%2$s" />
-<meta property="og:url" content="%3$s" />
-%4$s
+<meta property="og:type" content="%1$s" />
+<meta property="og:title" content="%2$s" />
+<meta property="og:description" content="%3$s" />
+<meta property="og:url" content="%4$s" />
+%5$s
 <!-- End Open Graph -->
 HTML,
+			is_singular() ? 'article' : 'website',
 			esc_attr( $title ),
 			esc_attr( $description ),
 			esc_url( $permalink ),
