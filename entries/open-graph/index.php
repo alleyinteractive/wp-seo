@@ -43,6 +43,8 @@ add_action( 'init', 'wp_seo_register_open_graph_scripts' );
 
 /**
  * Enqueue open graph slotfill styles.
+ *
+ * @return void
  */
 function wp_seo_register_open_graph_styles() {
 	wp_enqueue_style( 'wp-seo-open-graph', plugins_url( '../style-open-graph/index.css', __FILE__ ), [], '1.0.0' );
