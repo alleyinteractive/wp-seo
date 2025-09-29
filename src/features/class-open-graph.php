@@ -195,6 +195,26 @@ final class Open_Graph implements Feature {
 		$description = $this->get_description( $post_id );
 		$image       = $this->get_image( $post_id );
 		$permalink   = ! empty( get_permalink( $post_id ) ) ? get_permalink( $post_id ) : '';
+		$additional = '';
+
+		// Add article related tags.
+		if ( is_singular() ) {
+			$published_time = get_the_date('c', $post_id);
+			$modified_time  = get_the_modified_date('c', $post_id);
+
+			if ( ! empty( $published_time ) ) {
+				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( $published_time ) );
+			}
+
+			if ( ! empty( $modified_time ) ) {
+				$additional .= sprintf( "\n<meta property=\"article:modified_time\" content=\"%s\" />", esc_attr( $modified_time ) );
+			}
+		}
+
+		// Add image related tags.
+		if ( ! empty( $image ) ) {
+			$additional .= sprintf( "\n<meta property=\"og:image\" content=\"%s\" />", esc_url( $image ) );
+		}
 
 		printf(
 			<<<'HTML'
@@ -202,15 +222,14 @@ final class Open_Graph implements Feature {
 <meta property="og:type" content="%1$s" />
 <meta property="og:title" content="%2$s" />
 <meta property="og:description" content="%3$s" />
-<meta property="og:url" content="%4$s" />
-%5$s
+<meta property="og:url" content="%4$s" />%5$s
 <!-- End WP SEO Open Graph -->
 HTML,
 			is_singular() ? 'article' : 'website',
 			esc_attr( $title ),
 			esc_attr( $description ),
 			esc_url( $permalink ),
-			! empty( $image ) ? sprintf( '<meta property="og:image" content="%s" />', esc_url( $image ) ) : ''
+			$additional
 		);
 	}
 }
