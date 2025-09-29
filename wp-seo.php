@@ -52,15 +52,6 @@ if ( ! file_exists( __DIR__ . '/vendor/wordpress-autoload.php' ) ) {
 	require_once __DIR__ . '/vendor/wordpress-autoload.php';
 }
 
-// Load the plugin's main files.
-require_once __DIR__ . '/src/assets.php';
-require_once __DIR__ . '/src/meta.php';
-require_once __DIR__ . '/src/main.php';
-
-load_scripts();
-register_post_meta_from_defs();
-main();
-
 /**
  * Start Legacy Code
  *
@@ -114,3 +105,13 @@ function wp_seo_admin_scripts(): void {
 }
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\wp_seo_admin_scripts' );
 /* End Legacy Code */
+
+
+// Load the plugin's main files.
+require_once __DIR__ . '/src/assets.php';
+require_once __DIR__ . '/src/meta.php';
+require_once __DIR__ . '/src/main.php';
+
+load_scripts();
+register_post_meta_from_defs();
+main();
