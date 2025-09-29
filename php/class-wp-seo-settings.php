@@ -322,6 +322,9 @@ class WP_SEO_Settings {
 
 		add_settings_section( 'arbitrary', __( 'Other Meta Tags', 'wp-seo' ), false, $this::SLUG );
 		add_settings_field( 'arbitrary_tags', __( 'Tags', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'arbitrary', array( 'type' => 'repeatable', 'field' => 'arbitrary_tags', 'repeat' => array( 'name' => __( 'Name', 'lin' ), 'content' => __( 'Content', 'lin' ) ) ) );
+
+		add_settings_section( 'open_graph', __( 'Open Graph', 'wp-seo' ), false, $this::SLUG );
+		add_settings_field( 'open_graph_post_types', __( 'Add Open Graph support to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'open_graph', array( 'field' => 'open_graph_post_types', 'type' => 'checkboxes', 'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
 	}
 
 	/**
@@ -722,8 +725,9 @@ class WP_SEO_Settings {
 		$out = $this->default_options;
 
 		// Validate post types and taxonomies on which to show SEO fields.
-		$out['post_types'] = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
-		$out['taxonomies'] = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
+		$out['post_types']            = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
+		$out['taxonomies']            = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
+		$out['open_graph_post_types'] = isset( $in['open_graph_post_types'] ) && is_array( $in['open_graph_post_types'] ) ? array_filter( $in['open_graph_post_types'], 'post_type_exists' ) : array();
 
 		/**
 		 * Sanitize these as text fields and in the following order:
