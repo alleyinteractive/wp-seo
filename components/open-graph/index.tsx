@@ -46,7 +46,7 @@ function OpenGraphSlotfill() {
       <VStack spacing="3">
         <TextControl
           label={__('Title', 'wp-seo')}
-          onChange={(next) => setTitle(next)}
+          onChange={setTitle}
           value={title}
           __next40pxDefaultSize
           __nextHasNoMarginBottom
