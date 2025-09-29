@@ -198,13 +198,13 @@ final class Open_Graph implements Feature {
 
 		printf(
 			<<<'HTML'
-<!-- Start Open Graph -->
+<!-- Start WP SEO Open Graph -->
 <meta property="og:type" content="%1$s" />
 <meta property="og:title" content="%2$s" />
 <meta property="og:description" content="%3$s" />
 <meta property="og:url" content="%4$s" />
 %5$s
-<!-- End Open Graph -->
+<!-- End WP SEO Open Graph -->
 HTML,
 			is_singular() ? 'article' : 'website',
 			esc_attr( $title ),
