@@ -15,6 +15,14 @@ use function Alley\WP\WP_SEO\register_meta_helper;
  * Open Graph Feature
  */
 final class Open_Graph implements Feature {
+
+	/**
+	 * WP SEO settings.
+	 *
+	 * @var object WP_SEO_Settings::instance
+	 */
+	protected $wp_seo_settings;
+
 	/**
 	 * Boot the feature.
 	 */
@@ -23,18 +31,25 @@ final class Open_Graph implements Feature {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_block_editor_assets' ] );
 		add_action( 'init', [ $this, 'add_meta_fields' ] );
 		add_action( 'wp_head', [ $this, 'render_open_graph_tags' ] );
+
+		if ( ! isset( $this->wp_seo_settings ) ) {
+			$this->wp_seo_settings = \WP_SEO_Settings::instance();
+		}
 	}
 
 	/**
 	 * Add post type support.
 	 *
-	 * @todo: Supported post types should be configurable from admin page.
-	 *
 	 * @return void
 	 */
 	public function add_post_type_support() {
-		add_post_type_support( 'post', 'open-graph' );
-		add_post_type_support( 'page', 'open-graph' );
+		$enabled_post_types = $this->wp_seo_settings->get_option( 'open_graph_post_types' );
+
+		if ( is_array( $enabled_post_types ) ) {
+			foreach ( $enabled_post_types as $post_type ) {
+				add_post_type_support( $post_type, 'open-graph' );
+			}
+		}
 	}
 
 
