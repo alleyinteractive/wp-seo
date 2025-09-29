@@ -40,9 +40,9 @@
   },
   "devDependencies": {
     "@alleyinteractive/build-tool": "^0.1.5",
-    "@alleyinteractive/eslint-config": "^0.1.6",
+    "@alleyinteractive/eslint-config": "^0.2.0",
     "@alleyinteractive/stylelint-config": "^0.0.2",
-    "@alleyinteractive/tsconfig": "^0.1.1",
+    "@alleyinteractive/tsconfig": "^0.3.0",
     "@babel/preset-env": "^7.26.8",
     "@wordpress/babel-preset-default": "^8.19.1",
     "ajv": "^8.17.1",
