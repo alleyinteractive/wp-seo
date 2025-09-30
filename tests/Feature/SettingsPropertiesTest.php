@@ -1,12 +1,18 @@
 <?php
 /**
- * Test that properties in WP_SEO_Settings include only allowed values after set_properties().
+ * WP SEO Tests: Test that properties in WP_SEO_Settings include only allowed values after set_properties().
  *
- * @package WP SEO
+ * @package wp-seo
  */
-class WP_SEO_Settings_Properties_Tests extends WP_UnitTestCase {
 
-	function tearDown() {
+namespace Alley\WP\WP_SEO\Tests\Feature;
+
+use Alley\WP\WP_SEO\Tests\TestCase;
+use WP_SEO;
+
+class SettingsPropertiesTest extends TestCase {
+
+	function tearDown(): void {
 		parent::tearDown();
 		// Leave the place as we found it.
 		_wp_seo_reset_post_types();
@@ -15,8 +21,8 @@ class WP_SEO_Settings_Properties_Tests extends WP_UnitTestCase {
 	}
 
 	function test_allow_public_objects() {
-		register_post_type( 'demo_public', array( 'rewrite' => true, 'has_archive' => true, 'public' => true ) );
-		register_taxonomy( 'demo_public', 'post', array( 'public' => true ) );
+		register_post_type( 'demo_public', [ 'rewrite' => true, 'has_archive' => true, 'public' => true ] );
+		register_taxonomy( 'demo_public', 'post', [ 'public' => true ] );
 
 		WP_SEO_Settings()->set_properties();
 
@@ -26,8 +32,8 @@ class WP_SEO_Settings_Properties_Tests extends WP_UnitTestCase {
 	}
 
 	function test_disallow_private_objects() {
-		register_post_type( 'demo_private', array( 'public' => false ) );
-		register_taxonomy ( 'demo_private', 'post', array( 'public' => false ) );
+		register_post_type( 'demo_private', [ 'public' => false ] );
+		register_taxonomy( 'demo_private', 'post', [ 'public' => false ] );
 
 		WP_SEO_Settings()->set_properties();
 
@@ -37,7 +43,7 @@ class WP_SEO_Settings_Properties_Tests extends WP_UnitTestCase {
 	}
 
 	function test_handle_post_types_without_archives() {
-		register_post_type( 'demo_no_archive', array( 'rewrite' => true, 'has_archive' => false, 'public' => true ) );
+		register_post_type( 'demo_no_archive', [ 'rewrite' => true, 'has_archive' => false, 'public' => true ] );
 
 		WP_SEO_Settings()->set_properties();
 
@@ -46,8 +52,16 @@ class WP_SEO_Settings_Properties_Tests extends WP_UnitTestCase {
 	}
 
 	function test_disallow_unlabeled_objects() {
-		register_post_type( 'demo_no_label', array( 'label' => false, 'rewrite' => true, 'has_archive' => true, 'public' => true ) );
-		register_taxonomy( 'demo_no_label', 'post', array( 'label' => false, 'public' => true ) );
+		register_post_type( 'demo_no_label', [
+			'label'       => false,
+			'rewrite'     => true,
+			'has_archive' => true,
+			'public'      => true
+		] );
+		register_taxonomy( 'demo_no_label', 'post', [
+			'label'  => false,
+			'public' => true
+		] );
 
 		WP_SEO_Settings()->set_properties();
 
