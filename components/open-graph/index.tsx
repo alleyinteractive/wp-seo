@@ -10,12 +10,58 @@ import {
 } from '@wordpress/components';
 import {
   ImagePicker,
+  useMedia,
   usePostMetaValue,
 } from '@alleyinteractive/block-editor-tools';
 
 import PreviewModal from './PreviewModal';
 
 import './style.scss';
+
+/**
+ * Render image help text based on image data.
+ *
+ * @param image image details object.
+ */
+function ImageHelpText({ image }) {
+  const imageFullSize = image?.media_details?.sizes?.full ?? null;
+
+  if (!imageFullSize) {
+    return (
+      <p style={{ fontSize: '0.75rem', marginTop: '0.2rem', color: '#757575' }}>
+        {__('No image selected. If available, featured image will be used.', 'wp-seo')}
+      </p>
+    );
+  }
+
+  let text;
+
+  /**
+   * The following logic is based on Facebook's Open Graph image size requirements.
+   * Other social platforms follow suite close enough that we use it as the baseline.
+   *
+   * See: https://developers.facebook.com/docs/sharing/webmasters/images/
+   */
+
+  // Image size 200x200px meets the minimum requirements.
+  if (imageFullSize.width >= 200 && imageFullSize.height >= 200) {
+    text = __('Selected image size meets minimum requirements. 1500x1500px is preferred.', 'wp-seo');
+  }
+
+  // Image size 1500x1500px meets the preferred requirements.
+  if (imageFullSize.width >= 1500 && imageFullSize.height >= 1500) {
+    text = __('Selected image size meets preferred requirements.', 'wp-seo');
+  }
+
+  // Image size smaller than 200x200px risk not being used.
+  if (!text) {
+    text = __('Selected image size does not meet minimum requirements. Image size must be at least 200x200px. 1500x1500px is preferred.', 'wp-seo');
+  }
+
+  return (
+    <p style={{ fontSize: '0.75rem', marginTop: '0.2rem', color: '#757575' }}>{text}</p>
+  );
+}
 
 function OpenGraphSlotfill() {
   const currentPostType = select('core/editor').getCurrentPostType();
@@ -25,6 +71,8 @@ function OpenGraphSlotfill() {
   const [description, setDescription] = usePostMetaValue('wp_seo_open_graph_description');
   const [image, setImage] = usePostMetaValue('wp_seo_open_graph_image');
   const [showModal, setShowModal] = useState(false);
+
+  const selectedImage = useMedia(image);
 
   if (!postType?.supports['open-graph']) {
     return null;
@@ -57,11 +105,14 @@ function OpenGraphSlotfill() {
           value={description}
           __nextHasNoMarginBottom
         />
-        <ImagePicker
-          onReset={() => setImage(0)}
-          onUpdate={({ id: next }) => setImage(next)}
-          value={image}
-        />
+        <div>
+          <ImagePicker
+            onReset={() => setImage(0)}
+            onUpdate={({ id: next }) => setImage(next)}
+            value={image}
+          />
+          <ImageHelpText image={selectedImage} />
+        </div>
         <div>
           <Button
             onClick={openModal}
