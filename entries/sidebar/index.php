@@ -1,6 +1,6 @@
 <?php
 /**
- * Open-graph slotfill script registration and enqueue.
+ * Custom block editor script registration and enqueue.
  *
  * This file will be copied to the assets output directory
  * with Webpack using wp-scripts build. The build command must
@@ -13,12 +13,12 @@
  */
 
 /**
- * Registers all open-graph slotfill assets so that they can be enqueued in
+ * Registers all sidebar assets so that they can be enqueued in
  * the corresponding context.
  *
  * @return void
  */
-function wp_seo_register_open_graph_scripts() {
+function wp_seo_register_sidebar_scripts() {
 	/**
 	 * Asset file to automatically load dependencies and version.
 	 *
@@ -29,22 +29,23 @@ function wp_seo_register_open_graph_scripts() {
 	 * */
 	$asset_file = include __DIR__ . '/index.asset.php';
 
-	// Register the open-graph script.
+	// Register the sidebar script.
 	wp_register_script(
-		'wp-seo-open-graph-js',
+		'wp-seo-sidebar',
 		plugins_url( 'index.js', __FILE__ ),
 		$asset_file['dependencies'],
 		$asset_file['version'],
 		true
 	);
-	wp_set_script_translations( 'wp-seo-open-graph-js', 'wp-seo' );
+	wp_set_script_translations( 'wp-seo-sidebar', 'wp-seo' );
 }
-add_action( 'init', 'wp_seo_register_open_graph_scripts' );
+add_action( 'init', 'wp_seo_register_sidebar_scripts' );
 
 /**
- * Enqueue open graph slotfill styles.
+ * Enqueue sidebar assets.
  */
-function wp_seo_register_open_graph_styles() {
-	wp_enqueue_style( 'wp-seo-open-graph', plugins_url( '../style-open-graph/index.css', __FILE__ ), [], '1.0.0' );
+function wp_seo_register_sidebar_assets(): void {
+	wp_enqueue_script( 'wp-seo-sidebar' );
+	wp_enqueue_style( 'wp-seo-sidebar', plugins_url( '../style-sidebar/index.css', __FILE__ ), [], '1.0.0' );
 }
-add_action( 'enqueue_block_editor_assets', 'wp_seo_register_open_graph_styles' );
+add_action( 'enqueue_block_editor_assets', 'wp_seo_register_sidebar_assets' );
