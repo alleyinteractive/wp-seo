@@ -28,7 +28,7 @@ function ImageHelpText({ image }) {
 
   if (!imageFullSize) {
     return (
-      <p style={{ fontSize: '0.75rem', marginTop: '0.2rem', color: '#757575' }}>
+      <p style={{ fontSize: '0.75rem', color: '#757575' }}>
         {__('No image selected. If available, featured image will be used.', 'wp-seo')}
       </p>
     );
@@ -59,7 +59,7 @@ function ImageHelpText({ image }) {
   }
 
   return (
-    <p style={{ fontSize: '0.75rem', marginTop: '0.2rem', color: '#757575' }}>{text}</p>
+    <p style={{ fontSize: '0.75rem', color: '#757575' }}>{text}</p>
   );
 }
 
@@ -116,12 +116,12 @@ function OpenGraphSlotfill() {
           >
             {__('Image', 'wp-seo')}
           </p>
+          <ImageHelpText image={selectedImage} />
           <ImagePicker
             onReset={() => setImage(0)}
             onUpdate={({ id: next }) => setImage(next)}
             value={image}
           />
-          <ImageHelpText image={selectedImage} />
         </div>
         <div>
           <Button
