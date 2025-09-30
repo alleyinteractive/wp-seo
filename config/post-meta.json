@@ -1,0 +1,16 @@
+{
+  "search_engine_title": {
+    "default": "",
+    "post_types": [
+      "page",
+      "post"
+    ]
+  },
+  "search_engine_description": {
+    "default": "",
+    "post_types": [
+      "page",
+      "post"
+    ]
+  }
+}
