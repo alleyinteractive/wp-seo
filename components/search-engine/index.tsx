@@ -22,7 +22,7 @@ function SearchEngineSlotfill() {
         <div>
           <TextControl
             label={__('Title', 'wp-seo')}
-            onChange={(next) => setTitle(next)}
+            onChange={setTitle}
             value={title}
             __next40pxDefaultSize
             __nextHasNoMarginBottom
