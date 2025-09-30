@@ -34,7 +34,7 @@ function SearchEngineSlotfill() {
         <div>
           <TextareaControl
             label={__('Description', 'wp-seo')}
-            onChange={(next) => setDescription(next)}
+            onChange={setDescription}
             value={description}
             __nextHasNoMarginBottom
           />
