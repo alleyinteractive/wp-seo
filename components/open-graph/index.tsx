@@ -106,6 +106,16 @@ function OpenGraphSlotfill() {
           __nextHasNoMarginBottom
         />
         <div>
+          <p style={{
+            fontSize: '11px',
+            marginBottom: '0.5rem',
+            color: '#1E1E1E',
+            textTransform: 'uppercase',
+            fontWeight: '500',
+          }}
+          >
+            {__('Image', 'wp-seo')}
+          </p>
           <ImagePicker
             onReset={() => setImage(0)}
             onUpdate={({ id: next }) => setImage(next)}
