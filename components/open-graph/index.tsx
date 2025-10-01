@@ -56,9 +56,13 @@ function ImageHelpText({ image }) {
   if (imageFullSize.width >= preferredWidth && imageFullSize.height >= preferredHeight) {
     tipText = __('Selected image size meets preferred requirements but not in aspect ratio.', 'wp-seo');
 
-    if (Math.abs(imageFullSize.width / imageFullSize.height - 1.91) < 0.01) {
+    if (Math.abs(imageFullSize.width / imageFullSize.height - preferredAspectRatio) < 0.01) {
       showLink = false;
-      tipText = __('Selected image size and aspect ratio meets all requirements.', 'wp-seo');
+      tipText = (
+        <span style={{ color: 'var(--wp--preset--color--vivid-green-cyan)' }}>
+          {__('Selected image size and aspect ratio meets all requirements.', 'wp-seo')}
+        </span>
+      );
     }
   }
 
