@@ -280,6 +280,7 @@ class WP_SEO_Settings {
 
 		add_settings_section( 'post_types', __( 'Post Types', 'wp-seo' ), '__return_false', $this::SLUG );
 		add_settings_field( 'post_types', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'post_types', array( 'field' => 'post_types', 'type' => 'checkboxes', 'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
+		add_settings_field( 'open_graph_post_types', __( 'Add Open Graph support to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'post_types', array( 'field' => 'open_graph_post_types', 'type' => 'checkboxes', 'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
 
 		foreach ( $this->single_post_types as $post_type ) {
 			/* translators: %s: post type singular name */
@@ -323,8 +324,6 @@ class WP_SEO_Settings {
 		add_settings_section( 'arbitrary', __( 'Other Meta Tags', 'wp-seo' ), false, $this::SLUG );
 		add_settings_field( 'arbitrary_tags', __( 'Tags', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'arbitrary', array( 'type' => 'repeatable', 'field' => 'arbitrary_tags', 'repeat' => array( 'name' => __( 'Name', 'lin' ), 'content' => __( 'Content', 'lin' ) ) ) );
 
-		add_settings_section( 'open_graph', __( 'Open Graph', 'wp-seo' ), false, $this::SLUG );
-		add_settings_field( 'open_graph_post_types', __( 'Add Open Graph support to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'open_graph', array( 'field' => 'open_graph_post_types', 'type' => 'checkboxes', 'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
 	}
 
 	/**
