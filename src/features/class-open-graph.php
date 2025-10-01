@@ -28,7 +28,6 @@ final class Open_Graph implements Feature {
 	 */
 	public function boot(): void {
 		add_action( 'init', [ $this, 'add_post_type_support' ] );
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_block_editor_assets' ] );
 		add_action( 'init', [ $this, 'add_meta_fields' ] );
 		add_action( 'wp_head', [ $this, 'render_open_graph_tags' ] );
 
@@ -50,30 +49,6 @@ final class Open_Graph implements Feature {
 				add_post_type_support( $post_type, 'open-graph' );
 			}
 		}
-	}
-
-
-	/**
-	 * Enqueue block editor assets.
-	 *
-	 * @return void
-	 */
-	public function enqueue_block_editor_assets() {
-		global $post;
-
-		if ( ! is_admin()
-			|| ! ( $post instanceof \WP_Post || is_int( $post ) || is_null( $post ) )
-		) {
-			return;
-		}
-
-		$post_type = get_post_type( $post );
-
-		if ( empty( $post_type ) || ! post_type_supports( $post_type, 'open-graph' ) ) {
-			return;
-		}
-
-		wp_enqueue_script( 'wp-seo-open-graph-js' );
 	}
 
 	/**

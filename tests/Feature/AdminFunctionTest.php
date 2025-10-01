@@ -8,6 +8,7 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use Mantle\Testing\Utils;
 
 class AdminFunctionTest extends TestCase {
 	/**
@@ -17,11 +18,7 @@ class AdminFunctionTest extends TestCase {
 	 */
 	function test_admin_functions_contain( $function, $should, $contain, $args ) {
 		// Capture the output of the function.
-		ob_start();
-		$function( ...$args );
-		$output = ob_get_clean();
-
-		self::assertStringContainsString( $contain, $output, $should );
+		self::assertStringContainsString( $contain, Utils::get_echo( $function, $args ), $should );
 	}
 
 	/**

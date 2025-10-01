@@ -1,3 +1,4 @@
+// stylelint-disable selector-max-compound-selectors
 .open-graph-preview {
   .wp-seo-search-preview,
   .wp-seo-social-preview {
@@ -35,6 +36,7 @@
       column-gap: 0.5rem;
       margin-bottom: 0.3125rem;
 
+      /* stylelint-disable-next-line selector-max-compound-selectors */
       p {
         color: #333;
       }
@@ -44,6 +46,7 @@
       width: 1.625rem;
       height: 1.625rem;
 
+      /* stylelint-disable-next-line selector-max-compound-selectors */
       img {
         border-radius: 50%;
         height: 100%;
@@ -69,6 +72,8 @@
     }
 
     .search-preview-image {
+
+      /* stylelint-disable-next-line selector-max-compound-selectors */
       img {
         border-radius: 0.5rem;
         height: 5.625rem;
@@ -87,6 +92,7 @@
       max-width: 32rem;
       overflow: hidden;
 
+      /* stylelint-disable-next-line selector-max-compound-selectors */
       img {
         aspect-ratio: 16 / 9;
         display: block;

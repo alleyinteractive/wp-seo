@@ -1,4 +1,5 @@
 import { useMedia } from '@alleyinteractive/block-editor-tools';
+import WPRESTMedia from '../../src/types/WPRestMedia';
 
 interface SocialPreviewProps {
   title: string;
@@ -13,7 +14,7 @@ function SocialPreview({
   imageId,
   siteUrl,
 }: SocialPreviewProps) {
-  const socialImage = useMedia(imageId);
+  const socialImage: WPRESTMedia = useMedia(imageId);
 
   return (
     <div className="wp-seo-social-preview">
