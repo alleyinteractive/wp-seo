@@ -1,5 +1,6 @@
 import { date as wpDate } from '@wordpress/date';
 import { useMedia } from '@alleyinteractive/block-editor-tools';
+import WPRESTMedia from '../../src/types/WPRestMedia';
 
 interface SearchPreviewProps {
   title: string;
@@ -24,8 +25,8 @@ function SearchPreview({
   siteIcon,
   siteTimezone,
 }: SearchPreviewProps) {
-  const icon: any = useMedia(siteIcon);
-  const searchImage: any = useMedia(imageId);
+  const icon: WPRESTMedia = useMedia(siteIcon);
+  const searchImage: WPRESTMedia = useMedia(imageId);
 
   const previewDate = postType === 'post' ? (
     <span className="search-preview-date">{wpDate('F j, Y', date, siteTimezone)}</span>

@@ -43,6 +43,8 @@ add_action( 'init', 'wp_seo_register_sidebar_scripts' );
 
 /**
  * Enqueue sidebar assets.
+ *
+ * @return void
  */
 function wp_seo_register_sidebar_assets(): void {
 	wp_enqueue_script( 'wp-seo-sidebar' );
