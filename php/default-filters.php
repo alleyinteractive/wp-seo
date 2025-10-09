@@ -86,12 +86,12 @@ foreach ( $contexts as $context ) {
 	// Robots fields.
 	foreach ( WP_SEO()->get_robots_directive_values() as $directive ) {
     // Label.
-    add_action(
+		add_action(
 			"wp_seo_{$context}_meta_fields_robots_{$directive}_label",
 			function() use ( $directive ) {
 				wp_seo_the_meta_robots_label( $directive );
 			}
-    );
+		);
 
 		// Input.
 		add_action(
@@ -111,12 +111,12 @@ foreach ( $contexts as $context ) {
 			'edit_term' === $context ? 2 : 1
 		);
 
-    // After input.
-    add_action(
+		// After input.
+		add_action(
 			"wp_seo_{$context}_meta_fields_after_robots_{$directive}_input",
 			function() use ( $directive ) {
 				wp_seo_the_meta_robots_after_input( $directive );
 			}
-    );
+		);
 	}
 }

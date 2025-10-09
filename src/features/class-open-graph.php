@@ -15,50 +15,40 @@ use function Alley\WP\WP_SEO\register_meta_helper;
  * Open Graph Feature
  */
 final class Open_Graph implements Feature {
+
+	/**
+	 * WP SEO settings.
+	 *
+	 * @var object WP_SEO_Settings::instance
+	 */
+	protected $wp_seo_settings;
+
 	/**
 	 * Boot the feature.
 	 */
 	public function boot(): void {
 		add_action( 'init', [ $this, 'add_post_type_support' ] );
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_block_editor_assets' ] );
 		add_action( 'init', [ $this, 'add_meta_fields' ] );
 		add_action( 'wp_head', [ $this, 'render_open_graph_tags' ] );
+
+		if ( ! isset( $this->wp_seo_settings ) ) {
+			$this->wp_seo_settings = \WP_SEO_Settings::instance();
+		}
 	}
 
 	/**
 	 * Add post type support.
 	 *
-	 * @todo: Supported post types should be configurable from admin page.
-	 *
 	 * @return void
 	 */
 	public function add_post_type_support() {
-		add_post_type_support( 'post', 'open-graph' );
-		add_post_type_support( 'page', 'open-graph' );
-	}
+		$enabled_post_types = $this->wp_seo_settings->get_option( 'open_graph_post_types' );
 
-
-	/**
-	 * Enqueue block editor assets.
-	 *
-	 * @return void
-	 */
-	public function enqueue_block_editor_assets() {
-		global $post;
-
-		if ( ! is_admin()
-			|| ! ( $post instanceof \WP_Post || is_int( $post ) || is_null( $post ) )
-		) {
-			return;
+		if ( is_array( $enabled_post_types ) ) {
+			foreach ( $enabled_post_types as $post_type ) {
+				add_post_type_support( $post_type, 'open-graph' );
+			}
 		}
-
-		$post_type = get_post_type( $post );
-
-		if ( empty( $post_type ) || ! post_type_supports( $post_type, 'open-graph' ) ) {
-			return;
-		}
-
-		wp_enqueue_script( 'wp-seo-open-graph-js' );
 	}
 
 	/**
@@ -180,21 +170,41 @@ final class Open_Graph implements Feature {
 		$description = $this->get_description( $post_id );
 		$image       = $this->get_image( $post_id );
 		$permalink   = ! empty( get_permalink( $post_id ) ) ? get_permalink( $post_id ) : '';
+		$additional = '';
+
+		// Add article related tags.
+		if ( is_singular() ) {
+			$published_time = get_the_date('c', $post_id);
+			$modified_time  = get_the_modified_date('c', $post_id);
+
+			if ( ! empty( $published_time ) ) {
+				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( $published_time ) );
+			}
+
+			if ( ! empty( $modified_time ) ) {
+				$additional .= sprintf( "\n<meta property=\"article:modified_time\" content=\"%s\" />", esc_attr( $modified_time ) );
+			}
+		}
+
+		// Add image related tags.
+		if ( ! empty( $image ) ) {
+			$additional .= sprintf( "\n<meta property=\"og:image\" content=\"%s\" />", esc_url( $image ) );
+		}
 
 		printf(
 			<<<'HTML'
-<!-- Start Open Graph -->
-<meta property="og:type" content="website" />
-<meta property="og:title" content="%1$s" />
-<meta property="og:description" content="%2$s" />
-<meta property="og:url" content="%3$s" />
-%4$s
-<!-- End Open Graph -->
+<!-- Start WP SEO Open Graph -->
+<meta property="og:type" content="%1$s" />
+<meta property="og:title" content="%2$s" />
+<meta property="og:description" content="%3$s" />
+<meta property="og:url" content="%4$s" />%5$s
+<!-- End WP SEO Open Graph -->
 HTML,
+			is_singular() ? 'article' : 'website',
 			esc_attr( $title ),
 			esc_attr( $description ),
 			esc_url( $permalink ),
-			! empty( $image ) ? sprintf( '<meta property="og:image" content="%s" />', esc_url( $image ) ) : ''
+			$additional
 		);
 	}
 }

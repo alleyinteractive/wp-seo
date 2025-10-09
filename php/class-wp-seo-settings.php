@@ -272,8 +272,10 @@ class WP_SEO_Settings {
 	 * Register the settings section for the ID.
 	 * 
 	 * @param string $id The section ID.
+	 * @param string $title The section title.
+	 * @param callable $callback The section callback, or false for none.
 	 */
-	private function register_settings_section( $id, $title, $callback ) {
+	private function register_settings_section( string $id, string $title, callable $callback ) {
 		// Section title.
 		add_settings_section( $id, $title, $callback, $this::SLUG );
 
@@ -386,6 +388,17 @@ class WP_SEO_Settings {
 				'boxes' => call_user_func_array( 'wp_list_pluck', [ $this->single_post_types, 'label' ] )
 			]
 		);
+		add_settings_field(
+			'open_graph_post_types',
+			__( 'Add Open Graph support to individual:', 'wp-seo' ),
+			array( $this, 'field' ),
+			$this::SLUG,
+			'post_types', array(
+				'field' => 'open_graph_post_types',
+				'type' => 'checkboxes',
+				'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) )
+			)
+		);
 
 		// Single post types settings.
 		foreach ( $this->single_post_types as $post_type ) {
@@ -493,7 +506,7 @@ class WP_SEO_Settings {
 		add_settings_section(
 			'robots_meta',
 			__( 'Robots Meta Tag', 'wp-seo' ),
-			fn( $args ) => esc_html_e( $args['description'] ?? '' ),
+			fn( $args ) => printf( '<p class="description">%s</p>', esc_html( $args['description'] ?? '' ) ),
 			$this::SLUG,
 			[
 				'description'  => __( 'Add directives for use in the robots meta tag content attribute. These directives will be available for configuration on this settings page, post pages, and term pages.', 'wp-seo' ),
@@ -938,8 +951,9 @@ class WP_SEO_Settings {
 		$out = $this->default_options;
 
 		// Validate post types and taxonomies on which to show SEO fields.
-		$out['post_types'] = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
-		$out['taxonomies'] = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
+		$out['post_types']            = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
+		$out['taxonomies']            = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
+		$out['open_graph_post_types'] = isset( $in['open_graph_post_types'] ) && is_array( $in['open_graph_post_types'] ) ? array_filter( $in['open_graph_post_types'], 'post_type_exists' ) : array();
 
 		/**
 		 * Sanitize these as text fields and in the following order:
@@ -1003,10 +1017,10 @@ class WP_SEO_Settings {
 		 * Sanitize repeatable fields, also as text fields:
 		 */
 
-		$repeatables = array(
-			'arbitrary_tags' => array( 'name', 'content' ),
-			'robots_meta_directives' => array( 'label', 'value', 'description' ),
-		);
+		$repeatables = [
+			'arbitrary_tags' => [ 'name', 'content' ],
+			'robots_meta_directives' => [ 'label', 'value', 'description' ],
+		];
 
 		foreach ( $repeatables as $repeatable => $fields ) {
 			$out[ $repeatable ] = array();

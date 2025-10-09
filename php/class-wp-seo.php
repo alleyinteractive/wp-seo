@@ -152,12 +152,12 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 */
 		public function intersect_term_option( $option_value ) {
 			return wp_seo_intersect_args(
-        $option_value,
-        array_merge(
-          array_fill_keys( $this->get_base_fields(), '' ),
-          array_fill_keys( $this->get_robots_directive_meta_keys(), '' )
-        ),
-      );
+				$option_value,
+				array_merge(
+					array_fill_keys( $this->get_base_fields(), '' ),
+					array_fill_keys( $this->get_robots_directive_meta_keys(), '' ),
+				),
+			);
 		}
 
 		/**
@@ -254,10 +254,10 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 */
 			$fields = (array) apply_filters(
 				'wp_seo_saveable_fields',
-        array_merge(
-          $this->get_base_fields(),
-          $this->get_robots_directive_meta_keys(),
-        )
+				array_merge(
+					$this->get_base_fields(),
+					$this->get_robots_directive_meta_keys(),
+				)
 			);
 			foreach ( $fields as $field ) {
 				$meta_key = wp_slash( '_meta_' . $field );
@@ -383,9 +383,9 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			}
 
 			$fields = array_merge(
-        $this->get_base_fields(),
-        $this->get_robots_directive_meta_keys()
-      );
+				$this->get_base_fields(),
+				$this->get_robots_directive_meta_keys(),
+			);
 
 			foreach ( $fields as $field ) {
 				$value = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
@@ -805,10 +805,14 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @return array Updated associative array of directives.
 		 */
 		public function filter_robots_meta( array $robots, string $key ): array {
+			if ( empty( $key ) ) {
+				return $robots;
+			}
+
 			// List of possible robots directives.
 			$robots_directives = $this->get_robots_directive_values();
 
-			if ( empty( $key ) ) {
+			if ( empty( $robots_directives ) || ! is_array( $robots_directives ) ) {
 				return $robots;
 			}
 
@@ -820,9 +824,9 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 
 			// Check the meta value for each directive and set it to true if present.
 			foreach ( $robots_directives as $directive ) {
-        if ( empty( $directive ) ) {
-          continue;
-        }
+				if ( empty( $directive ) ) {
+					continue;
+				}
 
 				$robots_meta = '';
 
@@ -832,7 +836,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 					$robots_meta = $object_data[ "robots_{$directive}" ] ?? '';
 				}
 
-				if ( empty( $robots_meta ) ) {
+				if ( empty( $robots_meta ) && ! empty( $settings ) && is_array( $settings ) ) {
 					/**
 					 * Filter the robots meta directive for this page.
 					 * @param  string      The value retrieved from the settings.
@@ -876,24 +880,25 @@ if ( ! class_exists( 'WP_SEO' ) ) :
     }
 
     /**
-     * Get robots directive meta keys.
-     *
-     * @return array Array of robots directive meta keys from settings.
-     */
-    public function get_robots_directive_meta_keys(): array {
-      return array_map(
-        fn( $value ) => 'robots_' . $value,
-        wp_list_pluck( $this->get_robots_directives(), 'value' )
-      );
-    }
-
-    /**
      * Get robots directive values.
      *
      * @return array Array of robots directive values from settings.
      */
     public function get_robots_directive_values(): array {
       return wp_list_pluck( $this->get_robots_directives(), 'value' );
+		}
+
+    /**
+     * Get robots directive meta keys.
+     *
+     * @return array Array of robots directive meta keys from settings.
+		 * The meta keys are the directive values prefixed with 'robots_'.
+     */
+    public function get_robots_directive_meta_keys(): array {
+      return array_map(
+        fn( $value ) => 'robots_' . $value,
+        $this->get_robots_directive_values(),
+      );
     }
 	}
 

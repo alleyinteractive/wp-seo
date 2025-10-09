@@ -1,6 +1,21 @@
 {
-  "extends": ["@alleyinteractive/eslint-config/typescript-react"],
+  "extends": [
+    "@alleyinteractive/eslint-config/typescript-react"
+  ],
   "parserOptions": {
     "project": "./tsconfig.eslint.json"
+  },
+  "rules": {
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never",
+        "": "never"
+      }
+    ]
   }
 }

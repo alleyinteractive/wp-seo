@@ -166,7 +166,7 @@ function wp_seo_the_post_meta_fields( $post ) {
  */
 function wp_seo_the_add_term_meta_fields( $taxonomy ) {
 	?>
-	<h3><?php esc_html_e( wp_seo_get_box_title() ); ?></h3>
+	<h3><?php echo esc_html( wp_seo_get_box_title() ); ?></h3>
 
 	<div class="wp-seo-term-meta-fields">
 		<div class="form-field">
@@ -274,7 +274,7 @@ function wp_seo_the_add_term_meta_fields( $taxonomy ) {
  */
 function wp_seo_the_edit_term_meta_fields( $tag, $taxonomy ) {
 	?>
-	<h2><?php esc_html_e( wp_seo_get_box_title() ); ?></h2>
+	<h2><?php echo esc_html( wp_seo_get_box_title() ); ?></h2>
 
 	<table class="form-table wp-seo-term-meta-fields">
 		<tbody>
@@ -454,7 +454,7 @@ function wp_seo_the_title_character_count( $count ) {
 		<?php esc_html_e( 'Title character count: ', 'wp-seo' ); ?>
 		<span class="title-character-count"></span>
 		<?php /* translators: %d: title character count */ ?>
-		<noscript><?php esc_html_e( sprintf( __( '%d (save changes to update)', 'wp-seo' ), $count ) ); ?></noscript>
+		<noscript><?php echo esc_html( sprintf( __( '%d (save changes to update)', 'wp-seo' ), $count ) ); ?></noscript>
 	</p>
 	<?php
 }
@@ -490,7 +490,7 @@ function wp_seo_the_description_character_count( $count ) {
 		<?php esc_html_e( 'Description character count: ', 'wp-seo' ); ?>
 		<span class="description-character-count"></span>
 		<?php /* translators: %d: description character count */ ?>
-		<noscript><?php esc_html_e( sprintf( __( '%d (save changes to update)', 'wp-seo' ), $count ) ); ?></noscript>
+		<noscript><?php echo esc_html( sprintf( __( '%d (save changes to update)', 'wp-seo' ), $count ) ); ?></noscript>
 	</p>
 	<?php
 }
@@ -532,7 +532,7 @@ function wp_seo_the_meta_canonical_url_after_input() {
 function wp_seo_the_meta_robots_legend() {
 	?>
 	<legend>
-		<?php esc_html_e( 'Meta Robots Settings', 'wp-seo' ); ?>
+		<?php esc_html_e( 'Meta Robots', 'wp-seo' ); ?>
 	</legend>
 	<?php
 }
@@ -569,7 +569,7 @@ function wp_seo_the_meta_robots_label( $directive ) {
 
 	?>
 	<label for="wp_seo_meta_robots_<?php echo esc_attr( $directive ); ?>">
-		<?php esc_html_e( $robots_directive_label ); ?>
+		<?php echo esc_html( $robots_directive_label ); ?>
 	</label>
 	<?php
 }
@@ -613,7 +613,7 @@ function wp_seo_the_meta_robots_input( $value, $directive ) {
 				/* translators: inherited value (Enable/Disable) */
 				__( 'Inherit (%s)', 'wp-seo' ),
 				$inherited_value
-      )
+			)
 		); ?></option>
 		<option value="enable" <?php selected( $value, 'enable' ); ?>><?php esc_html_e( 'Enable', 'wp-seo' ); ?></option>
 		<option value="disable" <?php selected( $value, 'disable' ); ?>><?php esc_html_e( 'Disable', 'wp-seo' ); ?></option>
@@ -640,5 +640,5 @@ function wp_seo_the_meta_robots_after_input( $directive ) {
 		return;
 	}
 
-	esc_html_e( $robots_directive_description );
+	echo esc_html( $robots_directive_description );
 }
