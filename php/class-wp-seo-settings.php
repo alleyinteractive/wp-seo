@@ -328,6 +328,7 @@ class WP_SEO_Settings {
 		);
 
 		// Robots meta.
+		$robots_directives = WP_SEO()->get_robots_directives();
 		add_settings_field(
 			"{$id}_robots",
 			__( 'Meta Robots', 'wp-seo' ),
@@ -337,14 +338,18 @@ class WP_SEO_Settings {
 			[
 				'type' => 'checkboxes',
 				'field' => "{$id}_robots",
-				'boxes' => [
-					'noindex' => __( 'noindex: Request that robots not index the page', 'wp-seo' ),
-					'nofollow' => __( 'nofollow: Request that robots not follow the links on the page', 'wp-seo' ),
-					'noarchive' => __( 'noarchive: Request that search engines not cache the page content', 'wp-seo' ),
-					'nosnippet' => __( 'nosnippet: Request that search engines not display any description of the page in search results', 'wp-seo' ),
-					'noimageindex' => __( 'noimageindex: Request that search engines not index images on this page', 'wp-seo' ),
-					'notranslate' => __( 'notranslate: Request that search engines not offer translations of this page in search results', 'wp-seo' )
-				]
+				'boxes' => array_combine(
+					wp_list_pluck( $robots_directives, 'value' ),
+					array_map(
+						fn( $directive ) => sprintf(
+							'%1$s (%2$s): %3$s',
+							esc_html( $directive['label'] ?? '' ),
+							esc_html( $directive['value'] ?? '' ),
+							esc_html( $directive['description'] ?? '' )
+						),
+						$robots_directives,
+					),
+				)
 			]
 		);
 	}
@@ -484,6 +489,33 @@ class WP_SEO_Settings {
 			[ 'field' => '404_title' ],
 		);
 
+		// Robots meta tags settings.
+		add_settings_section(
+			'robots_meta',
+			__( 'Robots Meta Tag', 'wp-seo' ),
+			fn( $args ) => esc_html_e( $args['description'] ?? '' ),
+			$this::SLUG,
+			[
+				'description'  => __( 'Add directives for use in the robots meta tag content attribute. These directives will be available for configuration on this settings page, post pages, and term pages.', 'wp-seo' ),
+			]
+		);
+		add_settings_field(
+			'robots_meta_directives',
+			__( 'Directives', 'wp-seo' ),
+			[ $this, 'field' ],
+			$this::SLUG,
+			'robots_meta',
+			[
+				'type' => 'repeatable',
+				'field' => 'robots_meta_directives',
+				'repeat' => [
+					'label' => __( 'Label', 'wp-seo' ),
+					'value' => __( 'Value', 'wp-seo' ),
+					'description' => __( 'Description', 'wp-seo' ),
+				],
+			],
+		);
+
 		// Other meta tags settings.
 		add_settings_section(
 			'arbitrary',
@@ -501,8 +533,8 @@ class WP_SEO_Settings {
 				'type' => 'repeatable',
 				'field' => 'arbitrary_tags',
 				'repeat' => [
-					'name' => __( 'Name', 'lin' ),
-					'content' => __( 'Content', 'lin' )
+					'name' => __( 'Name', 'wp-seo' ),
+					'content' => __( 'Content', 'wp-seo' )
 				],
 			],
 		);
@@ -973,6 +1005,7 @@ class WP_SEO_Settings {
 
 		$repeatables = array(
 			'arbitrary_tags' => array( 'name', 'content' ),
+			'robots_meta_directives' => array( 'label', 'value', 'description' ),
 		);
 
 		foreach ( $repeatables as $repeatable => $fields ) {

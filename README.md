@@ -98,6 +98,14 @@ The WP SEO settings page allows you to set **global defaults**, but you can also
 
 ---
 
+### Robots Meta Tag
+
+WP SEO allows you to customize the directives that will be available to add to the robots `<meta>` tag. These are managed under the **Robots Meta Tag** in the settings.
+
+Once directives are added, they are available to be enabled on content types in the settings. These settings can also be overridden on the post and term level. By default, posts and terms inherit from the settings page.
+
+---
+
 ### Custom Meta Tags
 
 In addition to `<meta>` descriptions, WP SEO allows you to set **custom **``** tags** site-wide. These are managed under **Other Meta Tags** in the settings.

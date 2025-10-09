@@ -151,17 +151,13 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @return array Option values with default keys and values.
 		 */
 		public function intersect_term_option( $option_value ) {
-			return wp_seo_intersect_args( $option_value, array(
-				'title'       => '',
-				'description' => '',
-				'canonical_url' => '',
-				'robots_noindex' => '',
-				'robots_nofollow' => '',
-				'robots_noarchive' => '',
-				'robots_nosnippet' => '',
-				'robots_noimageindex' => '',
-				'robots_notranslate' => '',
-			) );
+			return wp_seo_intersect_args(
+        $option_value,
+        array_merge(
+          array_fill_keys( $this->get_base_fields(), '' ),
+          array_fill_keys( $this->get_robots_directive_meta_keys(), '' )
+        ),
+      );
 		}
 
 		/**
@@ -258,17 +254,10 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 */
 			$fields = (array) apply_filters(
 				'wp_seo_saveable_fields',
-				array(
-					'title',
-					'description',
-					'canonical_url',
-					'robots_noindex',
-					'robots_nofollow',
-					'robots_noarchive',
-					'robots_nosnippet',
-					'robots_noimageindex',
-					'robots_notranslate',
-				)
+        array_merge(
+          $this->get_base_fields(),
+          $this->get_robots_directive_meta_keys(),
+        )
 			);
 			foreach ( $fields as $field ) {
 				$meta_key = wp_slash( '_meta_' . $field );
@@ -393,17 +382,10 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				$_POST['seo_meta'] = array();
 			}
 
-			$fields = array(
-				'title',
-				'description',
-				'canonical_url',
-				'robots_noindex',
-				'robots_nofollow',
-				'robots_noarchive',
-				'robots_nosnippet',
-				'robots_noimageindex',
-				'robots_notranslate',
-			);
+			$fields = array_merge(
+        $this->get_base_fields(),
+        $this->get_robots_directive_meta_keys()
+      );
 
 			foreach ( $fields as $field ) {
 				$value = isset( $_POST['seo_meta'][ $field ] ) ? sanitize_text_field( wp_unslash( $_POST['seo_meta'][ $field ] ) ) : '';
@@ -824,14 +806,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 */
 		public function filter_robots_meta( array $robots, string $key ): array {
 			// List of possible robots directives.
-			$robots_directives = [
-				'noindex',
-				'nofollow',
-				'noarchive',
-				'nosnippet',
-				'noimageindex',
-				'notranslate',
-			];
+			$robots_directives = $this->get_robots_directive_values();
 
 			if ( empty( $key ) ) {
 				return $robots;
@@ -845,7 +820,11 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 
 			// Check the meta value for each directive and set it to true if present.
 			foreach ( $robots_directives as $directive ) {
-				$robots_meta = [];
+        if ( empty( $directive ) ) {
+          continue;
+        }
+
+				$robots_meta = '';
 
 				if ( is_singular() && ! empty( $object_data ) ) {
 					$robots_meta = $object_data[ "_meta_robots_{$directive}" ][0] ?? '';
@@ -861,18 +840,61 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 					 */
 					$robots_meta = apply_filters(
 						"wp_seo_robots_{$directive}_value",
-						in_array( $directive, $settings ) ? '1' : '',
+						in_array( $directive, $settings ) ? $directive : '',
 						$key
 					);
 				}
 
-				if ( ! empty( $robots_meta ) ) {
+				if ( ! empty( $robots_meta ) && 'disable' !== $robots_meta ) {
 					$robots[ $directive ] = true;
 				}
 			}
 
 			return $robots;
 		}
+
+    /**
+     * Get the base WP SEO fields.
+     *
+     * @return array Array of base WP SEO fields.
+     */
+    public function get_base_fields(): array {
+      return [
+        'title',
+        'description',
+        'canonical_url',
+      ];
+    }
+
+    /**
+     * Get robots directives.
+     *
+     * @return array Array of robots directives from settings.
+     */
+    public function get_robots_directives(): array {
+      return WP_SEO_Settings()->get_option( 'robots_meta_directives', [] );
+    }
+
+    /**
+     * Get robots directive meta keys.
+     *
+     * @return array Array of robots directive meta keys from settings.
+     */
+    public function get_robots_directive_meta_keys(): array {
+      return array_map(
+        fn( $value ) => 'robots_' . $value,
+        wp_list_pluck( $this->get_robots_directives(), 'value' )
+      );
+    }
+
+    /**
+     * Get robots directive values.
+     *
+     * @return array Array of robots directive values from settings.
+     */
+    public function get_robots_directive_values(): array {
+      return wp_list_pluck( $this->get_robots_directives(), 'value' );
+    }
 	}
 
 	/**

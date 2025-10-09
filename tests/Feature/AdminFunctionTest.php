@@ -45,10 +45,6 @@ class AdminFunctionTest extends TestCase {
 		$meta_canonical_url       = 'https://example.com/canonical-url';
 		$meta_robots_noindex      = '1';
 		$meta_robots_nofollow     = '';
-		$meta_robots_noarchive    = '1';
-		$meta_robots_nosnippet    = '';
-		$meta_robots_noimageindex = '1';
-		$meta_robots_notranslate  = '';
 
 		$post_id = static::factory()->post->create( [
 			'meta_input' => [
@@ -57,10 +53,6 @@ class AdminFunctionTest extends TestCase {
 				'_meta_canonical_url'       => $meta_canonical_url,
 				'_meta_robots_noindex'      => $meta_robots_noindex,
 				'_meta_robots_nofollow'     => $meta_robots_nofollow,
-				'_meta_robots_noarchive'    => $meta_robots_noarchive,
-				'_meta_robots_nosnippet'    => $meta_robots_nosnippet,
-				'_meta_robots_noimageindex' => $meta_robots_noimageindex,
-				'_meta_robots_notranslate'  => $meta_robots_notranslate,
 			],
 		] );
 		do_action( 'admin_init' );
@@ -108,30 +100,6 @@ class AdminFunctionTest extends TestCase {
 				$meta_robots_nofollow,
 				[ $post_id ],
 			],
-			[
-				'wp_seo_post_id_to_the_meta_robots_noarchive_input',
-				'Should check the noarchive checkbox when the noarchive meta is set',
-				$meta_robots_noarchive,
-				[ $post_id ],
-			],
-			[
-				'wp_seo_post_id_to_the_meta_robots_nosnippet_input',
-				'Should not check the nosnippet checkbox when the nosnippet meta is not set',
-				$meta_robots_nosnippet,
-				[ $post_id ],
-			],
-			[
-				'wp_seo_post_id_to_the_meta_robots_noimageindex_input',
-				'Should check the noimageindex checkbox when the noimageindex meta is set',
-				$meta_robots_noimageindex,
-				[ $post_id ],
-			],
-			[
-				'wp_seo_post_id_to_the_meta_robots_notranslate_input',
-				'Should not check the notranslate checkbox when the notranslate meta is not set',
-				$meta_robots_notranslate,
-				[ $post_id ],
-			]
 		];
 	}
 
@@ -148,10 +116,6 @@ class AdminFunctionTest extends TestCase {
 		$canonical_url       = 'https://example.com/canonical-url';
 		$robots_noindex      = '1';
 		$robots_nofollow     = '';
-		$robots_noarchive    = '1';
-		$robots_nosnippet    = '';
-		$robots_noimageindex = '1';
-		$robots_notranslate  = '';
 
 		$term = self::create_and_get_term_with_option( [
 			'title'         => $title,
@@ -160,10 +124,6 @@ class AdminFunctionTest extends TestCase {
 			'robots'        => [
 				'noindex'      => $robots_noindex,
 				'nofollow'     => $robots_nofollow,
-				'noarchive'    => $robots_noarchive,
-				'nosnippet'    => $robots_nosnippet,
-				'noimageindex' => $robots_noimageindex,
-				'notranslate'  => $robots_notranslate,
 			],
 		] );
 
@@ -210,30 +170,6 @@ class AdminFunctionTest extends TestCase {
 				$robots_nofollow,
 				[ $term->term_id, $term->taxonomy ],
 			],
-			[
-				'wp_seo_term_data_to_the_meta_robots_noarchive_input',
-				'Should check the noarchive checkbox when the noarchive option is set',
-				$robots_noarchive,
-				[ $term->term_id, $term->taxonomy ],
-			],
-			[
-				'wp_seo_term_data_to_the_meta_robots_nosnippet_input',
-				'Should not check the nosnippet checkbox when the nosnippet option is not set',
-				$robots_nosnippet,
-				[ $term->term_id, $term->taxonomy ],
-			],
-			[
-				'wp_seo_term_data_to_the_meta_robots_noimageindex_input',
-				'Should check the noimageindex checkbox when the noimageindex option is set',
-				$robots_noimageindex,
-				[ $term->term_id, $term->taxonomy ],
-			],
-			[
-				'wp_seo_term_data_to_the_meta_robots_notranslate_input',
-				'Should not check the notranslate checkbox when the notranslate option is not set',
-				$robots_notranslate,
-				[ $term->term_id, $term->taxonomy ],
-			]
 		];
 	}
 }

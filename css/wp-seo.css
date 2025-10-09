@@ -6,6 +6,7 @@ table.wp-seo-post-meta-fields { width: 100%; }
 .wp-seo-post-meta-fields input:not([type=checkbox]) { width: 98%; }
 .wp-seo-post-meta-fields input[type=url]::placeholder { color: gray; }
 .wp-seo-post-meta-fields p { margin: 0.25rem 0 1.25rem; }
+.wp-seo-term-meta-fields .form-field legend, .form-wrap label { font-weight: bold; margin-bottom: 0.5rem; }
 #tab-panel-formatting-tags h1 { font-size: 1.3em; margin: 1em 0; }
 #tab-panel-formatting-tags .formatting-tag-name { font-family: monospace; }
 .wp-seo-repeatable-group { margin-bottom: 2rem; }

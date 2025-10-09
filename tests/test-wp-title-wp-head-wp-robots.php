@@ -51,6 +51,10 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 				'content' => 'demo arbitrary content',
 			),
 		);
+		$this->options['robots_directives'] = array(
+			array( 'label' => 'NoIndex', 'value' => 'noindex', 'description' => 'Directive description' ),
+			array( 'label' => 'NoFollow', 'value' => 'nofollow', 'description' => 'Directive description' ),
+		);
 
 		foreach ( array(
 			'home',
@@ -70,10 +74,6 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 			$this->options[ "{$key}_canonical_url" ]       = "demo_{$key}_canonical_url";
 			$this->options[ "{$key}_robots_noindex" ]      = '1';
 			$this->options[ "{$key}_robots_nofollow" ]     = '';
-			$this->options[ "{$key}_robots_noarchive" ]    = '1';
-			$this->options[ "{$key}_robots_nosnippet" ]    = '';
-			$this->options[ "{$key}_robots_noimageindex" ] = '1';
-			$this->options[ "{$key}_robots_notranslate" ]  = '';
 		}
 
 		update_option( WP_SEO_Settings::SLUG, WP_SEO_Settings()->sanitize_options( $this->options ) );
@@ -98,27 +98,11 @@ class WP_SEO_WP_Title_WP_Head_Tests extends WP_UnitTestCase {
 	 * @param  string $description The expected meta description content.
 	 * @param  string $robots_noindex The expected robots noindex value, '1' or ''.
 	 * @param  string $robots_nofollow The expected robots nofollow value, '1' or ''.
-	 * @param  string $robots_noarchive The expected robots noarchive value, '1' or ''.
-	 * @param  string $robots_nosnippet The expected robots nosnippet value, '1' or ''.
-	 * @param  string $robots_noimageindex The expected robots noimageindex value, '1' or ''.
-	 * @param  string $robots_notranslate The expected robots notranslate value, '1' or ''.
 	 */
-	function _assert_all_meta(
-		$description,
-		$robots_noindex,
-		$robots_nofollow,
-		$robots_noarchive,
-		$robots_nosnippet,
-		$robots_noimageindex,
-		$robots_notranslate
-	) {
+	function _assert_all_meta( $description, $robots_noindex, $robots_nofollow ) {
 		$robots = implode( ', ', array(
 			$robots_noindex ? 'noindex' : '',
 			$robots_nofollow ? 'nofollow' : '',
-			$robots_noarchive ? 'noarchive' : '',
-			$robots_nosnippet ? 'nosnippet' : '',
-			$robots_noimageindex ? 'noimageindex' : '',
-			$robots_notranslate ? 'notranslate' : '',
 		) );
 
 		$expected = <<<EOF
@@ -162,10 +146,6 @@ EOF;
 			$this->options["{$key}_description"],
 			$this->options["{$key}_robots_noindex"],
 			$this->options["{$key}_robots_nofollow"],
-			$this->options["{$key}_robots_noarchive"],
-			$this->options["{$key}_robots_nosnippet"],
-			$this->options["{$key}_robots_noimageindex"],
-			$this->options["{$key}_robots_notranslate"]
 		);
 		$this->_assert_canonical( $this->options["{$key}_canonical_url"] );
 	}
@@ -194,10 +174,6 @@ EOF;
 		update_post_meta( $post_ID, '_canonical_url', '_custom_canonical_url' );
 		update_post_meta( $post_ID, '_robots_noindex', '1' );
 		update_post_meta( $post_ID, '_robots_nofollow', '' );
-		update_post_meta( $post_ID, '_robots_noarchive', '1' );
-		update_post_meta( $post_ID, '_robots_nosnippet', '' );
-		update_post_meta( $post_ID, '_robots_noimageindex', '1' );
-		update_post_meta( $post_ID, '_robots_notranslate', '' );
 		$this->_assert_title( '_custom_meta_title' );
 		$this->_assert_all_meta( '_custom_meta_description', '1', '', '1', '', '1', '' );
 		$this->_assert_canonical( '_custom_canonical_url' );
@@ -251,10 +227,6 @@ EOF;
 			'canonical_url' => '_custom_canonical_url',
 			'robots_noindex' => '1',
 			'robots_nofollow' => '',
-			'robots_noarchive' => '1',
-			'robots_nosnippet' => '',
-			'robots_noimageindex' => '1',
-			'robots_notranslate' => '',
 			),
 		);
 		$this->go_to( get_term_link( $term_ID, 'category' ) );

@@ -21,19 +21,6 @@ $contexts = [
 	'edit_term',
 ];
 
-// Field and whether the field needs a character count after the input.
-$fields = [
-	'title'               => true,
-	'description'         => true,
-	'canonical_url'       => false,
-	'robots_noindex'      => false,
-	'robots_nofollow'     => false,
-	'robots_noarchive'    => false,
-	'robots_nosnippet'    => false,
-	'robots_noimageindex' => false,
-	'robots_notranslate'  => false,
-];
-
 foreach ( $contexts as $context ) {
 	// All fields container.
 	add_action(
@@ -43,7 +30,12 @@ foreach ( $contexts as $context ) {
 		'edit_term' === $context ? 2 : 1
 	);
 
-	foreach ( $fields as $field => $show_char_count ) {
+	// Base fields.
+	foreach ( WP_SEO()->get_base_fields() as $field ) {
+		// Only show character count for title and description.
+		$char_count_fields = [ 'title', 'description' ];
+		$show_char_count = in_array( $field, $char_count_fields, true );
+
 		// Label.
 		add_action(
 			"wp_seo_{$context}_meta_fields_{$field}_label",
@@ -79,5 +71,52 @@ foreach ( $contexts as $context ) {
 			10,
 			'edit_term' === $context ? 2 : 1
 		);
+	}
+
+	// Robots legend.
+	add_action(
+		"wp_seo_{$context}_meta_fields_robots_legend",
+		"wp_seo_the_meta_robots_legend"
+	);
+	add_action(
+		"wp_seo_{$context}_meta_fields_after_robots_legend",
+		"wp_seo_the_meta_robots_after_legend"
+	);
+
+	// Robots fields.
+	foreach ( WP_SEO()->get_robots_directive_values() as $directive ) {
+    // Label.
+    add_action(
+			"wp_seo_{$context}_meta_fields_robots_{$directive}_label",
+			function() use ( $directive ) {
+				wp_seo_the_meta_robots_label( $directive );
+			}
+    );
+
+		// Input.
+		add_action(
+			"wp_seo_{$context}_meta_fields_robots_{$directive}_input",
+			match ( $context ) {
+				'post'      => function( $post_id ) use ( $directive ) {
+					wp_seo_post_id_to_the_meta_robots_input( $post_id, $directive );
+				},
+				'add_term'  => function() use ( $directive ) {
+					wp_seo_the_meta_robots_input( '', $directive );
+				},
+				'edit_term' => function( $term_id, $taxonomy ) use ( $directive ) {
+					wp_seo_term_data_to_the_meta_robots_input( $term_id, $taxonomy, $directive );
+				},
+			},
+			10,
+			'edit_term' === $context ? 2 : 1
+		);
+
+    // After input.
+    add_action(
+			"wp_seo_{$context}_meta_fields_after_robots_{$directive}_input",
+			function() use ( $directive ) {
+				wp_seo_the_meta_robots_after_input( $directive );
+			}
+    );
 	}
 }
