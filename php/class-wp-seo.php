@@ -615,9 +615,9 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		public function wp_head() {
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
-					$post_id = get_the_ID();
+					$post_id          = get_the_ID();
 					$meta_description = get_post_meta( $post_id, '_meta_description', true );
-					$canonical_url = get_post_meta( $post_id, '_meta_canonical_url', true );
+					$canonical_url    = get_post_meta( $post_id, '_meta_canonical_url', true );
 				}
 				$key = "single_{$post_type}";
 			} elseif ( is_front_page() ) {
@@ -627,7 +627,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			} elseif ( is_category() || is_tag() || is_tax() ) {
 				if ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) && $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) {
 					$meta_description = $option['description'];
-					$canonical_url = $option['canonical_url'];
+					$canonical_url    = $option['canonical_url'];
 				}
 				$key = "archive_{$taxonomy}";
 			} elseif ( is_post_type_archive() ) {
@@ -898,8 +898,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
       return array_map(
         fn( $value ) => 'robots_' . $value,
         $this->get_robots_directive_values(),
-      );
-    }
+			);
+		}
 	}
 
 	/**
