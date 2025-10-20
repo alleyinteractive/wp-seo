@@ -101,7 +101,7 @@ function wp_seo_admin_scripts(): void {
 		'character_count_fields'    => (array) apply_filters( 'wp_seo_character_count_fields', [ 'title', 'description' ] ),
 	] );
 
-	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', [], '1.0.0' );
+	wp_enqueue_style( 'wp-seo-admin', WP_SEO_URL . 'css/wp-seo.css', [], '2.0.0' );
 }
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\wp_seo_admin_scripts' );
 /* End Legacy Code */

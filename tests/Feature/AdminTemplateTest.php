@@ -113,6 +113,66 @@ class AdminTemplateTest extends TestCase {
 				"#{$num} \(save changes to update\)#s",
 				[ $num ],
 			],
+			[
+				'wp_seo_the_meta_canonical_url_label',
+				'Should print a label',
+				'#<label[^>]*?>.+?</label>#',
+				[],
+			],
+			[
+				'wp_seo_the_meta_canonical_url_input',
+				'Should print an input',
+				'#<input[^>]+? />#',
+				[ '' ],
+			],
+			[
+				'wp_seo_the_meta_canonical_url_input',
+				'Should print the passed value',
+				'#value=(.)\1#',
+				[ '' ],
+			],
+			[
+				'wp_seo_the_meta_canonical_url_input',
+				'Should print the passed value',
+				'#value=(.)' . $str . '\1#',
+				[ $str ],
+			],
+			[
+				'wp_seo_the_meta_robots_noindex_label',
+				'Should print a label',
+				'#<label[^>]*?>.+?</label>#',
+				[],
+			],
+			[
+				'wp_seo_the_meta_robots_noindex_input',
+				'Should print a select input',
+				'#<select[^>]+?name="seo_meta\[robots_noindex\]"[^>]*?>.*?</select>#s',
+				[ '' ],
+			],
+			[
+				'wp_seo_the_meta_robots_noindex_input',
+				'Should print the passed value as selected',
+				'#<option[^>]+?value=(.)\1[^>]*? selected>#',
+				[ '1' ],
+			],
+			[
+				'wp_seo_the_meta_robots_nofollow_label',
+				'Should print a label',
+				'#<label[^>]*?>.+?</label>#',
+				[],
+			],
+			[
+				'wp_seo_the_meta_robots_nofollow_input',
+				'Should print a select input',
+				'#<select[^>]+?name="seo_meta\[robots_nofollow\]"[^>]*?>.*?</select>#s',
+				[ '' ],
+			],
+			[
+				'wp_seo_the_meta_robots_nofollow_input',
+				'Should print the passed value as selected',
+				'#<option[^>]+?value=(.)\1[^>]*? selected>#',
+				[ '1' ],
+			],
 		];
 	}
 
