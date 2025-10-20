@@ -828,26 +828,30 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 					continue;
 				}
 
-				$robots_meta = '';
+				// Get the directive value from settings.
+				$robots_meta = ! empty( $settings ) && is_array( $settings ) && in_array( $directive, $settings, true )
+					? 'enable'
+					: '';
 
-				if ( is_singular() && ! empty( $object_data ) ) {
-					$robots_meta = $object_data[ "_meta_robots_{$directive}" ][0] ?? '';
-				} elseif ( ( is_category() || is_tag() || is_tax() ) && ! empty( $object_data ) ) {
-					$robots_meta = $object_data[ "robots_{$directive}" ] ?? '';
+				// Allow the directive value to be overridden on the post and term level.
+				if ( ! empty( $object_data ) ) {
+					if ( is_singular() && ! empty( $object_data[ "_meta_robots_{$directive}" ][0] ) ) {
+						$robots_meta = $object_data[ "_meta_robots_{$directive}" ][0];
+					} elseif ( ( is_category() || is_tag() || is_tax() ) && ! empty( $object_data[ "robots_{$directive}" ] ) ) {
+						$robots_meta = $object_data[ "robots_{$directive}" ];
+					}
 				}
 
-				if ( empty( $robots_meta ) && ! empty( $settings ) && is_array( $settings ) ) {
-					/**
-					 * Filter the robots meta directive for this page.
-					 * @param  string      The value retrieved from the settings.
-					 * @param  string $key The key of the setting retrieved.
-					 */
-					$robots_meta = apply_filters(
-						"wp_seo_robots_{$directive}_value",
-						in_array( $directive, $settings ) ? $directive : '',
-						$key
-					);
-				}
+				/**
+				 * Filter the robots meta directive for this content type.
+				 * @param  string      The value retrieved from the settings.
+				 * @param  string $key The key of the setting retrieved.
+				 */
+				$robots_meta = apply_filters(
+					"wp_seo_robots_{$directive}_value",
+					$robots_meta,
+					$key
+				);
 
 				if ( ! empty( $robots_meta ) && 'disable' !== $robots_meta ) {
 					$robots[ $directive ] = true;
