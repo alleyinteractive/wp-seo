@@ -625,8 +625,20 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 * @return string
 		 */
 		public function robots_txt( string $robots ): string {
+			/**
+			 * Filters the Robots.txt Prefix value for WP SEO.
+			 *
+			 * @param string $prefix The robots.txt prefix, added in the WP SEO settings page.
+			 */
 			$robots_prefix = apply_filters( 'wp_seo_robots_txt_prefix', WP_SEO_Settings()->get_option( 'robots_txt_prefix', '' ) );
+
+			/**
+			 * Filters the Robots.txt Suffix value for WP SEO.
+			 *
+			 * @param string $suffix The robots.txt suffix, added in the WP SEO settings page.
+			 */
 			$robots_suffix = apply_filters( 'wp_seo_robots_txt_suffix', WP_SEO_Settings()->get_option( 'robots_txt_suffix', '' ) );
+
 			return $robots_prefix . $robots . $robots_suffix;
 		}
 	}
