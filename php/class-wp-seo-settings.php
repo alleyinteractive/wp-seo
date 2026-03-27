@@ -328,6 +328,11 @@ class WP_SEO_Settings {
 
 		add_settings_section( 'arbitrary', __( 'Other Meta Tags', 'wp-seo' ), false, $this::SLUG );
 		add_settings_field( 'arbitrary_tags', __( 'Tags', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'arbitrary', array( 'type' => 'repeatable', 'field' => 'arbitrary_tags', 'repeat' => array( 'name' => __( 'Name', 'lin' ), 'content' => __( 'Content', 'lin' ) ) ) );
+
+		add_settings_section( 'robots', __( 'Robots.txt', 'wp-seo' ), false, $this::SLUG );
+		add_settings_field( 'robots_example', __( 'Robots.txt Example', 'wp-seo' ), array( $this, 'example_robots_txt' ), $this::SLUG, 'robots' );
+		add_settings_field( 'robots_txt_prefix', __( 'Add to start of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_prefix' ) );
+		add_settings_field( 'robots_txt_suffix', __( 'Add to end of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_suffix' ) );
 	}
 
 	/**
@@ -356,6 +361,16 @@ class WP_SEO_Settings {
 			echo ' <code><a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $url ) . '</a></code>';
 		}
 		echo '</p>';
+	}
+
+	/**
+	 * Display the compiled Robots.txt contents in an uneditable field.
+	 */
+	public function example_robots_txt() {
+		ob_start();
+		@do_robots();
+		$robots = ob_get_clean();
+		$this->render_textarea([ 'field' => 'robots_txt', 'disabled' => true ], $robots );
 	}
 
 	/**
@@ -524,11 +539,12 @@ class WP_SEO_Settings {
 		) );
 
 		printf(
-			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
+			'<textarea name="%s[%s]" rows="%d" cols="%d"%s>%s</textarea>',
 			esc_attr( $this::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
+			( ! empty( $args['disabled'] ) ? ' disabled' : '' ),
 			esc_textarea( $value )
 		);
 	}
@@ -759,6 +775,10 @@ class WP_SEO_Settings {
 		// "Other Pages" titles.
 		$sanitize_as_text_field[] = 'search_title';
 		$sanitize_as_text_field[] = '404_title';
+
+		// Robots.txt fields.
+		$sanitize_as_text_field[] = 'robots_txt_prefix';
+		$sanitize_as_text_field[] = 'robots_txt_suffix';
 
 		foreach ( $sanitize_as_text_field as $field ) {
 			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
