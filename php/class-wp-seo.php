@@ -90,6 +90,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			add_filter( 'pre_get_document_title', array( $this, 'pre_get_document_title' ), 20 );
 			add_filter( 'wp_title', array( $this, 'wp_title' ), 20, 2 );
 			add_filter( 'wp_head', array( $this, 'wp_head' ), 5 );
+			add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		}
 
 		/**
@@ -615,6 +616,18 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				}
 			}
 
+		}
+
+		/**
+		 * Build the prefix and suffix for the Robots.txt file, and return it.
+		 *
+		 * @param string $robots The robots.txt file contents.
+		 * @return string
+		 */
+		public function robots_txt( string $robots ): string {
+			$robots_prefix = apply_filters( 'wp_seo_robots_txt_prefix', WP_SEO_Settings()->get_option( 'robots_txt_prefix', '' ) );
+			$robots_suffix = apply_filters( 'wp_seo_robots_txt_suffix', WP_SEO_Settings()->get_option( 'robots_txt_suffix', '' ) );
+			return $robots_prefix . $robots . $robots_suffix;
 		}
 	}
 
