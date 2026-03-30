@@ -45,11 +45,11 @@ class AdminFunctionTest extends TestCase {
 
 		$post_id = static::factory()->post->create( [
 			'meta_input' => [
-				'_meta_title'               => $meta_title,
-				'_meta_description'         => $meta_description,
-				'_meta_canonical_url'       => $meta_canonical_url,
-				'_meta_robots_noindex'      => $meta_robots_noindex,
-				'_meta_robots_nofollow'     => $meta_robots_nofollow,
+				'_alley_seo_meta_title'               => $meta_title,
+				'_alley_seo_meta_description'         => $meta_description,
+				'_alley_seo_meta_canonical_url'       => $meta_canonical_url,
+				'_alley_seo_meta_robots_noindex'      => $meta_robots_noindex,
+				'_alley_seo_meta_robots_nofollow'     => $meta_robots_nofollow,
 			],
 		] );
 		do_action( 'admin_init' );

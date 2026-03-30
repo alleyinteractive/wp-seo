@@ -25,7 +25,7 @@ function wp_seo_get_box_title() {
  * @param int $post_id Post ID.
  */
 function wp_seo_post_id_to_the_meta_title_input( $post_id ) {
-	wp_seo_the_meta_title_input( get_post_meta( $post_id, '_meta_title', true ) );
+	wp_seo_the_meta_title_input( get_post_meta( $post_id, '_alley_seo_meta_title', true ) );
 }
 
 /**
@@ -34,7 +34,7 @@ function wp_seo_post_id_to_the_meta_title_input( $post_id ) {
  * @param int $post_id Post ID.
  */
 function wp_seo_post_id_to_the_title_character_count( $post_id ) {
-	wp_seo_the_title_character_count( strlen( get_post_meta( $post_id, '_meta_title', true ) ) );
+	wp_seo_the_title_character_count( strlen( get_post_meta( $post_id, '_alley_seo_meta_title', true ) ) );
 }
 
 /**
@@ -43,7 +43,7 @@ function wp_seo_post_id_to_the_title_character_count( $post_id ) {
  * @param int $post_id Post ID.
  */
 function wp_seo_post_id_to_the_meta_description_input( $post_id ) {
-	wp_seo_the_meta_description_input( get_post_meta( $post_id, '_meta_description', true ) );
+	wp_seo_the_meta_description_input( get_post_meta( $post_id, '_alley_seo_meta_description', true ) );
 }
 
 /**
@@ -52,7 +52,7 @@ function wp_seo_post_id_to_the_meta_description_input( $post_id ) {
  * @param int $post_id Post ID.
  */
 function wp_seo_post_id_to_the_description_character_count( $post_id ) {
-	wp_seo_the_description_character_count( strlen( get_post_meta( $post_id, '_meta_description', true ) ) );
+	wp_seo_the_description_character_count( strlen( get_post_meta( $post_id, '_alley_seo_meta_description', true ) ) );
 }
 
 /**
@@ -61,7 +61,7 @@ function wp_seo_post_id_to_the_description_character_count( $post_id ) {
  * @param int $post_id Post ID.
  */
 function wp_seo_post_id_to_the_meta_canonical_url_input( $post_id ) {
-	wp_seo_the_meta_canonical_url_input( get_post_meta( $post_id, '_meta_canonical_url', true ) );
+	wp_seo_the_meta_canonical_url_input( get_post_meta( $post_id, '_alley_seo_meta_canonical_url', true ) );
 }
 
 /**
@@ -71,7 +71,7 @@ function wp_seo_post_id_to_the_meta_canonical_url_input( $post_id ) {
  * @param string $directive Robots directive key (e.g., 'noindex').
  */
 function wp_seo_post_id_to_the_meta_robots_input( $post_id, $directive ) {
-	wp_seo_the_meta_robots_input( get_post_meta( $post_id, '_meta_robots_' . $directive, true ), $directive );
+	wp_seo_the_meta_robots_input( get_post_meta( $post_id, '_alley_seo_meta_robots_' . $directive, true ), $directive );
 }
 
 /**
