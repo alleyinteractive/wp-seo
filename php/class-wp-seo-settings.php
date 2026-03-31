@@ -860,19 +860,6 @@ class WP_SEO_Settings {
 	/**
 	 * Render a section's fields as a meta box.
 	 *
-	 * @param  mixed $object Unused. Data passed from do_accordion_sections().
-	 * @param  array $box {
-	 *     An array of meta box arguments.
-	 *
-	 *     @type  string $id @see add_meta_box().
-	 *     @type  string $title @see add_meta_box().
-	 *     @type  callback $callback @see add_meta_box().
-	 *     @type  array $args @see add_meta_box(), add_settings_section().
-	 * }
-	 */
-	/**
-	 * Render a section's fields as a meta box.
-	 *
 	 * @param mixed $_object Unused. Data passed from do_accordion_sections().
 	 * @param array $box {
 	 *     An array of meta box arguments.
