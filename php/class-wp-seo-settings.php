@@ -300,27 +300,26 @@ class WP_SEO_Settings {
 	 * Render the network settings page for robots.txt network prefix/suffix fields.
 	 */
 	public function view_network_settings_page() {
-		$prefix = $this->get_network_option( 'robots_txt_network_prefix', '' );
-		$suffix = $this->get_network_option( 'robots_txt_network_suffix', '' );
 		?>
 		<div class="wrap" id="wp_seo_network_settings">
 			<h2><?php esc_html_e( 'WP SEO Network Settings', 'wp-seo' ); ?></h2>
 			<?php if ( filter_input( INPUT_GET, 'updated' ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'wp-seo' ); ?></p></div>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Network settings saved.', 'wp-seo' ); ?></p></div>
 			<?php endif; ?>
 			<form action="edit.php?action=wp-seo-network" method="POST">
 				<?php wp_nonce_field( 'wp-seo-network-options' ); ?>
-				<h3><?php esc_html_e( 'Robots.txt', 'wp-seo' ); ?></h3>
-				<table class="form-table">
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Add to start of Robots.txt (Network)', 'wp-seo' ); ?></th>
-						<td><?php $this->render_textarea( array( 'field' => 'robots_txt_network_prefix' ), $prefix ); ?></td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Add to end of Robots.txt (Network)', 'wp-seo' ); ?></th>
-						<td><?php $this->render_textarea( array( 'field' => 'robots_txt_network_suffix' ), $suffix ); ?></td>
-					</tr>
-				</table>
+				<?php
+				/** This filter is documented in php/class-wp-seo-settings.php */
+				if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
+					global $wp_settings_sections;
+					foreach ( (array) $wp_settings_sections[ $this::NETWORK_SLUG ] as $section ) {
+						add_meta_box( $section['id'], $section['title'], array( $this, 'network_settings_meta_box' ), $this::NETWORK_SLUG, 'advanced', 'default', $section );
+					}
+					do_accordion_sections( $this::NETWORK_SLUG, 'advanced', null );
+				} else {
+					do_settings_sections( $this::NETWORK_SLUG );
+				}
+				?>
 				<?php submit_button(); ?>
 			</form>
 		</div>
@@ -434,6 +433,13 @@ class WP_SEO_Settings {
 		add_settings_field( 'robots_example', __( 'Robots.txt Example', 'wp-seo' ), array( $this, 'example_robots_txt' ), $this::SLUG, 'robots' );
 		add_settings_field( 'robots_txt_prefix', __( 'Add to start of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_prefix' ) );
 		add_settings_field( 'robots_txt_suffix', __( 'Add to end of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_suffix' ) );
+
+		if ( is_network_admin() ) {
+			add_settings_section( 'robots', __( 'Robots.txt', 'wp-seo' ), false, $this::NETWORK_SLUG );
+			add_settings_field( 'robots_example', __( 'Robots.txt Example', 'wp-seo' ), array( $this, 'example_robots_txt' ), $this::NETWORK_SLUG, 'robots' );
+			add_settings_field( 'robots_txt_network_prefix', __( 'Add to start of Robots.txt (Network)', 'wp-seo' ), array( $this, 'field_network' ), $this::NETWORK_SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_network_prefix' ) );
+			add_settings_field( 'robots_txt_network_suffix', __( 'Add to end of Robots.txt (Network)', 'wp-seo' ), array( $this, 'field_network' ), $this::NETWORK_SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_network_suffix' ) );
+		}
 	}
 
 	/**
@@ -469,9 +475,20 @@ class WP_SEO_Settings {
 	 */
 	public function example_robots_txt() {
 		ob_start();
+		/* Error suppression is used here because `do_robots` calls `header` which
+		 * throws a warning due to headers already having been sent. There is no
+		 * way around this, without recreating the function and maintaining our
+		 * own version of it entirely. At least as of WordPress 6.9.4.
+		 */
 		@do_robots();
 		$robots = ob_get_clean();
-		$this->render_textarea([ 'field' => 'robots_txt', 'disabled' => true ], $robots );
+		$this->render_textarea([
+				'field'    => 'robots_txt',
+				'disabled' => true,
+				'rows'     => 10,
+			],
+			$robots
+		);
 	}
 
 	/**
@@ -564,6 +581,34 @@ class WP_SEO_Settings {
 	 * }
 	 */
 	public function field( $args ) {
+		$this->render_field( $args, array( $this, 'get_option' ) );
+	}
+
+	/**
+	 * Display a network settings field.
+	 *
+	 * @param array $args Field arguments. @see render_field().
+	 */
+	public function field_network( $args ) {
+		$this->render_field( $args, array( $this, 'get_network_option' ) );
+	}
+
+	/**
+	 * Render a settings field using the provided getter callable.
+	 *
+	 * Shared implementation for field() and field_network(). Callers pass the
+	 * appropriate getter (get_option or get_network_option) so lazy-loading and
+	 * value lookup are handled by the getter regardless of storage source.
+	 *
+	 * @param array    $args   {
+	 *     Field arguments.
+	 *
+	 *     @type string $field The option key to pass to $getter.
+	 *     @type string $type  Optional field type. Defaults to 'text'.
+	 * }
+	 * @param callable $getter Callable that accepts ( $key, $default ) and returns the value.
+	 */
+	protected function render_field( $args, callable $getter ) {
 		if ( empty( $args['field'] ) ) {
 			return;
 		}
@@ -572,7 +617,7 @@ class WP_SEO_Settings {
 			$args['type'] = 'text';
 		}
 
-		$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
+		$value = call_user_func( $getter, $args['field'], '' );
 
 		switch ( $args['type'] ) {
 			case 'textarea' :
@@ -832,6 +877,25 @@ class WP_SEO_Settings {
 
 		echo '<table class="form-table">';
 		do_settings_fields( $this::SLUG, $box['args']['id'] );
+		echo '</table>';
+	}
+
+	/**
+	 * Render a network settings section's fields as a meta box.
+	 *
+	 * Mirrors settings_meta_box(), but uses NETWORK_SLUG so do_settings_fields()
+	 * pulls from the network-registered fields rather than the site fields.
+	 *
+	 * @param mixed $object Unused.
+	 * @param array $box    @see settings_meta_box().
+	 */
+	public function network_settings_meta_box( $_object, $box ) {
+		if ( is_callable( $box['args']['callback'] ) ) {
+			call_user_func( $box['args']['callback'], $box['args'] );
+		}
+
+		echo '<table class="form-table">';
+		do_settings_fields( $this::NETWORK_SLUG, $box['args']['id'] );
 		echo '</table>';
 	}
 

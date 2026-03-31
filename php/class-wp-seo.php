@@ -653,7 +653,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 */
 			$robots_suffix = apply_filters( 'wp_seo_robots_txt_suffix', WP_SEO_Settings()->get_option( 'robots_txt_suffix', '' ) );
 
-			return $robots_network_prefix . $robots_prefix . $robots . $robots_suffix . $robots_network_suffix;
+			return $robots_network_prefix . PHP_EOL . $robots_prefix . PHP_EOL . $robots . PHP_EOL . $robots_suffix . PHP_EOL . $robots_network_suffix;
 		}
 	}
 
