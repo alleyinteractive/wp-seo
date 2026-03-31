@@ -313,7 +313,7 @@ class WP_SEO_Settings {
 				if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
 					global $wp_settings_sections;
 					foreach ( (array) $wp_settings_sections[ $this::NETWORK_SLUG ] as $section ) {
-						add_meta_box( $section['id'], $section['title'], array( $this, 'network_settings_meta_box' ), $this::NETWORK_SLUG, 'advanced', 'default', $section );
+						add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), $this::NETWORK_SLUG, 'advanced', 'default', array_merge( $section, array( 'slug' => $this::NETWORK_SLUG ) ) );
 					}
 					do_accordion_sections( $this::NETWORK_SLUG, 'advanced', null );
 				} else {
@@ -844,7 +844,7 @@ class WP_SEO_Settings {
 					if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
 						global $wp_settings_sections;
 						foreach ( (array) $wp_settings_sections[ $this::SLUG ] as $section ) {
-							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', $section );
+							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', array_merge( $section, array( 'slug' => $this::SLUG ) ) );
 						}
 						do_accordion_sections( 'wp-seo', 'advanced', null );
 					} else {
@@ -870,32 +870,30 @@ class WP_SEO_Settings {
 	 *     @type  array $args @see add_meta_box(), add_settings_section().
 	 * }
 	 */
-	public function settings_meta_box( $object, $box ) {
-		if ( is_callable( $box['args']['callback'] ) ) {
-			call_user_func( $box['args']['callback'], $box['args'] );
-		}
-
-		echo '<table class="form-table">';
-		do_settings_fields( $this::SLUG, $box['args']['id'] );
-		echo '</table>';
-	}
-
 	/**
-	 * Render a network settings section's fields as a meta box.
+	 * Render a section's fields as a meta box.
 	 *
-	 * Mirrors settings_meta_box(), but uses NETWORK_SLUG so do_settings_fields()
-	 * pulls from the network-registered fields rather than the site fields.
+	 * @param mixed $_object Unused. Data passed from do_accordion_sections().
+	 * @param array $box {
+	 *     An array of meta box arguments.
 	 *
-	 * @param mixed $object Unused.
-	 * @param array $box    @see settings_meta_box().
+	 *     @type string   $id       @see add_meta_box().
+	 *     @type string   $title    @see add_meta_box().
+	 *     @type callback $callback @see add_meta_box().
+	 *     @type array    $args     @see add_meta_box(), add_settings_section().
+	 *           @type string $slug The settings page slug to pass to do_settings_fields().
+	 *                              Defaults to SLUG.
+	 * }
 	 */
-	public function network_settings_meta_box( $_object, $box ) {
+	public function settings_meta_box( $_object, $box ) {
 		if ( is_callable( $box['args']['callback'] ) ) {
 			call_user_func( $box['args']['callback'], $box['args'] );
 		}
 
+		$slug = isset( $box['args']['slug'] ) ? $box['args']['slug'] : $this::SLUG;
+
 		echo '<table class="form-table">';
-		do_settings_fields( $this::NETWORK_SLUG, $box['args']['id'] );
+		do_settings_fields( $slug, $box['args']['id'] );
 		echo '</table>';
 	}
 
