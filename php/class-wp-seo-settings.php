@@ -844,9 +844,9 @@ class WP_SEO_Settings {
 					if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
 						global $wp_settings_sections;
 						foreach ( (array) $wp_settings_sections[ $this::SLUG ] as $section ) {
-							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', array_merge( $section, array( 'slug' => $this::SLUG ) ) );
+							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), $this::SLUG, 'advanced', 'default', array_merge( $section, array( 'slug' => $this::SLUG ) ) );
 						}
-						do_accordion_sections( 'wp-seo', 'advanced', null );
+						do_accordion_sections( $this::SLUG, 'advanced', null );
 					} else {
 						do_settings_sections( $this::SLUG );
 					}
