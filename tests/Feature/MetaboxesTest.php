@@ -68,8 +68,8 @@ class MetaboxesTest extends TestCase {
 		$post_ID = $this->factory->post->create();
 		$title = rand_str();
 		$description = rand_str();
-		add_post_meta( $post_ID, '_meta_title', $title );
-		add_post_meta( $post_ID, '_meta_description', $description );
+		add_post_meta( $post_ID, '_alley_seo_meta_title', $title );
+		add_post_meta( $post_ID, '_alley_seo_meta_description', $description );
 
 		$post = get_post( $post_ID );
 		// Capture the output of the function.
@@ -131,8 +131,8 @@ class MetaboxesTest extends TestCase {
 
 		// No SEO data.
 		WP_SEO()->save_post_fields( $post_ID );
-		$this->assertEmpty( get_post_meta( $post_ID, '_meta_title', true ) );
-		$this->assertEmpty( get_post_meta( $post_ID, '_meta_description', true ) );
+		$this->assertEmpty( get_post_meta( $post_ID, '_alley_seo_meta_title', true ) );
+		$this->assertEmpty( get_post_meta( $post_ID, '_alley_seo_meta_description', true ) );
 
 		$title = rand_str();
 		$description = rand_str();
@@ -145,8 +145,8 @@ class MetaboxesTest extends TestCase {
 
 		// Successful save.
 		WP_SEO()->save_post_fields( $post_ID );
-		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
-		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
+		$this->assertEquals( $title, get_post_meta( $post_ID, '_alley_seo_meta_title', true ) );
+		$this->assertEquals( $description, get_post_meta( $post_ID, '_alley_seo_meta_description', true ) );
 
 		$title = "Is your name O'Reilly?";
 		$description = 'What is Folder\SubFolder\File.txt?';
@@ -158,8 +158,8 @@ class MetaboxesTest extends TestCase {
 		] );
 
 		WP_SEO()->save_post_fields( $post_ID );
-		$this->assertEquals( $title, get_post_meta( $post_ID, '_meta_title', true ) );
-		$this->assertEquals( $description, get_post_meta( $post_ID, '_meta_description', true ) );
+		$this->assertEquals( $title, get_post_meta( $post_ID, '_alley_seo_meta_title', true ) );
+		$this->assertEquals( $description, get_post_meta( $post_ID, '_alley_seo_meta_description', true ) );
 	}
 
 	/**

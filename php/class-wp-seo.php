@@ -260,7 +260,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				)
 			);
 			foreach ( $fields as $field ) {
-				$meta_key = wp_slash( '_meta_' . $field );
+				$meta_key = wp_slash( '_alley_seo_meta_' . $field );
 
 				// If this is the canonical URL field, validate it as a URL.
 				if ( 'canonical_url' === $field ) {
@@ -481,7 +481,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 */
 		public function wp_title( $title, $sep ) {
 			if ( is_singular() ) {
-				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) && $meta_title = get_post_meta( get_the_ID(), '_meta_title', true ) ) {
+				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) && $meta_title = get_post_meta( get_the_ID(), '_alley_seo_meta_title', true ) ) {
 					return $meta_title;
 				} else {
 					$key = "single_{$post_type}_title";
@@ -616,8 +616,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			if ( is_singular() ) {
 				if ( WP_SEO_Settings()->has_post_fields( $post_type = get_post_type() ) ) {
 					$post_id          = get_the_ID();
-					$meta_description = get_post_meta( $post_id, '_meta_description', true );
-					$canonical_url    = get_post_meta( $post_id, '_meta_canonical_url', true );
+					$meta_description = get_post_meta( $post_id, '_alley_seo_meta_description', true );
+					$canonical_url    = get_post_meta( $post_id, '_alley_seo_meta_canonical_url', true );
 				}
 				$key = "single_{$post_type}";
 			} elseif ( is_front_page() ) {
@@ -835,8 +835,8 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 
 				// Allow the directive value to be overridden on the post and term level.
 				if ( ! empty( $object_data ) ) {
-					if ( is_singular() && ! empty( $object_data[ "_meta_robots_{$directive}" ][0] ) ) {
-						$robots_meta = $object_data[ "_meta_robots_{$directive}" ][0];
+					if ( is_singular() && ! empty( $object_data[ "_alley_seo_meta_robots_{$directive}" ][0] ) ) {
+						$robots_meta = $object_data[ "_alley_seo_meta_robots_{$directive}" ][0];
 					} elseif ( ( is_category() || is_tag() || is_tax() ) && ! empty( $object_data[ "robots_{$directive}" ] ) ) {
 						$robots_meta = $object_data[ "robots_{$directive}" ];
 					}

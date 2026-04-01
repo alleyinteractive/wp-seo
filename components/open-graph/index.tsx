@@ -149,9 +149,9 @@ function OpenGraphSlotfill() {
   const currentPostType = select('core/editor').getCurrentPostType();
   const postType = select('core').getEntityRecord('root', 'postType', currentPostType);
 
-  const [title, setTitle] = usePostMetaValue('wp_seo_open_graph_title');
-  const [description, setDescription] = usePostMetaValue('wp_seo_open_graph_description');
-  const [image, setImage] = usePostMetaValue('wp_seo_open_graph_image');
+  const [title, setTitle] = usePostMetaValue('alley_seo_open_graph_title');
+  const [description, setDescription] = usePostMetaValue('alley_seo_open_graph_description');
+  const [image, setImage] = usePostMetaValue('alley_seo_open_graph_image');
   const [showModal, setShowModal] = useState(false);
 
   const selectedImage = useMedia(image);

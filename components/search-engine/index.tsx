@@ -10,8 +10,8 @@ import {
 } from '@alleyinteractive/block-editor-tools';
 
 function SearchEngineSlotfill() {
-  const [title, setTitle] = usePostMetaValue('search_engine_title');
-  const [description, setDescription] = usePostMetaValue('search_engine_description');
+  const [title, setTitle] = usePostMetaValue('alley_seo_search_engine_title');
+  const [description, setDescription] = usePostMetaValue('alley_seo_search_engine_description');
 
   return (
     <PanelBody

@@ -23,7 +23,7 @@ class OpenGraphTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_open_graph_title' => 'Open Graph Title',
+				'alley_seo_open_graph_title' => 'Open Graph Title',
 			]
 		)
 		->create();
@@ -37,7 +37,7 @@ class OpenGraphTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_open_graph_title' => '',
+				'alley_seo_open_graph_title' => '',
 			]
 		)
 		->create(
@@ -55,7 +55,7 @@ class OpenGraphTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_open_graph_description' => 'Open Graph Description',
+				'alley_seo_open_graph_description' => 'Open Graph Description',
 			]
 		)
 		->create();
@@ -69,7 +69,7 @@ class OpenGraphTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_open_graph_description' => '',
+				'alley_seo_open_graph_description' => '',
 			]
 		)
 		->create(
@@ -102,7 +102,7 @@ class OpenGraphTest extends TestCase {
 		->with_thumbnail()
 		->with_meta(
 			[
-				'wp_seo_open_graph_image' => '',
+				'alley_seo_open_graph_image' => '',
 			]
 		)
 		->create_and_get();
@@ -119,7 +119,7 @@ class OpenGraphTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_open_graph_image' => '',
+				'alley_seo_open_graph_image' => '',
 			]
 		)
 		->create();

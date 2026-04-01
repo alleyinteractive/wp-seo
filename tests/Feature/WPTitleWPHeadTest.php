@@ -178,11 +178,11 @@ EOF;
 	// A post with custom values should not use the single_{type}_ values.
 	function test_single_custom() {
 		$this->go_to( get_permalink( $post_ID = $this->factory->post->create() ) );
-		update_post_meta( $post_ID, '_meta_title', '_custom_meta_title' );
-		update_post_meta( $post_ID, '_meta_description', '_custom_meta_description' );
-		update_post_meta( $post_ID, '_canonical_url', '_custom_canonical_url' );
-		update_post_meta( $post_ID, '_robots_noindex', '1' );
-		update_post_meta( $post_ID, '_robots_nofollow', '' );
+		update_post_meta( $post_ID, '_alley_seo_meta_title', '_custom_meta_title' );
+		update_post_meta( $post_ID, '_alley_seo_meta_description', '_custom_meta_description' );
+		update_post_meta( $post_ID, '_alley_seo_meta_canonical_url', '_custom_canonical_url' );
+		update_post_meta( $post_ID, '_alley_seo_meta_robots_noindex', '1' );
+		update_post_meta( $post_ID, '_alley_seo_meta_robots_nofollow', '' );
 		$this->_assert_title( '_custom_meta_title' );
 		$this->_assert_all_meta( '_custom_meta_description', '1', '' );
 		$this->_assert_canonical( '_custom_canonical_url' );

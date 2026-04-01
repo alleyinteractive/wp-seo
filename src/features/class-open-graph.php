@@ -58,7 +58,7 @@ final class Open_Graph implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'open-graph' ),
-			'wp_seo_open_graph_title',
+			'alley_seo_open_graph_title',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
 				'single'            => true,
@@ -70,7 +70,7 @@ final class Open_Graph implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'open-graph' ),
-			'wp_seo_open_graph_description',
+			'alley_seo_open_graph_description',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
 				'single'            => true,
@@ -82,7 +82,7 @@ final class Open_Graph implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'open-graph' ),
-			'wp_seo_open_graph_image',
+			'alley_seo_open_graph_image',
 			[
 				'sanitize_callback' => 'absint',
 				'single'            => true,
@@ -100,7 +100,7 @@ final class Open_Graph implements Feature {
 	 * @return string The title.
 	 */
 	public static function get_title( $post_id ): string {
-		$open_graph_title = get_post_meta( $post_id, 'wp_seo_open_graph_title', true );
+		$open_graph_title = get_post_meta( $post_id, 'alley_seo_open_graph_title', true );
 
 		if ( ! empty( $open_graph_title ) && is_string( $open_graph_title ) ) {
 			return $open_graph_title;
@@ -117,7 +117,7 @@ final class Open_Graph implements Feature {
 	 * @return string The description.
 	 */
 	public static function get_description( $post_id ): string {
-		$open_graph_description = get_post_meta( $post_id, 'wp_seo_open_graph_description', true );
+		$open_graph_description = get_post_meta( $post_id, 'alley_seo_open_graph_description', true );
 
 		if ( ! empty( $open_graph_description ) && is_string( $open_graph_description ) ) {
 			return $open_graph_description;
@@ -134,7 +134,7 @@ final class Open_Graph implements Feature {
 	 * @return string|false The image URL or false if no assigned images.
 	 */
 	public static function get_image( $post_id ): string|bool {
-		$open_graph_image_id  = get_post_meta( $post_id, 'wp_seo_open_graph_image', true );
+		$open_graph_image_id  = get_post_meta( $post_id, 'alley_seo_open_graph_image', true );
 		$open_graph_image_url = ( ! empty( $open_graph_image_id ) && is_string( $open_graph_image_id ) )
 		? wp_get_attachment_image_url( (int) $open_graph_image_id, 'full' )
 		: false;
@@ -170,12 +170,12 @@ final class Open_Graph implements Feature {
 		$description = $this->get_description( $post_id );
 		$image       = $this->get_image( $post_id );
 		$permalink   = ! empty( get_permalink( $post_id ) ) ? get_permalink( $post_id ) : '';
-		$additional = '';
+		$additional  = '';
 
 		// Add article related tags.
 		if ( is_singular() ) {
-			$published_time = get_the_date('c', $post_id);
-			$modified_time  = get_the_modified_date('c', $post_id);
+			$published_time = get_the_date( 'c', $post_id );
+			$modified_time  = get_the_modified_date( 'c', $post_id );
 
 			if ( ! empty( $published_time ) ) {
 				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( $published_time ) );
@@ -204,7 +204,7 @@ HTML,
 			esc_attr( $title ),
 			esc_attr( $description ),
 			esc_url( $permalink ),
-			$additional
+			$additional // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $additional is pre-built HTML with all dynamic values already escaped via esc_attr/esc_url.
 		);
 	}
 }
