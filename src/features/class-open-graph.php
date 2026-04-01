@@ -170,12 +170,12 @@ final class Open_Graph implements Feature {
 		$description = $this->get_description( $post_id );
 		$image       = $this->get_image( $post_id );
 		$permalink   = ! empty( get_permalink( $post_id ) ) ? get_permalink( $post_id ) : '';
-		$additional = '';
+		$additional  = '';
 
 		// Add article related tags.
 		if ( is_singular() ) {
-			$published_time = get_the_date('c', $post_id);
-			$modified_time  = get_the_modified_date('c', $post_id);
+			$published_time = get_the_date( 'c', $post_id );
+			$modified_time  = get_the_modified_date( 'c', $post_id );
 
 			if ( ! empty( $published_time ) ) {
 				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( $published_time ) );
@@ -204,7 +204,7 @@ HTML,
 			esc_attr( $title ),
 			esc_attr( $description ),
 			esc_url( $permalink ),
-			$additional
+			$additional // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $additional is pre-built HTML with all dynamic values already escaped via esc_attr/esc_url.
 		);
 	}
 }
