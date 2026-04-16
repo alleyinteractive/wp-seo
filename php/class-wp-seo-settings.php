@@ -38,13 +38,6 @@ class WP_SEO_Settings {
 	public $options = array();
 
 	/**
-	 * Storage unit for the current network option values of the plugin.
-	 *
-	 * @var array.
-	 */
-	public $network_options = array();
-
-	/**
 	 * Taxonomies with archive pages, which can have meta fields set for them.
 	 *
 	 * @see  WP_SEO_Settings::setup().
@@ -72,8 +65,6 @@ class WP_SEO_Settings {
 	private $archived_post_types = array();
 
 	const SLUG = 'wp-seo';
-
-	const NETWORK_SLUG = 'wp-seo-network';
 
 	/**
 	 * Unused.
@@ -127,8 +118,7 @@ class WP_SEO_Settings {
 			add_action( 'admin_menu', array( $this, 'add_options_page' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
-			add_action( 'network_admin_menu', array( $this, 'add_network_options_page' ) );
-			add_action( 'network_admin_edit_wp-seo-network', array( $this, 'save_network_settings' ) );
+
 		}
 	}
 
@@ -194,27 +184,6 @@ class WP_SEO_Settings {
 			$this->set_options();
 		}
 		return isset( $this->options[ $key ] ) ? $this->options[ $key ] : $default;
-	}
-
-	/**
-	 * Set $network_options with the current network database value.
-	 */
-	public function set_network_options() {
-		$this->network_options = get_site_option( $this::NETWORK_SLUG, array() );
-	}
-
-	/**
-	 * Get a network option value.
-	 *
-	 * @param string $key     The option key sought.
-	 * @param mixed  $default Optional default.
-	 * @return mixed The value, or null on failure.
-	 */
-	public function get_network_option( $key, $default = null ) {
-		if ( empty( $this->network_options ) ) {
-			$this->set_network_options();
-		}
-		return isset( $this->network_options[ $key ] ) ? $this->network_options[ $key ] : $default;
 	}
 
 	/**
@@ -287,74 +256,6 @@ class WP_SEO_Settings {
 	 */
 	public function add_options_page() {
 		add_options_page( __( 'WP SEO Settings', 'wp-seo' ), __( 'SEO', 'wp-seo' ), $this->options_capability, $this::SLUG, array( $this, 'view_settings_page' ) );
-	}
-
-	/**
-	 * Register the plugin network options page.
-	 */
-	public function add_network_options_page() {
-		add_submenu_page( 'settings.php', __( 'WP SEO Settings', 'wp-seo' ), __( 'SEO', 'wp-seo' ), 'manage_network_options', $this::SLUG, array( $this, 'view_network_settings_page' ) );
-	}
-
-	/**
-	 * Render the network settings page for robots.txt network prefix/suffix fields.
-	 */
-	public function view_network_settings_page() {
-		?>
-		<div class="wrap" id="wp_seo_network_settings">
-			<h2><?php esc_html_e( 'WP SEO Network Settings', 'wp-seo' ); ?></h2>
-			<?php if ( filter_input( INPUT_GET, 'updated' ) ) : ?>
-				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Network settings saved.', 'wp-seo' ); ?></p></div>
-			<?php endif; ?>
-			<form action="edit.php?action=wp-seo-network" method="POST">
-				<?php wp_nonce_field( 'wp-seo-network-options' ); ?>
-				<?php
-				/** This filter is documented in php/class-wp-seo-settings.php */
-				if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
-					global $wp_settings_sections;
-					foreach ( (array) $wp_settings_sections[ $this::NETWORK_SLUG ] as $section ) {
-						add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), $this::NETWORK_SLUG, 'advanced', 'default', array_merge( $section, array( 'slug' => $this::NETWORK_SLUG ) ) );
-					}
-					do_accordion_sections( $this::NETWORK_SLUG, 'advanced', null );
-				} else {
-					do_settings_sections( $this::NETWORK_SLUG );
-				}
-				?>
-				<?php submit_button(); ?>
-			</form>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handle saving the network robots.txt settings.
-	 *
-	 * Double-gated: only processes when the request originates from the network
-	 * admin (via the network_admin_edit_wp-seo-network action) and the current
-	 * user has manage_network_options. This prevents network settings from being
-	 * updated via the regular per-site settings form, even by users who hold
-	 * network admin credentials.
-	 */
-	public function save_network_settings() {
-		check_admin_referer( 'wp-seo-network-options' );
-
-		if ( ! is_network_admin() || ! current_user_can( 'manage_network_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'wp-seo' ) );
-		}
-
-		$in = isset( $_POST[ $this::SLUG ] ) && is_array( $_POST[ $this::SLUG ] ) ? $_POST[ $this::SLUG ] : array();
-
-		if ( empty( $this->network_options ) ) {
-			$this->set_network_options();
-		}
-
-		$this->network_options['robots_txt_network_prefix'] = isset( $in['robots_txt_network_prefix'] ) && is_string( $in['robots_txt_network_prefix'] ) ? sanitize_text_field( $in['robots_txt_network_prefix'] ) : '';
-		$this->network_options['robots_txt_network_suffix'] = isset( $in['robots_txt_network_suffix'] ) && is_string( $in['robots_txt_network_suffix'] ) ? sanitize_text_field( $in['robots_txt_network_suffix'] ) : '';
-
-		update_site_option( $this::NETWORK_SLUG, $this->network_options );
-
-		wp_safe_redirect( add_query_arg( array( 'page' => $this::SLUG, 'updated' => 'true' ), network_admin_url( 'settings.php' ) ) );
-		exit;
 	}
 
 	/**
@@ -434,12 +335,6 @@ class WP_SEO_Settings {
 		add_settings_field( 'robots_txt_prefix', __( 'Add to start of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_prefix' ) );
 		add_settings_field( 'robots_txt_suffix', __( 'Add to end of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_suffix' ) );
 
-		if ( is_network_admin() ) {
-			add_settings_section( 'robots', __( 'Robots.txt', 'wp-seo' ), false, $this::NETWORK_SLUG );
-			add_settings_field( 'robots_example', __( 'Robots.txt Example', 'wp-seo' ), array( $this, 'example_robots_txt' ), $this::NETWORK_SLUG, 'robots' );
-			add_settings_field( 'robots_txt_network_prefix', __( 'Add to start of Robots.txt (Network)', 'wp-seo' ), array( $this, 'field_network' ), $this::NETWORK_SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_network_prefix' ) );
-			add_settings_field( 'robots_txt_network_suffix', __( 'Add to end of Robots.txt (Network)', 'wp-seo' ), array( $this, 'field_network' ), $this::NETWORK_SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_network_suffix' ) );
-		}
 	}
 
 	/**
@@ -581,34 +476,6 @@ class WP_SEO_Settings {
 	 * }
 	 */
 	public function field( $args ) {
-		$this->render_field( $args, array( $this, 'get_option' ) );
-	}
-
-	/**
-	 * Display a network settings field.
-	 *
-	 * @param array $args Field arguments. @see render_field().
-	 */
-	public function field_network( $args ) {
-		$this->render_field( $args, array( $this, 'get_network_option' ) );
-	}
-
-	/**
-	 * Render a settings field using the provided getter callable.
-	 *
-	 * Shared implementation for field() and field_network(). Callers pass the
-	 * appropriate getter (get_option or get_network_option) so lazy-loading and
-	 * value lookup are handled by the getter regardless of storage source.
-	 *
-	 * @param array    $args   {
-	 *     Field arguments.
-	 *
-	 *     @type string $field The option key to pass to $getter.
-	 *     @type string $type  Optional field type. Defaults to 'text'.
-	 * }
-	 * @param callable $getter Callable that accepts ( $key, $default ) and returns the value.
-	 */
-	protected function render_field( $args, callable $getter ) {
 		if ( empty( $args['field'] ) ) {
 			return;
 		}
@@ -617,7 +484,7 @@ class WP_SEO_Settings {
 			$args['type'] = 'text';
 		}
 
-		$value = call_user_func( $getter, $args['field'], '' );
+		$value = ! empty( $this->options[ $args['field'] ] ) ? $this->options[ $args['field'] ] : '';
 
 		switch ( $args['type'] ) {
 			case 'textarea' :
@@ -844,7 +711,7 @@ class WP_SEO_Settings {
 					if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
 						global $wp_settings_sections;
 						foreach ( (array) $wp_settings_sections[ $this::SLUG ] as $section ) {
-							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), $this::SLUG, 'advanced', 'default', array_merge( $section, array( 'slug' => $this::SLUG ) ) );
+							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), $this::SLUG, 'advanced', 'default', $section );
 						}
 						do_accordion_sections( $this::SLUG, 'advanced', null );
 					} else {
@@ -860,27 +727,23 @@ class WP_SEO_Settings {
 	/**
 	 * Render a section's fields as a meta box.
 	 *
-	 * @param mixed $_object Unused. Data passed from do_accordion_sections().
-	 * @param array $box {
+	 * @param  mixed $object Unused. Data passed from do_accordion_sections().
+	 * @param  array $box {
 	 *     An array of meta box arguments.
 	 *
-	 *     @type string   $id       @see add_meta_box().
-	 *     @type string   $title    @see add_meta_box().
-	 *     @type callback $callback @see add_meta_box().
-	 *     @type array    $args     @see add_meta_box(), add_settings_section().
-	 *           @type string $slug The settings page slug to pass to do_settings_fields().
-	 *                              Defaults to SLUG.
+	 *     @type  string $id @see add_meta_box().
+	 *     @type  string $title @see add_meta_box().
+	 *     @type  callback $callback @see add_meta_box().
+	 *     @type  array $args @see add_meta_box(), add_settings_section().
 	 * }
 	 */
-	public function settings_meta_box( $_object, $box ) {
+	public function settings_meta_box( $object, $box ) {
 		if ( is_callable( $box['args']['callback'] ) ) {
 			call_user_func( $box['args']['callback'], $box['args'] );
 		}
 
-		$slug = isset( $box['args']['slug'] ) ? $box['args']['slug'] : $this::SLUG;
-
 		echo '<table class="form-table">';
-		do_settings_fields( $slug, $box['args']['id'] );
+		do_settings_fields( $this::SLUG, $box['args']['id'] );
 		echo '</table>';
 	}
 

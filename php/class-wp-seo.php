@@ -626,20 +626,6 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 		 */
 		public function robots_txt( string $robots ): string {
 			/**
-			 * Filters the network-level Robots.txt Prefix value for WP SEO.
-			 *
-			 * @param string $prefix The robots.txt network prefix, added in the WP SEO network settings page.
-			 */
-			$robots_network_prefix = apply_filters( 'wp_seo_robots_txt_network_prefix', WP_SEO_Settings()->get_network_option( 'robots_txt_network_prefix', '' ) );
-
-			/**
-			 * Filters the network-level Robots.txt Suffix value for WP SEO.
-			 *
-			 * @param string $suffix The robots.txt network suffix, added in the WP SEO network settings page.
-			 */
-			$robots_network_suffix = apply_filters( 'wp_seo_robots_txt_network_suffix', WP_SEO_Settings()->get_network_option( 'robots_txt_network_suffix', '' ) );
-
-			/**
 			 * Filters the Robots.txt Prefix value for WP SEO.
 			 *
 			 * @param string $prefix The robots.txt prefix, added in the WP SEO settings page.
@@ -653,18 +639,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 			 */
 			$robots_suffix = apply_filters( 'wp_seo_robots_txt_suffix', WP_SEO_Settings()->get_option( 'robots_txt_suffix', '' ) );
 
-			return implode(
-				PHP_EOL,
-				array_filter(
-					array(
-						$robots_network_prefix,
-						$robots_prefix,
-						$robots,
-						$robots_suffix,
-						$robots_network_suffix
-					)
-				)
-			);
+			return implode( PHP_EOL, array_filter( array( $robots_prefix, $robots, $robots_suffix ) ) );
 		}
 	}
 
