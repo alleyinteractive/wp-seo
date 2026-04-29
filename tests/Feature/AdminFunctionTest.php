@@ -18,6 +18,7 @@ class AdminFunctionTest extends TestCase {
 	 */
 	public function test_admin_functions_contain( callable $function, string $should, string $contain, callable $setup ) {
 		$args = $setup();
+		do_action( 'admin_init' );
 		self::assertStringContainsString( $contain, capture( fn() => $function( ...$args ) ), $should );
 	}
 
@@ -53,7 +54,6 @@ class AdminFunctionTest extends TestCase {
 					'_meta_robots_nofollow' => $meta_robots_nofollow,
 				],
 			] );
-			do_action( 'admin_init' );
 			return [ $post_id ];
 		};
 
