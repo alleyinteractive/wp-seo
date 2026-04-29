@@ -150,7 +150,7 @@ class SettingsPageTest extends TestCase {
 	 * false positive in January.
 	 */
 	function test_example_date_archive() {
-		$html = capture( [ WP_SEO_Settings(), 'example_date_archive' ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_date_archive() );
 
 		$this->assertStringContainsString( date( 'Y' ), $html );
 		$this->assertStringContainsString( date( 'm' ), str_replace( date( 'Y' ), '', $html ) );
@@ -160,7 +160,7 @@ class SettingsPageTest extends TestCase {
 	 * Test that the example of an author archive includes the URL for this user.
 	 */
 	function test_example_author_archive() {
-		$html = capture( [ WP_SEO_Settings(), 'example_author_archive' ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_author_archive() );
 
 		$this->assertStringContainsString( get_author_posts_url( get_current_user_id() ), $html );
 	}
@@ -169,7 +169,7 @@ class SettingsPageTest extends TestCase {
 	 * Test that the example of a search link includes a search query string.
 	 */
 	function test_example_search_page() {
-		$html = capture( [ WP_SEO_Settings(), 'example_search_page' ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_search_page() );
 
 		$this->assertStringContainsString( get_search_link( 'wordpress' ), $html );
 	}
@@ -178,7 +178,7 @@ class SettingsPageTest extends TestCase {
 	 * Test that the example 404 page includes the hashed blog URL.
 	 */
 	function test_example_404_page() {
-		$html = capture( [ WP_SEO_Settings(), 'example_404_page' ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_404_page() );
 
 		$this->assertStringContainsString( md5( get_bloginfo( 'url' ) ), $html );
 	}
