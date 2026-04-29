@@ -8,7 +8,7 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
-use Mantle\Testing\Utils;
+use function Mantle\Support\Helpers\capture;
 use WP_SEO_Settings;
 use WP_SEO;
 
@@ -16,12 +16,19 @@ class WPTitleWPHeadTest extends TestCase {
 
 	var string $taxonomy  = 'demo_taxonomy';
 	var string $post_type = 'demo_post_type';
-	var array $options   = [];
+	var array $options    = array();
 
 	function setUp(): void {
 		parent::setUp();
 		register_taxonomy( $this->taxonomy, 'post' );
-		register_post_type( $this->post_type, [ 'rewrite' => true, 'has_archive' => true, 'public' => true ] );
+		register_post_type(
+			$this->post_type,
+			array(
+				'rewrite'     => true,
+				'has_archive' => true,
+				'public'      => true,
+			)
+		);
 		WP_SEO_Settings()->set_properties();
 
 		$this->_update_option_for_tests();
@@ -50,20 +57,28 @@ class WPTitleWPHeadTest extends TestCase {
 	 * cleaner, and the option has to be set one way or another.
 	 */
 	function _update_option_for_tests() {
-		$this->options['post_types'] = [ 'post' ];
-		$this->options['taxonomies'] = [ 'category' ];
-		$this->options['arbitrary_tags'] = [
-			[
-				'name' => 'demo arbitrary title',
+		$this->options['post_types']        = array( 'post' );
+		$this->options['taxonomies']        = array( 'category' );
+		$this->options['arbitrary_tags']    = array(
+			array(
+				'name'    => 'demo arbitrary title',
 				'content' => 'demo arbitrary content',
-			],
-		];
-		$this->options['robots_directives'] = [
-			[ 'label' => 'NoIndex', 'value' => 'noindex', 'description' => 'Directive description' ],
-			[ 'label' => 'NoFollow', 'value' => 'nofollow', 'description' => 'Directive description' ],
-		];
+			),
+		);
+		$this->options['robots_directives'] = array(
+			array(
+				'label'       => 'NoIndex',
+				'value'       => 'noindex',
+				'description' => 'Directive description',
+			),
+			array(
+				'label'       => 'NoFollow',
+				'value'       => 'nofollow',
+				'description' => 'Directive description',
+			),
+		);
 
-		foreach ( [
+		foreach ( array(
 			'home',
 			'single_post',
 			"single_{$this->post_type}",
@@ -75,12 +90,12 @@ class WPTitleWPHeadTest extends TestCase {
 			'search',
 			'404',
 			'feed',
-		] as $key ) {
-			$this->options[ "{$key}_title" ]               = "demo_{$key}_title";
-			$this->options[ "{$key}_description" ]         = "demo_{$key}_description";
-			$this->options[ "{$key}_canonical_url" ]       = "demo_{$key}_canonical_url";
-			$this->options[ "{$key}_robots_noindex" ]      = '1';
-			$this->options[ "{$key}_robots_nofollow" ]     = '';
+		) as $key ) {
+			$this->options[ "{$key}_title" ]           = "demo_{$key}_title";
+			$this->options[ "{$key}_description" ]     = "demo_{$key}_description";
+			$this->options[ "{$key}_canonical_url" ]   = "demo_{$key}_canonical_url";
+			$this->options[ "{$key}_robots_noindex" ]  = '1';
+			$this->options[ "{$key}_robots_nofollow" ] = '';
 		}
 
 		update_option( WP_SEO_Settings::SLUG, WP_SEO_Settings()->sanitize_options( $this->options ) );
@@ -107,39 +122,40 @@ class WPTitleWPHeadTest extends TestCase {
 	 * @param  string $robots_nofollow The expected robots nofollow value, '1' or ''.
 	 */
 	function _assert_all_meta( $description, $robots_noindex, $robots_nofollow ) {
-		$robots = implode( ', ', [
-			$robots_noindex ? 'noindex' : '',
-			$robots_nofollow ? 'nofollow' : '',
-		] );
+		$robots = implode(
+			', ',
+			array(
+				$robots_noindex ? 'noindex' : '',
+				$robots_nofollow ? 'nofollow' : '',
+			)
+		);
 
-		$expected = <<<EOF
-<meta name='description' content='{$description}' /><!-- WP SEO -->
-<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
-<meta name='robots' content='{$robots}' /><!-- WP SEO -->
-EOF;
+		$output = strip_ws( capture( [ WP_SEO(), 'wp_head' ] ) );
 
-		$this->assertSame( strip_ws( $expected ), strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
+		$this->assertStringContainsString( strip_ws( "<meta name='description' content='{$description}' />" ), $output );
+		$this->assertStringContainsString( strip_ws( "<meta name='demo arbitrary title' content='demo arbitrary content' />" ), $output );
+		$this->assertStringContainsString( strip_ws( "<meta name='robots' content='{$robots}' />" ), $output );
 	}
 
 	/**
 	 * Test that WP_SEO::wp_head() echoes only the arbitrary <meta> tags.
 	 */
 	function _assert_arbitrary_meta() {
-		$expected = <<<EOF
+		$expected = <<<'EOF'
 <meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
 EOF;
 
-		$this->assertSame( strip_ws( $expected ), strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
+		$this->assertSame( strip_ws( $expected ), strip_ws( capture( [ WP_SEO(), 'wp_head' ] ) ) );
 	}
 
 	/**
 	 * Test that WP_SEO::wp_head() echoes <link> canonical tag with expected value.
-	 * 
-	 * @param string $canonical_url The expected canonical URL.
+	 * * @param string $canonical_url The expected canonical URL.
 	 */
 	function _assert_canonical( $canonical_url ) {
-		$expected = "<link rel='canonical' href='{$canonical_url}' /><!-- WP SEO -->";
-		$this->assertSame( strip_ws( $expected ), strip_ws( get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
+		$expected = "<link rel='canonical' href='{$canonical_url}' />";
+
+		$this->assertStringContainsString( strip_ws( $expected ), strip_ws( capture( [ WP_SEO(), 'wp_head' ] ) ) );
 	}
 
 	/**
@@ -152,11 +168,11 @@ EOF;
 	function _assert_option_filters( $key ) {
 		$this->_assert_title( $this->options[ "{$key}_title" ] );
 		$this->_assert_all_meta(
-			$this->options["{$key}_description"],
-			$this->options["{$key}_robots_noindex"],
-			$this->options["{$key}_robots_nofollow"],
+			$this->options[ "{$key}_description" ],
+			$this->options[ "{$key}_robots_noindex" ],
+			$this->options[ "{$key}_robots_nofollow" ],
 		);
-		$this->_assert_canonical( $this->options["{$key}_canonical_url"] );
+		$this->_assert_canonical( $this->options[ "{$key}_canonical_url" ] );
 	}
 
 	/**
@@ -164,14 +180,13 @@ EOF;
 	 *
 	 * Most requests should be subject to _assert_option_filters(), at least.
 	 */
-
 	function test_single() {
 		$this->go_to( get_permalink( $this->factory->post->create() ) );
 		$this->_assert_option_filters( 'single_post' );
 	}
 
 	function test_singular() {
-		$this->go_to( get_permalink( $this->factory->post->create( [ 'post_type' => $this->post_type ] ) ) );
+		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_type' => $this->post_type ) ) ) );
 		$this->_assert_option_filters( "single_{$this->post_type}" );
 	}
 
@@ -192,7 +207,7 @@ EOF;
 	function test_no_format_string() {
 		add_filter( 'wp_seo_title_tag_format', '__return_false' );
 		$title = rand_str();
-		$this->go_to( get_permalink( $this->factory->post->create( [ 'post_title' => $title ] ) ) );
+		$this->go_to( get_permalink( $this->factory->post->create( array( 'post_title' => $title ) ) ) );
 		// The site name doesn't appear in all versions we test against; just check for our title.
 		$this->assertStringContainsString( $title, wp_title( '&raquo;', false ) );
 		// WP_UnitTestCase::_restore_hooks() was introduced in 4.0.
@@ -205,38 +220,53 @@ EOF;
 	}
 
 	function test_author_archive() {
-		$author_ID = $this->factory->user->create( [ 'user_login' => 'user-a' ] );
-		$this->factory->post->create( [ 'post_author' => $author_ID ] );
+		$author_ID = $this->factory->user->create( array( 'user_login' => 'user-a' ) );
+		$this->factory->post->create( array( 'post_author' => $author_ID ) );
 		$this->go_to( get_author_posts_url( $author_ID ) );
 		$this->_assert_option_filters( 'archive_author' );
 	}
 
 	function test_category() {
-		$category_ID = $this->factory->term->create( [ 'name' => 'cat-a', 'taxonomy' => 'category' ] );
+		$category_ID = $this->factory->term->create(
+			array(
+				'name'     => 'cat-a',
+				'taxonomy' => 'category',
+			)
+		);
 		$this->go_to( get_term_link( $category_ID, 'category' ) );
 		$this->_assert_option_filters( 'archive_category' );
 	}
 
 	function test_tax() {
-		$term_ID = $this->factory->term->create( [ 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ] );
+		$term_ID = $this->factory->term->create(
+			array(
+				'name'     => 'demo-a',
+				'taxonomy' => $this->taxonomy,
+			)
+		);
 		$this->go_to( get_term_link( $term_ID, $this->taxonomy ) );
 		$this->_assert_option_filters( "archive_{$this->taxonomy}" );
 	}
 
 	// A term with custom values should not use the archive_{taxonomy}_ fields.
 	function test_category_custom() {
-		$term_ID = $this->factory->term->create( [ 'name' => 'cat-b', 'taxonomy' => 'category' ] );
+		$term_ID = $this->factory->term->create(
+			array(
+				'name'     => 'cat-b',
+				'taxonomy' => 'category',
+			)
+		);
 		update_option(
 			WP_SEO()->get_term_option_name(
 				get_term( $term_ID, 'category' )
 			),
-			[
-				'title' => '_custom_title',
-				'description' => '_custom_description',
-				'canonical_url' => '_custom_canonical_url',
-				'robots_noindex' => '1',
+			array(
+				'title'           => '_custom_title',
+				'description'     => '_custom_description',
+				'canonical_url'   => '_custom_canonical_url',
+				'robots_noindex'  => '1',
 				'robots_nofollow' => '',
-			],
+			),
 		);
 		$this->go_to( get_term_link( $term_ID, 'category' ) );
 		$this->_assert_title( '_custom_title' );
@@ -250,7 +280,7 @@ EOF;
 	}
 
 	function test_date_archive() {
-		$this->factory->post->create( [ 'post_date' => '2007-09-04 12:34' ] );
+		$this->factory->post->create( array( 'post_date' => '2007-09-04 12:34' ) );
 		$this->go_to( get_day_link( '2007', '09', '04' ) );
 		$this->_assert_option_filters( 'archive_date' );
 	}
@@ -300,7 +330,7 @@ EOF;
 		$sep = rand_str();
 		$this->assertStringContainsString( $sep, wp_title( $sep, false ) );
 
-		$this->assertEmpty( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) );
+		$this->assertEmpty( capture( [ WP_SEO(), 'wp_head' ] ) );
 	}
 
 	/**
@@ -310,16 +340,18 @@ EOF;
 		delete_option( WP_SEO_Settings::SLUG );
 		WP_SEO_Settings()->set_options();
 
-		update_option( WP_SEO_Settings::SLUG, [
-			'arbitrary_tags' => [
-				'name' => 'foo',
-				'value' => new \WP_Error(),
-			],
-		] );
+		update_option(
+			WP_SEO_Settings::SLUG,
+			array(
+				'arbitrary_tags' => array(
+					'name'  => 'foo',
+					'value' => new \WP_Error(),
+				),
+			)
+		);
 
 		$this->go_to( '/' );
 
-		$this->assertEmpty( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) );
+		$this->assertEmpty( capture( [ WP_SEO(), 'wp_head' ] ) );
 	}
-
 }

@@ -8,10 +8,10 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
-use Mantle\Testing\Utils;
 use WP_SEO_Settings;
 use WP_SEO;
 use Mantle\Testing\Concerns\Admin_Screen;
+use function Mantle\Support\Helpers\capture;
 
 class SettingsPageTest extends TestCase {
 	use Admin_Screen;
@@ -61,10 +61,10 @@ class SettingsPageTest extends TestCase {
 	 */
 	function test_example_url() {
 
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_url' ], [ 'Demo text' ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_url( 'Demo text' ) );
 		$this->assertSame( '<p class="description">Demo text</p>', $html );
 
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_url' ], [ 'Demo text', 'http://wordpress.org' ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_url( 'Demo text', 'http://wordpress.org' ) );
 		$this->assertStringContainsString( '<code><a href="http://wordpress.org" target="_blank">http://wordpress.org</a></code>', $html );
 	}
 
@@ -75,7 +75,7 @@ class SettingsPageTest extends TestCase {
 		$post_ID = $this->factory->post->create();
 
 		$section = [ 'id' => 'single_post' ];
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_permalink' ], [ $section ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_permalink( $section ) );
 
 		$this->assertStringContainsString( get_permalink( $post_ID ), $html );
 	}
@@ -87,7 +87,7 @@ class SettingsPageTest extends TestCase {
 		register_post_type( 'demo' );
 
 		$section = [ 'id' => 'single_demo' ];
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_permalink' ], [ $section ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_permalink( $section ) );
 
 		$this->assertStringContainsString( 'No posts yet.', $html );
 	}
@@ -100,7 +100,7 @@ class SettingsPageTest extends TestCase {
 		wp_set_object_terms( $this->factory->post->create(), $category_ID, 'category' );
 
 		$section = [ 'id' => 'archive_category' ];
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_term_archive' ], [ $section ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_term_archive( $section ) );
 
 		$this->assertStringContainsString( get_term_link( $category_ID, 'category' ), $html );
 	}
@@ -112,7 +112,7 @@ class SettingsPageTest extends TestCase {
 		register_taxonomy( 'demo', 'post' );
 
 		$section = [ 'id' => 'archive_demo' ];
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_term_archive' ], [ $section ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_term_archive( $section ) );
 
 		$this->assertStringContainsString( 'No terms yet.', $html );
 	}
@@ -125,7 +125,7 @@ class SettingsPageTest extends TestCase {
 		$this->factory->post->create( [ 'post_type' => 'demo' ] );
 
 		$section = [ 'id' => 'archive_demo' ];
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_post_type_archive' ], [ $section ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_post_type_archive( $section ) );
 
 		$this->assertStringContainsString( get_post_type_archive_link( 'demo' ), $html );
 	}
@@ -138,7 +138,7 @@ class SettingsPageTest extends TestCase {
 		$this->factory->post->create( [ 'post_type' => 'demo' ] );
 
 		$section = [ 'id' => 'archive_demo' ];
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_post_type_archive' ], [ $section ] );
+		$html = capture( fn() => WP_SEO_Settings()->example_post_type_archive( $section ) );
 
 		$this->assertEmpty( $html );
 	}
@@ -150,7 +150,7 @@ class SettingsPageTest extends TestCase {
 	 * false positive in January.
 	 */
 	function test_example_date_archive() {
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_date_archive' ] );
+		$html = capture( [ WP_SEO_Settings(), 'example_date_archive' ] );
 
 		$this->assertStringContainsString( date( 'Y' ), $html );
 		$this->assertStringContainsString( date( 'm' ), str_replace( date( 'Y' ), '', $html ) );
@@ -160,7 +160,7 @@ class SettingsPageTest extends TestCase {
 	 * Test that the example of an author archive includes the URL for this user.
 	 */
 	function test_example_author_archive() {
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_author_archive' ] );
+		$html = capture( [ WP_SEO_Settings(), 'example_author_archive' ] );
 
 		$this->assertStringContainsString( get_author_posts_url( get_current_user_id() ), $html );
 	}
@@ -169,7 +169,7 @@ class SettingsPageTest extends TestCase {
 	 * Test that the example of a search link includes a search query string.
 	 */
 	function test_example_search_page() {
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_search_page' ] );
+		$html = capture( [ WP_SEO_Settings(), 'example_search_page' ] );
 
 		$this->assertStringContainsString( get_search_link( 'wordpress' ), $html );
 	}
@@ -178,7 +178,7 @@ class SettingsPageTest extends TestCase {
 	 * Test that the example 404 page includes the hashed blog URL.
 	 */
 	function test_example_404_page() {
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'example_404_page' ] );
+		$html = capture( [ WP_SEO_Settings(), 'example_404_page' ] );
 
 		$this->assertStringContainsString( md5( get_bloginfo( 'url' ) ), $html );
 	}
@@ -188,47 +188,41 @@ class SettingsPageTest extends TestCase {
 	 */
 	function test_field() {
 		// No field.
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'field' ], [ [] ] );
+		$html = capture( fn() => WP_SEO_Settings()->field( [] ) );
 
 		$this->assertEmpty( $html );
 
 		// No type? Use a text field.
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'field' ], [ [ 'field' => 'demo' ] ] );
+		$html = capture( fn() => WP_SEO_Settings()->field( [ 'field' => 'demo' ] ) );
 		$this->assertMatchesRegularExpression( '/<input[^>]+type="text"[^>]+name="wp-seo\[demo\]"/', $html );
 
 		// Check that a value is passed.
 		WP_SEO_Settings()->options['demo'] = 'demo value';
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'field' ], [ [ 'field' => 'demo' ] ] );
+		$html = capture( fn() => WP_SEO_Settings()->field( [ 'field' => 'demo' ] ) );
 
 		$this->assertMatchesRegularExpression( '/<input[^>]+type="text"[^>]+value="demo value"/', $html );
 
 		// Check the rendered field types.
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'field' ], [
-			[
-				'field' => 'demo',
-				'type'  => 'textarea',
-			]
-		] );
+		$html = capture( fn() => WP_SEO_Settings()->field( [
+			'field' => 'demo',
+			'type'  => 'textarea',
+		] ) );
 
 		$this->assertStringContainsString( '<textarea', $html );
 
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'field' ], [
-			[
-				'field' => 'demo',
-				'type'  => 'checkboxes',
-				'boxes' => [ 'foo' => 'bar' ],
-			]
-		] );
+		$html = capture( fn() => WP_SEO_Settings()->field( [
+			'field' => 'demo',
+			'type'  => 'checkboxes',
+			'boxes' => [ 'foo' => 'bar' ],
+		] ) );
 
 		$this->assertMatchesRegularExpression( '/<input[^>]+type="checkbox"/', $html );
 
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'field' ], [
-			[
-				'field'  => 'demo_repeatable', // Not "demo," which does have a value.
-				'type'   => 'repeatable',
-				'repeat' => [ 'foo' => 'bar' ],
-			]
-		] );
+		$html = capture( fn() => WP_SEO_Settings()->field( [
+			'field'  => 'demo_repeatable', // Not "demo," which does have a value.
+			'type'   => 'repeatable',
+			'repeat' => [ 'foo' => 'bar' ],
+		] ) );
 
 		$this->assertMatchesRegularExpression( '/<input[^>]+type="text"/', $html );
 	}
@@ -238,10 +232,10 @@ class SettingsPageTest extends TestCase {
 	 */
 	function test_render_text_field() {
 
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'render_text_field' ], [
+		$html = capture( fn() => WP_SEO_Settings()->render_text_field(
 			[ 'field' => 'demo', 'type' => 'text' ],
 			'demo value',
-		] );
+		) );
 
 		// Look for the correct attributes: type of "text," field name and value.
 		$this->assertStringContainsString( 'type="text"', $html );
@@ -251,10 +245,10 @@ class SettingsPageTest extends TestCase {
 		// Expect the field to have some size.
 		$this->assertMatchesRegularExpression( '/size="\d+"/', $html );
 
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'render_text_field' ], [
+		$html = capture( fn() => WP_SEO_Settings()->render_text_field(
 			[ 'type' => 'number', 'field' => 'demo', 'size' => 5 ],
 			'40',
-		] );
+		) );
 
 		$this->assertStringContainsString( 'type="number"', $html );
 		$this->assertStringContainsString( 'value="40"', $html );
@@ -265,10 +259,10 @@ class SettingsPageTest extends TestCase {
 	 * Test the default textarea output and the output with all args.
 	 */
 	function test_render_textarea() {
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'render_textarea' ], [
+		$html = capture( fn() => WP_SEO_Settings()->render_textarea(
 			[ 'field' => 'demo' ],
-			'demo value'
-		] );
+			'demo value',
+		) );
 
 		// Expect at least a textarea, with with the field name and the correct value.
 		$this->assertMatchesRegularExpression( '/<textarea[^>]+name="wp-seo\[demo\]"[^>]+>demo value<\/textarea>/', $html );
@@ -279,7 +273,7 @@ class SettingsPageTest extends TestCase {
 	}
 
 	function test_render_checkboxes() {
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'render_checkboxes' ], [
+		$html = capture( fn() => WP_SEO_Settings()->render_checkboxes(
 			[
 				'field' => 'demo',
 				'boxes' => [
@@ -288,7 +282,7 @@ class SettingsPageTest extends TestCase {
 				],
 			],
 			[ 'post_tag' ],
-		] );
+		) );
 
 		// Expect two checkboxes.
 		$this->assertSame( 2, substr_count( $html, 'type="checkbox"' ) );
@@ -311,9 +305,7 @@ class SettingsPageTest extends TestCase {
 			],
 		];
 
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'render_repeatable_field' ], [
-			$args, []
-		] );
+		$html = capture( fn() => WP_SEO_Settings()->render_repeatable_field( $args, [] ) );
 
 		// Expect a "name" attribute in with the counter for the template.
 		$this->assertStringContainsString( 'name="wp-seo[demo][<%= i %>][first_name]"', $html );
@@ -328,7 +320,7 @@ class SettingsPageTest extends TestCase {
 
 		$args['size'] = '40';
 
-		$html = Utils::get_echo( [ WP_SEO_Settings(), 'render_repeatable_field' ], [
+		$html = capture( fn() => WP_SEO_Settings()->render_repeatable_field(
 			$args,
 			[
 				[
@@ -343,8 +335,8 @@ class SettingsPageTest extends TestCase {
 					'first_name' => 'James',
 					'last_name'  => 'Buchanan',
 				],
-			]
-		] );
+			],
+		) );
 
 		// Three values: Expect eight inputs (there isn't a blank one).
 		$this->assertSame( 8, substr_count( $html, '<input class="repeatable"' ) );
@@ -366,5 +358,4 @@ class SettingsPageTest extends TestCase {
 		_wp_seo_reset_post_types();
 		_wp_seo_reset_taxonomies();
 	}
-
 }
