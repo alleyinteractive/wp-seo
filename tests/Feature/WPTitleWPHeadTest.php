@@ -124,9 +124,11 @@ class WPTitleWPHeadTest extends TestCase {
 	function _assert_all_meta( $description, $robots_noindex, $robots_nofollow ) {
 		$robots = implode(
 			', ',
-			array(
-				$robots_noindex ? 'noindex' : '',
-				$robots_nofollow ? 'nofollow' : '',
+			array_filter(
+				array(
+					$robots_noindex ? 'noindex' : '',
+					$robots_nofollow ? 'nofollow' : '',
+				)
 			)
 		);
 
