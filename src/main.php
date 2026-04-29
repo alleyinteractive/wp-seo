@@ -16,6 +16,7 @@ function main(): void {
 	// Add features here.
 	$plugin = new Group(
 		new Features\Open_Graph(),
+		new Features\Pagination_SEO(),
 	);
 
 	$plugin->boot();
