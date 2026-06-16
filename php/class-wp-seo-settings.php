@@ -118,6 +118,7 @@ class WP_SEO_Settings {
 			add_action( 'admin_menu', array( $this, 'add_options_page' ) );
 			add_action( 'admin_init', array( $this, 'register_settings' ) );
 			add_action( 'load-settings_page_' . $this::SLUG, array( $this, 'add_help_tab' ) );
+
 		}
 	}
 
@@ -328,6 +329,11 @@ class WP_SEO_Settings {
 
 		add_settings_section( 'arbitrary', __( 'Other Meta Tags', 'wp-seo' ), false, $this::SLUG );
 		add_settings_field( 'arbitrary_tags', __( 'Tags', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'arbitrary', array( 'type' => 'repeatable', 'field' => 'arbitrary_tags', 'repeat' => array( 'name' => __( 'Name', 'lin' ), 'content' => __( 'Content', 'lin' ) ) ) );
+
+		add_settings_section( 'robots', __( 'Robots.txt', 'wp-seo' ), false, $this::SLUG );
+		add_settings_field( 'robots_example', __( 'Robots.txt Example', 'wp-seo' ), array( $this, 'example_robots_txt' ), $this::SLUG, 'robots' );
+		add_settings_field( 'robots_txt_prefix', __( 'Add to start of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_prefix' ) );
+		add_settings_field( 'robots_txt_suffix', __( 'Add to end of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_suffix' ) );
 	}
 
 	/**
@@ -356,6 +362,27 @@ class WP_SEO_Settings {
 			echo ' <code><a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $url ) . '</a></code>';
 		}
 		echo '</p>';
+	}
+
+	/**
+	 * Display the compiled Robots.txt contents in an uneditable field.
+	 */
+	public function example_robots_txt() {
+		ob_start();
+		/* Error suppression is used here because `do_robots` calls `header` which
+		 * throws a warning due to headers already having been sent. There is no
+		 * way around this, without recreating the function and maintaining our
+		 * own version of it entirely. At least as of WordPress 6.9.4.
+		 */
+		@do_robots();
+		$robots = ob_get_clean();
+		$this->render_textarea([
+				'field'    => 'robots_txt',
+				'disabled' => true,
+				'rows'     => 10,
+			],
+			$robots
+		);
 	}
 
 	/**
@@ -524,11 +551,12 @@ class WP_SEO_Settings {
 		) );
 
 		printf(
-			'<textarea name="%s[%s]" rows="%d" cols="%d">%s</textarea>',
+			'<textarea name="%s[%s]" rows="%d" cols="%d"%s>%s</textarea>',
 			esc_attr( $this::SLUG ),
 			esc_attr( $args['field'] ),
 			esc_attr( $args['rows'] ),
 			esc_attr( $args['cols'] ),
+			( ! empty( $args['disabled'] ) ? ' disabled' : '' ),
 			esc_textarea( $value )
 		);
 	}
@@ -682,9 +710,9 @@ class WP_SEO_Settings {
 					if ( apply_filters( 'wp_seo_use_settings_accordions', true ) ) {
 						global $wp_settings_sections;
 						foreach ( (array) $wp_settings_sections[ $this::SLUG ] as $section ) {
-							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), 'wp-seo', 'advanced', 'default', $section );
+							add_meta_box( $section['id'], $section['title'], array( $this, 'settings_meta_box' ), $this::SLUG, 'advanced', 'default', $section );
 						}
-						do_accordion_sections( 'wp-seo', 'advanced', null );
+						do_accordion_sections( $this::SLUG, 'advanced', null );
 					} else {
 						do_settings_sections( $this::SLUG );
 					}
@@ -759,6 +787,10 @@ class WP_SEO_Settings {
 		// "Other Pages" titles.
 		$sanitize_as_text_field[] = 'search_title';
 		$sanitize_as_text_field[] = '404_title';
+
+		// Robots.txt fields.
+		$sanitize_as_text_field[] = 'robots_txt_prefix';
+		$sanitize_as_text_field[] = 'robots_txt_suffix';
 
 		foreach ( $sanitize_as_text_field as $field ) {
 			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] ) ? sanitize_text_field( $in[ $field ] ) : null;
