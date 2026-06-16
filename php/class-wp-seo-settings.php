@@ -334,7 +334,6 @@ class WP_SEO_Settings {
 		add_settings_field( 'robots_example', __( 'Robots.txt Example', 'wp-seo' ), array( $this, 'example_robots_txt' ), $this::SLUG, 'robots' );
 		add_settings_field( 'robots_txt_prefix', __( 'Add to start of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_prefix' ) );
 		add_settings_field( 'robots_txt_suffix', __( 'Add to end of Robots.txt', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'robots', array( 'type' => 'textarea', 'field' => 'robots_txt_suffix' ) );
-
 	}
 
 	/**
