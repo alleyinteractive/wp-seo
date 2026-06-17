@@ -284,6 +284,9 @@ class WP_SEO_Settings {
 		add_settings_field( 'post_types', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'post_types', array( 'field' => 'post_types', 'type' => 'checkboxes', 'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) ) ) );
 
 		foreach ( $this->single_post_types as $post_type ) {
+			if ( ! in_array( $post_type->name, $this->get_enabled_post_types() ) ) {
+				continue;
+			}
 			/* translators: %s: post type singular name */
 			add_settings_section( 'single_' . $post_type->name, sprintf( __( 'Single %s Defaults', 'wp-seo' ), $post_type->labels->singular_name ), array( $this, 'example_permalink' ), $this::SLUG );
 			add_settings_field( "single_{$post_type->name}_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'single_' . $post_type->name, array( 'field' => "single_{$post_type->name}_title" ) );
@@ -292,6 +295,9 @@ class WP_SEO_Settings {
 		}
 
 		foreach ( $this->archived_post_types as $post_type ) {
+			if ( ! in_array( $post_type->name, $this->get_enabled_post_types() ) ) {
+				continue;
+			}
 			/* translators: %s: post type singular name */
 			add_settings_section( 'archive_' . $post_type->name, sprintf( __( '%s Archives', 'wp-seo' ), $post_type->labels->singular_name ), array( $this, 'example_post_type_archive' ), $this::SLUG );
 			add_settings_field( "archive_{$post_type->name}_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $post_type->name, array( 'field' => "archive_{$post_type->name}_title" ) );
@@ -304,6 +310,9 @@ class WP_SEO_Settings {
 		add_settings_field( 'taxonomies', __( 'Add SEO fields to individual:', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'taxonomies', array( 'field' => 'taxonomies', 'type' => 'checkboxes', 'boxes' => call_user_func_array( 'wp_list_pluck', array( array_diff_key( $this->taxonomies, array( 'post_format' => true ) ), 'label' ) ) ) );
 
 		foreach ( $this->taxonomies as $taxonomy ) {
+			if ( ! in_array( $taxonomy->name, $this->get_enabled_taxonomies() ) ) {
+				continue;
+			}
 			/* translators: %s: taxonomy singular name */
 			add_settings_section( 'archive_' . $taxonomy->name, sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ), array( $this, 'example_term_archive' ), $this::SLUG );
 			add_settings_field( "archive_{$taxonomy->name}_title", __( 'Title Tag Format', 'wp-seo' ), array( $this, 'field' ), $this::SLUG, 'archive_' . $taxonomy->name, array( 'field' => "archive_{$taxonomy->name}_title" ) );
