@@ -4,6 +4,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import { PluginSidebar } from '@wordpress/editor';
 import OpenGraphSlotfill from '@/components/open-graph';
 import SearchEngineSlotfill from '@/components/search-engine';
+import TwitterCardSlotfill from '@/components/twitter-card';
 
 function MetaSidebar() {
   return (
@@ -14,6 +15,7 @@ function MetaSidebar() {
     >
       <SearchEngineSlotfill />
       <OpenGraphSlotfill />
+      <TwitterCardSlotfill />
     </PluginSidebar>
   );
 }

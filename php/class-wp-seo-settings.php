@@ -399,6 +399,17 @@ class WP_SEO_Settings {
 				'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) )
 			)
 		);
+		add_settings_field(
+			'twitter_card_post_types',
+			__( 'Add Twitter Card support to individual:', 'wp-seo' ),
+			array( $this, 'field' ),
+			$this::SLUG,
+			'post_types', array(
+				'field' => 'twitter_card_post_types',
+				'type' => 'checkboxes',
+				'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) )
+			)
+		);
 
 		// Single post types settings.
 		foreach ( $this->single_post_types as $post_type ) {
@@ -954,6 +965,7 @@ class WP_SEO_Settings {
 		$out['post_types']            = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
 		$out['taxonomies']            = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
 		$out['open_graph_post_types'] = isset( $in['open_graph_post_types'] ) && is_array( $in['open_graph_post_types'] ) ? array_filter( $in['open_graph_post_types'], 'post_type_exists' ) : array();
+		$out['twitter_card_post_types'] = isset( $in['twitter_card_post_types'] ) && is_array( $in['twitter_card_post_types'] ) ? array_filter( $in['twitter_card_post_types'], 'post_type_exists' ) : array();
 
 		/**
 		 * Sanitize these as text fields and in the following order:
