@@ -59,6 +59,14 @@ class SanitizeOptionsTest extends TestCase {
 		$this->assertSame( $actual['taxonomies'], [ 'category', 'post_tag' ] );
 	}
 
+	// Test that non-post types are removed from the Twitter Card post types option.
+	function test_twitter_card_post_types() {
+		$actual = $this->_sanitize( [
+			'twitter_card_post_types' => [ 'post', 'page', 'foo' ],
+		] );
+		$this->assertSame( $actual['twitter_card_post_types'], [ 'post', 'page' ] );
+	}
+
 	// Test that keys with empty values are still included in the option array.
 	function test_missing_keys() {
 		$actual = $this->_sanitize( [

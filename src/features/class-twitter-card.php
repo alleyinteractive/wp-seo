@@ -134,20 +134,13 @@ final class Twitter_Card implements Feature {
 	 * @return string|false The image URL or false if no assigned images.
 	 */
 	public static function get_image( $post_id ): string|bool {
-		$twitter_card_image_id  = get_post_meta( $post_id, 'wp_seo_twitter_card_image', true );
-		$twitter_card_image_url = ( ! empty( $twitter_card_image_id ) && is_string( $twitter_card_image_id ) )
-		? wp_get_attachment_image_url( (int) $twitter_card_image_id, 'full' )
-		: false;
+		$twitter_card_image_url = wp_seo_get_image_url_from_meta( $post_id, 'wp_seo_twitter_card_image' );
 
-		if ( empty( $twitter_card_image_url ) ) {
-			$twitter_card_image_url = new \WP_Error( 'no_twitter_card_image', 'No Twitter Card image found' );
+		if ( ! empty( $twitter_card_image_url ) ) {
+			return $twitter_card_image_url;
 		}
 
-		if ( is_wp_error( $twitter_card_image_url ) ) {
-			return Open_Graph::get_image( $post_id );
-		}
-
-		return $twitter_card_image_url;
+		return Open_Graph::get_image( $post_id );
 	}
 
 	/**
@@ -170,11 +163,7 @@ final class Twitter_Card implements Feature {
 		$description = $this->get_description( $post_id );
 		$image       = $this->get_image( $post_id );
 		$card_type   = ! empty( $image ) ? 'summary_large_image' : 'summary';
-		$additional  = '';
-
-		if ( ! empty( $image ) ) {
-			$additional .= sprintf( "\n<meta name=\"twitter:image\" content=\"%s\" />", esc_url( $image ) );
-		}
+		$image_tag   = ! empty( $image ) ? sprintf( "\n<meta name=\"twitter:image\" content=\"%s\" />", esc_url( $image ) ) : '';
 
 		printf(
 			<<<'HTML'
@@ -187,7 +176,7 @@ HTML,
 			esc_attr( $card_type ),
 			esc_attr( $title ),
 			esc_attr( $description ),
-			$additional // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already escaped above with esc_url().
+			$image_tag // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already escaped above with esc_url().
 		);
 	}
 }

@@ -953,6 +953,16 @@ class WP_SEO_Settings {
 	}
 
 	/**
+	 * Sanitize a submitted list of post type slugs down to those that are registered.
+	 *
+	 * @param mixed $post_types The submitted list of post type slugs.
+	 * @return array The sanitized list of post type slugs.
+	 */
+	protected function sanitize_post_types_list( $post_types ) {
+		return is_array( $post_types ) ? array_filter( $post_types, 'post_type_exists' ) : array();
+	}
+
+	/**
 	 * Sanitize and validate the submitted options.
 	 *
 	 * @param  array $in The options as submitted.
@@ -962,10 +972,10 @@ class WP_SEO_Settings {
 		$out = $this->default_options;
 
 		// Validate post types and taxonomies on which to show SEO fields.
-		$out['post_types']            = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
-		$out['taxonomies']            = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
-		$out['open_graph_post_types'] = isset( $in['open_graph_post_types'] ) && is_array( $in['open_graph_post_types'] ) ? array_filter( $in['open_graph_post_types'], 'post_type_exists' ) : array();
-		$out['twitter_card_post_types'] = isset( $in['twitter_card_post_types'] ) && is_array( $in['twitter_card_post_types'] ) ? array_filter( $in['twitter_card_post_types'], 'post_type_exists' ) : array();
+		$out['post_types']             = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
+		$out['taxonomies']              = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
+		$out['open_graph_post_types']   = $this->sanitize_post_types_list( $in['open_graph_post_types'] ?? null );
+		$out['twitter_card_post_types'] = $this->sanitize_post_types_list( $in['twitter_card_post_types'] ?? null );
 
 		/**
 		 * Sanitize these as text fields and in the following order:

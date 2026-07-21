@@ -134,20 +134,13 @@ final class Open_Graph implements Feature {
 	 * @return string|false The image URL or false if no assigned images.
 	 */
 	public static function get_image( $post_id ): string|bool {
-		$open_graph_image_id  = get_post_meta( $post_id, 'wp_seo_open_graph_image', true );
-		$open_graph_image_url = ( ! empty( $open_graph_image_id ) && is_string( $open_graph_image_id ) )
-		? wp_get_attachment_image_url( (int) $open_graph_image_id, 'full' )
-		: false;
+		$open_graph_image_url = wp_seo_get_image_url_from_meta( $post_id, 'wp_seo_open_graph_image' );
 
-		if ( empty( $open_graph_image_url ) ) {
-			$open_graph_image_url = new \WP_Error( 'no_open_graph_image', 'No Open Graph image found' );
+		if ( ! empty( $open_graph_image_url ) ) {
+			return $open_graph_image_url;
 		}
 
-		if ( is_wp_error( $open_graph_image_url ) ) {
-			return get_the_post_thumbnail_url( $post_id, 'full' );
-		}
-
-		return $open_graph_image_url;
+		return get_the_post_thumbnail_url( $post_id, 'full' );
 	}
 
 	/**
@@ -170,12 +163,12 @@ final class Open_Graph implements Feature {
 		$description = $this->get_description( $post_id );
 		$image       = $this->get_image( $post_id );
 		$permalink   = ! empty( get_permalink( $post_id ) ) ? get_permalink( $post_id ) : '';
-		$additional = '';
+		$additional  = '';
 
 		// Add article related tags.
 		if ( is_singular() ) {
-			$published_time = get_the_date('c', $post_id);
-			$modified_time  = get_the_modified_date('c', $post_id);
+			$published_time = get_the_date( 'c', $post_id );
+			$modified_time  = get_the_modified_date( 'c', $post_id );
 
 			if ( ! empty( $published_time ) ) {
 				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( $published_time ) );
@@ -204,7 +197,7 @@ HTML,
 			esc_attr( $title ),
 			esc_attr( $description ),
 			esc_url( $permalink ),
-			$additional
+			$additional // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Already escaped above with esc_url()/esc_attr().
 		);
 	}
 }
