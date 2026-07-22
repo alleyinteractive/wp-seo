@@ -8,15 +8,16 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use Mantle\Testing\Concerns\Admin_Screen;
 use Mantle\Testing\Mock_Action;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class AdminTemplateTest extends TestCase {
-	function setUp(): void {
-		parent::setUp();
-		require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
-		require_once ABSPATH . 'wp-admin/includes/screen.php';
-	}
+	// Loads the WP_Screen/set_current_screen() dependencies and, importantly,
+	// backs up and restores $GLOBALS['current_screen'] around each test so the
+	// set_current_screen() calls below don't leak admin context into other
+	// tests that happen to run afterward in the same process.
+	use Admin_Screen;
 
 	/**
 	 * Sanity-check admin template tag output.
