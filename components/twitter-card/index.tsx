@@ -19,7 +19,7 @@ function TwitterCardSlotfill() {
   const [description, setDescription] = usePostMetaValue('wp_seo_twitter_card_description');
   const [image, setImage] = usePostMetaValue('wp_seo_twitter_card_image');
 
-  if (!postType?.supports['twitter-card']) {
+  if (!postType?.supports['wp-seo-twitter-card']) {
     return null;
   }
 

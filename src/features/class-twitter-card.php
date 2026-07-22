@@ -46,7 +46,7 @@ final class Twitter_Card implements Feature {
 
 		if ( is_array( $enabled_post_types ) ) {
 			foreach ( $enabled_post_types as $post_type ) {
-				add_post_type_support( $post_type, 'twitter-card' );
+				add_post_type_support( $post_type, 'wp-seo-twitter-card' );
 			}
 		}
 	}
@@ -57,7 +57,7 @@ final class Twitter_Card implements Feature {
 	public function add_meta_fields(): void {
 		register_meta_helper(
 			'post',
-			get_post_types_by_support( 'twitter-card' ),
+			get_post_types_by_support( 'wp-seo-twitter-card' ),
 			'wp_seo_twitter_card_title',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
@@ -69,7 +69,7 @@ final class Twitter_Card implements Feature {
 
 		register_meta_helper(
 			'post',
-			get_post_types_by_support( 'twitter-card' ),
+			get_post_types_by_support( 'wp-seo-twitter-card' ),
 			'wp_seo_twitter_card_description',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
@@ -81,7 +81,7 @@ final class Twitter_Card implements Feature {
 
 		register_meta_helper(
 			'post',
-			get_post_types_by_support( 'twitter-card' ),
+			get_post_types_by_support( 'wp-seo-twitter-card' ),
 			'wp_seo_twitter_card_image',
 			[
 				'sanitize_callback' => 'absint',
@@ -155,7 +155,7 @@ final class Twitter_Card implements Feature {
 
 		$post_type = get_post_type( $post_id );
 
-		if ( empty( $post_type ) || ! post_type_supports( $post_type, 'twitter-card' ) ) {
+		if ( empty( $post_type ) || ! post_type_supports( $post_type, 'wp-seo-twitter-card' ) ) {
 			return;
 		}
 

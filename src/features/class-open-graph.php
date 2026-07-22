@@ -46,7 +46,7 @@ final class Open_Graph implements Feature {
 
 		if ( is_array( $enabled_post_types ) ) {
 			foreach ( $enabled_post_types as $post_type ) {
-				add_post_type_support( $post_type, 'open-graph' );
+				add_post_type_support( $post_type, 'wp-seo-open-graph' );
 			}
 		}
 	}
@@ -57,7 +57,7 @@ final class Open_Graph implements Feature {
 	public function add_meta_fields(): void {
 		register_meta_helper(
 			'post',
-			get_post_types_by_support( 'open-graph' ),
+			get_post_types_by_support( 'wp-seo-open-graph' ),
 			'wp_seo_open_graph_title',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
@@ -69,7 +69,7 @@ final class Open_Graph implements Feature {
 
 		register_meta_helper(
 			'post',
-			get_post_types_by_support( 'open-graph' ),
+			get_post_types_by_support( 'wp-seo-open-graph' ),
 			'wp_seo_open_graph_description',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
@@ -81,7 +81,7 @@ final class Open_Graph implements Feature {
 
 		register_meta_helper(
 			'post',
-			get_post_types_by_support( 'open-graph' ),
+			get_post_types_by_support( 'wp-seo-open-graph' ),
 			'wp_seo_open_graph_image',
 			[
 				'sanitize_callback' => 'absint',
@@ -155,7 +155,7 @@ final class Open_Graph implements Feature {
 
 		$post_type = get_post_type( $post_id );
 
-		if ( empty( $post_type ) || ! post_type_supports( $post_type, 'open-graph' ) ) {
+		if ( empty( $post_type ) || ! post_type_supports( $post_type, 'wp-seo-open-graph' ) ) {
 			return;
 		}
 

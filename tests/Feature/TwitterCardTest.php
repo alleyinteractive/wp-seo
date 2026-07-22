@@ -182,10 +182,10 @@ class TwitterCardTest extends TestCase {
 	}
 
 	/**
-	 * Test that no tags render when the post type doesn't support 'twitter-card'.
+	 * Test that no tags render when the post type doesn't support 'wp-seo-twitter-card'.
 	 */
 	public function test_render_twitter_card_tags_not_supported() {
-		remove_post_type_support( 'post', 'twitter-card' );
+		remove_post_type_support( 'post', 'wp-seo-twitter-card' );
 
 		$post_id = $this->factory->post->create();
 		$this->go_to( get_permalink( $post_id ) );
@@ -199,7 +199,7 @@ class TwitterCardTest extends TestCase {
 	 * Test that tags render with a 'summary_large_image' card type when an image resolves.
 	 */
 	public function test_render_twitter_card_tags_with_image() {
-		add_post_type_support( 'post', 'twitter-card' );
+		add_post_type_support( 'post', 'wp-seo-twitter-card' );
 
 		$post_id = $this->factory->post
 		->with_real_thumbnail()
@@ -221,14 +221,14 @@ class TwitterCardTest extends TestCase {
 		$this->assertStringContainsString( 'name="twitter:description" content="Twitter Description"', $output );
 		$this->assertStringContainsString( 'name="twitter:image"', $output );
 
-		remove_post_type_support( 'post', 'twitter-card' );
+		remove_post_type_support( 'post', 'wp-seo-twitter-card' );
 	}
 
 	/**
 	 * Test that tags render with a 'summary' card type when no image resolves.
 	 */
 	public function test_render_twitter_card_tags_without_image() {
-		add_post_type_support( 'post', 'twitter-card' );
+		add_post_type_support( 'post', 'wp-seo-twitter-card' );
 
 		$post_id = $this->factory->post
 		->with_meta(
@@ -247,6 +247,6 @@ class TwitterCardTest extends TestCase {
 		$this->assertStringContainsString( 'name="twitter:card" content="summary"', $output );
 		$this->assertStringNotContainsString( 'name="twitter:image"', $output );
 
-		remove_post_type_support( 'post', 'twitter-card' );
+		remove_post_type_support( 'post', 'wp-seo-twitter-card' );
 	}
 }

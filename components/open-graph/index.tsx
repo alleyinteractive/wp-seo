@@ -156,7 +156,7 @@ function OpenGraphSlotfill() {
 
   const selectedImage = useMedia(image);
 
-  if (!postType?.supports['open-graph']) {
+  if (!postType?.supports['wp-seo-open-graph']) {
     return null;
   }
 
