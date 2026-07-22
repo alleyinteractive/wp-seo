@@ -98,7 +98,7 @@ class WP_SEO_Settings {
 	 *
 	 * @codeCoverageIgnore
 	 */
-	public static function instance() {
+	public static function instance(): self {
 		if ( ! isset( self::$instance ) ) {
 			self::$instance = new WP_SEO_Settings;
 			self::$instance->setup();

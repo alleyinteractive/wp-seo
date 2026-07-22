@@ -19,7 +19,7 @@ final class Twitter_Card implements Feature {
 	/**
 	 * WP SEO settings.
 	 *
-	 * @var object WP_SEO_Settings::instance
+	 * @var \WP_SEO_Settings|null
 	 */
 	protected $wp_seo_settings;
 
@@ -42,11 +42,17 @@ final class Twitter_Card implements Feature {
 	 * @return void
 	 */
 	public function add_post_type_support() {
+		if ( ! $this->wp_seo_settings ) {
+			return;
+		}
+
 		$enabled_post_types = $this->wp_seo_settings->get_option( 'twitter_card_post_types' );
 
 		if ( is_array( $enabled_post_types ) ) {
 			foreach ( $enabled_post_types as $post_type ) {
-				add_post_type_support( $post_type, 'wp-seo-twitter-card' );
+				if ( is_string( $post_type ) ) {
+					add_post_type_support( $post_type, 'wp-seo-twitter-card' );
+				}
 			}
 		}
 	}

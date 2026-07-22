@@ -19,7 +19,7 @@ final class Open_Graph implements Feature {
 	/**
 	 * WP SEO settings.
 	 *
-	 * @var object WP_SEO_Settings::instance
+	 * @var \WP_SEO_Settings|null
 	 */
 	protected $wp_seo_settings;
 
@@ -42,11 +42,17 @@ final class Open_Graph implements Feature {
 	 * @return void
 	 */
 	public function add_post_type_support() {
+		if ( ! $this->wp_seo_settings ) {
+			return;
+		}
+
 		$enabled_post_types = $this->wp_seo_settings->get_option( 'open_graph_post_types' );
 
 		if ( is_array( $enabled_post_types ) ) {
 			foreach ( $enabled_post_types as $post_type ) {
-				add_post_type_support( $post_type, 'wp-seo-open-graph' );
+				if ( is_string( $post_type ) ) {
+					add_post_type_support( $post_type, 'wp-seo-open-graph' );
+				}
 			}
 		}
 	}
@@ -171,11 +177,11 @@ final class Open_Graph implements Feature {
 			$modified_time  = get_the_modified_date( 'c', $post_id );
 
 			if ( ! empty( $published_time ) ) {
-				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( $published_time ) );
+				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( (string) $published_time ) );
 			}
 
 			if ( ! empty( $modified_time ) ) {
-				$additional .= sprintf( "\n<meta property=\"article:modified_time\" content=\"%s\" />", esc_attr( $modified_time ) );
+				$additional .= sprintf( "\n<meta property=\"article:modified_time\" content=\"%s\" />", esc_attr( (string) $modified_time ) );
 			}
 		}
 
