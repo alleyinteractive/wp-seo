@@ -12,11 +12,23 @@ use Mantle\Testing\Utils;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class AdminFunctionTest extends TestCase {
+	function setUp(): void {
+		parent::setUp();
+		require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
+		require_once ABSPATH . 'wp-admin/includes/screen.php';
+	}
+
 	/**
 	 * Sanity-check that the post_id_to_* and term_data_to_* functions use saved values.
 	 */
 	#[DataProvider( 'data_post_id_to_and_term_data_to' )]
-	function test_admin_functions_contain( $function, $should, $contain, $args ) {
+	function test_admin_functions_contain( $function, $should, $contain, $args, $screen = '' ) {
+		// The robots directive functions only render once is_admin() is true and
+		// get_current_screen() returns a matching post type or taxonomy screen.
+		if ( '' !== $screen ) {
+			set_current_screen( $screen );
+		}
+
 		// Capture the output of the function.
 		self::assertStringContainsString( $contain, Utils::get_echo( $function, $args ), $should );
 	}
@@ -44,8 +56,8 @@ class AdminFunctionTest extends TestCase {
 		$meta_title               = rand_str( rand( 32, 64 ) );
 		$meta_description         = rand_str( rand( 32, 64 ) );
 		$meta_canonical_url       = 'https://example.com/canonical-url';
-		$meta_robots_noindex      = '1';
-		$meta_robots_nofollow     = '';
+		$meta_robots_noindex      = 'enable';
+		$meta_robots_nofollow     = 'disable';
 
 		$post_id = static::factory()->post->create( [
 			'meta_input' => [
@@ -91,15 +103,17 @@ class AdminFunctionTest extends TestCase {
 			],
 			[
 				'wp_seo_post_id_to_the_meta_robots_input',
-				'Should check the noindex checkbox when the noindex meta is set',
-				$meta_robots_noindex,
+				'Should select the enable option when the noindex meta is set to enable',
+				sprintf( 'value="%s"  selected=', $meta_robots_noindex ),
 				[ $post_id, 'noindex' ],
+				'post',
 			],
 			[
 				'wp_seo_post_id_to_the_meta_robots_input',
-				'Should not check the nofollow checkbox when the nofollow meta is not set',
-				$meta_robots_nofollow,
+				'Should select the disable option when the nofollow meta is set to disable',
+				sprintf( 'value="%s"  selected=', $meta_robots_nofollow ),
 				[ $post_id, 'nofollow' ],
+				'post',
 			],
 		];
 	}
@@ -115,17 +129,25 @@ class AdminFunctionTest extends TestCase {
 		$title               = rand_str( rand( 32, 64 ) );
 		$description         = rand_str( rand( 32, 64 ) );
 		$canonical_url       = 'https://example.com/canonical-url';
-		$robots_noindex      = '1';
-		$robots_nofollow     = '';
+		$robots_noindex      = 'enable';
+		$robots_nofollow     = 'disable';
+
+		// intersect_term_option() only keeps a 'robots_{directive}' key for
+		// directives configured in settings, so noindex/nofollow must be registered
+		// for the term option's flat robots_noindex/robots_nofollow keys to survive.
+		update_option( \WP_SEO_Settings::SLUG, [
+			'robots_meta_directives' => [
+				[ 'value' => 'noindex' ],
+				[ 'value' => 'nofollow' ],
+			],
+		] );
 
 		$term = self::create_and_get_term_with_option( [
-			'title'         => $title,
-			'description'   => $description,
-			'canonical_url' => $canonical_url,
-			'robots'        => [
-				'noindex'      => $robots_noindex,
-				'nofollow'     => $robots_nofollow,
-			],
+			'title'           => $title,
+			'description'     => $description,
+			'canonical_url'   => $canonical_url,
+			'robots_noindex'  => $robots_noindex,
+			'robots_nofollow' => $robots_nofollow,
 		] );
 
 		return [
@@ -161,15 +183,17 @@ class AdminFunctionTest extends TestCase {
 			],
 			[
 				'wp_seo_term_data_to_the_meta_robots_input',
-				'Should check the noindex checkbox when the noindex option is set',
-				$robots_noindex,
+				'Should select the enable option when the noindex option is set to enable',
+				sprintf( 'value="%s"  selected=', $robots_noindex ),
 				[ $term->term_id, $term->taxonomy, 'noindex' ],
+				'edit-' . $term->taxonomy,
 			],
 			[
 				'wp_seo_term_data_to_the_meta_robots_input',
-				'Should not check the nofollow checkbox when the nofollow option is not set',
-				$robots_nofollow,
+				'Should select the disable option when the nofollow option is set to disable',
+				sprintf( 'value="%s"  selected=', $robots_nofollow ),
 				[ $term->term_id, $term->taxonomy, 'nofollow' ],
+				'edit-' . $term->taxonomy,
 			],
 		];
 	}

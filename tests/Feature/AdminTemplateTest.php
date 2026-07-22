@@ -12,12 +12,23 @@ use Mantle\Testing\Mock_Action;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class AdminTemplateTest extends TestCase {
+	function setUp(): void {
+		parent::setUp();
+		require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
+		require_once ABSPATH . 'wp-admin/includes/screen.php';
+	}
 
 	/**
 	 * Sanity-check admin template tag output.
 	 */
 	#[DataProvider( 'data_template_tag_output' )]
-	function test_template_tag_output( $function, $should, $match, $args ) {
+	function test_template_tag_output( $function, $should, $match, $args, $screen = '' ) {
+		// The robots directive input only renders once is_admin() is true and
+		// get_current_screen() returns a real WP_Screen.
+		if ( '' !== $screen ) {
+			set_current_screen( $screen );
+		}
+
 		self::expectOutputRegex( $match );
 		$function( ...$args );
 	}
@@ -34,6 +45,15 @@ class AdminTemplateTest extends TestCase {
 		// Data providers run before the test framework's application/container is
 		// bootstrapped, but factory() (used below) depends on it being available.
 		new \Mantle\Testkit\Application();
+
+		// wp_seo_the_meta_robots_label() only prints a label for directives that
+		// are registered in settings with a non-empty label.
+		update_option( \WP_SEO_Settings::SLUG, [
+			'robots_meta_directives' => [
+				[ 'label' => 'No Index', 'value' => 'noindex' ],
+				[ 'label' => 'No Follow', 'value' => 'nofollow' ],
+			],
+		] );
 
 		$str = rand_str();
 		$num = rand( 1, 10 );
@@ -144,7 +164,7 @@ class AdminTemplateTest extends TestCase {
 			[
 				'wp_seo_the_meta_robots_label',
 				'Should print a label',
-				'#<label[^>]*?>.+?</label>#',
+				'#<label[^>]*?>.+?</label>#s',
 				[ 'noindex' ],
 			],
 			[
@@ -152,17 +172,19 @@ class AdminTemplateTest extends TestCase {
 				'Should print a select input',
 				'#<select[^>]+?name="seo_meta\[robots_noindex\]"[^>]*?>.*?</select>#s',
 				[ '', 'noindex' ],
+				'post',
 			],
 			[
 				'wp_seo_the_meta_robots_input',
-				'Should print the passed value as selected',
-				'#<option[^>]+?value=(.)\1[^>]*? selected>#',
-				[ '1', 'noindex' ],
+				'Should mark the enable option as selected',
+				'#<option value="enable"\s+selected=#',
+				[ 'enable', 'noindex' ],
+				'post',
 			],
 			[
 				'wp_seo_the_meta_robots_label',
 				'Should print a label',
-				'#<label[^>]*?>.+?</label>#',
+				'#<label[^>]*?>.+?</label>#s',
 				[ 'nofollow' ],
 			],
 			[
@@ -170,12 +192,14 @@ class AdminTemplateTest extends TestCase {
 				'Should print a select input',
 				'#<select[^>]+?name="seo_meta\[robots_nofollow\]"[^>]*?>.*?</select>#s',
 				[ '', 'nofollow' ],
+				'post',
 			],
 			[
 				'wp_seo_the_meta_robots_input',
-				'Should print the passed value as selected',
-				'#<option[^>]+?value=(.)\1[^>]*? selected>#',
-				[ '1', 'nofollow' ],
+				'Should mark the disable option as selected',
+				'#<option value="disable"\s+selected=#',
+				[ 'disable', 'nofollow' ],
+				'post',
 			],
 		];
 	}
