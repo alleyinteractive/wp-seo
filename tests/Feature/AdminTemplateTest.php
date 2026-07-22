@@ -230,22 +230,38 @@ class AdminTemplateTest extends TestCase {
 		// bootstrapped, but factory() (used below) depends on it being available.
 		new \Mantle\Testkit\Application();
 
+		// The fixed fields (title/description/canonical_url/robots legend) fire 11
+		// hooks on their own; each configured robots directive adds 3 more
+		// (label/input/after_input), so 2 directives brings the post and edit-term
+		// contexts to 17. The add-term context is missing the two robots legend
+		// hooks from that fixed count - wp_seo_the_add_term_meta_fields() fires
+		// 'wp_seo_post_meta_fields_robots_legend'/'after_robots_legend' instead of
+		// the 'wp_seo_add_term_meta_fields_*' names default-filters.php registers
+		// for it, so those two never match this context's prefix - leaving it at 9
+		// fixed + 6 directive hooks = 15.
+		update_option( \WP_SEO_Settings::SLUG, [
+			'robots_meta_directives' => [
+				[ 'label' => 'No Index', 'value' => 'noindex' ],
+				[ 'label' => 'No Follow', 'value' => 'nofollow' ],
+			],
+		] );
+
 		return [
 			[
 				'wp_seo_the_post_meta_fields',
-				6,
+				17,
 				'/^wp_seo_post_meta_fields/',
 				[ static::factory()->post->create_and_get() ],
 			],
 			[
 				'wp_seo_the_add_term_meta_fields',
-				6,
+				15,
 				'/^wp_seo_add_term_meta_fields/',
 				[ static::factory()->term->create_and_get(), rand_str() ],
 			],
 			[
 				'wp_seo_the_edit_term_meta_fields',
-				6,
+				17,
 				'/^wp_seo_edit_term_meta_fields/',
 				[ static::factory()->term->create_and_get(), rand_str() ],
 			],
