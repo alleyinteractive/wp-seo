@@ -20,6 +20,10 @@ class MetaboxesTest extends TestCase {
 			'taxonomies' => [ 'category' ],
 		] );
 		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		// The default admin-only template tag functions (e.g. wp_seo_the_post_meta_fields())
+		// are only loaded on admin_init, which doesn't fire on its own in this test environment.
+		do_action( 'admin_init' );
 	}
 
 	function tearDown(): void {
@@ -265,6 +269,7 @@ class MetaboxesTest extends TestCase {
 			[
 				'title' => $title,
 				'description' => $description,
+				'canonical_url' => '',
 			],
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
@@ -281,6 +286,7 @@ class MetaboxesTest extends TestCase {
 			[
 				'title' => $updated_title,
 				'description' => '',
+				'canonical_url' => '',
 			],
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
