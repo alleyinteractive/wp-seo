@@ -87,8 +87,14 @@ require_once WP_SEO_PATH . '/php/default-filters.php';
 
 /**
  * Enqueues scripts and styles for administration pages.
+ *
+ * @param string $hook_suffix The current admin page's hook suffix.
  */
-function wp_seo_admin_scripts(): void {
+function wp_seo_admin_scripts( $hook_suffix ): void {
+	if ( ! wp_seo_is_admin_screen_enqueueable( $hook_suffix ) ) {
+		return;
+	}
+
 	wp_enqueue_script( 'wp-seo-admin', WP_SEO_URL . 'js/wp-seo.js', [ 'jquery', 'underscore' ], '0.11.1', true );
 	wp_localize_script( 'wp-seo-admin', 'wp_seo_admin', [
 		'repeatable_add_more_label' => __( 'Add another', 'wp-seo' ),
