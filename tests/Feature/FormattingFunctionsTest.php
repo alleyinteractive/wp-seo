@@ -8,13 +8,13 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class FormattingFunctionsTest extends TestCase {
 	/**
 	 * Test wp_seo_match_all_formatting_tags() with various strings.
-	 *
-	 * @dataProvider data_match_all_formatting_tags
 	 */
+	#[DataProvider( 'data_match_all_formatting_tags' )]
 	function test_match_all_formatting_tags( $string, $expected_count ) {
 		$this->assertCount( $expected_count, wp_seo_match_all_formatting_tags( $string ) );
 	}
@@ -37,9 +37,8 @@ class FormattingFunctionsTest extends TestCase {
 
 	/**
 	 * Test wp_seo_no_formatting_tags_allowed() with passing strings.
-	 *
-	 * @dataProvider data_no_formatting_tags_allowed_pass
 	 */
+	#[DataProvider( 'data_no_formatting_tags_allowed_pass' )]
 	function test_no_formatting_tags_allowed_pass( $string ) {
 		$this->assertNotWPError( wp_seo_no_formatting_tags_allowed( $string ) );
 	}

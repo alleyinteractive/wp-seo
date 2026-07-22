@@ -9,14 +9,14 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
 use Mantle\Testing\Mock_Action;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class AdminTemplateTest extends TestCase {
 
 	/**
 	 * Sanity-check admin template tag output.
-	 *
-	 * @dataProvider data_template_tag_output
 	 */
+	#[DataProvider( 'data_template_tag_output' )]
 	function test_template_tag_output( $function, $should, $match, $args ) {
 		self::expectOutputRegex( $match );
 		$function( ...$args );
@@ -178,9 +178,8 @@ class AdminTemplateTest extends TestCase {
 
 	/**
 	 * Sanity-check the number of WP SEO hook calls in admin template tags.
-	 *
-	 * @dataProvider data_template_tag_hooks
 	 */
+	#[DataProvider( 'data_template_tag_hooks' )]
 	function test_template_tag_hooks( $function, $fires, $matching, $args ) {
 		$ma = new Mock_Action();
 		add_action( 'all', [ $ma, 'action' ] );
