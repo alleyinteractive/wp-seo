@@ -19,6 +19,34 @@ class AdminTemplateTest extends TestCase {
 	// tests that happen to run afterward in the same process.
 	use Admin_Screen;
 
+	function setUp(): void {
+		parent::setUp();
+
+		// Registered fresh per test rather than in the data providers (which only
+		// run once, at collection time, shared across every other test class) so
+		// this isn't at the mercy of some other test class's setUp()/tearDown()
+		// overwriting or deleting the 'wp-seo' option before this one runs.
+		// wp_seo_the_meta_robots_label() only prints a label for directives that
+		// are registered here with a non-empty label.
+		update_option( \WP_SEO_Settings::SLUG, [
+			'robots_meta_directives' => [
+				[ 'label' => 'No Index', 'value' => 'noindex' ],
+				[ 'label' => 'No Follow', 'value' => 'nofollow' ],
+			],
+		] );
+
+		// WP_SEO_Settings caches $this->options in memory and only re-reads the
+		// database when that cache is empty, so update_option() alone is invisible
+		// to it once anything has populated the cache - force a refresh.
+		WP_SEO_Settings()->set_options();
+	}
+
+	function tearDown(): void {
+		parent::tearDown();
+		delete_option( \WP_SEO_Settings::SLUG );
+		WP_SEO_Settings()->set_options();
+	}
+
 	/**
 	 * Sanity-check admin template tag output.
 	 */
@@ -46,15 +74,6 @@ class AdminTemplateTest extends TestCase {
 		// Data providers run before the test framework's application/container is
 		// bootstrapped, but factory() (used below) depends on it being available.
 		new \Mantle\Testkit\Application();
-
-		// wp_seo_the_meta_robots_label() only prints a label for directives that
-		// are registered in settings with a non-empty label.
-		update_option( \WP_SEO_Settings::SLUG, [
-			'robots_meta_directives' => [
-				[ 'label' => 'No Index', 'value' => 'noindex' ],
-				[ 'label' => 'No Follow', 'value' => 'nofollow' ],
-			],
-		] );
 
 		$str = rand_str();
 		$num = rand( 1, 10 );
@@ -239,14 +258,8 @@ class AdminTemplateTest extends TestCase {
 		// 'wp_seo_post_meta_fields_robots_legend'/'after_robots_legend' instead of
 		// the 'wp_seo_add_term_meta_fields_*' names default-filters.php registers
 		// for it, so those two never match this context's prefix - leaving it at 9
-		// fixed + 6 directive hooks = 15.
-		update_option( \WP_SEO_Settings::SLUG, [
-			'robots_meta_directives' => [
-				[ 'label' => 'No Index', 'value' => 'noindex' ],
-				[ 'label' => 'No Follow', 'value' => 'nofollow' ],
-			],
-		] );
-
+		// fixed + 6 directive hooks = 15. (Directives themselves are registered in
+		// setUp(), not here - see that method's comment for why.)
 		return [
 			[
 				'wp_seo_the_post_meta_fields',
