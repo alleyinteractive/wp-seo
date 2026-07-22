@@ -90,16 +90,16 @@ class AdminFunctionTest extends TestCase {
 				[ $post_id ],
 			],
 			[
-				'wp_seo_post_id_to_the_meta_robots_noindex_input',
+				'wp_seo_post_id_to_the_meta_robots_input',
 				'Should check the noindex checkbox when the noindex meta is set',
 				$meta_robots_noindex,
-				[ $post_id ],
+				[ $post_id, 'noindex' ],
 			],
 			[
-				'wp_seo_post_id_to_the_meta_robots_nofollow_input',
+				'wp_seo_post_id_to_the_meta_robots_input',
 				'Should not check the nofollow checkbox when the nofollow meta is not set',
 				$meta_robots_nofollow,
-				[ $post_id ],
+				[ $post_id, 'nofollow' ],
 			],
 		];
 	}
@@ -160,16 +160,16 @@ class AdminFunctionTest extends TestCase {
 				[ $term->term_id, $term->taxonomy ],
 			],
 			[
-				'wp_seo_term_data_to_the_meta_robots_noindex_input',
+				'wp_seo_term_data_to_the_meta_robots_input',
 				'Should check the noindex checkbox when the noindex option is set',
 				$robots_noindex,
-				[ $term->term_id, $term->taxonomy ],
+				[ $term->term_id, $term->taxonomy, 'noindex' ],
 			],
 			[
-				'wp_seo_term_data_to_the_meta_robots_nofollow_input',
+				'wp_seo_term_data_to_the_meta_robots_input',
 				'Should not check the nofollow checkbox when the nofollow option is not set',
 				$robots_nofollow,
-				[ $term->term_id, $term->taxonomy ],
+				[ $term->term_id, $term->taxonomy, 'nofollow' ],
 			],
 		];
 	}
