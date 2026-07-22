@@ -25,6 +25,10 @@ class AdminFunctionTest extends TestCase {
 	 * Combines the post_id_to_* and term_data_to_* data providers.
 	 */
 	static function data_post_id_to_and_term_data_to() {
+		// Data providers run before the test framework's application/container is
+		// bootstrapped, but factory() (used below) depends on it being available.
+		new \Mantle\Testkit\Application();
+
 		return array_merge( self::data_post_id_to_functions(), self::data_term_data_to_functions() );
 	}
 

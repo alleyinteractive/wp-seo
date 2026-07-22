@@ -31,6 +31,10 @@ class AdminTemplateTest extends TestCase {
 	 * }
 	 */
 	static function data_template_tag_output() {
+		// Data providers run before the test framework's application/container is
+		// bootstrapped, but factory() (used below) depends on it being available.
+		new \Mantle\Testkit\Application();
+
 		$str = rand_str();
 		$num = rand( 1, 10 );
 
@@ -198,6 +202,10 @@ class AdminTemplateTest extends TestCase {
 	 * }
 	 */
 	static function data_template_tag_hooks() {
+		// Data providers run before the test framework's application/container is
+		// bootstrapped, but factory() (used below) depends on it being available.
+		new \Mantle\Testkit\Application();
+
 		return [
 			[
 				'wp_seo_the_post_meta_fields',
