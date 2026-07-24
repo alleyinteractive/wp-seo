@@ -144,10 +144,35 @@ final class Open_Graph implements Feature {
 		}
 
 		if ( is_wp_error( $open_graph_image_url ) ) {
-			return get_the_post_thumbnail_url( $post_id, 'full' );
+			$open_graph_image_url = get_the_post_thumbnail_url( $post_id, 'full' );
+		}
+
+		if ( empty( $open_graph_image_url ) ) {
+			$open_graph_image_url = self::get_default_image( $post_id );
 		}
 
 		return $open_graph_image_url;
+	}
+
+	/**
+	 * Get the site-wide default Open Graph image, used as a fallback when a
+	 * post has no explicit Open Graph image or featured image.
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return string|false The default image URL, or false if none is configured.
+	 */
+	protected static function get_default_image( $post_id ): string|bool {
+		$default_image_id  = \WP_SEO_Settings::instance()->get_option( 'default_open_graph_image' );
+		$default_image_url = ! empty( $default_image_id ) ? wp_get_attachment_image_url( (int) $default_image_id, 'full' ) : false;
+
+		/**
+		 * Filter the site-wide default Open Graph image.
+		 *
+		 * @param string|false $default_image_url The default image URL, or false if none is configured.
+		 * @param int          $post_id            The post ID.
+		 */
+		return apply_filters( 'wp_seo_default_open_graph_image', $default_image_url, $post_id );
 	}
 
 	/**

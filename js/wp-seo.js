@@ -5,6 +5,7 @@
 const init = () => {
   setUpRepeatableGroups();
   setUpCharacterCountFields();
+  setUpMediaFields();
 }
 
 /**
@@ -129,6 +130,56 @@ const setUpRepeatableGroups = () => {
     wpSeoToggleRemoves(repeatableContainer);
 
     repeatable.addEventListener('click', handleButtonClick);
+  });
+}
+
+/**
+ * Wire up the media library picker for each `.wp-seo-media-field`.
+ */
+const setUpMediaFields = () => {
+  const mediaFields = document.querySelectorAll('.wp-seo-media-field');
+
+  mediaFields?.forEach((field) => {
+    const preview = field.querySelector('.wp-seo-media-field-preview');
+    const input = field.querySelector('.wp-seo-media-field-input');
+    const selectButton = field.querySelector('.wp-seo-media-field-select');
+    const removeButton = field.querySelector('.wp-seo-media-field-remove');
+
+    let frame;
+
+    selectButton.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      if (frame) {
+        frame.open();
+        return;
+      }
+
+      frame = wp.media({
+        title: selectButton.textContent,
+        multiple: false,
+        library: { type: 'image' },
+      });
+
+      frame.on('select', () => {
+        const attachment = frame.state().get('selection').first().toJSON();
+        const previewUrl = attachment.sizes?.medium?.url ?? attachment.url;
+
+        input.value = attachment.id;
+        preview.innerHTML = `<img src="${previewUrl}" style="max-width: 200px; height: auto;" />`;
+        removeButton.style.display = '';
+      });
+
+      frame.open();
+    });
+
+    removeButton.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      input.value = '';
+      preview.innerHTML = '';
+      removeButton.style.display = 'none';
+    });
   });
 }
 
