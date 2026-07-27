@@ -103,13 +103,13 @@ class WPTitleWPHeadTest extends TestCase {
 	}
 
 	/**
-	 * Test that WP_SEO::wp_head() and the core wp_robots filter it hooks into
-	 * together produce all expected <meta> tags.
+	 * Test that the actual rendered wp_head output for the current query
+	 * contains all expected <meta> tags.
 	 *
-	 * Robots meta output no longer comes from WP_SEO::wp_head() itself - it's
-	 * rendered by core's wp_robots(), hooked separately to wp_head and fed by
-	 * the wp_robots filter WP_SEO::wp_robots() hooks into. So this captures
-	 * both to reconstruct the full <head> output.
+	 * Robots meta output doesn't come from WP_SEO::wp_head() itself - it's
+	 * rendered by core's wp_robots(), fed by the wp_robots filter
+	 * WP_SEO::wp_robots() hooks into, but both fire on the real wp_head action
+	 * get_rendered_head() captures.
 	 *
 	 * @param  string   $description   The expected meta description content.
 	 * @param  string[] $robots        The expected enabled robots directives (e.g. [ 'noindex' ]).
@@ -118,7 +118,7 @@ class WPTitleWPHeadTest extends TestCase {
 		// wp_head() also unconditionally prints the canonical link (tested
 		// separately via _assert_canonical()), so this checks that each expected
 		// line is present rather than requiring an exact full-output match.
-		$actual = strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) . Utils::get_echo( 'wp_robots' ) );
+		$actual = strip_ws( $this->get_rendered_head() );
 
 		$this->assertStringContainsString( "<meta name='description' content='{$description}' /><!-- WP SEO -->", $actual );
 		$this->assertStringContainsString( "<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->", $actual );
@@ -139,24 +139,26 @@ class WPTitleWPHeadTest extends TestCase {
 	}
 
 	/**
-	 * Test that WP_SEO::wp_head() echoes only the arbitrary <meta> tags.
+	 * Test that the rendered wp_head output contains the arbitrary <meta> tag.
 	 */
 	function _assert_arbitrary_meta() {
-		$expected = <<<EOF
-<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
-EOF;
-
-		$this->assertSame( strip_ws( $expected ), strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
+		$this->assertStringContainsString(
+			"<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->",
+			strip_ws( $this->get_rendered_head() )
+		);
 	}
 
 	/**
-	 * Test that WP_SEO::wp_head() echoes <link> canonical tag with expected value.
-	 * 
+	 * Test that the rendered wp_head output contains the <link> canonical tag
+	 * with the expected value.
+	 *
 	 * @param string $canonical_url The expected canonical URL.
 	 */
 	function _assert_canonical( $canonical_url ) {
-		$expected = "<link rel='canonical' href='{$canonical_url}' /><!-- WP SEO -->";
-		$this->assertStringContainsString( $expected, strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
+		$this->assertStringContainsString(
+			"<link rel='canonical' href='{$canonical_url}' /><!-- WP SEO -->",
+			strip_ws( $this->get_rendered_head() )
+		);
 	}
 
 	/**
