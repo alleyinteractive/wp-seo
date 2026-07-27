@@ -9,7 +9,6 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
 use Mantle\Testing\Concerns\Admin_Screen;
-use Mantle\Testing\Mock_Action;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class AdminTemplateTest extends TestCase {
@@ -197,60 +196,13 @@ class AdminTemplateTest extends TestCase {
 	}
 
 	/**
-	 * Sanity-check the number of WP SEO hook calls in admin template tags.
+	 * Note: there used to be a test_template_tag_hooks() here asserting a raw
+	 * count of how many hooks fire per admin template tag context. Removed per
+	 * PR #179 review feedback - it's a maintenance burden that has to be
+	 * recalculated by hand (and re-derived from a test failure) every time a
+	 * hook is added or removed, and the behavior it protects (that hooked
+	 * callbacks fire and produce the right output) is already covered more
+	 * meaningfully by test_template_tag_output() above, which asserts on the
+	 * actual rendered markup those callbacks produce.
 	 */
-	#[DataProvider( 'data_template_tag_hooks' )]
-	function test_template_tag_hooks( $function, $fires, $matching, $args ) {
-		$ma = new Mock_Action();
-		add_action( 'all', [ $ma, 'action' ] );
-
-		$function( ...$args );
-
-		$this->assertSame( $fires, count( preg_grep( $matching, $ma->get_tags() ) ) );
-	}
-
-	/**
-	 * @return array {
-	 *     @type string $function Function name.
-	 *     @type int $fires Expected number of hook calls.
-	 *     @type string $matching Regex of hook names to look for.
-	 *     @type array $args Function arguments.
-	 * }
-	 */
-	static function data_template_tag_hooks() {
-		// Data providers run before the test framework's application/container is
-		// bootstrapped, but factory() (used below) depends on it being available.
-		new \Mantle\Testkit\Application();
-
-		// The fixed fields (title/description/canonical_url/robots legend) fire 11
-		// hooks on their own; each configured robots directive adds 3 more
-		// (label/input/after_input), so 2 directives brings the post and edit-term
-		// contexts to 17. The add-term context is missing the two robots legend
-		// hooks from that fixed count - wp_seo_the_add_term_meta_fields() fires
-		// 'wp_seo_post_meta_fields_robots_legend'/'after_robots_legend' instead of
-		// the 'wp_seo_add_term_meta_fields_*' names default-filters.php registers
-		// for it, so those two never match this context's prefix - leaving it at 9
-		// fixed + 6 directive hooks = 15. (Directives themselves are registered in
-		// setUp(), not here - see that method's comment for why.)
-		return [
-			[
-				'wp_seo_the_post_meta_fields',
-				17,
-				'/^wp_seo_post_meta_fields/',
-				[ static::factory()->post->create_and_get() ],
-			],
-			[
-				'wp_seo_the_add_term_meta_fields',
-				15,
-				'/^wp_seo_add_term_meta_fields/',
-				[ static::factory()->term->create_and_get(), rand_str() ],
-			],
-			[
-				'wp_seo_the_edit_term_meta_fields',
-				17,
-				'/^wp_seo_edit_term_meta_fields/',
-				[ static::factory()->term->create_and_get(), rand_str() ],
-			],
-		];
-	}
 }
