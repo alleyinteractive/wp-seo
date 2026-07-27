@@ -8,15 +8,29 @@
 namespace Alley\WP\WP_SEO\Tests\Features;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
-use Alley\WP\WP_SEO\Features\Twitter_Card;
-use Mantle\Testing\Utils;
 
 /**
  * TwitterCard Test for the Twitter_Card class.
  *
+ * These test the actual rendered <head> markup for a post (via the real
+ * wp_head action, per the base TestCase's get_rendered_head()) rather than
+ * calling Twitter_Card's methods directly, so they verify the feature is
+ * genuinely wired into WordPress's own rendering, not just callable in
+ * isolation.
+ *
  * @link https://mantle.alley.com/docs/testing
  */
 class TwitterCardTest extends TestCase {
+	protected function setUp(): void {
+		parent::setUp();
+		add_post_type_support( 'post', 'wp-seo-twitter-card' );
+	}
+
+	protected function tearDown(): void {
+		remove_post_type_support( 'post', 'wp-seo-twitter-card' );
+		parent::tearDown();
+	}
+
 	/**
 	 * Test title.
 	 */
@@ -28,7 +42,9 @@ class TwitterCardTest extends TestCase {
 			]
 		)
 		->create();
-		$this->assertEquals( 'Twitter Card Title', Twitter_Card::get_title( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringContainsString( 'name="twitter:title" content="Twitter Card Title"', $this->get_rendered_head() );
 	}
 
 	/**
@@ -43,7 +59,9 @@ class TwitterCardTest extends TestCase {
 			]
 		)
 		->create();
-		$this->assertEquals( 'Open Graph Title', Twitter_Card::get_title( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringContainsString( 'name="twitter:title" content="Open Graph Title"', $this->get_rendered_head() );
 	}
 
 	/**
@@ -62,7 +80,9 @@ class TwitterCardTest extends TestCase {
 				'post_title' => 'Post Title',
 			]
 		);
-		$this->assertEquals( 'Post Title', Twitter_Card::get_title( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringContainsString( 'name="twitter:title" content="Post Title"', $this->get_rendered_head() );
 	}
 
 	/**
@@ -76,7 +96,9 @@ class TwitterCardTest extends TestCase {
 			]
 		)
 		->create();
-		$this->assertEquals( 'Twitter Card Description', Twitter_Card::get_description( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringContainsString( 'name="twitter:description" content="Twitter Card Description"', $this->get_rendered_head() );
 	}
 
 	/**
@@ -91,7 +113,9 @@ class TwitterCardTest extends TestCase {
 			]
 		)
 		->create();
-		$this->assertEquals( 'Open Graph Description', Twitter_Card::get_description( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringContainsString( 'name="twitter:description" content="Open Graph Description"', $this->get_rendered_head() );
 	}
 
 	/**
@@ -110,7 +134,9 @@ class TwitterCardTest extends TestCase {
 				'post_excerpt' => 'Post Content',
 			]
 		);
-		$this->assertEquals( 'Post Content', Twitter_Card::get_description( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringContainsString( 'name="twitter:description" content="Post Content"', $this->get_rendered_head() );
 	}
 
 	/**
@@ -118,20 +144,22 @@ class TwitterCardTest extends TestCase {
 	 */
 	public function test_get_image() {
 		$post_id = $this->factory->post
-		->with_thumbnail()
+		->with_real_thumbnail()
 		->create();
 
 		$thumb_id  = get_post_meta( $post_id, '_thumbnail_id', true );
 		$thumb_url = wp_get_attachment_image_url( $thumb_id, 'full' );
 
-		$this->assertEquals( $thumb_url, Twitter_Card::get_image( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringContainsString( "name=\"twitter:image\" content=\"{$thumb_url}\"", $this->get_rendered_head() );
 	}
 
 	/**
 	 * Test image w/ fallback to Open Graph image.
 	 */
 	public function test_get_image_fallback_to_open_graph() {
-		$attachment_id = $this->factory->attachment->create();
+		$attachment_id = $this->factory->attachment->with_image()->create();
 
 		$post_id = $this->factory->post
 		->with_meta(
@@ -144,7 +172,9 @@ class TwitterCardTest extends TestCase {
 
 		$image_url = wp_get_attachment_image_url( $attachment_id, 'full' );
 
-		$this->assertEquals( $image_url, Twitter_Card::get_image( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringContainsString( "name=\"twitter:image\" content=\"{$image_url}\"", $this->get_rendered_head() );
 	}
 
 	/**
@@ -152,7 +182,7 @@ class TwitterCardTest extends TestCase {
 	 */
 	public function test_get_image_fallback_to_featured_image() {
 		$post = $this->factory->post
-		->with_thumbnail()
+		->with_real_thumbnail()
 		->with_meta(
 			[
 				'wp_seo_twitter_card_image' => '',
@@ -163,7 +193,9 @@ class TwitterCardTest extends TestCase {
 
 		$post_thumbnail_url = get_the_post_thumbnail_url( $post->ID );
 
-		$this->assertEquals( $post_thumbnail_url, Twitter_Card::get_image( $post->ID ) );
+		$this->go_to( get_permalink( $post->ID ) );
+
+		$this->assertStringContainsString( "name=\"twitter:image\" content=\"{$post_thumbnail_url}\"", $this->get_rendered_head() );
 	}
 
 	/**
@@ -178,7 +210,9 @@ class TwitterCardTest extends TestCase {
 			]
 		)
 		->create();
-		$this->assertFalse( Twitter_Card::get_image( $post_id ) );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringNotContainsString( 'name="twitter:image"', $this->get_rendered_head() );
 	}
 
 	/**
@@ -190,17 +224,13 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post->create();
 		$this->go_to( get_permalink( $post_id ) );
 
-		$twitter_card = new Twitter_Card();
-
-		$this->assertEmpty( Utils::get_echo( [ $twitter_card, 'render_twitter_card_tags' ] ) );
+		$this->assertStringNotContainsString( 'name="twitter:card"', $this->get_rendered_head() );
 	}
 
 	/**
 	 * Test that tags render with a 'summary_large_image' card type when an image resolves.
 	 */
 	public function test_render_twitter_card_tags_with_image() {
-		add_post_type_support( 'post', 'wp-seo-twitter-card' );
-
 		$post_id = $this->factory->post
 		->with_real_thumbnail()
 		->with_meta(
@@ -212,24 +242,18 @@ class TwitterCardTest extends TestCase {
 		->create();
 
 		$this->go_to( get_permalink( $post_id ) );
-
-		$twitter_card = new Twitter_Card();
-		$output       = Utils::get_echo( [ $twitter_card, 'render_twitter_card_tags' ] );
+		$output = $this->get_rendered_head();
 
 		$this->assertStringContainsString( 'name="twitter:card" content="summary_large_image"', $output );
 		$this->assertStringContainsString( 'name="twitter:title" content="Twitter Title"', $output );
 		$this->assertStringContainsString( 'name="twitter:description" content="Twitter Description"', $output );
 		$this->assertStringContainsString( 'name="twitter:image"', $output );
-
-		remove_post_type_support( 'post', 'wp-seo-twitter-card' );
 	}
 
 	/**
 	 * Test that tags render with a 'summary' card type when no image resolves.
 	 */
 	public function test_render_twitter_card_tags_without_image() {
-		add_post_type_support( 'post', 'wp-seo-twitter-card' );
-
 		$post_id = $this->factory->post
 		->with_meta(
 			[
@@ -240,13 +264,9 @@ class TwitterCardTest extends TestCase {
 		->create();
 
 		$this->go_to( get_permalink( $post_id ) );
-
-		$twitter_card = new Twitter_Card();
-		$output       = Utils::get_echo( [ $twitter_card, 'render_twitter_card_tags' ] );
+		$output = $this->get_rendered_head();
 
 		$this->assertStringContainsString( 'name="twitter:card" content="summary"', $output );
 		$this->assertStringNotContainsString( 'name="twitter:image"', $output );
-
-		remove_post_type_support( 'post', 'wp-seo-twitter-card' );
 	}
 }
