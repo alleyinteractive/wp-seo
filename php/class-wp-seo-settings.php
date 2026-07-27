@@ -402,13 +402,14 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'twitter_card_post_types',
 			__( 'Add Twitter Card support to individual:', 'wp-seo' ),
-			array( $this, 'field' ),
+			[ $this, 'field' ],
 			$this::SLUG,
-			'post_types', array(
+			'post_types',
+			[
 				'field' => 'twitter_card_post_types',
-				'type' => 'checkboxes',
-				'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) )
-			)
+				'type'  => 'checkboxes',
+				'boxes' => call_user_func_array( 'wp_list_pluck', [ $this->single_post_types, 'label' ] ),
+			]
 		);
 
 		// Single post types settings.
