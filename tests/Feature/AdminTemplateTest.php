@@ -194,15 +194,4 @@ class AdminTemplateTest extends TestCase {
 			],
 		];
 	}
-
-	/**
-	 * Note: there used to be a test_template_tag_hooks() here asserting a raw
-	 * count of how many hooks fire per admin template tag context. Removed per
-	 * PR #179 review feedback - it's a maintenance burden that has to be
-	 * recalculated by hand (and re-derived from a test failure) every time a
-	 * hook is added or removed, and the behavior it protects (that hooked
-	 * callbacks fire and produce the right output) is already covered more
-	 * meaningfully by test_template_tag_output() above, which asserts on the
-	 * actual rendered markup those callbacks produce.
-	 */
 }
