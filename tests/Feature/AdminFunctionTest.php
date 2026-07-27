@@ -19,32 +19,6 @@ class AdminFunctionTest extends TestCase {
 	// tests that happen to run afterward in the same process.
 	use Admin_Screen;
 
-	function setUp(): void {
-		parent::setUp();
-
-		// Registered fresh per test rather than in the data provider (which only
-		// runs once, at collection time, shared across every other test class) so
-		// this isn't at the mercy of some other test class's setUp()/tearDown()
-		// overwriting or deleting the 'wp-seo' option before this one runs.
-		update_option( \WP_SEO_Settings::SLUG, [
-			'robots_meta_directives' => [
-				[ 'value' => 'noindex' ],
-				[ 'value' => 'nofollow' ],
-			],
-		] );
-
-		// WP_SEO_Settings caches $this->options in memory and only re-reads the
-		// database when that cache is empty, so update_option() alone is invisible
-		// to it once anything has populated the cache - force a refresh.
-		WP_SEO_Settings()->set_options();
-	}
-
-	function tearDown(): void {
-		parent::tearDown();
-		delete_option( \WP_SEO_Settings::SLUG );
-		WP_SEO_Settings()->set_options();
-	}
-
 	/**
 	 * Sanity-check that the post_id_to_* and term_data_to_* functions use saved values.
 	 */
@@ -160,9 +134,10 @@ class AdminFunctionTest extends TestCase {
 		$robots_nofollow     = 'disable';
 
 		// Note: intersect_term_option() only keeps a 'robots_{directive}' key for
-		// directives configured in settings (registered in setUp()), so
-		// noindex/nofollow must be registered there for the term option's flat
-		// robots_noindex/robots_nofollow keys to survive when the test runs.
+		// directives configured in settings (registered in the base TestCase's
+		// setUp()), so noindex/nofollow need to be among those directives for
+		// the term option's flat robots_noindex/robots_nofollow keys to survive
+		// when the test runs.
 		$term = self::create_and_get_term_with_option( [
 			'title'           => $title,
 			'description'     => $description,
