@@ -9,19 +9,13 @@ namespace Alley\WP\WP_SEO\Features;
 
 use Alley\WP\Types\Feature;
 
+use function Alley\WP\WP_SEO\get_wp_seo_settings;
 use function Alley\WP\WP_SEO\register_meta_helper;
 
 /**
  * Open Graph Feature
  */
 final class Open_Graph implements Feature {
-
-	/**
-	 * WP SEO settings.
-	 *
-	 * @var \WP_SEO_Settings|null
-	 */
-	protected ?\WP_SEO_Settings $wp_seo_settings = null;
 
 	/**
 	 * Boot the feature.
@@ -33,23 +27,12 @@ final class Open_Graph implements Feature {
 	}
 
 	/**
-	 * Get the WP SEO settings instance, initializing it if needed.
-	 */
-	protected function get_settings(): \WP_SEO_Settings {
-		if ( null === $this->wp_seo_settings ) {
-			$this->wp_seo_settings = \WP_SEO_Settings::instance();
-		}
-
-		return $this->wp_seo_settings;
-	}
-
-	/**
 	 * Add post type support.
 	 *
 	 * @return void
 	 */
 	public function add_post_type_support() {
-		$enabled_post_types = $this->get_settings()->get_option( 'open_graph_post_types' );
+		$enabled_post_types = get_wp_seo_settings()->get_option( 'open_graph_post_types' );
 
 		if ( is_array( $enabled_post_types ) ) {
 			foreach ( $enabled_post_types as $post_type ) {
