@@ -12,7 +12,7 @@ class WP_SEO_Settings {
 	/**
 	 * Instance of this class.
 	 *
-	 * @var object
+	 * @var WP_SEO_Settings|null
 	 */
 	private static $instance = null;
 
@@ -97,6 +97,8 @@ class WP_SEO_Settings {
 	 * Get the instance of this class.
 	 *
 	 * @codeCoverageIgnore
+	 *
+	 * @return self
 	 */
 	public static function instance(): self {
 		if ( ! isset( self::$instance ) ) {

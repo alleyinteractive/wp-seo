@@ -4,6 +4,8 @@ interface WPRESTMedia {
     sizes: {
       [size: string]: {
         source_url: string;
+        width: number;
+        height: number;
       };
     };
   };
