@@ -8,7 +8,7 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
-use Mantle\Testing\Utils;
+use function Mantle\Support\Helpers\capture;
 use WP_SEO_Settings;
 use WP_SEO;
 
@@ -73,7 +73,7 @@ class MetaboxesTest extends TestCase {
 
 		$post = get_post( $post_ID );
 		// Capture the output of the function.
-		$html = Utils::get_echo( [ WP_SEO(), 'post_meta_fields' ], [ $post ] );
+		$html = capture( fn() => WP_SEO()->post_meta_fields( $post ) );
 
 		self::assertStringContainsString( 'name="seo_meta[title]" value="' . $title . '" size="96"', $html );
 		self::assertMatchesRegularExpression( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
@@ -91,7 +91,7 @@ class MetaboxesTest extends TestCase {
 		$post = get_post( $post_ID );
 
 		// Capture the output of the function.
-		$html = Utils::get_echo( [ WP_SEO(), 'post_meta_fields' ], [ $post ] );
+		$html = capture( fn() => WP_SEO()->post_meta_fields( $post ) );
 
 		// No $_POST.
 		$this->assertNull( WP_SEO()->save_post_fields( $post_ID ) );
@@ -178,7 +178,7 @@ class MetaboxesTest extends TestCase {
 	 */
 	function test_add_term_meta_fields() {
 		// Capture the output of the function.
-		$html = Utils::get_echo( [ WP_SEO(), 'add_term_meta_fields' ], [ 'category' ] );
+		$html = capture( fn() => WP_SEO()->add_term_meta_fields( 'category' ) );
 
 		self::assertMatchesRegularExpression( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
 		self::assertStringContainsString( 'name="seo_meta[title]"', $html );
@@ -204,7 +204,7 @@ class MetaboxesTest extends TestCase {
 		);
 
 		// Capture the output of the function.
-		$html = Utils::get_echo( [ WP_SEO(), 'edit_term_meta_fields' ], [ $category, 'category' ] );
+		$html = capture( fn() => WP_SEO()->edit_term_meta_fields( $category, 'category' ) );
 
 		self::assertMatchesRegularExpression( '/<input[^>]+type="hidden"[^>]+name="wp-seo-nonce"/', $html );
 		self::assertMatchesRegularExpression( "/<textarea.*?>{$description}<\/textarea>/", $html );
@@ -219,7 +219,7 @@ class MetaboxesTest extends TestCase {
 		$category = get_term( $category_ID, 'category' );
 
 		// Capture the output of the function.
-		$html = Utils::get_echo( [ WP_SEO(), 'add_term_meta_fields' ], [ $category, 'category' ] );
+		$html = capture( fn() => WP_SEO()->add_term_meta_fields( $category, 'category' ) );
 
 		// No $_POST.
 		$this->assertNull( WP_SEO()->save_term_fields( $category_ID, $category->term_taxonomy_id, 'category' ) );
