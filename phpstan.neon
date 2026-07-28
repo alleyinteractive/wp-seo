@@ -11,6 +11,9 @@ parameters:
 		- src/
 		- wp-seo.php
 
+	scanDirectories:
+		- php/
+
 #    ignoreErrors:
 #        - '#PHPDoc tag @var#'
 #
