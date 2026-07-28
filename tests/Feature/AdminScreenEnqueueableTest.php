@@ -8,9 +8,12 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use Mantle\Testing\Concerns\Admin_Screen;
 use WP_SEO_Settings;
 
 class AdminScreenEnqueueableTest extends TestCase {
+	use Admin_Screen;
+
 	function setUp(): void {
 		parent::setUp();
 		update_option( WP_SEO_Settings::SLUG, [
