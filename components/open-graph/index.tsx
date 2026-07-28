@@ -14,6 +14,8 @@ import {
   usePostMetaValue,
 } from '@alleyinteractive/block-editor-tools';
 
+import WPRESTMedia from '../../src/types/WPRestMedia';
+
 import PreviewModal from './PreviewModal';
 
 import './style.scss';
@@ -23,7 +25,7 @@ import './style.scss';
  *
  * @param image image details object.
  */
-function ImageHelpText({ image }) {
+function ImageHelpText({ image }: { image: WPRESTMedia }) {
   const imageFullSize = image?.media_details?.sizes?.full ?? null;
 
   if (!imageFullSize) {
