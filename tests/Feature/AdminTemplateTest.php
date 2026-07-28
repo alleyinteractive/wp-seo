@@ -8,9 +8,36 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use Mantle\Testing\Concerns\Admin_Screen;
 use Mantle\Testing\Mock_Action;
+use WP_SEO_Settings;
 
 class AdminTemplateTest extends TestCase {
+	use Admin_Screen;
+
+	/**
+	 * Robots directives configured for these tests.
+	 */
+	const ROBOTS_DIRECTIVES = [
+		[ 'value' => 'noindex', 'label' => 'No Index' ],
+		[ 'value' => 'nofollow', 'label' => 'No Follow' ],
+	];
+
+	function setUp(): void {
+		parent::setUp();
+		update_option( WP_SEO_Settings::SLUG, [
+			'robots_meta_directives' => self::ROBOTS_DIRECTIVES,
+		] );
+		WP_SEO_Settings()->set_options();
+
+		// Admin-only template tags load on admin_init.
+		do_action( 'admin_init' );
+	}
+
+	function tearDown(): void {
+		parent::tearDown();
+		delete_option( WP_SEO_Settings::SLUG );
+	}
 
 	/**
 	 * Sanity-check admin template tag output.
@@ -138,40 +165,40 @@ class AdminTemplateTest extends TestCase {
 				[ $str ],
 			],
 			[
-				'wp_seo_the_meta_robots_noindex_label',
+				'wp_seo_the_meta_robots_label',
 				'Should print a label',
-				'#<label[^>]*?>.+?</label>#',
-				[],
+				'#<label[^>]*?>.+?</label>#s',
+				[ 'noindex' ],
 			],
 			[
-				'wp_seo_the_meta_robots_noindex_input',
+				'wp_seo_the_meta_robots_input',
 				'Should print a select input',
 				'#<select[^>]+?name="seo_meta\[robots_noindex\]"[^>]*?>.*?</select>#s',
-				[ '' ],
+				[ '', 'noindex' ],
 			],
 			[
-				'wp_seo_the_meta_robots_noindex_input',
+				'wp_seo_the_meta_robots_input',
 				'Should print the passed value as selected',
-				'#<option[^>]+?value=(.)\1[^>]*? selected>#',
-				[ '1' ],
+				'#<option value="enable"[^>]*?selected=.selected.[^>]*?>#',
+				[ 'enable', 'noindex' ],
 			],
 			[
-				'wp_seo_the_meta_robots_nofollow_label',
+				'wp_seo_the_meta_robots_label',
 				'Should print a label',
-				'#<label[^>]*?>.+?</label>#',
-				[],
+				'#<label[^>]*?>.+?</label>#s',
+				[ 'nofollow' ],
 			],
 			[
-				'wp_seo_the_meta_robots_nofollow_input',
+				'wp_seo_the_meta_robots_input',
 				'Should print a select input',
 				'#<select[^>]+?name="seo_meta\[robots_nofollow\]"[^>]*?>.*?</select>#s',
-				[ '' ],
+				[ '', 'nofollow' ],
 			],
 			[
-				'wp_seo_the_meta_robots_nofollow_input',
+				'wp_seo_the_meta_robots_input',
 				'Should print the passed value as selected',
-				'#<option[^>]+?value=(.)\1[^>]*? selected>#',
-				[ '1' ],
+				'#<option value="disable"[^>]*?selected=.selected.[^>]*?>#',
+				[ 'disable', 'nofollow' ],
 			],
 		];
 	}
@@ -202,19 +229,19 @@ class AdminTemplateTest extends TestCase {
 		return [
 			[
 				'wp_seo_the_post_meta_fields',
-				6,
+				17,
 				'/^wp_seo_post_meta_fields/',
 				[ static::factory()->post->create_and_get() ],
 			],
 			[
 				'wp_seo_the_add_term_meta_fields',
-				6,
+				17,
 				'/^wp_seo_add_term_meta_fields/',
 				[ static::factory()->term->create_and_get(), rand_str() ],
 			],
 			[
 				'wp_seo_the_edit_term_meta_fields',
-				6,
+				17,
 				'/^wp_seo_edit_term_meta_fields/',
 				[ static::factory()->term->create_and_get(), rand_str() ],
 			],

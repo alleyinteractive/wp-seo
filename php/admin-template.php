@@ -228,12 +228,12 @@ function wp_seo_the_add_term_meta_fields( $taxonomy ) {
 			/**
 			 * Fires to print the meta robots legend with the add-term meta fields.
 			 */
-			do_action( 'wp_seo_post_meta_fields_robots_legend' );
+			do_action( 'wp_seo_add_term_meta_fields_robots_legend' );
 
 			/**
 			 * Fires after the meta robots legend with the add-term meta fields.
 			 */
-			do_action( 'wp_seo_post_meta_fields_after_robots_legend' );
+			do_action( 'wp_seo_add_term_meta_fields_after_robots_legend' );
 			?>
 		</div>
 		<?php foreach ( WP_SEO()->get_robots_directive_values() as $directive ) : ?>
