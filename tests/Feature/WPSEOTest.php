@@ -30,22 +30,15 @@ class WPSEOTest extends TestCase {
 	}
 
 	function test_intersect_term_option() {
-		$this->assertCount(
-			2,
-			WP_SEO::instance()->intersect_term_option( [] ),
-			'Unexpected term option default key'
-		);
-
-		$this->assertArrayHasKey(
-			'title',
-			WP_SEO::instance()->intersect_term_option( [] ),
-			'Unexpectedly missing default term option key'
-		);
-
-		$this->assertArrayHasKey(
-			'description',
-			WP_SEO::instance()->intersect_term_option( [] ),
-			'Unexpectedly missing default term option key'
+		// Spelled out in full (rather than a count + assertArrayHasKey per key)
+		// so any missing or unexpectedly-added key shows up directly in the
+		// diff, per PR #179 review feedback.
+		$this->assertSame(
+			[
+				'title'       => '',
+				'description' => '',
+			],
+			WP_SEO::instance()->intersect_term_option( [] )
 		);
 	}
 

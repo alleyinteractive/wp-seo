@@ -8,7 +8,6 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
-use Mantle\Testing\Mock_Action;
 
 class AdminTemplateTest extends TestCase {
 
@@ -177,47 +176,13 @@ class AdminTemplateTest extends TestCase {
 	}
 
 	/**
-	 * Sanity-check the number of WP SEO hook calls in admin template tags.
-	 *
-	 * @dataProvider data_template_tag_hooks
+	 * Note: there used to be a test_template_tag_hooks() here asserting a raw
+	 * count of how many hooks fire per admin template tag context. Removed per
+	 * PR #179 review feedback - it's a maintenance burden that has to be
+	 * recalculated by hand (and re-derived from a test failure) every time a
+	 * hook is added or removed, and the behavior it protects (that hooked
+	 * callbacks fire and produce the right output) is already covered more
+	 * meaningfully by test_template_tag_output() above, which asserts on the
+	 * actual rendered markup those callbacks produce.
 	 */
-	function test_template_tag_hooks( $function, $fires, $matching, $args ) {
-		$ma = new Mock_Action();
-		add_action( 'all', [ $ma, 'action' ] );
-
-		$function( ...$args );
-
-		$this->assertSame( $fires, count( preg_grep( $matching, $ma->get_tags() ) ) );
-	}
-
-	/**
-	 * @return array {
-	 *     @type string $function Function name.
-	 *     @type int $fires Expected number of hook calls.
-	 *     @type string $matching Regex of hook names to look for.
-	 *     @type array $args Function arguments.
-	 * }
-	 */
-	static function data_template_tag_hooks() {
-		return [
-			[
-				'wp_seo_the_post_meta_fields',
-				6,
-				'/^wp_seo_post_meta_fields/',
-				[ static::factory()->post->create_and_get() ],
-			],
-			[
-				'wp_seo_the_add_term_meta_fields',
-				6,
-				'/^wp_seo_add_term_meta_fields/',
-				[ static::factory()->term->create_and_get(), rand_str() ],
-			],
-			[
-				'wp_seo_the_edit_term_meta_fields',
-				6,
-				'/^wp_seo_edit_term_meta_fields/',
-				[ static::factory()->term->create_and_get(), rand_str() ],
-			],
-		];
-	}
 }
