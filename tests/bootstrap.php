@@ -18,6 +18,14 @@
 	->install();
 
 /**
+ * PHPUnit resolves all @dataProvider callbacks for the whole suite before any
+ * test's setUp() runs, so a provider calling TestCase::factory() would try to
+ * build a Factory_Container before an Application has bound itself into the
+ * container. Booting one here ensures the container is ready in time.
+ */
+new \Mantle\Testkit\Application();
+
+/**
  * Mimic WP_UnitTestCase::reset_post_types() for supporting older versions of WP.
  *
  * @see https://core.trac.wordpress.org/changeset/29860.
