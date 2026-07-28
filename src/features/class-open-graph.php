@@ -19,9 +19,9 @@ final class Open_Graph implements Feature {
 	/**
 	 * WP SEO settings.
 	 *
-	 * @var object WP_SEO_Settings::instance
+	 * @var \WP_SEO_Settings|null
 	 */
-	protected $wp_seo_settings;
+	protected ?\WP_SEO_Settings $wp_seo_settings = null;
 
 	/**
 	 * Boot the feature.
@@ -30,10 +30,17 @@ final class Open_Graph implements Feature {
 		add_action( 'init', [ $this, 'add_post_type_support' ] );
 		add_action( 'init', [ $this, 'add_meta_fields' ] );
 		add_action( 'wp_head', [ $this, 'render_open_graph_tags' ] );
+	}
 
-		if ( ! isset( $this->wp_seo_settings ) ) {
+	/**
+	 * Get the WP SEO settings instance, initializing it if needed.
+	 */
+	protected function get_settings(): \WP_SEO_Settings {
+		if ( null === $this->wp_seo_settings ) {
 			$this->wp_seo_settings = \WP_SEO_Settings::instance();
 		}
+
+		return $this->wp_seo_settings;
 	}
 
 	/**
@@ -42,11 +49,13 @@ final class Open_Graph implements Feature {
 	 * @return void
 	 */
 	public function add_post_type_support() {
-		$enabled_post_types = $this->wp_seo_settings->get_option( 'open_graph_post_types' );
+		$enabled_post_types = $this->get_settings()->get_option( 'open_graph_post_types' );
 
 		if ( is_array( $enabled_post_types ) ) {
 			foreach ( $enabled_post_types as $post_type ) {
-				add_post_type_support( $post_type, 'open-graph' );
+				if ( is_string( $post_type ) ) {
+					add_post_type_support( $post_type, 'open-graph' );
+				}
 			}
 		}
 	}
@@ -178,11 +187,11 @@ final class Open_Graph implements Feature {
 			$modified_time  = get_the_modified_date( 'c', $post_id );
 
 			if ( ! empty( $published_time ) ) {
-				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( $published_time ) );
+				$additional .= sprintf( "\n<meta property=\"article:published_time\" content=\"%s\" />", esc_attr( (string) $published_time ) );
 			}
 
 			if ( ! empty( $modified_time ) ) {
-				$additional .= sprintf( "\n<meta property=\"article:modified_time\" content=\"%s\" />", esc_attr( $modified_time ) );
+				$additional .= sprintf( "\n<meta property=\"article:modified_time\" content=\"%s\" />", esc_attr( (string) $modified_time ) );
 			}
 		}
 
