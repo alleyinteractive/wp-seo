@@ -54,7 +54,7 @@ final class Open_Graph implements Feature {
 		if ( is_array( $enabled_post_types ) ) {
 			foreach ( $enabled_post_types as $post_type ) {
 				if ( is_string( $post_type ) ) {
-					add_post_type_support( $post_type, 'open-graph' );
+					add_post_type_support( $post_type, 'wp-seo-open-graph' );
 				}
 			}
 		}

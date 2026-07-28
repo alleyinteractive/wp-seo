@@ -8,6 +8,7 @@
 namespace Alley\WP\WP_SEO\Tests\Features;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use Alley\WP\WP_SEO\Features\Twitter_Card;
 
 /**
  * TwitterCard Test for the Twitter_Card class.
@@ -268,5 +269,39 @@ class TwitterCardTest extends TestCase {
 
 		$this->assertStringContainsString( 'name="twitter:card" content="summary"', $output );
 		$this->assertStringNotContainsString( 'name="twitter:image"', $output );
+	}
+
+	/**
+	 * Test that enabling Twitter Card support for a post type via settings
+	 * results in that post type actually being recognized as supporting it.
+	 *
+	 * Added alongside an equivalent test in OpenGraphTest to guard against
+	 * the same class of regression found there: a merge accidentally
+	 * reverted Open_Graph::add_post_type_support() to grant the old,
+	 * unprefixed 'open-graph' support flag while everywhere else
+	 * (get_post_types_by_support(), post_type_supports(), and the block
+	 * editor sidebar's postType.supports check) still checked the prefixed
+	 * 'wp-seo-open-graph' one - post type support flags share one global
+	 * namespace across every plugin, with no built-in prefixing
+	 * convention, which is exactly why these were prefixed in the first
+	 * place. Twitter_Card doesn't have that specific history, but this
+	 * confirms the same settings -> add_post_type_support() ->
+	 * post_type_supports() wiring stays in sync here too.
+	 */
+	public function test_post_type_support_is_granted_under_the_expected_slug() {
+		// setUp() already grants this support directly for the rest of the
+		// tests in this class; remove it first so this test genuinely
+		// exercises the settings-driven wiring instead of passing because of
+		// that unrelated setup.
+		remove_post_type_support( 'post', 'wp-seo-twitter-card' );
+
+		update_option( \WP_SEO_Settings::SLUG, [
+			'twitter_card_post_types' => [ 'post' ],
+		] );
+		WP_SEO_Settings()->set_options();
+
+		( new Twitter_Card() )->add_post_type_support();
+
+		$this->assertTrue( post_type_supports( 'post', 'wp-seo-twitter-card' ) );
 	}
 }

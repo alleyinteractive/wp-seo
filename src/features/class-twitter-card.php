@@ -21,7 +21,7 @@ final class Twitter_Card implements Feature {
 	 *
 	 * @var \WP_SEO_Settings|null
 	 */
-	protected $wp_seo_settings;
+	protected ?\WP_SEO_Settings $wp_seo_settings = null;
 
 	/**
 	 * Boot the feature.
@@ -30,10 +30,17 @@ final class Twitter_Card implements Feature {
 		add_action( 'init', [ $this, 'add_post_type_support' ] );
 		add_action( 'init', [ $this, 'add_meta_fields' ] );
 		add_action( 'wp_head', [ $this, 'render_twitter_card_tags' ] );
+	}
 
-		if ( ! isset( $this->wp_seo_settings ) ) {
+	/**
+	 * Get the WP SEO settings instance, initializing it if needed.
+	 */
+	protected function get_settings(): \WP_SEO_Settings {
+		if ( null === $this->wp_seo_settings ) {
 			$this->wp_seo_settings = \WP_SEO_Settings::instance();
 		}
+
+		return $this->wp_seo_settings;
 	}
 
 	/**
@@ -42,11 +49,7 @@ final class Twitter_Card implements Feature {
 	 * @return void
 	 */
 	public function add_post_type_support() {
-		if ( ! $this->wp_seo_settings ) {
-			return;
-		}
-
-		$enabled_post_types = $this->wp_seo_settings->get_option( 'twitter_card_post_types' );
+		$enabled_post_types = $this->get_settings()->get_option( 'twitter_card_post_types' );
 
 		if ( is_array( $enabled_post_types ) ) {
 			foreach ( $enabled_post_types as $post_type ) {

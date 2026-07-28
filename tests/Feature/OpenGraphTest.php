@@ -125,4 +125,36 @@ class OpenGraphTest extends TestCase {
 		->create();
 		$this->assertFalse( Open_Graph::get_image( $post_id ) );
 	}
+
+	/**
+	 * Test that enabling Open Graph support for a post type via settings
+	 * results in that post type actually being recognized as supporting it.
+	 *
+	 * This guards against a regression: the post type support slug was
+	 * renamed from 'open-graph' to 'wp-seo-open-graph' (to avoid colliding
+	 * with another plugin's post type support flag of the same generic
+	 * name - post_type_supports() flags share one global namespace across
+	 * every plugin, with no built-in prefixing convention). A later merge
+	 * accidentally reverted just the add_post_type_support() call back to
+	 * the old, unprefixed name, while get_post_types_by_support(),
+	 * post_type_supports(), and the block editor sidebar's
+	 * postType.supports check all still used the new one. That silently
+	 * broke Open Graph for every post type - meta fields never registered,
+	 * front-end tags never rendered, the sidebar panel never appeared -
+	 * and nothing in this file caught it, since the rest of these tests
+	 * only exercise the static getter methods directly rather than the
+	 * post-type-support wiring itself.
+	 */
+	public function test_post_type_support_is_granted_under_the_expected_slug() {
+		update_option( \WP_SEO_Settings::SLUG, [
+			'open_graph_post_types' => [ 'post' ],
+		] );
+		WP_SEO_Settings()->set_options();
+
+		( new Open_Graph() )->add_post_type_support();
+
+		$this->assertTrue( post_type_supports( 'post', 'wp-seo-open-graph' ) );
+
+		remove_post_type_support( 'post', 'wp-seo-open-graph' );
+	}
 }
