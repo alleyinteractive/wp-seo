@@ -390,12 +390,19 @@ class WP_SEO_Settings {
 				'boxes' => call_user_func_array( 'wp_list_pluck', [ $this->single_post_types, 'label' ] )
 			]
 		);
+		// Open Graph settings.
+		add_settings_section(
+			'open_graph',
+			__( 'Open Graph', 'wp-seo' ),
+			'__return_false',
+			$this::SLUG
+		);
 		add_settings_field(
 			'open_graph_post_types',
 			__( 'Add Open Graph support to individual:', 'wp-seo' ),
 			array( $this, 'field' ),
 			$this::SLUG,
-			'post_types', array(
+			'open_graph', array(
 				'field' => 'open_graph_post_types',
 				'type' => 'checkboxes',
 				'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) )
@@ -404,13 +411,13 @@ class WP_SEO_Settings {
 		add_settings_field(
 			'default_open_graph_image',
 			__( 'Default Open Graph Image', 'wp-seo' ),
-			array( $this, 'field' ),
+			[ $this, 'field' ],
 			$this::SLUG,
-			'post_types',
-			array(
+			'open_graph',
+			[
 				'field' => 'default_open_graph_image',
 				'type'  => 'media',
-			)
+			]
 		);
 
 		// Single post types settings.
@@ -1005,7 +1012,7 @@ class WP_SEO_Settings {
 		$out['taxonomies']            = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
 		$out['open_graph_post_types'] = isset( $in['open_graph_post_types'] ) && is_array( $in['open_graph_post_types'] ) ? array_filter( $in['open_graph_post_types'], 'post_type_exists' ) : array();
 
-		// Site-wide default Open Graph image attachment ID.
+		// Validate the default Open Graph image attachment ID.
 		$out['default_open_graph_image'] = isset( $in['default_open_graph_image'] ) ? absint( $in['default_open_graph_image'] ) : 0;
 
 		/**

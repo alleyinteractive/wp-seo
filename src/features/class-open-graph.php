@@ -142,40 +142,48 @@ final class Open_Graph implements Feature {
 	 *
 	 * @return string|false The image URL or false if no assigned images.
 	 */
-	public static function get_image( $post_id ): string|false {
+	public static function get_image( $post_id ): string|bool {
 		$open_graph_image_id  = get_post_meta( $post_id, 'wp_seo_open_graph_image', true );
-		$open_graph_image_url = is_numeric( $open_graph_image_id )
-			? wp_get_attachment_image_url( (int) $open_graph_image_id, 'full' )
-			: false;
+		$open_graph_image_url = ( ! empty( $open_graph_image_id ) && is_string( $open_graph_image_id ) )
+		? wp_get_attachment_image_url( (int) $open_graph_image_id, 'full' )
+		: false;
 
-		if ( ! empty( $open_graph_image_url ) ) {
-			return $open_graph_image_url;
+		if ( empty( $open_graph_image_url ) ) {
+			$open_graph_image_url = new \WP_Error( 'no_open_graph_image', 'No Open Graph image found' );
 		}
 
-		$thumbnail_url = get_the_post_thumbnail_url( $post_id, 'full' );
-
-		if ( ! empty( $thumbnail_url ) ) {
-			return $thumbnail_url;
+		if ( is_wp_error( $open_graph_image_url ) ) {
+			$open_graph_image_url = get_the_post_thumbnail_url( $post_id, 'full' );
 		}
 
-		return self::get_default_image();
+		if ( empty( $open_graph_image_url ) ) {
+			$open_graph_image_url = self::get_default_image( $post_id );
+		}
+
+		return $open_graph_image_url;
 	}
 
 	/**
-	 * Get the site-wide default Open Graph image, used as a fallback when no
-	 * more specific image is available (no post meta override, no featured
-	 * image, or a non-singular page with no post to pull an image from).
+	 * Get the site-wide default Open Graph image, used as a fallback when a
+	 * post has no explicit Open Graph image or featured image, or on a
+	 * non-singular page with no post to pull an image from (pass 0 for
+	 * $post_id in that case).
+	 *
+	 * @param int $post_id The post ID, or 0 if there isn't one (e.g. an archive).
 	 *
 	 * @return string|false The default image URL, or false if none is configured.
 	 */
-	public static function get_default_image(): string|false {
-		$default_image_id = \WP_SEO_Settings::instance()->get_option( 'default_open_graph_image' );
+	protected static function get_default_image( $post_id ): string|bool {
+		$default_image_id  = \WP_SEO_Settings::instance()->get_option( 'default_open_graph_image' );
+		$default_image_url = ! empty( $default_image_id ) ? wp_get_attachment_image_url( (int) $default_image_id, 'full' ) : false;
 
-		if ( ! is_numeric( $default_image_id ) ) {
-			return false;
-		}
-
-		return wp_get_attachment_image_url( (int) $default_image_id, 'full' );
+		/**
+		 * Filter the site-wide default Open Graph image.
+		 *
+		 * @param string|false $default_image_url The default image URL, or false if none is configured.
+		 * @param int          $post_id            The post ID, or 0 if there isn't one (e.g. an archive).
+		 */
+		return apply_filters( 'wp_seo_default_open_graph_image', $default_image_url, $post_id );
 	}
 
 	/**
@@ -196,7 +204,7 @@ final class Open_Graph implements Feature {
 				get_bloginfo( 'name' ),
 				get_bloginfo( 'description' ),
 				home_url( '/' ),
-				self::get_default_image()
+				self::get_default_image( 0 )
 			);
 
 			return;
@@ -219,7 +227,7 @@ final class Open_Graph implements Feature {
 			$context['title'],
 			$context['description'],
 			$context['url'],
-			self::get_default_image()
+			self::get_default_image( 0 )
 		);
 	}
 

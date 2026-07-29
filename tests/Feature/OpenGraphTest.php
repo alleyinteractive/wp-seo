@@ -113,7 +113,7 @@ class OpenGraphTest extends TestCase {
 	}
 
 	/**
-	 * Test image w/ no post thumbnail or Open Graph image.
+	 * Test image w/ no post thumbnail, Open Graph image, or site default configured.
 	 */
 	public function test_get_image_fallback_no_thumbnail() {
 		$post_id = $this->factory->post
@@ -127,15 +127,14 @@ class OpenGraphTest extends TestCase {
 	}
 
 	/**
-	 * Test image w/ fallback all the way to the site-wide default Open Graph image.
+	 * Test image falls back to the site-wide default when no post thumbnail
+	 * or Open Graph image is set.
 	 */
-	public function test_get_image_fallback_to_default_image() {
+	public function test_get_image_fallback_default_image() {
 		$attachment_id = $this->factory->attachment->with_image()->create();
 
-		update_option( \WP_SEO_Settings::SLUG, [
-			'default_open_graph_image' => $attachment_id,
-		] );
-		WP_SEO_Settings()->set_options();
+		update_option( \WP_SEO_Settings::SLUG, [ 'default_open_graph_image' => $attachment_id ] );
+		\WP_SEO_Settings::instance()->set_options();
 
 		$post_id = $this->factory->post
 		->with_meta(
@@ -145,43 +144,73 @@ class OpenGraphTest extends TestCase {
 		)
 		->create();
 
-		$image_url = wp_get_attachment_image_url( $attachment_id, 'full' );
+		$default_image_url = wp_get_attachment_image_url( $attachment_id, 'full' );
 
-		$this->assertEquals( $image_url, Open_Graph::get_image( $post_id ) );
+		$this->assertEquals( $default_image_url, Open_Graph::get_image( $post_id ) );
 	}
 
 	/**
-	 * Test that the site-wide default Open Graph image is not used when a
-	 * post thumbnail is already available.
+	 * Test the post thumbnail still takes priority over the site-wide default.
 	 */
-	public function test_get_image_prefers_thumbnail_over_default_image() {
+	public function test_get_image_default_image_does_not_override_thumbnail() {
 		$attachment_id = $this->factory->attachment->with_image()->create();
 
-		update_option( \WP_SEO_Settings::SLUG, [
-			'default_open_graph_image' => $attachment_id,
-		] );
-		WP_SEO_Settings()->set_options();
+		update_option( \WP_SEO_Settings::SLUG, [ 'default_open_graph_image' => $attachment_id ] );
+		\WP_SEO_Settings::instance()->set_options();
 
 		$post_id = $this->factory->post
 		->with_real_thumbnail()
-		->with_meta(
-			[
-				'wp_seo_open_graph_image' => '',
-			]
-		)
 		->create();
 
-		$thumb_id  = get_post_meta( $post_id, '_thumbnail_id', true );
-		$thumb_url = wp_get_attachment_image_url( $thumb_id, 'full' );
+		$thumb_url = get_the_post_thumbnail_url( $post_id, 'full' );
 
+		$this->assertNotFalse( $thumb_url );
 		$this->assertEquals( $thumb_url, Open_Graph::get_image( $post_id ) );
 	}
 
 	/**
-	 * Test that Open_Graph::get_default_image() returns false when no
-	 * default Open Graph image is configured.
+	 * Test the site-wide default falls back to false if the configured
+	 * attachment no longer exists.
 	 */
-	public function test_get_default_image_returns_false_when_unset() {
-		$this->assertFalse( Open_Graph::get_default_image() );
+	public function test_get_image_fallback_default_image_deleted() {
+		$attachment_id = $this->factory->attachment->with_image()->create();
+
+		update_option( \WP_SEO_Settings::SLUG, [ 'default_open_graph_image' => $attachment_id ] );
+		\WP_SEO_Settings::instance()->set_options();
+
+		wp_delete_attachment( $attachment_id, true );
+
+		$post_id = $this->factory->post
+		->with_meta(
+			[
+				'wp_seo_open_graph_image' => '',
+			]
+		)
+		->create();
+
+		$this->assertFalse( Open_Graph::get_image( $post_id ) );
+	}
+
+	/**
+	 * Test the `wp_seo_default_open_graph_image` filter overrides the
+	 * resolved site-wide default image.
+	 */
+	public function test_get_image_default_image_filter() {
+		add_filter(
+			'wp_seo_default_open_graph_image',
+			function () {
+				return 'https://example.com/filtered-image.jpg';
+			}
+		);
+
+		$post_id = $this->factory->post
+		->with_meta(
+			[
+				'wp_seo_open_graph_image' => '',
+			]
+		)
+		->create();
+
+		$this->assertEquals( 'https://example.com/filtered-image.jpg', Open_Graph::get_image( $post_id ) );
 	}
 }
