@@ -10,6 +10,7 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use Mantle\Testing\Concerns\Admin_Screen;
 use Mantle\Testing\Utils;
+use PHPUnit\Framework\Attributes\DataProvider;
 use WP_SEO_Settings;
 
 class AdminFunctionTest extends TestCase {
@@ -38,9 +39,8 @@ class AdminFunctionTest extends TestCase {
 
 	/**
 	 * Sanity-check that the post_id_to_* and term_data_to_* functions use saved values.
-	 *
-	 * @dataProvider data_post_id_to_and_term_data_to
 	 */
+	#[DataProvider( 'data_post_id_to_and_term_data_to' )]
 	function test_admin_functions_contain( $function, $should, $contain, $args ) {
 		// Capture the output of the function.
 		self::assertStringContainsString( $contain, Utils::get_echo( $function, $args ), $should );
