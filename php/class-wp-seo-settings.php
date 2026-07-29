@@ -401,6 +401,17 @@ class WP_SEO_Settings {
 				'boxes' => call_user_func_array( 'wp_list_pluck', array( $this->single_post_types, 'label' ) )
 			)
 		);
+		add_settings_field(
+			'default_open_graph_image',
+			__( 'Default Open Graph Image', 'wp-seo' ),
+			array( $this, 'field' ),
+			$this::SLUG,
+			'post_types',
+			array(
+				'field' => 'default_open_graph_image',
+				'type'  => 'media',
+			)
+		);
 
 		// Single post types settings.
 		foreach ( $this->single_post_types as $post_type ) {
@@ -696,6 +707,10 @@ class WP_SEO_Settings {
 				$this->render_repeatable_field( $args, $value );
 				break;
 
+			case 'media' :
+				$this->render_media_field( $args, $value );
+				break;
+
 			default :
 				$this->render_text_field( $args, $value );
 				break;
@@ -784,6 +799,39 @@ class WP_SEO_Settings {
 				esc_html( $box_label )
 			);
 		}
+	}
+
+	/**
+	 * Render a media (attachment picker) field.
+	 *
+	 * @param  array $args {
+	 *     An array of arguments for the media field.
+	 *
+	 *     @type string $field The field name.
+	 * }
+	 * @param  mixed $value The current field value (an attachment ID).
+	 */
+	public function render_media_field( $args, $value ) {
+		$attachment_id  = ! empty( $value ) ? (int) $value : 0;
+		$attachment_url = $attachment_id ? wp_get_attachment_image_url( $attachment_id, 'medium' ) : false;
+
+		printf(
+			'<div class="wp-seo-media-field">
+				<div class="wp-seo-media-field-preview">%1$s</div>
+				<input type="hidden" class="wp-seo-media-field-input" name="%2$s[%3$s]" value="%4$s" />
+				<p>
+					<button type="button" class="button wp-seo-media-field-select">%5$s</button>
+					<button type="button" class="button wp-seo-media-field-remove" style="%6$s">%7$s</button>
+				</p>
+			</div>',
+			$attachment_url ? sprintf( '<img src="%s" style="max-width: 200px; height: auto;" />', esc_url( $attachment_url ) ) : '',
+			esc_attr( $this::SLUG ),
+			esc_attr( $args['field'] ),
+			esc_attr( $attachment_id ),
+			esc_html__( 'Add Image', 'wp-seo' ),
+			$attachment_id ? '' : 'display: none;',
+			esc_html__( 'Remove Image', 'wp-seo' )
+		);
 	}
 
 	/**
@@ -956,6 +1004,9 @@ class WP_SEO_Settings {
 		$out['post_types']            = isset( $in['post_types'] ) && is_array( $in['post_types'] ) ? array_filter( $in['post_types'], 'post_type_exists' ) : array();
 		$out['taxonomies']            = isset( $in['taxonomies'] ) && is_array( $in['taxonomies'] ) ? array_filter( $in['taxonomies'], 'taxonomy_exists' ) : array();
 		$out['open_graph_post_types'] = isset( $in['open_graph_post_types'] ) && is_array( $in['open_graph_post_types'] ) ? array_filter( $in['open_graph_post_types'], 'post_type_exists' ) : array();
+
+		// Site-wide default Open Graph image attachment ID.
+		$out['default_open_graph_image'] = isset( $in['default_open_graph_image'] ) ? absint( $in['default_open_graph_image'] ) : 0;
 
 		/**
 		 * Sanitize these as text fields and in the following order:

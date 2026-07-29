@@ -125,4 +125,63 @@ class OpenGraphTest extends TestCase {
 		->create();
 		$this->assertFalse( Open_Graph::get_image( $post_id ) );
 	}
+
+	/**
+	 * Test image w/ fallback all the way to the site-wide default Open Graph image.
+	 */
+	public function test_get_image_fallback_to_default_image() {
+		$attachment_id = $this->factory->attachment->with_image()->create();
+
+		update_option( \WP_SEO_Settings::SLUG, [
+			'default_open_graph_image' => $attachment_id,
+		] );
+		WP_SEO_Settings()->set_options();
+
+		$post_id = $this->factory->post
+		->with_meta(
+			[
+				'wp_seo_open_graph_image' => '',
+			]
+		)
+		->create();
+
+		$image_url = wp_get_attachment_image_url( $attachment_id, 'full' );
+
+		$this->assertEquals( $image_url, Open_Graph::get_image( $post_id ) );
+	}
+
+	/**
+	 * Test that the site-wide default Open Graph image is not used when a
+	 * post thumbnail is already available.
+	 */
+	public function test_get_image_prefers_thumbnail_over_default_image() {
+		$attachment_id = $this->factory->attachment->with_image()->create();
+
+		update_option( \WP_SEO_Settings::SLUG, [
+			'default_open_graph_image' => $attachment_id,
+		] );
+		WP_SEO_Settings()->set_options();
+
+		$post_id = $this->factory->post
+		->with_real_thumbnail()
+		->with_meta(
+			[
+				'wp_seo_open_graph_image' => '',
+			]
+		)
+		->create();
+
+		$thumb_id  = get_post_meta( $post_id, '_thumbnail_id', true );
+		$thumb_url = wp_get_attachment_image_url( $thumb_id, 'full' );
+
+		$this->assertEquals( $thumb_url, Open_Graph::get_image( $post_id ) );
+	}
+
+	/**
+	 * Test that Open_Graph::get_default_image() returns false when no
+	 * default Open Graph image is configured.
+	 */
+	public function test_get_default_image_returns_false_when_unset() {
+		$this->assertFalse( Open_Graph::get_default_image() );
+	}
 }
