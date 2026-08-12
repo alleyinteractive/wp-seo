@@ -360,11 +360,76 @@ class SettingsPageTest extends TestCase {
 		$this->assertMatchesRegularExpression( '/<input[^>]+class="repeatable"[^>]+\[2\]\[last_name\][^>]+value="Buchanan"[^>]+>/', $html );
 	}
 
+	/**
+	 * Test that settings sections for post types and taxonomies only register
+	 * when SEO fields are enabled for them, while always-on sections remain.
+	 */
+	function test_register_settings_only_shows_enabled_post_types_and_taxonomies() {
+		// Neither built-in post type has an archive by default, so use custom
+		// post types to exercise the archive-gating path specifically.
+		register_post_type( 'wpseo_demo_enabled', [
+			'public'      => true,
+			'has_archive' => true,
+			'label'       => 'Demo Enabled',
+		] );
+		register_post_type( 'wpseo_demo_disabled', [
+			'public'      => true,
+			'has_archive' => true,
+			'label'       => 'Demo Disabled',
+		] );
+
+		update_option( WP_SEO_Settings::SLUG, [
+			'post_types' => [ 'post', 'wpseo_demo_enabled' ],
+			'taxonomies' => [ 'category' ],
+		] );
+		WP_SEO_Settings()->set_properties();
+		WP_SEO_Settings()->set_options();
+
+		// add_settings_section()/add_settings_field() live here.
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		unset( $GLOBALS['wp_settings_sections'][ WP_SEO_Settings::SLUG ] );
+		unset( $GLOBALS['wp_settings_fields'][ WP_SEO_Settings::SLUG ] );
+		WP_SEO_Settings()->register_settings();
+
+		$sections = $GLOBALS['wp_settings_sections'][ WP_SEO_Settings::SLUG ];
+
+		// Enabled post type: single section appears.
+		$this->assertArrayHasKey( 'single_post', $sections );
+
+		// Enabled post type with an archive: both sections appear.
+		$this->assertArrayHasKey( 'single_wpseo_demo_enabled', $sections );
+		$this->assertArrayHasKey( 'archive_wpseo_demo_enabled', $sections );
+
+		// Disabled post type with an archive: neither section appears.
+		$this->assertArrayNotHasKey( 'single_wpseo_demo_disabled', $sections );
+		$this->assertArrayNotHasKey( 'archive_wpseo_demo_disabled', $sections );
+
+		// Disabled post type without SEO fields enabled: no single section.
+		$this->assertArrayNotHasKey( 'single_page', $sections );
+
+		// Enabled taxonomy: archive section appears.
+		$this->assertArrayHasKey( 'archive_category', $sections );
+
+		// Disabled taxonomy: archive section does not appear.
+		$this->assertArrayNotHasKey( 'archive_post_tag', $sections );
+
+		// Sections unrelated to a specific post type/taxonomy always appear.
+		foreach ( [ 'home', 'post_types', 'open_graph', 'taxonomies', 'archive_author', 'archive_date', 'search', '404', 'robots_meta', 'arbitrary' ] as $id ) {
+			$this->assertArrayHasKey( $id, $sections );
+		}
+	}
+
 	protected function tearDown(): void {
 		parent::tearDown();
 		// Clean up after ourselves.
 		_wp_seo_reset_post_types();
 		_wp_seo_reset_taxonomies();
+		delete_option( WP_SEO_Settings::SLUG );
+		WP_SEO_Settings()->set_properties();
+		WP_SEO_Settings()->set_options();
+		unset( $GLOBALS['wp_settings_sections'][ WP_SEO_Settings::SLUG ] );
+		unset( $GLOBALS['wp_settings_fields'][ WP_SEO_Settings::SLUG ] );
 	}
 
 }
