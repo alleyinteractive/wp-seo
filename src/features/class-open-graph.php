@@ -173,7 +173,7 @@ final class Open_Graph implements Feature {
 	 */
 	protected static function get_default_image( $post_id ): string|bool {
 		$default_image_id  = \WP_SEO_Settings::instance()->get_option( 'default_open_graph_image' );
-		$default_image_url = ( ! empty( $default_image_id ) && is_string( $default_image_id ) )
+		$default_image_url = ( ! empty( $default_image_id ) && is_numeric( $default_image_id ) )
 			? wp_get_attachment_image_url( (int) $default_image_id, 'full' )
 			: false;
 
