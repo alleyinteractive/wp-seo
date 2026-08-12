@@ -8,14 +8,39 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use Mantle\Testing\Concerns\Admin_Screen;
 use Mantle\Testing\Utils;
+use PHPUnit\Framework\Attributes\DataProvider;
+use WP_SEO_Settings;
 
 class AdminFunctionTest extends TestCase {
+	use Admin_Screen;
+
+	/**
+	 * Robots directives configured for these tests.
+	 */
+	const ROBOTS_DIRECTIVES = [
+		[ 'value' => 'noindex', 'label' => 'No Index' ],
+		[ 'value' => 'nofollow', 'label' => 'No Follow' ],
+	];
+
+	function setUp(): void {
+		parent::setUp();
+		update_option( WP_SEO_Settings::SLUG, [
+			'robots_meta_directives' => self::ROBOTS_DIRECTIVES,
+		] );
+		WP_SEO_Settings()->set_options();
+	}
+
+	function tearDown(): void {
+		parent::tearDown();
+		delete_option( WP_SEO_Settings::SLUG );
+	}
+
 	/**
 	 * Sanity-check that the post_id_to_* and term_data_to_* functions use saved values.
-	 *
-	 * @dataProvider data_post_id_to_and_term_data_to
 	 */
+	#[DataProvider( 'data_post_id_to_and_term_data_to' )]
 	function test_admin_functions_contain( $function, $should, $contain, $args ) {
 		// Capture the output of the function.
 		self::assertStringContainsString( $contain, Utils::get_echo( $function, $args ), $should );
@@ -37,19 +62,19 @@ class AdminFunctionTest extends TestCase {
 	 * }
 	 */
 	static function data_post_id_to_functions() {
-		$meta_title               = rand_str( rand( 32, 64 ) );
-		$meta_description         = rand_str( rand( 32, 64 ) );
-		$meta_canonical_url       = 'https://example.com/canonical-url';
-		$meta_robots_noindex      = '1';
-		$meta_robots_nofollow     = '';
+		$meta_title           = rand_str( rand( 32, 64 ) );
+		$meta_description     = rand_str( rand( 32, 64 ) );
+		$meta_canonical_url   = 'https://example.com/canonical-url';
+		$meta_robots_noindex  = 'enable';
+		$meta_robots_nofollow = 'disable';
 
 		$post_id = static::factory()->post->create( [
 			'meta_input' => [
-				'_meta_title'               => $meta_title,
-				'_meta_description'         => $meta_description,
-				'_meta_canonical_url'       => $meta_canonical_url,
-				'_meta_robots_noindex'      => $meta_robots_noindex,
-				'_meta_robots_nofollow'     => $meta_robots_nofollow,
+				'_meta_title'           => $meta_title,
+				'_meta_description'     => $meta_description,
+				'_meta_canonical_url'   => $meta_canonical_url,
+				'_meta_robots_noindex'  => $meta_robots_noindex,
+				'_meta_robots_nofollow' => $meta_robots_nofollow,
 			],
 		] );
 		do_action( 'admin_init' );
@@ -86,16 +111,16 @@ class AdminFunctionTest extends TestCase {
 				[ $post_id ],
 			],
 			[
-				'wp_seo_post_id_to_the_meta_robots_noindex_input',
-				'Should check the noindex checkbox when the noindex meta is set',
-				$meta_robots_noindex,
-				[ $post_id ],
+				'wp_seo_post_id_to_the_meta_robots_input',
+				'Should select the enabled option when the noindex meta is set to enable',
+				'<option value="enable" ' . selected( $meta_robots_noindex, 'enable', false ) . '>',
+				[ $post_id, 'noindex' ],
 			],
 			[
-				'wp_seo_post_id_to_the_meta_robots_nofollow_input',
-				'Should not check the nofollow checkbox when the nofollow meta is not set',
-				$meta_robots_nofollow,
-				[ $post_id ],
+				'wp_seo_post_id_to_the_meta_robots_input',
+				'Should select the disabled option when the nofollow meta is set to disable',
+				'<option value="disable" ' . selected( $meta_robots_nofollow, 'disable', false ) . '>',
+				[ $post_id, 'nofollow' ],
 			],
 		];
 	}
@@ -108,20 +133,18 @@ class AdminFunctionTest extends TestCase {
 	 * }
 	 */
 	static function data_term_data_to_functions() {
-		$title               = rand_str( rand( 32, 64 ) );
-		$description         = rand_str( rand( 32, 64 ) );
-		$canonical_url       = 'https://example.com/canonical-url';
-		$robots_noindex      = '1';
-		$robots_nofollow     = '';
+		$title                = rand_str( rand( 32, 64 ) );
+		$description          = rand_str( rand( 32, 64 ) );
+		$canonical_url        = 'https://example.com/canonical-url';
+		$robots_noindex       = 'enable';
+		$robots_nofollow      = 'disable';
 
 		$term = self::create_and_get_term_with_option( [
-			'title'         => $title,
-			'description'   => $description,
-			'canonical_url' => $canonical_url,
-			'robots'        => [
-				'noindex'      => $robots_noindex,
-				'nofollow'     => $robots_nofollow,
-			],
+			'title'          => $title,
+			'description'    => $description,
+			'canonical_url'  => $canonical_url,
+			'robots_noindex' => $robots_noindex,
+			'robots_nofollow' => $robots_nofollow,
 		] );
 
 		return [
@@ -156,16 +179,16 @@ class AdminFunctionTest extends TestCase {
 				[ $term->term_id, $term->taxonomy ],
 			],
 			[
-				'wp_seo_term_data_to_the_meta_robots_noindex_input',
-				'Should check the noindex checkbox when the noindex option is set',
-				$robots_noindex,
-				[ $term->term_id, $term->taxonomy ],
+				'wp_seo_term_data_to_the_meta_robots_input',
+				'Should select the enabled option when the noindex term option is set to enable',
+				'<option value="enable" ' . selected( $robots_noindex, 'enable', false ) . '>',
+				[ $term->term_id, $term->taxonomy, 'noindex' ],
 			],
 			[
-				'wp_seo_term_data_to_the_meta_robots_nofollow_input',
-				'Should not check the nofollow checkbox when the nofollow option is not set',
-				$robots_nofollow,
-				[ $term->term_id, $term->taxonomy ],
+				'wp_seo_term_data_to_the_meta_robots_input',
+				'Should select the disabled option when the nofollow term option is set to disable',
+				'<option value="disable" ' . selected( $robots_nofollow, 'disable', false ) . '>',
+				[ $term->term_id, $term->taxonomy, 'nofollow' ],
 			],
 		];
 	}
