@@ -420,6 +420,45 @@ class SettingsPageTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Test that a post type and taxonomy sharing the same name are
+	 * disambiguated into separate archive settings sections instead of one
+	 * clobbering the other's section/fields.
+	 */
+	function test_register_settings_disambiguates_colliding_post_type_and_taxonomy_names() {
+		register_post_type( 'wpseo_demo_shared', [
+			'public'      => true,
+			'has_archive' => true,
+			'label'       => 'Demo Shared',
+		] );
+		register_taxonomy( 'wpseo_demo_shared', 'post', [
+			'public' => true,
+			'label'  => 'Demo Shared',
+		] );
+
+		update_option( WP_SEO_Settings::SLUG, [
+			'post_types' => [ 'wpseo_demo_shared' ],
+			'taxonomies' => [ 'wpseo_demo_shared' ],
+		] );
+		WP_SEO_Settings()->set_properties();
+		WP_SEO_Settings()->set_options();
+
+		// add_settings_section()/add_settings_field() live here.
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		unset( $GLOBALS['wp_settings_sections'][ WP_SEO_Settings::SLUG ] );
+		unset( $GLOBALS['wp_settings_fields'][ WP_SEO_Settings::SLUG ] );
+		WP_SEO_Settings()->register_settings();
+
+		$sections = $GLOBALS['wp_settings_sections'][ WP_SEO_Settings::SLUG ];
+
+		// Both types are enabled: both archive sections appear, under
+		// distinct, disambiguated IDs.
+		$this->assertArrayHasKey( 'archive_post_wpseo_demo_shared', $sections );
+		$this->assertArrayHasKey( 'archive_term_wpseo_demo_shared', $sections );
+		$this->assertArrayNotHasKey( 'archive_wpseo_demo_shared', $sections );
+	}
+
 	protected function tearDown(): void {
 		parent::tearDown();
 		// Clean up after ourselves.

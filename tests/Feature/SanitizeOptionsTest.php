@@ -236,10 +236,44 @@ class SanitizeOptionsTest extends TestCase {
 		$this->assertNull( $actual['archive_date_title'] );
 	}
 
+	// Test that a post type and a taxonomy sharing the same name don't
+	// clobber each other's stored archive values when only one is enabled.
+	function test_colliding_post_type_and_taxonomy_names_do_not_overwrite_each_other() {
+		register_post_type( 'wpseo_demo_shared', [
+			'public'      => true,
+			'has_archive' => true,
+			'label'       => 'Demo Shared',
+		] );
+		register_taxonomy( 'wpseo_demo_shared', 'post', [
+			'public' => true,
+			'label'  => 'Demo Shared',
+		] );
+		WP_SEO_Settings()->set_properties();
+
+		update_option( WP_SEO_Settings::SLUG, [
+			'post_types' => [ 'wpseo_demo_shared' ],
+			'taxonomies' => [],
+			'archive_term_wpseo_demo_shared_title' => 'Old Taxonomy Title',
+		] );
+		WP_SEO_Settings()->set_options();
+
+		$actual = $this->_sanitize( [
+			'post_types' => [ 'wpseo_demo_shared' ],
+			'taxonomies' => [],
+			'archive_post_wpseo_demo_shared_title' => 'New Post Type Title',
+		] );
+
+		$this->assertSame( 'New Post Type Title', $actual['archive_post_wpseo_demo_shared_title'] );
+		$this->assertSame( 'Old Taxonomy Title', $actual['archive_term_wpseo_demo_shared_title'] );
+	}
+
 	protected function tearDown(): void {
 		parent::tearDown();
 		// Leave the place as we found it, so other tests see everything enabled.
+		_wp_seo_reset_post_types();
+		_wp_seo_reset_taxonomies();
 		delete_option( WP_SEO_Settings::SLUG );
+		WP_SEO_Settings()->set_properties();
 		WP_SEO_Settings()->set_options();
 	}
 

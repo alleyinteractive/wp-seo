@@ -146,7 +146,7 @@ class WP_SEO_Settings {
 		 *
 		 * @param array Associative array of post type keys and objects.
 		 */
-		$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'public' => true, 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 
 		/**
 		 * Filter the taxonomies that support SEO fields on term archive pages.
@@ -250,6 +250,30 @@ class WP_SEO_Settings {
 	 */
 	public function has_term_fields( $taxonomy ) {
 		return in_array( $taxonomy, $this->get_enabled_taxonomies(), true );
+	}
+
+	/**
+	 * Get the settings-key prefix for a post type or taxonomy archive.
+	 *
+	 * Post type and taxonomy archive settings normally share the same
+	 * "archive_{name}" prefix for their setting keys and settings-section ID.
+	 * If a post type and a taxonomy happen to be registered with the same
+	 * name, that shared prefix would let one overwrite the other's stored
+	 * values and settings-page section. Disambiguate only in that case, so
+	 * existing keys are unaffected for the common case of no collision.
+	 *
+	 * @param string $name Post type or taxonomy name.
+	 * @param string $type Either 'post_type' or 'taxonomy'.
+	 * @return string The prefix to use for this archive's setting keys, e.g. "archive_{name}".
+	 */
+	public function get_archive_key_prefix( string $name, string $type ): string {
+		$collides = isset( $this->archived_post_types[ $name ] ) && isset( $this->taxonomies[ $name ] );
+
+		if ( ! $collides ) {
+			return "archive_{$name}";
+		}
+
+		return 'taxonomy' === $type ? "archive_term_{$name}" : "archive_post_{$name}";
 	}
 
 	/**
@@ -444,7 +468,7 @@ class WP_SEO_Settings {
 
 			/* translators: %s: post type singular name */
 			$this->register_settings_section(
-				'archive_' . $post_type->name,
+				$this->get_archive_key_prefix( $post_type->name, 'post_type' ),
 				sprintf( __( '%s Archives', 'wp-seo' ), $post_type->labels->singular_name ),
 				[ $this, 'example_post_type_archive' ],
 			);
@@ -485,7 +509,7 @@ class WP_SEO_Settings {
 
 			/* translators: %s: taxonomy singular name */
 			$this->register_settings_section(
-				'archive_' . $taxonomy->name,
+				$this->get_archive_key_prefix( $taxonomy->name, 'taxonomy' ),
 				sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ),
 				[ $this, 'example_term_archive' ],
 			);
@@ -639,7 +663,10 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_term_archive( $section ) {
-		if ( $term = get_terms( str_replace( 'archive_', '', $section['id'] ), array( 'number' => 1 ) ) ) {
+		// Strip the disambiguated "archive_term_" prefix if present, else "archive_".
+		$taxonomy = str_replace( array( 'archive_term_', 'archive_' ), '', $section['id'] );
+
+		if ( $term = get_terms( $taxonomy, array( 'number' => 1 ) ) ) {
 			$this->example_url( $this->ex_text(), get_term_link( reset( $term ) ) );
 		} else {
 			$this->example_url( __( 'No terms yet.', 'wp-seo' ) );
@@ -652,7 +679,10 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_post_type_archive( $section ) {
-		if ( $url = get_post_type_archive_link( str_replace( 'archive_', '', $section['id'] ) ) ) {
+		// Strip the disambiguated "archive_post_" prefix if present, else "archive_".
+		$post_type = str_replace( array( 'archive_post_', 'archive_' ), '', $section['id'] );
+
+		if ( $url = get_post_type_archive_link( $post_type ) ) {
 			$this->example_url( __( 'at ', 'wp-seo' ), $url );
 		}
 	}
@@ -1081,11 +1111,12 @@ class WP_SEO_Settings {
 		}
 		// Post type archives.
 		foreach ( $this->archived_post_types as $type ) {
+			$prefix = $this->get_archive_key_prefix( $type->name, 'post_type' );
 			$fields = array(
-				"archive_{$type->name}_title",
-				"archive_{$type->name}_description",
-				"archive_{$type->name}_canonical_url",
-				"archive_{$type->name}_robots",
+				"{$prefix}_title",
+				"{$prefix}_description",
+				"{$prefix}_canonical_url",
+				"{$prefix}_robots",
 			);
 
 			$sanitize_as_text_field[]       = $fields[0];
@@ -1099,11 +1130,12 @@ class WP_SEO_Settings {
 		}
 		// Taxonomy archives.
 		foreach ( $this->taxonomies as $type ) {
+			$prefix = $this->get_archive_key_prefix( $type->name, 'taxonomy' );
 			$fields = array(
-				"archive_{$type->name}_title",
-				"archive_{$type->name}_description",
-				"archive_{$type->name}_canonical_url",
-				"archive_{$type->name}_robots",
+				"{$prefix}_title",
+				"{$prefix}_description",
+				"{$prefix}_canonical_url",
+				"{$prefix}_robots",
 			);
 
 			$sanitize_as_text_field[]       = $fields[0];
