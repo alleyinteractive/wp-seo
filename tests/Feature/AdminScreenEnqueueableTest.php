@@ -14,7 +14,7 @@ use WP_SEO_Settings;
 class AdminScreenEnqueueableTest extends TestCase {
 	use Admin_Screen;
 
-	function setUp(): void {
+	protected function setUp(): void {
 		parent::setUp();
 		update_option( WP_SEO_Settings::SLUG, [
 			'post_types' => [ 'post' ],
@@ -23,7 +23,7 @@ class AdminScreenEnqueueableTest extends TestCase {
 		WP_SEO_Settings()->set_options();
 	}
 
-	function tearDown(): void {
+	protected function tearDown(): void {
 		parent::tearDown();
 		delete_option( WP_SEO_Settings::SLUG );
 	}
@@ -31,7 +31,7 @@ class AdminScreenEnqueueableTest extends TestCase {
 	/**
 	 * Test that the plugin's settings page is always enqueueable.
 	 */
-	function test_is_admin_screen_enqueueable_on_settings_page() {
+	public function test_is_admin_screen_enqueueable_on_settings_page() {
 		$this->assertTrue( wp_seo_is_admin_screen_enqueueable( 'settings_page_' . WP_SEO_Settings::SLUG ) );
 	}
 
