@@ -31,7 +31,7 @@ class WPSEOTest extends TestCase {
 
 	function test_intersect_term_option() {
 		$this->assertCount(
-			2,
+			3,
 			WP_SEO::instance()->intersect_term_option( [] ),
 			'Unexpected term option default key'
 		);
@@ -44,6 +44,12 @@ class WPSEOTest extends TestCase {
 
 		$this->assertArrayHasKey(
 			'description',
+			WP_SEO::instance()->intersect_term_option( [] ),
+			'Unexpectedly missing default term option key'
+		);
+
+		$this->assertArrayHasKey(
+			'canonical_url',
 			WP_SEO::instance()->intersect_term_option( [] ),
 			'Unexpectedly missing default term option key'
 		);

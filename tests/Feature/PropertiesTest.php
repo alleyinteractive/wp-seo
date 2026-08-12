@@ -28,7 +28,7 @@ class PropertiesTest extends TestCase {
 	}
 
 	function _add_mock( $tags ) {
-		$tags['is_a_tag'] = $this->getMockForAbstractClass( 'WP_SEO_Formatting_Tag' );
+		$tags['is_a_tag'] = $this->getMockBuilder( 'WP_SEO_Formatting_Tag' )->getMock();
 
 		return $tags;
 	}

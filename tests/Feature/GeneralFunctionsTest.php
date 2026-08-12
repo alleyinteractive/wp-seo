@@ -8,13 +8,13 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class GeneralFunctionsTest extends TestCase {
 	/**
 	 * Test wp_seo_intersect_args() with args combinations.
-	 *
-	 * @dataProvider data_intersect_args
 	 */
+	#[DataProvider( 'data_intersect_args' )]
 	function test_intersect_args( $args, $defaults, $expected, $message ) {
 		$this->assertSame(
 			$expected,
