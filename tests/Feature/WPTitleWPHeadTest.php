@@ -58,7 +58,7 @@ class WPTitleWPHeadTest extends TestCase {
 				'content' => 'demo arbitrary content',
 			],
 		];
-		$this->options['robots_directives'] = [
+		$this->options['robots_meta_directives'] = [
 			[ 'label' => 'NoIndex', 'value' => 'noindex', 'description' => 'Directive description' ],
 			[ 'label' => 'NoFollow', 'value' => 'nofollow', 'description' => 'Directive description' ],
 		];
@@ -76,11 +76,11 @@ class WPTitleWPHeadTest extends TestCase {
 			'404',
 			'feed',
 		] as $key ) {
-			$this->options[ "{$key}_title" ]               = "demo_{$key}_title";
-			$this->options[ "{$key}_description" ]         = "demo_{$key}_description";
-			$this->options[ "{$key}_canonical_url" ]       = "demo_{$key}_canonical_url";
-			$this->options[ "{$key}_robots_noindex" ]      = '1';
-			$this->options[ "{$key}_robots_nofollow" ]     = '';
+			$this->options[ "{$key}_title" ]         = "demo_{$key}_title";
+			$this->options[ "{$key}_description" ]   = "demo_{$key}_description";
+			$this->options[ "{$key}_canonical_url" ] = "demo_{$key}_canonical_url";
+			// Only the 'noindex' directive is enabled by default in these settings.
+			$this->options[ "{$key}_robots" ]        = [ 'noindex' ];
 		}
 
 		update_option( WP_SEO_Settings::SLUG, WP_SEO_Settings()->sanitize_options( $this->options ) );
@@ -100,22 +100,24 @@ class WPTitleWPHeadTest extends TestCase {
 	}
 
 	/**
-	 * Test that WP_SEO::wp_head() echoes all <meta> tags with expected values.
+	 * Test that WP_SEO::wp_head() echoes the description, arbitrary, and
+	 * canonical <meta>/<link> tags with expected values.
 	 *
-	 * @param  string $description The expected meta description content.
-	 * @param  string $robots_noindex The expected robots noindex value, '1' or ''.
-	 * @param  string $robots_nofollow The expected robots nofollow value, '1' or ''.
+	 * The robots meta tag is no longer rendered by wp_head(); WP_SEO hooks
+	 * into WordPress core's wp_robots filter instead, so it's asserted
+	 * separately via _assert_robots().
+	 *
+	 * @param  string $description   The expected meta description content.
+	 * @param  string $canonical_url The expected canonical URL.
 	 */
-	function _assert_all_meta( $description, $robots_noindex, $robots_nofollow ) {
-		$robots = implode( ', ', [
-			$robots_noindex ? 'noindex' : '',
-			$robots_nofollow ? 'nofollow' : '',
-		] );
+	function _assert_all_meta( $description, $canonical_url ) {
+		// esc_url() prepends a scheme to bare strings without one.
+		$canonical_url = esc_url( $canonical_url );
 
 		$expected = <<<EOF
 <meta name='description' content='{$description}' /><!-- WP SEO -->
 <meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
-<meta name='robots' content='{$robots}' /><!-- WP SEO -->
+<link rel='canonical' href='{$canonical_url}' /><!-- WP SEO -->
 EOF;
 
 		$this->assertSame( strip_ws( $expected ), strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
@@ -133,30 +135,33 @@ EOF;
 	}
 
 	/**
-	 * Test that WP_SEO::wp_head() echoes <link> canonical tag with expected value.
-	 * 
-	 * @param string $canonical_url The expected canonical URL.
+	 * Test that WP_SEO::wp_robots() contributes the expected directives.
+	 *
+	 * Calls the method directly rather than through the full 'wp_robots'
+	 * filter chain, so unrelated core default callbacks (like
+	 * wp_robots_max_image_preview_large()) don't leak into the expectation.
+	 *
+	 * @param array $expected Associative array of expected robots directives.
 	 */
-	function _assert_canonical( $canonical_url ) {
-		$expected = "<link rel='canonical' href='{$canonical_url}' /><!-- WP SEO -->";
-		$this->assertSame( strip_ws( $expected ), strip_ws( get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
+	function _assert_robots( array $expected ) {
+		$this->assertSame( $expected, WP_SEO()->wp_robots( [] ) );
 	}
 
 	/**
 	 * Wrapper for checking _assert_title(), _assert_all_meta() and
-	 * _assert_canonical() on option values.
+	 * _assert_robots() on option values.
 	 *
 	 * @param  string $key The option to test. Use a name that prefixes
 	 *     '_title' and '_description' in the option, like 'home'.
+	 * @param  array  $robots The expected robots directives for this key.
 	 */
-	function _assert_option_filters( $key ) {
+	function _assert_option_filters( $key, array $robots = [ 'noindex' => true ] ) {
 		$this->_assert_title( $this->options[ "{$key}_title" ] );
 		$this->_assert_all_meta(
 			$this->options["{$key}_description"],
-			$this->options["{$key}_robots_noindex"],
-			$this->options["{$key}_robots_nofollow"],
+			$this->options["{$key}_canonical_url"],
 		);
-		$this->_assert_canonical( $this->options["{$key}_canonical_url"] );
+		$this->_assert_robots( $robots );
 	}
 
 	/**
@@ -170,9 +175,11 @@ EOF;
 		$this->_assert_option_filters( 'single_post' );
 	}
 
+	// The custom post type isn't in the plugin's configured post_types, so
+	// WP_SEO::wp_robots() skips it entirely.
 	function test_singular() {
 		$this->go_to( get_permalink( $this->factory->post->create( [ 'post_type' => $this->post_type ] ) ) );
-		$this->_assert_option_filters( "single_{$this->post_type}" );
+		$this->_assert_option_filters( "single_{$this->post_type}", [] );
 	}
 
 	// A post with custom values should not use the single_{type}_ values.
@@ -180,12 +187,12 @@ EOF;
 		$this->go_to( get_permalink( $post_ID = $this->factory->post->create() ) );
 		update_post_meta( $post_ID, '_meta_title', '_custom_meta_title' );
 		update_post_meta( $post_ID, '_meta_description', '_custom_meta_description' );
-		update_post_meta( $post_ID, '_canonical_url', '_custom_canonical_url' );
-		update_post_meta( $post_ID, '_robots_noindex', '1' );
-		update_post_meta( $post_ID, '_robots_nofollow', '' );
+		update_post_meta( $post_ID, '_meta_canonical_url', '_custom_canonical_url' );
+		update_post_meta( $post_ID, '_meta_robots_noindex', 'enable' );
+		update_post_meta( $post_ID, '_meta_robots_nofollow', 'disable' );
 		$this->_assert_title( '_custom_meta_title' );
-		$this->_assert_all_meta( '_custom_meta_description', '1', '' );
-		$this->_assert_canonical( '_custom_canonical_url' );
+		$this->_assert_all_meta( '_custom_meta_description', '_custom_canonical_url' );
+		$this->_assert_robots( [ 'noindex' => true ] );
 	}
 
 	// If there is no format string, return the original post title.
@@ -217,10 +224,12 @@ EOF;
 		$this->_assert_option_filters( 'archive_category' );
 	}
 
+	// The custom taxonomy isn't in the plugin's configured taxonomies, so
+	// WP_SEO::wp_robots() skips it entirely.
 	function test_tax() {
 		$term_ID = $this->factory->term->create( [ 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ] );
 		$this->go_to( get_term_link( $term_ID, $this->taxonomy ) );
-		$this->_assert_option_filters( "archive_{$this->taxonomy}" );
+		$this->_assert_option_filters( "archive_{$this->taxonomy}", [] );
 	}
 
 	// A term with custom values should not use the archive_{taxonomy}_ fields.
@@ -234,14 +243,14 @@ EOF;
 				'title' => '_custom_title',
 				'description' => '_custom_description',
 				'canonical_url' => '_custom_canonical_url',
-				'robots_noindex' => '1',
-				'robots_nofollow' => '',
+				'robots_noindex' => 'enable',
+				'robots_nofollow' => 'disable',
 			],
 		);
 		$this->go_to( get_term_link( $term_ID, 'category' ) );
 		$this->_assert_title( '_custom_title' );
-		$this->_assert_all_meta( '_custom_description', '1', '' );
-		$this->_assert_canonical( '_custom_canonical_url' );
+		$this->_assert_all_meta( '_custom_description', '_custom_canonical_url' );
+		$this->_assert_robots( [ 'noindex' => true ] );
 	}
 
 	function test_post_type_archive() {

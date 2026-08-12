@@ -20,6 +20,9 @@ class MetaboxesTest extends TestCase {
 			'taxonomies' => [ 'category' ],
 		] );
 		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		// Admin-only template tags load on admin_init.
+		do_action( 'admin_init' );
 	}
 
 	function tearDown(): void {
@@ -265,6 +268,7 @@ class MetaboxesTest extends TestCase {
 			[
 				'title' => $title,
 				'description' => $description,
+				'canonical_url' => '',
 			],
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
@@ -281,6 +285,7 @@ class MetaboxesTest extends TestCase {
 			[
 				'title' => $updated_title,
 				'description' => '',
+				'canonical_url' => '',
 			],
 			get_option( WP_SEO()->get_term_option_name( $category ) )
 		);
