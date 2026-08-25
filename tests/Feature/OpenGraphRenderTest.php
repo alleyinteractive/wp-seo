@@ -7,6 +7,9 @@
 
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
+use Alley\WP\WP_SEO\Feature;
+use Alley\WP\WP_SEO\Features\Open_Graph;
+use Alley\WP\WP_SEO\Registry;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
 /**
@@ -40,6 +43,18 @@ class OpenGraphRenderTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
+
+		/*
+		 * Open Graph is opt-in, so the plugin composed it without booting it.
+		 * These tests are about what the feature renders on a site that has
+		 * turned it on, so they turn it on the way a site would -- through the
+		 * filter named for its handle -- and boot it from here. The registry is
+		 * emptied first because the plugin already claimed the handle when it
+		 * composed itself.
+		 */
+		Registry::reset_for_tests();
+		add_filter( 'wp_seo_enable_open_graph', '__return_true' );
+		Feature::top_level( 'open_graph', 'Open Graph', new Open_Graph() )->boot();
 
 		add_post_type_support( 'post', 'wp-seo-open-graph' );
 
