@@ -7,6 +7,8 @@
 
 namespace Alley\WP\WP_SEO;
 
+use Alley\WP\Features\Group;
+
 /**
  * A WP SEO feature: some plugin behavior paired with the handle that gates it.
  *
@@ -37,11 +39,13 @@ final class Feature implements \Alley\WP\Types\Feature {
 	 * The characters a handle may be made of.
 	 *
 	 * Anything else could not be written as a filter name, so nothing could
-	 * enable or disable the feature.
+	 * enable or disable the feature. The leading letter is required for a second
+	 * reason: PHP converts an all-digit array key to an integer, so a numeric
+	 * handle would key the Registry by something that is not a handle.
 	 *
 	 * @var string
 	 */
-	private const HANDLE_PATTERN = '/^[a-z0-9_]+$/';
+	private const HANDLE_PATTERN = '/^[a-z][a-z0-9_]*$/';
 
 	/**
 	 * Whether this feature claimed its handle and belongs to the Registry.
@@ -49,6 +53,17 @@ final class Feature implements \Alley\WP\Types\Feature {
 	 * @var bool
 	 */
 	private bool $registered = false;
+
+	/**
+	 * Handle of the group that holds this feature, if any.
+	 *
+	 * Written by `group()` as it receives its children, which is the only place
+	 * the relationship is known: `Group` cannot be enumerated, and PHP has
+	 * already constructed a child by the time its group exists.
+	 *
+	 * @var string|null
+	 */
+	private ?string $parent = null;
 
 	/**
 	 * Whether the wrapped feature was booted.
@@ -64,11 +79,13 @@ final class Feature implements \Alley\WP\Types\Feature {
 	 * which say at the call site whether it is top-level or nested.
 	 *
 	 * @param string                  $handle  Handle identifying this feature.
+	 * @param string                  $label   Human-readable name of this feature.
 	 * @param \Alley\WP\Types\Feature $origin  Feature to boot when the handle is enabled.
 	 * @param bool                    $default Whether the handle is enabled before filtering.
 	 */
 	private function __construct(
 		private readonly string $handle,
+		private readonly string $label,
 		private readonly \Alley\WP\Types\Feature $origin,
 		private readonly bool $default,
 	) {
@@ -89,7 +106,7 @@ final class Feature implements \Alley\WP\Types\Feature {
 			_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					'The feature handle "%s" is not usable. Handles are interpolated into the names of the filters that enable a feature, so they may contain only lowercase letters, numbers, and underscores.',
+					'The feature handle "%s" is not usable. Handles are interpolated into the names of the filters that enable a feature and key the registry, so they must begin with a lowercase letter and may otherwise contain only lowercase letters, numbers, and underscores.',
 					esc_html( $handle )
 				),
 				'2.0.0'
@@ -105,11 +122,12 @@ final class Feature implements \Alley\WP\Types\Feature {
 	 * A feature the site has not asked for, off unless something enables it.
 	 *
 	 * @param string                  $handle Handle identifying this feature.
+	 * @param string                  $label  Human-readable name of this feature.
 	 * @param \Alley\WP\Types\Feature $origin Feature to boot when the handle is enabled.
 	 * @return self
 	 */
-	public static function top_level( string $handle, \Alley\WP\Types\Feature $origin ): self {
-		return new self( $handle, $origin, false );
+	public static function top_level( string $handle, string $label, \Alley\WP\Types\Feature $origin ): self {
+		return new self( $handle, $label, $origin, false );
 	}
 
 	/**
@@ -122,11 +140,55 @@ final class Feature implements \Alley\WP\Types\Feature {
 	 * enabled.
 	 *
 	 * @param string                  $handle Handle identifying this feature.
+	 * @param string                  $label  Human-readable name of this feature.
 	 * @param \Alley\WP\Types\Feature $origin Feature to boot unless the handle is disabled.
 	 * @return self
 	 */
-	public static function nested( string $handle, \Alley\WP\Types\Feature $origin ): self {
-		return new self( $handle, $origin, true );
+	public static function nested( string $handle, string $label, \Alley\WP\Types\Feature $origin ): self {
+		return new self( $handle, $label, $origin, true );
+	}
+
+	/**
+	 * A group of features under a handle of its own, off unless something
+	 * enables it.
+	 *
+	 * The group's handle is the switch for everything it holds: enabling it runs
+	 * the children, and leaving it off short-circuits them however their own
+	 * filters answer. Children are built with `nested()`, so they are already
+	 * constructed -- and already in the Registry -- by the time the group
+	 * receives them; the group records that it holds them, since nothing else
+	 * can.
+	 *
+	 * A group is a top-level feature, so a group given to another group still
+	 * needs enabling on its own.
+	 *
+	 * The label comes before the children rather than after them, because the
+	 * children are variadic and nothing can follow them. The other two
+	 * constructors take it in the same position so that the three read alike.
+	 *
+	 * @link docs/adr/0008-groups-own-their-children.md
+	 *
+	 * @param string $handle      Handle identifying this group.
+	 * @param string $label       Human-readable name of this group.
+	 * @param self   ...$children Features the group holds.
+	 * @return self
+	 */
+	public static function group( string $handle, string $label, self ...$children ): self {
+		$group = new self( $handle, $label, new Group( ...$children ), false );
+
+		/*
+		 * A group that did not claim its handle is not in the Registry, so
+		 * nothing would list its children underneath it. Leaving them
+		 * parentless reports them as what they are: features on their own that
+		 * no group in the Registry holds.
+		 */
+		if ( $group->registered ) {
+			foreach ( $children as $child ) {
+				$child->parent = $handle;
+			}
+		}
+
+		return $group;
 	}
 
 	/**
@@ -190,6 +252,35 @@ final class Feature implements \Alley\WP\Types\Feature {
 	 */
 	public function handle(): string {
 		return $this->handle;
+	}
+
+	/**
+	 * The human-readable name of this feature.
+	 *
+	 * Written at the call site rather than derived from the handle. Deriving
+	 * reads well enough for `open_graph` and then renders a later
+	 * `title_description_tags` as "Title Description Tags" instead of the
+	 * "Title & Description Tags" someone would have written. It is display
+	 * text, so unlike the handle it is neither validated nor constrained: it
+	 * names nothing and keys nothing.
+	 *
+	 * @return string Feature label.
+	 */
+	public function label(): string {
+		return $this->label;
+	}
+
+	/**
+	 * The handle of the group that holds this feature.
+	 *
+	 * A handle rather than the group itself, because that is what the answer is
+	 * for: reporting the tree the Registry contains, where every feature is
+	 * already known by handle.
+	 *
+	 * @return string|null Group handle, or null for a feature no group holds.
+	 */
+	public function parent(): ?string {
+		return $this->parent;
 	}
 
 	/**
