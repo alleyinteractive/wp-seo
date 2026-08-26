@@ -11,6 +11,9 @@ node_modules
 .phpcs/*.json
 .phpunit.result.cache
 
+# Local working notes, not plugin documentation
+HANDOFF.md
+
 # Ignore temporary OS files
 .DS_Store
 .DS_Store?

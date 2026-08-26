@@ -12,6 +12,28 @@ This applies to stored data. The plugin's hooks keep the `wp_seo_` prefix they a
 
 Open Graph is already migrated and stores `wp_seo_open_graph_*`. Those keys are wrong under this decision and must be renamed, along with the `search_engine_*` pair in `config/post-meta.json` and the sidebar component reading them. Open Graph shipped before this was settled; it is not an exception to it.
 
-## Still open
+## The old keys are dropped, not migrated
 
-This settles what new keys are called and not what happens to the old ones. Whether a migrated Feature reads the legacy keys, migrates them on upgrade, or writes both is undecided, and unlike the prefix it is not a matter of taste: sites running v1 hold real data under `_meta_*`, and v2 is meant to replace v1 on those sites.
+The question this ADR originally left open — whether a migrated Feature reads the legacy keys, migrates them on upgrade, or writes both — is answered by a fact about the world rather than by a preference: the plugin has no install base to protect. No site is running it, so no stored data is at risk, and a breaking key change costs nothing.
+
+A migrated Feature therefore reads and writes exactly one key per concept. Nothing reads `_meta_*`, nothing is backfilled, and the plugin needs no upgrade routine — worth stating plainly, because it has never had one and would have had to grow one first.
+
+This is worth more than permission to rename. The reason `_meta_title` and `search_engine_title` both exist is that the second was added when the first could not safely be dropped. That constraint is gone, so the duplication collapses instead of being carried forward:
+
+| Concept | Keys today | Key after migration | How it gets there |
+| --- | --- | --- | --- |
+| Title | `_meta_title`, `search_engine_title` | `alley_seo_search_engine_title` | replaced when `titles` migrates |
+| Description | `_meta_description`, `search_engine_description` | `alley_seo_search_engine_description` | replaced when `descriptions` migrates |
+| Canonical | `_meta_canonical_url` | `alley_seo_canonical_url` | replaced when `canonical_urls` migrates |
+| Robots | `_meta_robots_{directive}` | `alley_seo_robots_{directive}` | replaced when `robots_meta` migrates |
+| Open Graph | `wp_seo_open_graph_*` | `alley_seo_open_graph_*` | renamed in place |
+
+Only the last row is a rename. Open Graph is already a Feature and already owns its keys, so nothing has to happen first. Every other row is a replacement: the Feature that takes ownership of the concept registers the new key and stops reading the old one, in the same change that moves its rendering out of `php/`. There is no intermediate state in which a legacy key wears a new name.
+
+That distinction is worth stating because the alternative reads as reasonable and has already been written once. [alleyinteractive/wp-seo#171](https://github.com/alleyinteractive/wp-seo/pull/171) renamed all four legacy keys in place and was approved; it produced `_alley_seo_meta_title`, which keeps the leading underscore, stays invisible to REST, and would have to be renamed again when `titles` migrated. Do not open a standalone rename PR for the first four rows.
+
+Two further things follow from the shape of the table rather than from the prefix.
+
+No new key carries a leading underscore. Underscore-prefixed meta is hidden from REST, which is the entire subject of [alleyinteractive/wp-seo#188](https://github.com/alleyinteractive/wp-seo/issues/188). Registering those keys for REST is therefore not work to do but work that stops existing: #188 closes as moot once the four Features migrate.
+
+Titles and descriptions keep a `search_engine_` qualifier rather than becoming bare `alley_seo_title` and `alley_seo_description`. A post has two titles — the one search engines see and the one Open Graph declares — so an unqualified key would name neither, and the qualifier reads the way `open_graph_` does in its counterpart. This is the one row chosen on taste rather than forced by the ruling, and it is cheap to revisit while nothing stores it.
