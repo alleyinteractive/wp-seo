@@ -125,4 +125,13 @@ require_once __DIR__ . '/src/main.php';
 
 load_scripts();
 register_post_meta_from_defs();
-main();
+
+/*
+ * Compose the plugin's features on `after_setup_theme`, rather than now.
+ *
+ * Whether a feature is enabled is decided by filters, and WordPress loads
+ * plugins before the active theme, so composing at this point would read those
+ * filters before a theme could add them. Waiting happens here, once, instead of
+ * inside every feature.
+ */
+add_action( 'after_setup_theme', __NAMESPACE__ . '\main' );

@@ -5,7 +5,7 @@
  * @package wp-seo
  */
 
-namespace Alley\WP\WP_SEO\Tests\Features;
+namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
 use Alley\WP\WP_SEO\Features\Open_Graph;
