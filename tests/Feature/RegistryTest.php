@@ -49,8 +49,8 @@ class RegistryTest extends TestCase {
 	 * anything boots -- however deeply they are nested.
 	 */
 	public function test_features_register_themselves_on_construction() {
-		$child  = Feature::nested( 'child', $this->origin() );
-		$parent = Feature::top_level( 'parent', new Group( $child ) );
+		$child  = Feature::nested( 'child', 'Child', $this->origin() );
+		$parent = Feature::top_level( 'parent', 'Parent', new Group( $child ) );
 
 		$this->assertSame(
 			[
@@ -68,8 +68,8 @@ class RegistryTest extends TestCase {
 	public function test_registry_reports_which_features_booted() {
 		add_filter( 'wp_seo_enable_sitemaps', '__return_true' );
 
-		$og       = Feature::top_level( 'og', $this->origin() );
-		$sitemaps = Feature::top_level( 'sitemaps', $this->origin() );
+		$og       = Feature::top_level( 'og', 'Open Graph', $this->origin() );
+		$sitemaps = Feature::top_level( 'sitemaps', 'Sitemaps', $this->origin() );
 
 		$og->boot();
 		$sitemaps->boot();
@@ -89,8 +89,8 @@ class RegistryTest extends TestCase {
 	 */
 	#[Expected_Incorrect_Usage( 'Alley\WP\WP_SEO\Registry::register' )]
 	public function test_the_first_feature_to_claim_a_handle_keeps_it() {
-		$first = Feature::top_level( 'og', $this->origin() );
-		Feature::top_level( 'og', $this->origin() );
+		$first = Feature::top_level( 'og', 'Open Graph', $this->origin() );
+		Feature::top_level( 'og', 'Open Graph', $this->origin() );
 
 		$this->assertSame( [ 'og' => $first ], Registry::features() );
 	}

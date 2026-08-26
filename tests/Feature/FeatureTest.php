@@ -56,11 +56,30 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
+	 * A feature carries the name a person reads it by, alongside the handle a
+	 * filter addresses it by.
+	 *
+	 * The name is written rather than derived from the handle: deriving reads
+	 * well enough for `open_graph`, and then renders a later
+	 * `title_description_tags` as "Title Description Tags" instead of the
+	 * "Title & Description Tags" someone would have written. Labels are
+	 * user-facing and translated, so they are authored at the call site.
+	 */
+	public function test_a_feature_reports_the_label_it_was_given() {
+		$this->assertSame( 'Open Graph', Feature::top_level( 'open_graph', 'Open Graph', $this->boot_spy() )->label() );
+		$this->assertSame( 'Post Titles', Feature::nested( 'post_titles', 'Post Titles', $this->boot_spy() )->label() );
+		$this->assertSame(
+			'Title & Description Tags',
+			Feature::group( 'titles', 'Title & Description Tags', Feature::nested( 'term_titles', 'Term Titles', $this->boot_spy() ) )->label()
+		);
+	}
+
+	/**
 	 * A feature nobody enabled stays off.
 	 */
 	public function test_feature_is_disabled_by_default() {
 		$spy     = $this->boot_spy();
-		$feature = Feature::top_level( 'og', $spy );
+		$feature = Feature::top_level( 'og', 'Open Graph', $spy );
 
 		$feature->boot();
 
@@ -74,7 +93,7 @@ class FeatureTest extends TestCase {
 	 */
 	public function test_nested_feature_boots_without_filters() {
 		$spy     = $this->boot_spy();
-		$feature = Feature::nested( 'og', $spy );
+		$feature = Feature::nested( 'og', 'Open Graph', $spy );
 
 		$feature->boot();
 
@@ -97,8 +116,8 @@ class FeatureTest extends TestCase {
 			2
 		);
 
-		Feature::top_level( 'og', $enabled )->boot();
-		Feature::top_level( 'sitemaps', $other )->boot();
+		Feature::top_level( 'og', 'Open Graph', $enabled )->boot();
+		Feature::top_level( 'sitemaps', 'Sitemaps', $other )->boot();
 
 		$this->assertSame( 1, $enabled->boots );
 		$this->assertSame( 0, $other->boots );
@@ -112,7 +131,7 @@ class FeatureTest extends TestCase {
 	 */
 	public function test_per_handle_filter_enables_feature() {
 		$spy     = $this->boot_spy();
-		$feature = Feature::top_level( 'og', $spy );
+		$feature = Feature::top_level( 'og', 'Open Graph', $spy );
 
 		add_filter( 'wp_seo_enable_og', '__return_true' );
 
@@ -140,7 +159,7 @@ class FeatureTest extends TestCase {
 		);
 
 		$spy     = $this->boot_spy();
-		$feature = Feature::top_level( 'og', $spy );
+		$feature = Feature::top_level( 'og', 'Open Graph', $spy );
 
 		$feature->boot();
 
@@ -157,8 +176,8 @@ class FeatureTest extends TestCase {
 		add_filter( 'wp_seo_enable_child', '__return_true' );
 
 		$spy   = $this->boot_spy();
-		$child = Feature::nested( 'child', $spy );
-		$group = Feature::top_level( 'group', new Group( $child ) );
+		$child = Feature::nested( 'child', 'Child', $spy );
+		$group = Feature::top_level( 'group', 'Group', new Group( $child ) );
 
 		$group->boot();
 
@@ -174,8 +193,8 @@ class FeatureTest extends TestCase {
 		add_filter( 'wp_seo_enable_group', '__return_true' );
 
 		$spy   = $this->boot_spy();
-		$child = Feature::nested( 'child', $spy );
-		$group = Feature::top_level( 'group', new Group( $child ) );
+		$child = Feature::nested( 'child', 'Child', $spy );
+		$group = Feature::top_level( 'group', 'Group', new Group( $child ) );
 
 		$group->boot();
 
@@ -192,8 +211,8 @@ class FeatureTest extends TestCase {
 		add_filter( 'wp_seo_enable_child', '__return_false' );
 
 		$spy   = $this->boot_spy();
-		$child = Feature::nested( 'child', $spy );
-		$group = Feature::top_level( 'group', new Group( $child ) );
+		$child = Feature::nested( 'child', 'Child', $spy );
+		$group = Feature::top_level( 'group', 'Group', new Group( $child ) );
 
 		$group->boot();
 
@@ -203,18 +222,71 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
+	 * A group is the switch for everything inside it: its own handle decides
+	 * whether the subtree runs, exactly as when the group was composed by hand.
+	 */
+	public function test_group_gates_the_subtree_it_wraps() {
+		add_filter( 'wp_seo_enable_on_group', '__return_true' );
+
+		$off_spy = $this->boot_spy();
+		$on_spy  = $this->boot_spy();
+
+		$off = Feature::group( 'off_group', 'Off Group', Feature::nested( 'off_child', 'Off Child', $off_spy ) );
+		$on  = Feature::group( 'on_group', 'On Group', Feature::nested( 'on_child', 'On Child', $on_spy ) );
+
+		$off->boot();
+		$on->boot();
+
+		$this->assertSame( 0, $off_spy->boots, 'A group nobody enabled runs nothing inside it.' );
+		$this->assertSame( 1, $on_spy->boots, 'Enabling a group is the request to run what it holds.' );
+	}
+
+	/**
+	 * The group records what it was handed, so that the registry can report the
+	 * tree that the call site describes.
+	 */
+	public function test_a_group_owns_the_children_it_is_given() {
+		$child   = Feature::nested( 'child', 'Child', $this->boot_spy() );
+		$sibling = Feature::nested( 'sibling', 'Sibling', $this->boot_spy() );
+		$group   = Feature::group( 'group', 'Group', $child, $sibling );
+
+		$this->assertSame( 'group', $child->parent() );
+		$this->assertSame( 'group', $sibling->parent() );
+		$this->assertNull( $group->parent(), 'A group that no other group holds belongs to nothing.' );
+	}
+
+	/**
+	 * A group that lost its handle is not in the registry, so nothing could list
+	 * its children underneath it. They report themselves as belonging to no
+	 * group, which is what they are.
+	 */
+	#[Expected_Incorrect_Usage( 'Alley\WP\WP_SEO\Registry::register' )]
+	public function test_a_group_that_did_not_claim_its_handle_claims_no_children() {
+		Feature::top_level( 'taken', 'Taken', $this->boot_spy() );
+
+		$child = Feature::nested( 'child', 'Child', $this->boot_spy() );
+
+		Feature::group( 'taken', 'Taken', $child );
+
+		$this->assertNull( $child->parent() );
+	}
+
+	/**
 	 * Handles that cannot name a usable filter.
 	 *
 	 * @return array<string, array{string}>
 	 */
 	public static function data_invalid_handles(): array {
 		return [
-			'the global gate'    => [ 'feature' ],
-			'empty'              => [ '' ],
-			'uppercase letters'  => [ 'Open_Graph' ],
-			'dashes'             => [ 'open-graph' ],
-			'spaces'             => [ 'open graph' ],
-			'namespace brackets' => [ 'og[]' ],
+			'the global gate'      => [ 'feature' ],
+			'empty'                => [ '' ],
+			'uppercase letters'    => [ 'Open_Graph' ],
+			'dashes'               => [ 'open-graph' ],
+			'spaces'               => [ 'open graph' ],
+			'namespace brackets'   => [ 'og[]' ],
+			'digits only'          => [ '123' ],
+			'a leading digit'      => [ '2nd_feature' ],
+			'a leading underscore' => [ '_og' ],
 		];
 	}
 
@@ -226,7 +298,9 @@ class FeatureTest extends TestCase {
 	 *
 	 * `feature` is reserved because it would name the same filter as the global
 	 * `wp_seo_enable_feature` gate, which passes its callbacks a second
-	 * argument that the per-handle call does not.
+	 * argument that the per-handle call does not. A handle must also begin with
+	 * a letter: PHP turns an all-digit array key into an integer, so a numeric
+	 * handle would key the registry by something that is not a handle.
 	 *
 	 * @param string $handle Handle to refuse.
 	 */
@@ -237,7 +311,7 @@ class FeatureTest extends TestCase {
 		add_filter( 'wp_seo_enable_feature', '__return_true' );
 
 		$spy     = $this->boot_spy();
-		$feature = Feature::top_level( $handle, $spy );
+		$feature = Feature::top_level( $handle, 'A Feature', $spy );
 
 		$feature->boot();
 
@@ -260,8 +334,8 @@ class FeatureTest extends TestCase {
 		$claimed  = $this->boot_spy();
 		$rejected = $this->boot_spy();
 
-		$first  = Feature::top_level( 'og', $claimed );
-		$second = Feature::top_level( 'og', $rejected );
+		$first  = Feature::top_level( 'og', 'Open Graph', $claimed );
+		$second = Feature::top_level( 'og', 'Open Graph', $rejected );
 
 		$first->boot();
 		$second->boot();
@@ -280,7 +354,7 @@ class FeatureTest extends TestCase {
 		add_filter( 'wp_seo_enable_og', '__return_true' );
 
 		$spy     = $this->boot_spy();
-		$feature = Feature::top_level( 'og', $spy );
+		$feature = Feature::top_level( 'og', 'Open Graph', $spy );
 
 		( new Group( $feature, $feature ) )->boot();
 
