@@ -49,7 +49,7 @@
     "scripts": {
         "phpcbf": "phpcbf .",
         "phpcs": "phpcs .",
-        "phpstan": "phpstan --memory-limit=512M",
+        "phpstan": "phpstan --memory-limit=1G",
         "lint": [
             "@phpcs",
             "@phpstan"

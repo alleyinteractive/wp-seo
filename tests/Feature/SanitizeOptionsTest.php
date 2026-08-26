@@ -67,6 +67,20 @@ class SanitizeOptionsTest extends TestCase {
 		$this->assertSame( $actual['twitter_card_post_types'], [ 'post', 'page' ] );
 	}
 
+	// Test that the default Open Graph image is sanitized down to an attachment ID.
+	function test_default_open_graph_image() {
+		$actual = $this->_sanitize( [
+			'default_open_graph_image' => '42',
+		] );
+		$this->assertSame( 42, $actual['default_open_graph_image'] );
+	}
+
+	// Test that a missing default Open Graph image key defaults to 0.
+	function test_default_open_graph_image_missing_key() {
+		$actual = $this->_sanitize( [] );
+		$this->assertSame( 0, $actual['default_open_graph_image'] );
+	}
+
 	// Test that keys with empty values are still included in the option array.
 	function test_missing_keys() {
 		$actual = $this->_sanitize( [

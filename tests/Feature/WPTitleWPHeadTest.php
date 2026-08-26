@@ -82,7 +82,8 @@ class WPTitleWPHeadTest extends TestCase {
 		] as $key ) {
 			$this->options[ "{$key}_title" ]         = "demo_{$key}_title";
 			$this->options[ "{$key}_description" ]   = "demo_{$key}_description";
-			$this->options[ "{$key}_canonical_url" ] = "http://demo_{$key}_canonical_url";
+			$this->options[ "{$key}_canonical_url" ] = "demo_{$key}_canonical_url";
+			// Only the 'noindex' directive is enabled by default in these settings.
 			$this->options[ "{$key}_robots" ]        = [ 'noindex' ];
 		}
 
@@ -103,39 +104,27 @@ class WPTitleWPHeadTest extends TestCase {
 	}
 
 	/**
-	 * Test that the actual rendered wp_head output for the current query
-	 * contains all expected <meta> tags.
+	 * Test that WP_SEO::wp_head() echoes the description, arbitrary, and
+	 * canonical <meta>/<link> tags with expected values.
 	 *
-	 * Robots meta output doesn't come from WP_SEO::wp_head() itself - it's
-	 * rendered by core's wp_robots(), fed by the wp_robots filter
-	 * WP_SEO::wp_robots() hooks into, but both fire on the real wp_head action
-	 * get_rendered_head() captures.
+	 * The robots meta tag is no longer rendered by wp_head(); WP_SEO hooks
+	 * into WordPress core's wp_robots filter instead, so it's asserted
+	 * separately via _assert_robots().
 	 *
-	 * @param  string   $description   The expected meta description content.
-	 * @param  string[] $robots        The expected enabled robots directives (e.g. [ 'noindex' ]).
+	 * @param  string $description   The expected meta description content.
+	 * @param  string $canonical_url The expected canonical URL.
 	 */
-	function _assert_all_meta( $description, $robots ) {
-		// wp_head() also unconditionally prints the canonical link (tested
-		// separately via _assert_canonical()), so this checks that each expected
-		// line is present rather than requiring an exact full-output match.
-		$actual = strip_ws( $this->get_rendered_head() );
+	function _assert_all_meta( $description, $canonical_url ) {
+		// esc_url() prepends a scheme to bare strings without one.
+		$canonical_url = esc_url( $canonical_url );
 
-		$this->assertStringContainsString( "<meta name='description' content='{$description}' /><!-- WP SEO -->", $actual );
-		$this->assertStringContainsString( "<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->", $actual );
+		$expected = <<<EOF
+<meta name='description' content='{$description}' /><!-- WP SEO -->
+<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
+<link rel='canonical' href='{$canonical_url}' /><!-- WP SEO -->
+EOF;
 
-		// Core's own default wp_robots callbacks (e.g. max-image-preview:large)
-		// may also be present, so only check WP_SEO's own contribution rather
-		// than requiring an exact match on the whole content attribute.
-		preg_match( "/<meta name='robots' content='([^']*)'/", $actual, $matches );
-		$robots_content = $matches[1] ?? '';
-
-		foreach ( [ 'noindex', 'nofollow' ] as $directive ) {
-			if ( in_array( $directive, $robots, true ) ) {
-				$this->assertStringContainsString( $directive, $robots_content );
-			} else {
-				$this->assertStringNotContainsString( $directive, $robots_content );
-			}
-		}
+		$this->assertSame( strip_ws( $expected ), strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
 	}
 
 	/**
@@ -149,32 +138,33 @@ class WPTitleWPHeadTest extends TestCase {
 	}
 
 	/**
-	 * Test that the rendered wp_head output contains the <link> canonical tag
-	 * with the expected value.
+	 * Test that WP_SEO::wp_robots() contributes the expected directives.
 	 *
-	 * @param string $canonical_url The expected canonical URL.
+	 * Calls the method directly rather than through the full 'wp_robots'
+	 * filter chain, so unrelated core default callbacks (like
+	 * wp_robots_max_image_preview_large()) don't leak into the expectation.
+	 *
+	 * @param array $expected Associative array of expected robots directives.
 	 */
-	function _assert_canonical( $canonical_url ) {
-		$this->assertStringContainsString(
-			"<link rel='canonical' href='{$canonical_url}' /><!-- WP SEO -->",
-			strip_ws( $this->get_rendered_head() )
-		);
+	function _assert_robots( array $expected ) {
+		$this->assertSame( $expected, WP_SEO()->wp_robots( [] ) );
 	}
 
 	/**
 	 * Wrapper for checking _assert_title(), _assert_all_meta() and
-	 * _assert_canonical() on option values.
+	 * _assert_robots() on option values.
 	 *
 	 * @param  string $key The option to test. Use a name that prefixes
 	 *     '_title' and '_description' in the option, like 'home'.
+	 * @param  array  $robots The expected robots directives for this key.
 	 */
-	function _assert_option_filters( $key ) {
+	function _assert_option_filters( $key, array $robots = [ 'noindex' => true ] ) {
 		$this->_assert_title( $this->options[ "{$key}_title" ] );
 		$this->_assert_all_meta(
 			$this->options["{$key}_description"],
-			$this->options["{$key}_robots"],
+			$this->options["{$key}_canonical_url"],
 		);
-		$this->_assert_canonical( $this->options["{$key}_canonical_url"] );
+		$this->_assert_robots( $robots );
 	}
 
 	/**
@@ -198,12 +188,12 @@ class WPTitleWPHeadTest extends TestCase {
 		$this->go_to( get_permalink( $post_ID = $this->factory->post->create() ) );
 		update_post_meta( $post_ID, '_meta_title', '_custom_meta_title' );
 		update_post_meta( $post_ID, '_meta_description', '_custom_meta_description' );
-		update_post_meta( $post_ID, '_meta_canonical_url', 'http://_custom_canonical_url' );
-		update_post_meta( $post_ID, '_meta_robots_noindex', '1' );
-		update_post_meta( $post_ID, '_meta_robots_nofollow', '' );
+		update_post_meta( $post_ID, '_meta_canonical_url', '_custom_canonical_url' );
+		update_post_meta( $post_ID, '_meta_robots_noindex', 'enable' );
+		update_post_meta( $post_ID, '_meta_robots_nofollow', 'disable' );
 		$this->_assert_title( '_custom_meta_title' );
-		$this->_assert_all_meta( '_custom_meta_description', [ 'noindex' ] );
-		$this->_assert_canonical( 'http://_custom_canonical_url' );
+		$this->_assert_all_meta( '_custom_meta_description', '_custom_canonical_url' );
+		$this->_assert_robots( [ 'noindex' => true ] );
 	}
 
 	// If there is no format string, return the original post title.
@@ -251,15 +241,15 @@ class WPTitleWPHeadTest extends TestCase {
 			[
 				'title' => '_custom_title',
 				'description' => '_custom_description',
-				'canonical_url' => 'http://_custom_canonical_url',
-				'robots_noindex' => '1',
-				'robots_nofollow' => '',
+				'canonical_url' => '_custom_canonical_url',
+				'robots_noindex' => 'enable',
+				'robots_nofollow' => 'disable',
 			],
 		);
 		$this->go_to( get_term_link( $term_ID, 'category' ) );
 		$this->_assert_title( '_custom_title' );
-		$this->_assert_all_meta( '_custom_description', [ 'noindex' ] );
-		$this->_assert_canonical( 'http://_custom_canonical_url' );
+		$this->_assert_all_meta( '_custom_description', '_custom_canonical_url' );
+		$this->_assert_robots( [ 'noindex' => true ] );
 	}
 
 	function test_post_type_archive() {

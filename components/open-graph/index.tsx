@@ -31,7 +31,7 @@ function ImageHelpText({ image }: { image: WPRESTMedia }) {
   if (!imageFullSize) {
     return (
       <p style={{ fontSize: '0.75rem', color: '#757575' }}>
-        {__('No image selected. If available, featured image will be used.', 'wp-seo')}
+        {__('No image selected. If available, the featured image will be used, or the site\'s default Open Graph image if configured.', 'wp-seo')}
       </p>
     );
   }
