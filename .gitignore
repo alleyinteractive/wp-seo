@@ -13,6 +13,7 @@ node_modules
 
 # Local working notes, not plugin documentation
 HANDOFF.md
+DEV-NOTES.md
 
 # Ignore temporary OS files
 .DS_Store
