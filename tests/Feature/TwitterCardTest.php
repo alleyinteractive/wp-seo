@@ -56,7 +56,7 @@ class TwitterCardTest extends TestCase {
 		->with_meta(
 			[
 				'wp_seo_twitter_card_title' => '',
-				'wp_seo_open_graph_title'   => 'Open Graph Title',
+				'alley_seo_open_graph_title'   => 'Open Graph Title',
 			]
 		)
 		->create();
@@ -73,7 +73,7 @@ class TwitterCardTest extends TestCase {
 		->with_meta(
 			[
 				'wp_seo_twitter_card_title' => '',
-				'wp_seo_open_graph_title'   => '',
+				'alley_seo_open_graph_title'   => '',
 			]
 		)
 		->create(
@@ -110,7 +110,7 @@ class TwitterCardTest extends TestCase {
 		->with_meta(
 			[
 				'wp_seo_twitter_card_description' => '',
-				'wp_seo_open_graph_description'   => 'Open Graph Description',
+				'alley_seo_open_graph_description'   => 'Open Graph Description',
 			]
 		)
 		->create();
@@ -127,7 +127,7 @@ class TwitterCardTest extends TestCase {
 		->with_meta(
 			[
 				'wp_seo_twitter_card_description' => '',
-				'wp_seo_open_graph_description'   => '',
+				'alley_seo_open_graph_description'   => '',
 			]
 		)
 		->create(
@@ -166,7 +166,7 @@ class TwitterCardTest extends TestCase {
 		->with_meta(
 			[
 				'wp_seo_twitter_card_image' => '',
-				'wp_seo_open_graph_image'   => $attachment_id,
+				'alley_seo_open_graph_image'   => $attachment_id,
 			]
 		)
 		->create();
@@ -187,7 +187,7 @@ class TwitterCardTest extends TestCase {
 		->with_meta(
 			[
 				'wp_seo_twitter_card_image' => '',
-				'wp_seo_open_graph_image'   => '',
+				'alley_seo_open_graph_image'   => '',
 			]
 		)
 		->create_and_get();
@@ -207,7 +207,7 @@ class TwitterCardTest extends TestCase {
 		->with_meta(
 			[
 				'wp_seo_twitter_card_image' => '',
-				'wp_seo_open_graph_image'   => '',
+				'alley_seo_open_graph_image'   => '',
 			]
 		)
 		->create();

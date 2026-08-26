@@ -50,7 +50,7 @@ final class Open_Graph implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'wp-seo-open-graph' ),
-			'wp_seo_open_graph_title',
+			'alley_seo_open_graph_title',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
 				'single'            => true,
@@ -62,7 +62,7 @@ final class Open_Graph implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'wp-seo-open-graph' ),
-			'wp_seo_open_graph_description',
+			'alley_seo_open_graph_description',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
 				'single'            => true,
@@ -74,7 +74,7 @@ final class Open_Graph implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'wp-seo-open-graph' ),
-			'wp_seo_open_graph_image',
+			'alley_seo_open_graph_image',
 			[
 				'sanitize_callback' => 'absint',
 				'single'            => true,
@@ -92,7 +92,7 @@ final class Open_Graph implements Feature {
 	 * @return string The title.
 	 */
 	public static function get_title( $post_id ): string {
-		$open_graph_title = get_post_meta( $post_id, 'wp_seo_open_graph_title', true );
+		$open_graph_title = get_post_meta( $post_id, 'alley_seo_open_graph_title', true );
 
 		if ( ! empty( $open_graph_title ) && is_string( $open_graph_title ) ) {
 			return $open_graph_title;
@@ -109,7 +109,7 @@ final class Open_Graph implements Feature {
 	 * @return string The description.
 	 */
 	public static function get_description( $post_id ): string {
-		$open_graph_description = get_post_meta( $post_id, 'wp_seo_open_graph_description', true );
+		$open_graph_description = get_post_meta( $post_id, 'alley_seo_open_graph_description', true );
 
 		if ( ! empty( $open_graph_description ) && is_string( $open_graph_description ) ) {
 			return $open_graph_description;
@@ -126,7 +126,7 @@ final class Open_Graph implements Feature {
 	 * @return string|false The image URL or false if no assigned images.
 	 */
 	public static function get_image( $post_id ): string|bool {
-		$open_graph_image_url = wp_seo_get_image_url_from_meta( $post_id, 'wp_seo_open_graph_image' );
+		$open_graph_image_url = wp_seo_get_image_url_from_meta( $post_id, 'alley_seo_open_graph_image' );
 
 		if ( ! empty( $open_graph_image_url ) ) {
 			return $open_graph_image_url;
