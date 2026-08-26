@@ -93,8 +93,8 @@ class OpenGraphRenderTest extends TestCase {
 		$post_id = $this->factory->post
 			->with_meta(
 				[
-					'wp_seo_open_graph_title'       => 'OG Title',
-					'wp_seo_open_graph_description' => 'OG Description',
+					'alley_seo_open_graph_title'       => 'OG Title',
+					'alley_seo_open_graph_description' => 'OG Description',
 				]
 			)
 			->create();
