@@ -13,11 +13,18 @@ Decision: Features divide by output type. Each covers its output everywhere it a
 | Canonical URLs | `canonical_urls` |
 | Robots Meta | `robots_meta` |
 | Open Graph | `open_graph` |
+| Twitter Card | `twitter_card` |
 | Arbitrary Meta Tags | `arbitrary_tags` |
 
 Titles and descriptions are separate Features rather than one. A site whose theme already renders titles well may want only descriptions, and the reverse becomes likelier as generated descriptions arrive. Nothing is lost by keeping them apart, and merging them could not be undone without breaking whoever had filtered the combined handle.
 
 Handles are flat, lowercase, and underscore-separated. Nothing here is nested, so nothing is namespaced.
+
+## Twitter Card arrived after this decision
+
+Twitter Card was added to `src/features/` by [alleyinteractive/wp-seo#179](https://github.com/alleyinteractive/wp-seo/pull/179) after this ADR was written, and is included in the table above rather than treated as an exception. It passes the test in `CONTEXT.md` for the same reason Open Graph does — it is an output type a site could reasonably decline — and it divides by output rather than by surface, so nothing here needed revisiting to accommodate it.
+
+It does raise a question this ADR does not answer. `Twitter_Card::get_title()`, `get_description()`, and `get_image()` fall back to `Open_Graph::get_title()` and friends by static call, so `twitter_card` reads Open Graph's stored meta. Those calls do not require Open Graph to have booted, which means a site can enable `twitter_card` with `open_graph` off and get Twitter Card tags populated from meta whose editor field is not shown and whose key was never registered. Whether that is expressed as a nested Feature (ADR 0003), a group that owns both (ADR 0008), or left as an explicit documented fallback is undecided, and should be settled before either Feature is documented for a release.
 
 ## Page type is a separate axis
 
@@ -33,4 +40,4 @@ Formatting tags are infrastructure for the same reason: they are the notation a 
 
 ## No recommended set in v2.0
 
-Requirement 4 of the original specification asked documentation to name a recommended set of Features. Each Feature is instead documented on its own merits, because a list naming five of six Features says little and implies the sixth is second-rate. A baseline for sites migrating from another SEO plugin — a checklist against silently losing behavior they already had, rather than a curated shortlist — is deferred to [alleyinteractive/wp-seo#200](https://github.com/alleyinteractive/wp-seo/issues/200), when the Features it names exist.
+Requirement 4 of the original specification asked documentation to name a recommended set of Features. Each Feature is instead documented on its own merits, because a list naming six of seven Features says little and implies the seventh is second-rate. A baseline for sites migrating from another SEO plugin — a checklist against silently losing behavior they already had, rather than a curated shortlist — is deferred to [alleyinteractive/wp-seo#200](https://github.com/alleyinteractive/wp-seo/issues/200), when the Features it names exist.
