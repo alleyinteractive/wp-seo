@@ -15,9 +15,9 @@ function TwitterCardSlotfill() {
   const currentPostType = select('core/editor').getCurrentPostType();
   const postType = select('core').getEntityRecord('root', 'postType', currentPostType);
 
-  const [title, setTitle] = usePostMetaValue('wp_seo_twitter_card_title');
-  const [description, setDescription] = usePostMetaValue('wp_seo_twitter_card_description');
-  const [image, setImage] = usePostMetaValue('wp_seo_twitter_card_image');
+  const [title, setTitle] = usePostMetaValue('alley_seo_twitter_card_title');
+  const [description, setDescription] = usePostMetaValue('alley_seo_twitter_card_description');
+  const [image, setImage] = usePostMetaValue('alley_seo_twitter_card_image');
 
   if (!postType?.supports['wp-seo-twitter-card']) {
     return null;

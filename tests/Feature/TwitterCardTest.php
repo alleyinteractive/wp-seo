@@ -7,6 +7,8 @@
 
 namespace Alley\WP\WP_SEO\Tests\Features;
 
+use Alley\WP\WP_SEO\Feature;
+use Alley\WP\WP_SEO\Registry;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use Alley\WP\WP_SEO\Features\Twitter_Card;
 
@@ -24,6 +26,19 @@ use Alley\WP\WP_SEO\Features\Twitter_Card;
 class TwitterCardTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
+
+		/*
+		 * Twitter Card is opt-in, so the plugin composed it without booting it.
+		 * These tests are about what the feature renders on a site that has
+		 * turned it on, so they turn it on the way a site would -- through the
+		 * filter named for its handle -- and boot it from here. The registry is
+		 * emptied first because the plugin already claimed the handle when it
+		 * composed itself.
+		 */
+		Registry::reset_for_tests();
+		add_filter( 'wp_seo_enable_twitter_card', '__return_true' );
+		Feature::top_level( 'twitter_card', 'Twitter Card', new Twitter_Card() )->boot();
+
 		add_post_type_support( 'post', 'wp-seo-twitter-card' );
 	}
 
@@ -39,7 +54,7 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_title' => 'Twitter Card Title',
+				'alley_seo_twitter_card_title' => 'Twitter Card Title',
 			]
 		)
 		->create();
@@ -55,7 +70,7 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_title' => '',
+				'alley_seo_twitter_card_title' => '',
 				'alley_seo_open_graph_title'   => 'Open Graph Title',
 			]
 		)
@@ -72,7 +87,7 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_title' => '',
+				'alley_seo_twitter_card_title' => '',
 				'alley_seo_open_graph_title'   => '',
 			]
 		)
@@ -93,7 +108,7 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_description' => 'Twitter Card Description',
+				'alley_seo_twitter_card_description' => 'Twitter Card Description',
 			]
 		)
 		->create();
@@ -109,7 +124,7 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_description' => '',
+				'alley_seo_twitter_card_description' => '',
 				'alley_seo_open_graph_description'   => 'Open Graph Description',
 			]
 		)
@@ -126,7 +141,7 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_description' => '',
+				'alley_seo_twitter_card_description' => '',
 				'alley_seo_open_graph_description'   => '',
 			]
 		)
@@ -165,7 +180,7 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_image' => '',
+				'alley_seo_twitter_card_image' => '',
 				'alley_seo_open_graph_image'   => $attachment_id,
 			]
 		)
@@ -186,7 +201,7 @@ class TwitterCardTest extends TestCase {
 		->with_real_thumbnail()
 		->with_meta(
 			[
-				'wp_seo_twitter_card_image' => '',
+				'alley_seo_twitter_card_image' => '',
 				'alley_seo_open_graph_image'   => '',
 			]
 		)
@@ -206,7 +221,7 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_image' => '',
+				'alley_seo_twitter_card_image' => '',
 				'alley_seo_open_graph_image'   => '',
 			]
 		)
@@ -236,8 +251,8 @@ class TwitterCardTest extends TestCase {
 		->with_real_thumbnail()
 		->with_meta(
 			[
-				'wp_seo_twitter_card_title'       => 'Twitter Title',
-				'wp_seo_twitter_card_description' => 'Twitter Description',
+				'alley_seo_twitter_card_title'       => 'Twitter Title',
+				'alley_seo_twitter_card_description' => 'Twitter Description',
 			]
 		)
 		->create();
@@ -258,8 +273,8 @@ class TwitterCardTest extends TestCase {
 		$post_id = $this->factory->post
 		->with_meta(
 			[
-				'wp_seo_twitter_card_title'       => 'Twitter Title',
-				'wp_seo_twitter_card_description' => 'Twitter Description',
+				'alley_seo_twitter_card_title'       => 'Twitter Title',
+				'alley_seo_twitter_card_description' => 'Twitter Description',
 			]
 		)
 		->create();
