@@ -41,7 +41,7 @@ class OpenGraphRenderTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		add_post_type_support( 'post', 'open-graph' );
+		add_post_type_support( 'post', 'wp-seo-open-graph' );
 
 		register_taxonomy( $this->taxonomy, 'post' );
 		register_post_type(
@@ -60,8 +60,8 @@ class OpenGraphRenderTest extends TestCase {
 	}
 
 	protected function tearDown(): void {
-		remove_post_type_support( 'post', 'open-graph' );
-		remove_post_type_support( 'page', 'open-graph' );
+		remove_post_type_support( 'post', 'wp-seo-open-graph' );
+		remove_post_type_support( 'page', 'wp-seo-open-graph' );
 
 		parent::tearDown();
 
@@ -110,7 +110,7 @@ class OpenGraphRenderTest extends TestCase {
 	 * enabled uses the richer per-post rendering.
 	 */
 	public function test_homepage_static_page_with_open_graph_support() {
-		add_post_type_support( 'page', 'open-graph' );
+		add_post_type_support( 'page', 'wp-seo-open-graph' );
 
 		$page_id = $this->factory->post->create(
 			[

@@ -59,6 +59,14 @@ class SanitizeOptionsTest extends TestCase {
 		$this->assertSame( $actual['taxonomies'], [ 'category', 'post_tag' ] );
 	}
 
+	// Test that non-post types are removed from the Twitter Card post types option.
+	function test_twitter_card_post_types() {
+		$actual = $this->_sanitize( [
+			'twitter_card_post_types' => [ 'post', 'page', 'foo' ],
+		] );
+		$this->assertSame( $actual['twitter_card_post_types'], [ 'post', 'page' ] );
+	}
+
 	// Test that the default Open Graph image is sanitized down to an attachment ID.
 	function test_default_open_graph_image() {
 		$actual = $this->_sanitize( [

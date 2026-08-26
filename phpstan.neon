@@ -11,6 +11,9 @@ parameters:
 		- src/
 		- wp-seo.php
 
+	# Legacy php/ classes and global wp_seo_* functions aren't analyzed
+	# directly (see paths above), but src/ references them, so their
+	# symbols need to be known.
 	scanDirectories:
 		- php/
 

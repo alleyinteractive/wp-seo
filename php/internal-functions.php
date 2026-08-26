@@ -26,6 +26,24 @@ function wp_seo_enable_formatting_tag_safe_mode() {
 }
 
 /**
+ * Resolve an attachment ID stored in post meta to a full-size image URL.
+ *
+ * @param int    $post_id  The post ID.
+ * @param string $meta_key The meta key storing the attachment ID.
+ *
+ * @return string|false The image URL, or false if no valid image is set.
+ */
+function wp_seo_get_image_url_from_meta( $post_id, $meta_key ) {
+	$attachment_id = get_post_meta( $post_id, $meta_key, true );
+
+	if ( empty( $attachment_id ) || ! is_string( $attachment_id ) ) {
+		return false;
+	}
+
+	return wp_get_attachment_image_url( (int) $attachment_id, 'full' );
+}
+
+/**
  * Check whether the plugin's admin script and style are needed on the
  * current admin screen.
  *

@@ -120,6 +120,7 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\wp_seo_admin_scripts' );
 // Load the plugin's main files.
 require_once __DIR__ . '/src/assets.php';
 require_once __DIR__ . '/src/meta.php';
+require_once __DIR__ . '/src/settings.php';
 require_once __DIR__ . '/src/main.php';
 
 load_scripts();

@@ -50,8 +50,12 @@ class WPTitleWPHeadTest extends TestCase {
 	 * cleaner, and the option has to be set one way or another.
 	 */
 	function _update_option_for_tests() {
-		$this->options['post_types'] = [ 'post' ];
-		$this->options['taxonomies'] = [ 'category' ];
+		// wp_robots() only renders robots meta for post types/taxonomies enabled
+		// here (has_post_fields()/has_term_fields()), unlike the title/description/
+		// canonical settings fallback, which applies regardless - so the custom
+		// post type and taxonomy this test registers must be included too.
+		$this->options['post_types'] = [ 'post', $this->post_type ];
+		$this->options['taxonomies'] = [ 'category', $this->taxonomy ];
 		$this->options['arbitrary_tags'] = [
 			[
 				'name' => 'demo arbitrary title',
@@ -124,14 +128,13 @@ EOF;
 	}
 
 	/**
-	 * Test that WP_SEO::wp_head() echoes only the arbitrary <meta> tags.
+	 * Test that the rendered wp_head output contains the arbitrary <meta> tag.
 	 */
 	function _assert_arbitrary_meta() {
-		$expected = <<<EOF
-<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->
-EOF;
-
-		$this->assertSame( strip_ws( $expected ), strip_ws( Utils::get_echo( [ WP_SEO(), 'wp_head' ] ) ) );
+		$this->assertStringContainsString(
+			"<meta name='demo arbitrary title' content='demo arbitrary content' /><!-- WP SEO -->",
+			strip_ws( $this->get_rendered_head() )
+		);
 	}
 
 	/**
@@ -175,11 +178,9 @@ EOF;
 		$this->_assert_option_filters( 'single_post' );
 	}
 
-	// The custom post type isn't in the plugin's configured post_types, so
-	// WP_SEO::wp_robots() skips it entirely.
 	function test_singular() {
 		$this->go_to( get_permalink( $this->factory->post->create( [ 'post_type' => $this->post_type ] ) ) );
-		$this->_assert_option_filters( "single_{$this->post_type}", [] );
+		$this->_assert_option_filters( "single_{$this->post_type}" );
 	}
 
 	// A post with custom values should not use the single_{type}_ values.
@@ -224,12 +225,10 @@ EOF;
 		$this->_assert_option_filters( 'archive_category' );
 	}
 
-	// The custom taxonomy isn't in the plugin's configured taxonomies, so
-	// WP_SEO::wp_robots() skips it entirely.
 	function test_tax() {
 		$term_ID = $this->factory->term->create( [ 'name' => 'demo-a', 'taxonomy' => $this->taxonomy ] );
 		$this->go_to( get_term_link( $term_ID, $this->taxonomy ) );
-		$this->_assert_option_filters( "archive_{$this->taxonomy}", [] );
+		$this->_assert_option_filters( "archive_{$this->taxonomy}" );
 	}
 
 	// A term with custom values should not use the archive_{taxonomy}_ fields.

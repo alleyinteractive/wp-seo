@@ -19,9 +19,17 @@ class MetaboxesTest extends TestCase {
 			'post_types' => [ 'post' ],
 			'taxonomies' => [ 'category' ],
 		] );
+
+		// WP_SEO_Settings caches $this->options in memory and only re-reads the
+		// database when that cache is empty. The base TestCase's own setUp()
+		// already primed that cache, so this update_option() call above would
+		// otherwise be invisible - force a refresh.
+		WP_SEO_Settings()->set_options();
+
 		require_once ABSPATH . 'wp-admin/includes/template.php';
 
-		// Admin-only template tags load on admin_init.
+		// The default admin-only template tag functions (e.g. wp_seo_the_post_meta_fields())
+		// are only loaded on admin_init, which doesn't fire on its own in this test environment.
 		do_action( 'admin_init' );
 	}
 

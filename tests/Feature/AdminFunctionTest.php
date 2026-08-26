@@ -14,6 +14,10 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use WP_SEO_Settings;
 
 class AdminFunctionTest extends TestCase {
+	// Loads the WP_Screen/set_current_screen() dependencies and, importantly,
+	// backs up and restores $GLOBALS['current_screen'] around each test so the
+	// set_current_screen() calls below don't leak admin context into other
+	// tests that happen to run afterward in the same process.
 	use Admin_Screen;
 
 	/**
@@ -41,7 +45,13 @@ class AdminFunctionTest extends TestCase {
 	 * Sanity-check that the post_id_to_* and term_data_to_* functions use saved values.
 	 */
 	#[DataProvider( 'data_post_id_to_and_term_data_to' )]
-	function test_admin_functions_contain( $function, $should, $contain, $args ) {
+	function test_admin_functions_contain( $function, $should, $contain, $args, $screen = '' ) {
+		// The robots directive functions only render once is_admin() is true and
+		// get_current_screen() returns a matching post type or taxonomy screen.
+		if ( '' !== $screen ) {
+			set_current_screen( $screen );
+		}
+
 		// Capture the output of the function.
 		self::assertStringContainsString( $contain, Utils::get_echo( $function, $args ), $should );
 	}
@@ -50,6 +60,10 @@ class AdminFunctionTest extends TestCase {
 	 * Combines the post_id_to_* and term_data_to_* data providers.
 	 */
 	static function data_post_id_to_and_term_data_to() {
+		// Data providers run before the test framework's application/container is
+		// bootstrapped, but factory() (used below) depends on it being available.
+		new \Mantle\Testkit\Application();
+
 		return array_merge( self::data_post_id_to_functions(), self::data_term_data_to_functions() );
 	}
 
@@ -115,12 +129,14 @@ class AdminFunctionTest extends TestCase {
 				'Should select the enabled option when the noindex meta is set to enable',
 				'<option value="enable" ' . selected( $meta_robots_noindex, 'enable', false ) . '>',
 				[ $post_id, 'noindex' ],
+				'post',
 			],
 			[
 				'wp_seo_post_id_to_the_meta_robots_input',
 				'Should select the disabled option when the nofollow meta is set to disable',
 				'<option value="disable" ' . selected( $meta_robots_nofollow, 'disable', false ) . '>',
 				[ $post_id, 'nofollow' ],
+				'post',
 			],
 		];
 	}
@@ -133,17 +149,22 @@ class AdminFunctionTest extends TestCase {
 	 * }
 	 */
 	static function data_term_data_to_functions() {
-		$title                = rand_str( rand( 32, 64 ) );
-		$description          = rand_str( rand( 32, 64 ) );
-		$canonical_url        = 'https://example.com/canonical-url';
-		$robots_noindex       = 'enable';
-		$robots_nofollow      = 'disable';
+		$title           = rand_str( rand( 32, 64 ) );
+		$description     = rand_str( rand( 32, 64 ) );
+		$canonical_url   = 'https://example.com/canonical-url';
+		$robots_noindex  = 'enable';
+		$robots_nofollow = 'disable';
 
+		// Note: intersect_term_option() only keeps a 'robots_{directive}' key for
+		// directives configured in settings (registered in the base TestCase's
+		// setUp()), so noindex/nofollow need to be among those directives for
+		// the term option's flat robots_noindex/robots_nofollow keys to survive
+		// when the test runs.
 		$term = self::create_and_get_term_with_option( [
-			'title'          => $title,
-			'description'    => $description,
-			'canonical_url'  => $canonical_url,
-			'robots_noindex' => $robots_noindex,
+			'title'           => $title,
+			'description'     => $description,
+			'canonical_url'   => $canonical_url,
+			'robots_noindex'  => $robots_noindex,
 			'robots_nofollow' => $robots_nofollow,
 		] );
 
@@ -183,12 +204,14 @@ class AdminFunctionTest extends TestCase {
 				'Should select the enabled option when the noindex term option is set to enable',
 				'<option value="enable" ' . selected( $robots_noindex, 'enable', false ) . '>',
 				[ $term->term_id, $term->taxonomy, 'noindex' ],
+				'edit-' . $term->taxonomy,
 			],
 			[
 				'wp_seo_term_data_to_the_meta_robots_input',
 				'Should select the disabled option when the nofollow term option is set to disable',
 				'<option value="disable" ' . selected( $robots_nofollow, 'disable', false ) . '>',
 				[ $term->term_id, $term->taxonomy, 'nofollow' ],
+				'edit-' . $term->taxonomy,
 			],
 		];
 	}
