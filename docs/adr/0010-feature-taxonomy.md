@@ -26,6 +26,14 @@ Twitter Card was added to `src/features/` by [alleyinteractive/wp-seo#179](https
 
 It does raise a question this ADR does not answer. `Twitter_Card::get_title()`, `get_description()`, and `get_image()` fall back to `Open_Graph::get_title()` and friends by static call, so `twitter_card` reads Open Graph's stored meta. Those calls do not require Open Graph to have booted, which means a site can enable `twitter_card` with `open_graph` off and get Twitter Card tags populated from meta whose editor field is not shown and whose key was never registered. Whether that is expressed as a nested Feature (ADR 0003), a group that owns both (ADR 0008), or left as an explicit documented fallback is undecided, and should be settled before either Feature is documented for a release.
 
+## How a Feature gates its editor field
+
+Owning an editor field means the field has to disappear when the Feature is off, and the mechanism for that is already established: a Feature adds a post-type support flag in its `boot()` — `wp-seo-open-graph`, `wp-seo-twitter-card` — and its editor panel returns `null` unless the current post type declares that support.
+
+Because support is added inside `boot()`, a Feature that was never enabled never adds it, and the panel vanishes without the JavaScript knowing anything about handles, enablement filters, or the Registry. Exposing the Registry's active handles to the editor was considered and rejected: the support flag already carries the answer, it additionally respects the per-post-type setting that a handle check would ignore, and one mechanism is cheaper to keep correct than two.
+
+The consequence for the Features still to migrate is that each must register its own support flag rather than relying on a shared one. The Search Engine panel has no gate today, which is correct only for as long as `search_engine_*` is registered unconditionally from `config/post-meta.json` and no Feature claims it. When `titles` and `descriptions` take those keys over, each needs a support flag of its own and its half of that panel must check it — otherwise the panel writes to meta that a disabled Feature never registered.
+
 ## Page type is a separate axis
 
 Dividing by page type was rejected as a way to define Features, but it remains how configuration is organized: a site enables `titles` once and then configures a title format for each page type. The two axes are orthogonal and should not be collapsed into each other. Separating page types properly in the admin is tracked in [alleyinteractive/wp-seo#199](https://github.com/alleyinteractive/wp-seo/issues/199).
