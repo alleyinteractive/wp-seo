@@ -19,5 +19,21 @@ function main(): void {
 		new Features\Twitter_Card(),
 	);
 
+	/**
+	 * Fires while WP SEO composes its features, before any of them boot.
+	 *
+	 * Include a feature in the given group to have WP SEO boot it alongside its
+	 * own, without editing the plugin. Wrap it in a `Feature` first to give it a
+	 * handle and put it in the Registry.
+	 *
+	 * WP SEO composes on `after_setup_theme`, so the enablement filters named
+	 * for a handle can still be added from a theme.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \Alley\WP\Types\Features $plugin The features WP SEO is about to boot.
+	 */
+	do_action( 'wp_seo_register_features', $plugin );
+
 	$plugin->boot();
 }
