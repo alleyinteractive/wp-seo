@@ -22,17 +22,26 @@ function wp_seo_register_sidebar_scripts() {
 	/**
 	 * Asset file to automatically load dependencies and version.
 	 *
+	 * Dependencies are script handles, which are never empty strings.
+	 *
 	 * @var array{
-	 *      dependencies: string[],
+	 *      dependencies: non-empty-string[],
 	 *      version: string,
 	 * } $asset_file
 	 * */
 	$asset_file = include __DIR__ . '/index.asset.php';
 
+	$src = plugins_url( 'index.js', __FILE__ );
+
+	// Nothing to register without a URL to register it from.
+	if ( '' === $src ) {
+		return;
+	}
+
 	// Register the sidebar script.
 	wp_register_script(
 		'wp-seo-sidebar',
-		plugins_url( 'index.js', __FILE__ ),
+		$src,
 		$asset_file['dependencies'],
 		$asset_file['version'],
 		true
