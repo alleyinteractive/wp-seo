@@ -50,7 +50,7 @@ final class Twitter_Card implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'wp-seo-twitter-card' ),
-			'wp_seo_twitter_card_title',
+			'alley_seo_twitter_card_title',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
 				'single'            => true,
@@ -62,7 +62,7 @@ final class Twitter_Card implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'wp-seo-twitter-card' ),
-			'wp_seo_twitter_card_description',
+			'alley_seo_twitter_card_description',
 			[
 				'sanitize_callback' => 'sanitize_text_field',
 				'single'            => true,
@@ -74,7 +74,7 @@ final class Twitter_Card implements Feature {
 		register_meta_helper(
 			'post',
 			get_post_types_by_support( 'wp-seo-twitter-card' ),
-			'wp_seo_twitter_card_image',
+			'alley_seo_twitter_card_image',
 			[
 				'sanitize_callback' => 'absint',
 				'single'            => true,
@@ -92,7 +92,7 @@ final class Twitter_Card implements Feature {
 	 * @return string The title.
 	 */
 	public static function get_title( $post_id ): string {
-		$twitter_card_title = get_post_meta( $post_id, 'wp_seo_twitter_card_title', true );
+		$twitter_card_title = get_post_meta( $post_id, 'alley_seo_twitter_card_title', true );
 
 		if ( ! empty( $twitter_card_title ) && is_string( $twitter_card_title ) ) {
 			return $twitter_card_title;
@@ -109,7 +109,7 @@ final class Twitter_Card implements Feature {
 	 * @return string The description.
 	 */
 	public static function get_description( $post_id ): string {
-		$twitter_card_description = get_post_meta( $post_id, 'wp_seo_twitter_card_description', true );
+		$twitter_card_description = get_post_meta( $post_id, 'alley_seo_twitter_card_description', true );
 
 		if ( ! empty( $twitter_card_description ) && is_string( $twitter_card_description ) ) {
 			return $twitter_card_description;
@@ -126,7 +126,7 @@ final class Twitter_Card implements Feature {
 	 * @return string|false The image URL or false if no assigned images.
 	 */
 	public static function get_image( $post_id ): string|bool {
-		$twitter_card_image_url = wp_seo_get_image_url_from_meta( $post_id, 'wp_seo_twitter_card_image' );
+		$twitter_card_image_url = wp_seo_get_image_url_from_meta( $post_id, 'alley_seo_twitter_card_image' );
 
 		if ( ! empty( $twitter_card_image_url ) ) {
 			return $twitter_card_image_url;
