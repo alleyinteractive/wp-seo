@@ -5,6 +5,9 @@ All notable changes to `WP SEO` will be documented in this file.
 ## 2.0.0 ##
 Just kidding about the "no plans for additional feature development" thing, we're back!
 
+* Breaking change: Plugin behavior is organized into features, and every feature is opt-in. Nothing runs until it is enabled in code with the `wp_seo_enable_feature` filter or the `wp_seo_enable_{handle}` filter named for a specific feature. Features migrated so far: Open Graph (`wp_seo_enable_open_graph`).
+* Added: A read-only WP SEO Features admin screen listing every registered feature and whether it is running.
+* Added: `wp_seo_register_features` action, for adding features to the plugin without editing it.
 * Added: Configurable site-wide default Open Graph image, used as a fallback when a post has no explicit or featured image.
 * Added: Support for canonical URL and robots meta.
 * Changed: Rebase plugin on @alleyinteractive/create-wordpress-plugin.
