@@ -27,8 +27,9 @@ This is worth more than permission to rename. The reason `_meta_title` and `sear
 | Canonical | `_meta_canonical_url` | `alley_seo_canonical_url` | replaced when `canonical_urls` migrates |
 | Robots | `_meta_robots_{directive}` | `alley_seo_robots_{directive}` | replaced when `robots_meta` migrates |
 | Open Graph | `wp_seo_open_graph_*` | `alley_seo_open_graph_*` | renamed in place |
+| Twitter Card | `wp_seo_twitter_card_*` | `alley_seo_twitter_card_*` | renamed in place |
 
-Only the last row is a rename. Open Graph is already a Feature and already owns its keys, so nothing has to happen first. Every other row is a replacement: the Feature that takes ownership of the concept registers the new key and stops reading the old one, in the same change that moves its rendering out of `php/`. There is no intermediate state in which a legacy key wears a new name.
+Only the last two rows are renames. Open Graph and Twitter Card are already Features and already own their keys, so nothing has to happen first. Every other row is a replacement: the Feature that takes ownership of the concept registers the new key and stops reading the old one, in the same change that moves its rendering out of `php/`. There is no intermediate state in which a legacy key wears a new name.
 
 That distinction is worth stating because the alternative reads as reasonable and has already been written once. [alleyinteractive/wp-seo#171](https://github.com/alleyinteractive/wp-seo/pull/171) renamed all four legacy keys in place and was approved; it produced `_alley_seo_meta_title`, which keeps the leading underscore, stays invisible to REST, and would have to be renamed again when `titles` migrated. Do not open a standalone rename PR for the first four rows.
 
