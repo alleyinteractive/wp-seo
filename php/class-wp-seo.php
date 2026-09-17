@@ -494,10 +494,10 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 				if ( ( WP_SEO_Settings()->has_term_fields( $taxonomy = get_queried_object()->taxonomy ) ) && ( $option = get_option( $this->get_term_option_name( get_queried_object() ) ) ) && ( ! empty( $option['title'] ) ) ) {
 					return $option['title'];
 				} else {
-					$key = "archive_{$taxonomy}_title";
+					$key = WP_SEO_Settings()->get_archive_key_prefix( $taxonomy, 'taxonomy' ) . '_title';
 				}
 			} elseif ( is_post_type_archive() ) {
-				$key = 'archive_' . get_queried_object()->name . '_title';
+				$key = WP_SEO_Settings()->get_archive_key_prefix( get_queried_object()->name, 'post_type' ) . '_title';
 			} elseif ( is_date() ) {
 				$key = 'archive_date_title';
 			} elseif ( is_search() ) {
@@ -629,9 +629,9 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 					$meta_description = $option['description'];
 					$canonical_url    = $option['canonical_url'];
 				}
-				$key = "archive_{$taxonomy}";
+				$key = WP_SEO_Settings()->get_archive_key_prefix( $taxonomy, 'taxonomy' );
 			} elseif ( is_post_type_archive() ) {
-				$key = 'archive_' . get_queried_object()->name;
+				$key = WP_SEO_Settings()->get_archive_key_prefix( get_queried_object()->name, 'post_type' );
 			} elseif ( is_date() ) {
 				$key = 'archive_date';
 			} else {
@@ -726,7 +726,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 					return $robots;
 				}
 
-				$key = "archive_{$term->taxonomy}";
+				$key = WP_SEO_Settings()->get_archive_key_prefix( $term->taxonomy, 'taxonomy' );
 			}
 
 			// Homepage.
@@ -741,7 +741,7 @@ if ( ! class_exists( 'WP_SEO' ) ) :
 
 			// Post type archives.
 			if ( is_post_type_archive() ) {
-				$key = 'archive_' . get_queried_object()->name;
+				$key = WP_SEO_Settings()->get_archive_key_prefix( get_queried_object()->name, 'post_type' );
 			}
 
 			// Date archives.
