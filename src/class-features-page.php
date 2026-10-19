@@ -96,14 +96,14 @@ final class Features_Page {
 		);
 
 		/*
-		 * Name the page within its own menu, so that the menu can hold a second
-		 * page later without WordPress naming this one after the menu itself.
+		 * Name the page within its own menu, so that alongside the menu's other
+		 * pages WordPress does not name this one after the menu itself.
 		 *
-		 * The label does not render today: while this is the only page under the
-		 * menu, WordPress removes a lone submenu item whose slug matches its
-		 * parent, on the grounds that it only repeats the menu. Registering it
-		 * anyway is what makes "Features" the name of the first item on the day a
-		 * second one appears, instead of a second "WP SEO".
+		 * The label renders only when another page shares the menu: WordPress
+		 * removes a lone submenu item whose slug matches its parent, on the
+		 * grounds that it only repeats the menu. Registering it anyway is what
+		 * makes "Features" the name of the first item, instead of a second
+		 * "WP SEO".
 		 */
 		add_submenu_page(
 			self::SLUG,

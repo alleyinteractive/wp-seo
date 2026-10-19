@@ -11,6 +11,7 @@ Just kidding about the "no plans for additional feature development" thing, we'r
 * Added: Configurable site-wide default Open Graph image, used as a fallback when a post has no explicit or featured image.
 * Added: Support for canonical URL and robots meta.
 * Added: `ai_providers()` and `ai_prompt()` helpers for sending prompts through the AI connectors configured in WordPress.
+* Added: A WP SEO AI settings page for choosing the AI provider each feature sends prompts to, the `get_ai_provider()` helper, and the `wp_seo_ai_provider` filter for setting a provider in code.
 * Changed: Raised minimum WordPress version to 7.0.
 * Changed: Rebase plugin on @alleyinteractive/create-wordpress-plugin.
 * Removed: Support for keywords which are no longer used by search engines.
