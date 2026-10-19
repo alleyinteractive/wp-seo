@@ -11,8 +11,8 @@ use Alley\WP\WP_SEO\AI_Settings;
 use Alley\WP\WP_SEO\Features_Page;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
-use function Alley\WP\WP_SEO\ai_providers;
 use function Alley\WP\WP_SEO\get_ai_provider;
+use function Alley\WP\WP_SEO\get_ai_providers;
 use function Mantle\Support\Helpers\capture;
 
 /**
@@ -211,7 +211,7 @@ class AiSettingsTest extends TestCase {
 	public function test_section_links_to_connectors_when_there_are_no_providers() {
 		$page = new AI_Settings( [ 'description_generator' => 'Meta Description Generator' ] );
 
-		$this->assertSame( [], ai_providers(), 'No AI provider plugin is active in the test environment.' );
+		$this->assertSame( [], get_ai_providers(), 'No AI provider plugin is active in the test environment.' );
 		$this->assertStringContainsString( 'options-connectors.php', capture( fn () => $page->render_section() ) );
 
 		$this->register_provider( 'wp_seo_active' );

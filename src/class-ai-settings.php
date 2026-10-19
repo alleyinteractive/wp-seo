@@ -146,7 +146,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 		$value     = is_array( $value ) ? $value : [];
 		$stored    = get_option( self::OPTION );
 		$stored    = is_array( $stored ) ? $stored : [];
-		$providers = ai_providers();
+		$providers = get_ai_providers();
 		$sanitized = [];
 
 		foreach ( array_keys( $this->features ) as $feature ) {
@@ -189,7 +189,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * when there are none to choose from.
 	 */
 	public function render_section(): void {
-		if ( ai_providers() ) {
+		if ( get_ai_providers() ) {
 			return;
 		}
 		?>
@@ -220,7 +220,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 			<?php disabled( $in_code ); ?>
 		>
 			<option value=""><?php esc_html_e( 'None', 'wp-seo' ); ?></option>
-			<?php foreach ( ai_providers() as $id => $name ) : ?>
+			<?php foreach ( get_ai_providers() as $id => $name ) : ?>
 				<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $selected, $id ); ?>>
 					<?php echo esc_html( $name ); ?>
 				</option>
