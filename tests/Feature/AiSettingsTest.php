@@ -133,6 +133,19 @@ class AiSettingsTest extends TestCase {
 	}
 
 	/**
+	 * Saving "None" for a feature clears its stored provider, unlike leaving
+	 * the feature out of what is saved.
+	 */
+	public function test_saving_none_clears_the_stored_provider() {
+		$this->register_provider( 'wp_seo_active' );
+
+		update_option( AI_Settings::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
+		update_option( AI_Settings::OPTION, [ 'description_generator' => '' ] );
+
+		$this->assertSame( [], get_option( AI_Settings::OPTION ) );
+	}
+
+	/**
 	 * A provider set in code wins over the stored one, the stored one is used
 	 * otherwise, and a feature with neither has no provider.
 	 */
@@ -202,6 +215,18 @@ class AiSettingsTest extends TestCase {
 		$this->assertStringContainsString( "disabled='disabled'", $field );
 		$this->assertMatchesRegularExpression( "/value=\"wp_seo_active\"\\s+selected='selected'/", $field );
 		$this->assertStringContainsString( 'Set in code', $field );
+	}
+
+	/**
+	 * A provider set in code that is not available is listed as unavailable,
+	 * rather than the field showing "None".
+	 */
+	public function test_field_lists_an_unavailable_provider_set_in_code() {
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
+
+		$field = $this->render_field();
+
+		$this->assertMatchesRegularExpression( "/value=\"wp_seo_missing\"\\s+selected='selected'>\\s*wp_seo_missing \\(unavailable\\)/", $field );
 	}
 
 	/**

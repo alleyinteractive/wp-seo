@@ -16,8 +16,10 @@ namespace Alley\WP\WP_SEO;
  * option keyed by feature handle. A row whose provider is set in code with the
  * `wp_seo_ai_provider` filter is shown read-only.
  *
- * This is not a `Feature` and carries no handle: it only configures features
- * that are, and does nothing when it was given none.
+ * This is infrastructure rather than a WP SEO feature, though it implements the
+ * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
+ * wrapped in a `Feature` and carries no handle, since it only configures
+ * features that are, and it does nothing when it was given none.
  */
 final class AI_Settings implements \Alley\WP\Types\Feature {
 	/**
@@ -137,7 +139,8 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * Keeps a provider only for a feature the page lists and only if it is an
 	 * available AI provider. A feature missing from the input keeps the provider
 	 * already stored for it: a row set in code renders a disabled field, and
-	 * browsers do not submit disabled fields.
+	 * browsers do not submit disabled fields. A feature submitted as an empty
+	 * string, which is what choosing "None" sends, has its provider cleared.
 	 *
 	 * @param mixed $value Option value to save.
 	 * @return array<string, string> Connector IDs keyed by feature handle.
@@ -208,11 +211,24 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	/**
 	 * Render the provider dropdown for one feature.
 	 *
+	 * A provider the feature uses that is not available, as one set in code can
+	 * be, is listed as unavailable rather than left out, so that the dropdown
+	 * does not show "None" for a feature that still sends its prompts there.
+	 *
 	 * @param array{feature: string, label_for: string} $args Field arguments.
 	 */
 	public function render_field( array $args ): void {
-		$in_code  = null !== get_ai_provider_from_code( $args['feature'] );
-		$selected = get_ai_provider( $args['feature'] );
+		$in_code   = null !== get_ai_provider_from_code( $args['feature'] );
+		$selected  = get_ai_provider( $args['feature'] );
+		$providers = get_ai_providers();
+
+		if ( '' !== $selected && ! isset( $providers[ $selected ] ) ) {
+			$providers[ $selected ] = sprintf(
+				/* translators: %s: connector ID of the provider. */
+				__( '%s (unavailable)', 'wp-seo' ),
+				$selected
+			);
+		}
 		?>
 		<select
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
@@ -220,7 +236,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 			<?php disabled( $in_code ); ?>
 		>
 			<option value=""><?php esc_html_e( 'None', 'wp-seo' ); ?></option>
-			<?php foreach ( get_ai_providers() as $id => $name ) : ?>
+			<?php foreach ( $providers as $id => $name ) : ?>
 				<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $selected, $id ); ?>>
 					<?php echo esc_html( $name ); ?>
 				</option>
