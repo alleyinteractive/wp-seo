@@ -85,10 +85,20 @@ class AiTest extends TestCase {
 	}
 
 	/**
-	 * A prompt starts as the core prompt builder, with or without a provider.
+	 * A prompt starts as the core prompt builder.
 	 */
 	public function test_ai_prompt_returns_core_prompt_builder() {
 		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, ai_prompt( 'Hello' ) );
-		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, ai_prompt( 'Hello', 'anthropic' ) );
+	}
+
+	/**
+	 * A prompt goes to the provider it was given. A provider that does not exist
+	 * shows this without a request being made: generating fails, naming it.
+	 */
+	public function test_ai_prompt_uses_the_given_provider() {
+		$result = ai_prompt( 'Hello', 'wp_seo_missing' )->generate_text();
+
+		$this->assertWPError( $result );
+		$this->assertStringContainsString( 'wp_seo_missing', $result->get_error_message() );
 	}
 }
