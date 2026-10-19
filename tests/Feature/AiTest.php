@@ -9,8 +9,8 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
 
-use function Alley\WP\WP_SEO\ai_prompt;
-use function Alley\WP\WP_SEO\ai_providers;
+use function Alley\WP\WP_SEO\get_ai_prompt;
+use function Alley\WP\WP_SEO\get_ai_providers;
 
 /**
  * Tests for the helpers that use the AI connectors configured in WordPress.
@@ -60,10 +60,10 @@ class AiTest extends TestCase {
 	/**
 	 * An AI provider whose plugin is active is listed by name.
 	 */
-	public function test_ai_providers_lists_active_ai_providers() {
+	public function test_get_ai_providers_lists_active_ai_providers() {
 		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
 
-		$providers = ai_providers();
+		$providers = get_ai_providers();
 
 		$this->assertArrayHasKey( 'wp_seo_active', $providers );
 		$this->assertSame( 'Test wp_seo_active', $providers['wp_seo_active'] );
@@ -73,11 +73,11 @@ class AiTest extends TestCase {
 	 * Connectors that are not AI providers, and AI providers whose plugin is not
 	 * active, are left out.
 	 */
-	public function test_ai_providers_omits_inactive_and_non_ai_connectors() {
+	public function test_get_ai_providers_omits_inactive_and_non_ai_connectors() {
 		$this->register_connector( 'wp_seo_inactive', 'ai_provider', false );
 		$this->register_connector( 'wp_seo_other', 'spam_filtering', true );
 
-		$providers = ai_providers();
+		$providers = get_ai_providers();
 
 		$this->assertArrayNotHasKey( 'wp_seo_inactive', $providers );
 		$this->assertArrayNotHasKey( 'wp_seo_other', $providers );
@@ -87,16 +87,16 @@ class AiTest extends TestCase {
 	/**
 	 * A prompt starts as the core prompt builder.
 	 */
-	public function test_ai_prompt_returns_core_prompt_builder() {
-		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, ai_prompt( 'Hello' ) );
+	public function test_get_ai_prompt_returns_core_prompt_builder() {
+		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, get_ai_prompt( 'Hello' ) );
 	}
 
 	/**
 	 * A prompt goes to the provider it was given. A provider that does not exist
 	 * shows this without a request being made: generating fails, naming it.
 	 */
-	public function test_ai_prompt_uses_the_given_provider() {
-		$result = ai_prompt( 'Hello', 'wp_seo_missing' )->generate_text();
+	public function test_get_ai_prompt_uses_the_given_provider() {
+		$result = get_ai_prompt( 'Hello', 'wp_seo_missing' )->generate_text();
 
 		$this->assertWPError( $result );
 		$this->assertStringContainsString( 'wp_seo_missing', $result->get_error_message() );
