@@ -45,6 +45,14 @@ final class FakeAiProvider implements ProviderInterface {
 	public static string $response = '';
 
 	/**
+	 * Exception the provider throws instead of replying, as a real provider's
+	 * client does for a failed request, or null to reply.
+	 *
+	 * @var \Exception|null
+	 */
+	public static ?\Exception $exception = null;
+
+	/**
 	 * Text of the last prompt sent, or null if none was.
 	 *
 	 * @var string|null
@@ -68,6 +76,7 @@ final class FakeAiProvider implements ProviderInterface {
 		AiClient::defaultRegistry()->registerProvider( self::class );
 
 		self::$response           = $response;
+		self::$exception          = null;
 		self::$prompt             = null;
 		self::$system_instruction = null;
 	}
