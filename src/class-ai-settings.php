@@ -12,9 +12,9 @@ namespace Alley\WP\WP_SEO;
  * prompts to.
  *
  * Providers are the AI connectors configured under Settings > Connectors. The
- * page lists one row per feature it was given, and stores the choices in one
- * option keyed by feature handle. A row whose provider is set in code with the
- * `wp_seo_ai_provider` filter is shown read-only.
+ * page lists one row per active feature it was given, and stores the choices
+ * in one option keyed by feature handle. A row whose provider is set in code
+ * with the `wp_seo_ai_provider` filter is shown read-only.
  *
  * This is infrastructure rather than a WP SEO feature, though it implements the
  * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
@@ -97,7 +97,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	public function add_fields(): void {
 		add_settings_section( self::SECTION, '', [ $this, 'render_section' ], self::SLUG );
 
-		foreach ( $this->features as $feature => $label ) {
+		foreach ( $this->active_features() as $feature => $label ) {
 			add_settings_field(
 				"wp_seo_ai_provider_{$feature}",
 				$label,
@@ -117,8 +117,13 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 *
 	 * The fields are added only when the page loads, since only rendering the
 	 * page needs them; saving through `options.php` needs only the setting.
+	 * With no active features to list, there is no page.
 	 */
 	public function add_page(): void {
+		if ( ! $this->active_features() ) {
+			return;
+		}
+
 		$hook = add_submenu_page(
 			Features_Page::SLUG,
 			__( 'WP SEO AI Settings', 'wp-seo' ),
@@ -134,13 +139,33 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	}
 
 	/**
+	 * The features to list on the page: those that are active.
+	 *
+	 * A feature that is not active sends no prompts, so there is no provider
+	 * to choose for it. Its stored provider is kept all the same, since
+	 * `sanitize()` covers every feature the page was given, listed or not.
+	 *
+	 * @return array<string, string> Labels of the active features, keyed by handle.
+	 */
+	private function active_features(): array {
+		$registry = Registry::features();
+
+		return array_filter(
+			$this->features,
+			fn ( string $feature ): bool => isset( $registry[ $feature ] ) && $registry[ $feature ]->booted(),
+			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
 	 * Sanitize the option before it is saved.
 	 *
-	 * Keeps a provider only for a feature the page lists and only if it is an
-	 * available AI provider. A feature missing from the input keeps the provider
-	 * already stored for it: a row set in code renders a disabled field, and
-	 * browsers do not submit disabled fields. A feature submitted as an empty
-	 * string, which is what choosing "None" sends, has its provider cleared.
+	 * Keeps a provider only for a feature the page was given and only if it is
+	 * an available AI provider. A feature missing from the input keeps the
+	 * provider already stored for it: a row set in code renders a disabled
+	 * field, browsers do not submit disabled fields, and an inactive feature
+	 * has no row at all. A feature submitted as an empty string, which is what
+	 * choosing "None" sends, has its provider cleared.
 	 *
 	 * @param mixed $value Option value to save.
 	 * @return array<string, string> Connector IDs keyed by feature handle.
