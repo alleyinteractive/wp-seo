@@ -233,6 +233,13 @@ final class Description_Generator_Command {
 						return;
 					}
 
+					/*
+					 * The description is saved without an editor reviewing it,
+					 * and markup the provider escaped comes back decoded, so it
+					 * is sanitized as the plain text it should be.
+					 */
+					$description = sanitize_text_field( $description );
+
 					update_post_meta( $post->ID, Description_Generator::META_KEY, $description );
 					++$generated;
 
