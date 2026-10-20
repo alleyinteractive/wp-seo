@@ -64,10 +64,10 @@ final class Description_Generator implements Feature {
 	 * @return true|\WP_Error True if allowed, or an error.
 	 */
 	public function can_generate( \WP_REST_Request $request ): true|\WP_Error {
-		$post = get_post( $request['post_id'] );
+		$post = $this->get_requested_post( $request );
 
-		if ( ! $post instanceof \WP_Post ) {
-			return new \WP_Error( 'rest_post_invalid_id', __( 'Invalid post ID.', 'wp-seo' ), [ 'status' => 404 ] );
+		if ( is_wp_error( $post ) ) {
+			return $post;
 		}
 
 		if (
@@ -92,10 +92,10 @@ final class Description_Generator implements Feature {
 	 * @return \WP_REST_Response|\WP_Error The description, or an error.
 	 */
 	public function generate( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
-		$post = get_post( $request['post_id'] );
+		$post = $this->get_requested_post( $request );
 
-		if ( ! $post instanceof \WP_Post ) {
-			return new \WP_Error( 'rest_post_invalid_id', __( 'Invalid post ID.', 'wp-seo' ), [ 'status' => 404 ] );
+		if ( is_wp_error( $post ) ) {
+			return $post;
 		}
 
 		$description = generate_description( $post );
@@ -105,5 +105,22 @@ final class Description_Generator implements Feature {
 		}
 
 		return new \WP_REST_Response( [ 'description' => $description ] );
+	}
+
+	/**
+	 * Get the post a request is for.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @phpstan-param \WP_REST_Request<array{post_id: int}> $request
+	 * @return \WP_Post|\WP_Error The post, or an error if it does not exist.
+	 */
+	private function get_requested_post( \WP_REST_Request $request ): \WP_Post|\WP_Error {
+		$post = get_post( $request['post_id'] );
+
+		if ( ! $post instanceof \WP_Post ) {
+			return new \WP_Error( 'rest_post_invalid_id', __( 'Invalid post ID.', 'wp-seo' ), [ 'status' => 404 ] );
+		}
+
+		return $post;
 	}
 }

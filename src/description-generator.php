@@ -83,7 +83,12 @@ function generate_description( \WP_Post $post ): string|\WP_Error {
 	/** This filter is documented in wp-includes/post-template.php */
 	$content = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
-	$title   = wp_strip_all_tags( get_the_title( $post ), true );
+	/*
+	 * The title is read as stored, since get_the_title() prepends "Private: "
+	 * to a private post's title outside the admin, and the description would
+	 * repeat it.
+	 */
+	$title   = wp_strip_all_tags( $post->post_title, true );
 	$content = wp_strip_all_tags( is_string( $content ) ? $content : '', true );
 
 	if ( '' === $title && '' === $content ) {
@@ -137,9 +142,13 @@ function generate_description( \WP_Post $post ): string|\WP_Error {
 		return $text;
 	}
 
-	// Models sometimes wrap their answer in quotes despite being told not to.
+	/*
+	 * Models sometimes wrap their answer in quotes despite being told not to.
+	 * The quotes are removed only when the opening one appears nowhere else in
+	 * the reply, so that a reply such as `"A" vs "B"` keeps its quotes.
+	 */
 	$description = trim( wp_strip_all_tags( $text, true ) );
-	$description = (string) preg_replace( '/^["\'“‘](.*)["\'”’]$/su', '$1', $description );
+	$description = (string) preg_replace( '/^(?|"([^"]*)"|\'([^\']*)\'|“([^“]*)”|‘([^‘]*)’)$/u', '$1', $description );
 
 	if ( '' === $description ) {
 		return new \WP_Error(

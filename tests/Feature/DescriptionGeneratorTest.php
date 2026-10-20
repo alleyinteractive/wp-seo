@@ -10,6 +10,7 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 use Alley\WP\WP_SEO\Features\Description_Generator;
 use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
 use Alley\WP\WP_SEO\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 use function Alley\WP\WP_SEO\generate_description;
 use function Alley\WP\WP_SEO\get_description_generator_post_types;
@@ -82,6 +83,24 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
+	 * A private post's title is sent as stored, without the "Private: " that
+	 * is prepended to it for display.
+	 */
+	public function test_a_private_post_title_is_sent_without_a_prefix() {
+		$post = static::factory()->post->create_and_get(
+			[
+				'post_title'  => 'Hello World',
+				'post_status' => 'private',
+			]
+		);
+
+		generate_description( $post );
+
+		$this->assertStringContainsString( "Title: Hello World\n", FakeAiProvider::$prompt );
+		$this->assertStringNotContainsString( 'Private', FakeAiProvider::$prompt );
+	}
+
+	/**
 	 * The instructions can be changed, and are given the post.
 	 */
 	public function test_instructions_are_filterable() {
@@ -125,6 +144,36 @@ class DescriptionGeneratorTest extends TestCase {
 		FakeAiProvider::$response = "  \"A <b>bold</b>\n summary.\"  ";
 
 		$this->assertSame( 'A bold summary.', generate_description( $this->post ) );
+	}
+
+	/**
+	 * Quotes are removed only when they wrap the whole reply.
+	 *
+	 * @param string $reply    Reply from the provider.
+	 * @param string $expected Description returned.
+	 */
+	#[DataProvider( 'quoted_replies' )]
+	public function test_wrapping_quotes_are_removed( string $reply, string $expected ) {
+		FakeAiProvider::$response = $reply;
+
+		$this->assertSame( $expected, generate_description( $this->post ) );
+	}
+
+	/**
+	 * Replies with quotes, and the descriptions returned for them.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public static function quoted_replies(): array {
+		return [
+			'straight double quotes' => [ '"A summary."', 'A summary.' ],
+			'curly double quotes'    => [ '“A summary.”', 'A summary.' ],
+			'curly single quotes'    => [ '‘It’s a summary.’', 'It’s a summary.' ],
+			'quoted phrases'         => [ '"A" vs "B" compared.', '"A" vs "B" compared.' ],
+			'quoted phrases at ends' => [ '"A" vs "B"', '"A" vs "B"' ],
+			'curly quoted phrases'   => [ '“A” vs “B”', '“A” vs “B”' ],
+			'apostrophe inside'      => [ "'It's a summary.'", "'It's a summary.'" ],
+		];
 	}
 
 	/**
