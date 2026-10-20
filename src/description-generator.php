@@ -89,13 +89,28 @@ function generate_description( \WP_Post $post ): string|\WP_Error {
 	/** This filter is documented in wp-includes/post-template.php */
 	$content = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
+	/**
+	 * Filters the content of the post sent to the AI provider.
+	 *
+	 * The content is rendered through `the_content`, which other plugins can
+	 * add to every post, with share buttons or related posts for example.
+	 * Removing such additions here keeps them out of every prompt. Tags are
+	 * stripped and entities decoded after filtering.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string   $content Rendered content, as HTML.
+	 * @param \WP_Post $post    Post being described.
+	 */
+	$content = apply_filters( 'wp_seo_description_generator_content', is_string( $content ) ? $content : '', $post );
+
 	/*
 	 * The title is read as stored, since get_the_title() prepends "Private: "
 	 * to a private post's title outside the admin, and the description would
 	 * repeat it.
 	 */
 	$title   = $to_text( $post->post_title );
-	$content = $to_text( is_string( $content ) ? $content : '' );
+	$content = $to_text( $content );
 
 	if ( '' === $title && '' === $content ) {
 		return new \WP_Error(

@@ -119,6 +119,30 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
+	 * The rendered content can be changed before it is sent, for example to
+	 * remove what another plugin adds to every post, and the filter is given
+	 * the post.
+	 */
+	public function test_content_is_filterable() {
+		// A plugin adding share buttons to every post.
+		add_filter( 'the_content', fn ( string $content ) => $content . '<div class="share">Share this: Facebook</div>' );
+
+		add_filter(
+			'wp_seo_description_generator_content',
+			fn ( string $content, \WP_Post $post ) => $post->ID === $this->post->ID
+				? (string) preg_replace( '#<div class="share">.*?</div>#s', '', $content )
+				: $content,
+			10,
+			2
+		);
+
+		generate_description( $this->post );
+
+		$this->assertStringContainsString( 'Content: Some post content.', FakeAiProvider::$prompt );
+		$this->assertStringNotContainsString( 'Share this', FakeAiProvider::$prompt );
+	}
+
+	/**
 	 * The instructions can be changed, and are given the post.
 	 */
 	public function test_instructions_are_filterable() {
