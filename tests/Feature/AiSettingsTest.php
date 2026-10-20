@@ -8,7 +8,9 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\AI_Settings;
+use Alley\WP\WP_SEO\Feature;
 use Alley\WP\WP_SEO\Features_Page;
+use Alley\WP\WP_SEO\Registry;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
 use function Alley\WP\WP_SEO\get_ai_provider;
@@ -69,6 +71,28 @@ class AiSettingsTest extends TestCase {
 		);
 
 		$this->connectors[] = $id;
+	}
+
+	/**
+	 * Make a feature with the given handle active, in place of whatever the
+	 * Registry held.
+	 *
+	 * @param string $handle Feature handle.
+	 */
+	private function activate_feature( string $handle ): void {
+		Registry::reset_for_tests();
+
+		$feature = Feature::top_level(
+			$handle,
+			"Test {$handle}",
+			new class() implements \Alley\WP\Types\Feature {
+				public function boot(): void {}
+			}
+		);
+
+		add_filter( "wp_seo_enable_{$handle}", '__return_true' );
+
+		$feature->boot();
 	}
 
 	/**
@@ -166,6 +190,8 @@ class AiSettingsTest extends TestCase {
 	 * The page is added to the WP SEO menu only when it has features to list.
 	 */
 	public function test_page_is_added_only_when_it_has_features() {
+		$this->activate_feature( 'description_generator' );
+
 		$empty = new AI_Settings( [] );
 		$empty->boot();
 
@@ -179,13 +205,33 @@ class AiSettingsTest extends TestCase {
 	}
 
 	/**
-	 * Loading the page adds a row for each of its features.
+	 * The page is not added when none of its features is active, since none
+	 * of them sends prompts.
 	 */
-	public function test_page_lists_a_row_per_feature() {
+	public function test_page_is_not_added_without_active_features() {
+		$this->activate_feature( 'some_other_feature' );
+
+		$page = new AI_Settings( [ 'description_generator' => 'Meta Description Generator' ] );
+		$page->add_page();
+
+		$this->assertArrayNotHasKey( Features_Page::SLUG, $GLOBALS['submenu'] );
+	}
+
+	/**
+	 * Loading the page adds a row for each of its active features.
+	 */
+	public function test_page_lists_a_row_per_active_feature() {
 		// Tests do not run in an admin request, which would have loaded this.
 		require_once ABSPATH . 'wp-admin/includes/template.php';
 
-		$page = new AI_Settings( [ 'description_generator' => 'Meta Description Generator' ] );
+		$this->activate_feature( 'description_generator' );
+
+		$page = new AI_Settings(
+			[
+				'description_generator' => 'Meta Description Generator',
+				'inactive_feature'      => 'Inactive Feature',
+			]
+		);
 		$page->add_page();
 
 		do_action( 'load-' . get_plugin_page_hookname( AI_Settings::SLUG, Features_Page::SLUG ) );
@@ -194,6 +240,7 @@ class AiSettingsTest extends TestCase {
 
 		$this->assertStringContainsString( 'Meta Description Generator', $html );
 		$this->assertStringContainsString( 'name="wp_seo_ai_providers[description_generator]"', $html );
+		$this->assertStringNotContainsString( 'Inactive Feature', $html );
 	}
 
 	/**
