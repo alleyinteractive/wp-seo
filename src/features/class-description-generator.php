@@ -8,6 +8,7 @@
 namespace Alley\WP\WP_SEO\Features;
 
 use Alley\WP\Types\Feature;
+use Alley\WP\WP_SEO\Description_Generator_Command;
 
 use function Alley\WP\WP_SEO\generate_description;
 use function Alley\WP\WP_SEO\get_ai_provider;
@@ -25,9 +26,18 @@ use function Alley\WP\WP_SEO\get_description_generator_post_types;
  * bulk runs do, is not limited.
  *
  * The block editor offers a button to generate the description on post types
- * with the `wp-seo-description-generator` support.
+ * with the `wp-seo-description-generator` support, and the
+ * `wp wp-seo generate-descriptions` command generates and saves them in bulk.
  */
 final class Description_Generator implements Feature {
+	/**
+	 * Meta key the description is saved to, which the block editor's Search
+	 * Engine panel edits.
+	 *
+	 * @var string
+	 */
+	public const META_KEY = 'search_engine_description';
+
 	/**
 	 * Boot the feature.
 	 */
@@ -35,6 +45,10 @@ final class Description_Generator implements Feature {
 		// Late, so that post types registered on `init` are included.
 		add_action( 'init', [ $this, 'add_post_type_support' ], 99 );
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			\WP_CLI::add_command( 'wp-seo generate-descriptions', Description_Generator_Command::class );
+		}
 	}
 
 	/**
@@ -52,7 +66,7 @@ final class Description_Generator implements Feature {
 		}
 
 		foreach ( get_description_generator_post_types() as $post_type ) {
-			if ( registered_meta_key_exists( 'post', 'search_engine_description', $post_type ) ) {
+			if ( registered_meta_key_exists( 'post', self::META_KEY, $post_type ) ) {
 				add_post_type_support( $post_type, 'wp-seo-description-generator' );
 			}
 		}
