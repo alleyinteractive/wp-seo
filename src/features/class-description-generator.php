@@ -10,6 +10,7 @@ namespace Alley\WP\WP_SEO\Features;
 use Alley\WP\Types\Feature;
 
 use function Alley\WP\WP_SEO\generate_description;
+use function Alley\WP\WP_SEO\get_ai_provider;
 use function Alley\WP\WP_SEO\get_description_generator_post_types;
 
 /**
@@ -22,13 +23,39 @@ use function Alley\WP\WP_SEO\get_description_generator_post_types;
  * Every request costs a prompt, so each user may make a limited number of
  * requests to the route an hour. Calling generate_description() directly, as
  * bulk runs do, is not limited.
+ *
+ * The block editor offers a button to generate the description on post types
+ * with the `wp-seo-description-generator` support.
  */
 final class Description_Generator implements Feature {
 	/**
 	 * Boot the feature.
 	 */
 	public function boot(): void {
+		// Late, so that post types registered on `init` are included.
+		add_action( 'init', [ $this, 'add_post_type_support' ], 99 );
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
+	}
+
+	/**
+	 * Add support for the block editor's button to the post types it can
+	 * be used on.
+	 *
+	 * The button fills the description the Search Engine panel edits, so it is
+	 * offered only on post types that store that description. It is not
+	 * offered until an AI provider is chosen, since an editor could not fix
+	 * the error every click would get.
+	 */
+	public function add_post_type_support(): void {
+		if ( '' === get_ai_provider( 'description_generator' ) ) {
+			return;
+		}
+
+		foreach ( get_description_generator_post_types() as $post_type ) {
+			if ( registered_meta_key_exists( 'post', 'search_engine_description', $post_type ) ) {
+				add_post_type_support( $post_type, 'wp-seo-description-generator' );
+			}
+		}
 	}
 
 	/**
@@ -91,6 +118,10 @@ final class Description_Generator implements Feature {
 	/**
 	 * Generate a description for the post.
 	 *
+	 * A description longer than the maximum length is returned rather than
+	 * refused, since the editor reviews it before saving, and asking again
+	 * would count toward the limit and could be just as long.
+	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @phpstan-param \WP_REST_Request<array{post_id: int}> $request
 	 * @return \WP_REST_Response|\WP_Error The description, or an error.
@@ -122,6 +153,11 @@ final class Description_Generator implements Feature {
 		}
 
 		$description = generate_description( $post );
+
+		if ( is_wp_error( $description ) && 'wp_seo_description_too_long' === $description->get_error_code() ) {
+			$data        = $description->get_error_data();
+			$description = is_array( $data ) && is_string( $data['description'] ?? null ) ? $data['description'] : $description;
+		}
 
 		if ( is_wp_error( $description ) ) {
 			return $description;
