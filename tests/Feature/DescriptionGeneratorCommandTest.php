@@ -132,6 +132,63 @@ class DescriptionGeneratorCommandTest extends TestCase {
 	}
 
 	/**
+	 * A description an editor saves while one is being generated is kept,
+	 * though the post was queried, and its meta cached, before it was saved.
+	 */
+	public function test_a_description_saved_during_generation_is_kept() {
+		$post = static::factory()->post->create();
+
+		add_filter(
+			'wp_seo_description_generator_content',
+			function ( string $content ) use ( $post ) {
+				global $wpdb;
+
+				// An editor saving in another request, which this request's cache doesn't know about.
+				$wpdb->insert(
+					$wpdb->postmeta,
+					[
+						'post_id'    => $post,
+						'meta_key'   => 'search_engine_description', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => 'Written by an editor.', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					]
+				);
+
+				return $content;
+			}
+		);
+
+		$result = $this->run_command();
+
+		$this->assertSame( 'Written by an editor.', $this->description( $post ) );
+		$this->assertStringContainsString( "Post {$post}: Kept the description saved while this one was being generated.", $result['stdout'] );
+		$this->assertStringContainsString( 'Generated 0 descriptions. 0 posts failed.', $result['stdout'] );
+	}
+
+	/**
+	 * Other queries that run during the command, such as ones a post's content
+	 * makes, still find posts that have a description.
+	 */
+	public function test_other_queries_are_not_limited_to_posts_without_a_description() {
+		$described = static::factory()->post->create( [ 'meta_input' => [ 'search_engine_description' => 'Written by an editor.' ] ] );
+		static::factory()->post->create();
+
+		$found = [];
+
+		add_filter(
+			'wp_seo_description_generator_content',
+			function ( string $content ) use ( $described, &$found ) {
+				$found = wp_list_pluck( ( new \WP_Query( [ 'post__in' => [ $described ] ] ) )->posts, 'ID' );
+
+				return $content;
+			}
+		);
+
+		$this->run_command();
+
+		$this->assertSame( [ $described ], $found );
+	}
+
+	/**
 	 * By default, drafts, password-protected posts, and post types the filter
 	 * leaves out are not described.
 	 */
