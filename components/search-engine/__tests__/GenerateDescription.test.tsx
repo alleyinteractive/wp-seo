@@ -4,12 +4,14 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import { speak } from '@wordpress/a11y';
 import apiFetch from '@wordpress/api-fetch';
 
 import GenerateDescription from '../GenerateDescription';
 
 const mockUseSelect = jest.fn();
 
+jest.mock('@wordpress/a11y', () => ({ speak: jest.fn() }));
 jest.mock('@wordpress/api-fetch', () => jest.fn());
 jest.mock('@wordpress/core-data', () => ({ store: 'core' }));
 jest.mock('@wordpress/data', () => {
@@ -26,6 +28,7 @@ jest.mock('@wordpress/data', () => {
 jest.mock('@wordpress/editor', () => ({ store: 'core/editor' }));
 
 const mockApiFetch = apiFetch as unknown as jest.Mock;
+const mockSpeak = speak as jest.Mock;
 
 /**
  * Edit a post in the fake editor stores.
@@ -54,6 +57,7 @@ function editPost({ isNew = false, isSupported = true } = {}) {
 describe('GenerateDescription', () => {
   beforeEach(() => {
     mockApiFetch.mockReset();
+    mockSpeak.mockReset();
     editPost();
   });
 
@@ -69,8 +73,11 @@ describe('GenerateDescription', () => {
     editPost({ isNew: true });
 
     render(<GenerateDescription onGenerate={jest.fn()} />);
+    const button = screen.getByRole('button', { name: 'Generate description' });
+    fireEvent.click(button);
 
-    expect(screen.getByRole('button', { name: 'Generate description' })).toBeDisabled();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(mockApiFetch).not.toHaveBeenCalled();
     expect(screen.getByText('Save the post to generate a description.')).toBeInTheDocument();
   });
 
@@ -87,21 +94,26 @@ describe('GenerateDescription', () => {
       method: 'POST',
       data: { post_id: 123 },
     });
+    expect(mockSpeak).toHaveBeenCalledWith('Description generated.');
   });
 
-  it('is disabled while the description is generated', async () => {
+  it('is disabled while the description is generated, but keeps focus', async () => {
     let respond: (value: { description: string }) => void = () => {};
     mockApiFetch.mockReturnValue(new Promise((resolve) => { respond = resolve; }));
 
     render(<GenerateDescription onGenerate={jest.fn()} />);
     const button = screen.getByRole('button', { name: 'Generate description' });
     fireEvent.click(button);
+    fireEvent.click(button);
 
-    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    // A natively disabled button would lose focus to the page.
+    expect(button).not.toBeDisabled();
+    expect(mockApiFetch).toHaveBeenCalledTimes(1);
 
     respond({ description: 'A neutral summary of the post.' });
 
-    await waitFor(() => expect(button).toBeEnabled());
+    await waitFor(() => expect(button).not.toHaveAttribute('aria-disabled'));
   });
 
   it('shows the error and leaves the description alone when generating fails', async () => {
@@ -114,11 +126,8 @@ describe('GenerateDescription', () => {
     render(<GenerateDescription onGenerate={onGenerate} />);
     fireEvent.click(screen.getByRole('button', { name: 'Generate description' }));
 
-    // The notice also announces its message to screen readers, so the notice is looked for.
-    expect(await screen.findByText(
-      'Too many descriptions have been generated. Please try again later.',
-      { selector: '.components-notice__content' },
-    )).toBeInTheDocument();
+    expect(await screen.findByText('Too many descriptions have been generated. Please try again later.')).toBeInTheDocument();
     expect(onGenerate).not.toHaveBeenCalled();
+    expect(mockSpeak).not.toHaveBeenCalledWith('Description generated.');
   });
 });

@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@alleyinteractive/block-editor-tools": "^0.11.0",
+    "@wordpress/a11y": "^4.51.0",
     "@wordpress/api-fetch": "^7.51.0",
     "@wordpress/components": "^37.0.0",
     "@wordpress/core-data": "^7.51.0",

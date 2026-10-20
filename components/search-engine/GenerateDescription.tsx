@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { speak } from '@wordpress/a11y';
 import apiFetch from '@wordpress/api-fetch';
 import { Button, Notice } from '@wordpress/components';
 import { store as coreStore, type Type } from '@wordpress/core-data';
@@ -47,6 +48,7 @@ function GenerateDescription({ onGenerate }: GenerateDescriptionProps) {
       });
 
       onGenerate(description);
+      speak(__('Description generated.', 'wp-seo'));
     } catch (e) {
       setError((e as { message?: string })?.message || __('The description could not be generated.', 'wp-seo'));
     } finally {
@@ -56,10 +58,12 @@ function GenerateDescription({ onGenerate }: GenerateDescriptionProps) {
 
   return (
     <div>
+      {/* Kept focusable while disabled, so focus stays on it while it is busy. */}
       <Button
         variant="secondary"
         onClick={generate}
         disabled={isNew || isGenerating}
+        accessibleWhenDisabled
         isBusy={isGenerating}
         __next40pxDefaultSize
       >
