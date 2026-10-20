@@ -50,6 +50,9 @@ class DescriptionGeneratorTest extends TestCase {
 		// The next request for the REST server builds a new one, without the route.
 		$GLOBALS['wp_rest_server'] = null;
 
+		remove_post_type_support( 'post', 'wp-seo-description-generator' );
+		remove_post_type_support( 'page', 'wp-seo-description-generator' );
+
 		parent::tearDown();
 	}
 
@@ -313,10 +316,61 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
+	 * The block editor's button is offered on the post types the generator
+	 * works on.
+	 */
+	public function test_post_type_support_is_added_to_its_post_types() {
+		( new Description_Generator() )->add_post_type_support();
+
+		$this->assertTrue( post_type_supports( 'post', 'wp-seo-description-generator' ) );
+		$this->assertTrue( post_type_supports( 'page', 'wp-seo-description-generator' ) );
+	}
+
+	/**
+	 * The button is offered only on post types left by the post types filter
+	 * that store the description it fills.
+	 */
+	public function test_post_type_support_needs_a_stored_description() {
+		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page', 'wp_block' ] );
+
+		( new Description_Generator() )->add_post_type_support();
+
+		$this->assertTrue( post_type_supports( 'page', 'wp-seo-description-generator' ) );
+		$this->assertFalse( post_type_supports( 'post', 'wp-seo-description-generator' ) );
+		$this->assertFalse( post_type_supports( 'wp_block', 'wp-seo-description-generator' ) );
+	}
+
+	/**
+	 * The button is not offered until an AI provider is chosen.
+	 */
+	public function test_post_type_support_needs_a_provider() {
+		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
+
+		( new Description_Generator() )->add_post_type_support();
+
+		$this->assertFalse( post_type_supports( 'post', 'wp-seo-description-generator' ) );
+		$this->assertFalse( post_type_supports( 'page', 'wp-seo-description-generator' ) );
+	}
+
+	/**
 	 * Someone who can edit the post gets a description from the REST route.
 	 */
 	public function test_rest_route_returns_a_description() {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+
+		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $response->get_data() );
+	}
+
+	/**
+	 * A description over the maximum length is returned by the REST route for
+	 * the editor to review, rather than refused.
+	 */
+	public function test_rest_route_returns_a_description_over_the_max_length() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
 
 		$response = $this->request( [ 'post_id' => $this->post->ID ] );
 

@@ -9,6 +9,8 @@ import {
   usePostMetaValue,
 } from '@alleyinteractive/block-editor-tools';
 
+import GenerateDescription from './GenerateDescription';
+
 function SearchEngineSlotfill() {
   const [title, setTitle] = usePostMetaValue('search_engine_title');
   const [description, setDescription] = usePostMetaValue('search_engine_description');
@@ -42,6 +44,7 @@ function SearchEngineSlotfill() {
             {`Character count: ${description.length}`}
           </p>
         </div>
+        <GenerateDescription onGenerate={setDescription} />
       </VStack>
     </PanelBody>
   );
