@@ -18,6 +18,10 @@ use function Alley\WP\WP_SEO\get_description_generator_post_types;
  * Offers a REST route that writes a meta description for a post with the AI
  * provider chosen on the WP SEO AI settings page, for the editor to use. The
  * description is returned, not saved.
+ *
+ * Every request costs a prompt, so each user may make a limited number of
+ * requests to the route an hour. Calling generate_description() directly, as
+ * bulk runs do, is not limited.
  */
 final class Description_Generator implements Feature {
 	/**
@@ -98,6 +102,25 @@ final class Description_Generator implements Feature {
 			return $post;
 		}
 
+		$retry_after = $this->count_request( get_current_user_id() );
+
+		if ( $retry_after > 0 ) {
+			// A WP_Error can't carry headers, so the error is sent as a response.
+			$response = rest_convert_error_to_response(
+				new \WP_Error(
+					'wp_seo_description_rate_limited',
+					__( 'Too many descriptions have been generated. Please try again later.', 'wp-seo' ),
+					[
+						'status'      => 429,
+						'retry_after' => $retry_after,
+					]
+				)
+			);
+			$response->header( 'Retry-After', (string) $retry_after );
+
+			return $response;
+		}
+
 		$description = generate_description( $post );
 
 		if ( is_wp_error( $description ) ) {
@@ -105,6 +128,64 @@ final class Description_Generator implements Feature {
 		}
 
 		return new \WP_REST_Response( [ 'description' => $description ] );
+	}
+
+	/**
+	 * Count a request toward the user's hourly limit.
+	 *
+	 * Requests are counted in a transient for each user, in a fixed window
+	 * that starts with the user's first request and lasts an hour. A request
+	 * is counted before its prompt is sent, so one that fails still counts.
+	 * Two requests made at the same time at the limit may both be allowed.
+	 *
+	 * @param int $user_id User ID.
+	 * @return int Seconds until the user may try again, or 0 if the request is
+	 *             allowed.
+	 */
+	private function count_request( int $user_id ): int {
+		/**
+		 * Filters the number of descriptions a user may generate an hour
+		 * through the REST route.
+		 *
+		 * Calling generate_description() directly is not limited.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param int $limit   Requests allowed an hour. 0 or less turns the
+		 *                     limit off. Default 30.
+		 * @param int $user_id ID of the user making the request.
+		 */
+		$limit = (int) apply_filters( 'wp_seo_description_generator_rate_limit', 30, $user_id );
+
+		if ( $limit <= 0 ) {
+			return 0;
+		}
+
+		$key    = 'wp_seo_description_rate_limit_' . $user_id;
+		$now    = time();
+		$stored = get_transient( $key );
+		$count  = is_array( $stored ) && is_int( $stored['count'] ?? null ) ? $stored['count'] : 0;
+		$reset  = is_array( $stored ) && is_int( $stored['reset'] ?? null ) ? $stored['reset'] : 0;
+
+		if ( $reset <= $now ) {
+			$count = 0;
+			$reset = $now + HOUR_IN_SECONDS;
+		}
+
+		if ( $count >= $limit ) {
+			return $reset - $now;
+		}
+
+		set_transient(
+			$key,
+			[
+				'count' => $count + 1,
+				'reset' => $reset,
+			],
+			$reset - $now
+		);
+
+		return 0;
 	}
 
 	/**
