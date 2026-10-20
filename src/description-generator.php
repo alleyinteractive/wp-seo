@@ -80,6 +80,12 @@ function generate_description( \WP_Post $post ): string|\WP_Error {
 		);
 	}
 
+	/*
+	 * The provider reads and writes plain text, so markup is removed and
+	 * entities such as the curly quotes the_content adds become characters.
+	 */
+	$to_text = fn ( string $html ): string => html_entity_decode( wp_strip_all_tags( $html, true ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
 	/** This filter is documented in wp-includes/post-template.php */
 	$content = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
@@ -88,8 +94,8 @@ function generate_description( \WP_Post $post ): string|\WP_Error {
 	 * to a private post's title outside the admin, and the description would
 	 * repeat it.
 	 */
-	$title   = wp_strip_all_tags( $post->post_title, true );
-	$content = wp_strip_all_tags( is_string( $content ) ? $content : '', true );
+	$title   = $to_text( $post->post_title );
+	$content = $to_text( is_string( $content ) ? $content : '' );
 
 	if ( '' === $title && '' === $content ) {
 		return new \WP_Error(
@@ -147,7 +153,7 @@ function generate_description( \WP_Post $post ): string|\WP_Error {
 	 * The quotes are removed only when the opening one appears nowhere else in
 	 * the reply, so that a reply such as `"A" vs "B"` keeps its quotes.
 	 */
-	$description = trim( wp_strip_all_tags( $text, true ) );
+	$description = trim( $to_text( $text ) );
 	$description = (string) preg_replace( '/^(?|"([^"]*)"|\'([^\']*)\'|“([^“]*)”|‘([^‘]*)’)$/u', '$1', $description );
 
 	if ( '' === $description ) {

@@ -101,6 +101,24 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
+	 * Characters that are encoded as HTML entities for display, such as the
+	 * curly quotes the_content adds, are sent as characters.
+	 */
+	public function test_html_entities_are_sent_as_characters() {
+		$post = static::factory()->post->create_and_get(
+			[
+				'post_title'   => 'Salt &amp; Pepper',
+				'post_content' => '<p>It\'s "quoted" &amp; &lt;escaped&gt;.</p>',
+			]
+		);
+
+		generate_description( $post );
+
+		$this->assertStringContainsString( 'Title: Salt & Pepper', FakeAiProvider::$prompt );
+		$this->assertStringContainsString( 'Content: It’s “quoted” & <escaped>.', FakeAiProvider::$prompt );
+	}
+
+	/**
 	 * The instructions can be changed, and are given the post.
 	 */
 	public function test_instructions_are_filterable() {
@@ -144,6 +162,15 @@ class DescriptionGeneratorTest extends TestCase {
 		FakeAiProvider::$response = "  \"A <b>bold</b>\n summary.\"  ";
 
 		$this->assertSame( 'A bold summary.', generate_description( $this->post ) );
+	}
+
+	/**
+	 * HTML entities in the reply are returned as characters.
+	 */
+	public function test_html_entities_in_the_reply_are_decoded() {
+		FakeAiProvider::$response = '&quot;Salt &amp; pepper&#8217;s summary.&quot;';
+
+		$this->assertSame( 'Salt & pepper’s summary.', generate_description( $this->post ) );
 	}
 
 	/**
