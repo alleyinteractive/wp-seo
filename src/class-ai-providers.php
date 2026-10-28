@@ -37,8 +37,8 @@ final class AI_Providers {
 	 * settings page. Whether the provider is still available is not checked; an
 	 * unavailable one surfaces as an error when a prompt is sent.
 	 *
-	 * To send a prompt, use `get_prompt_builder()`, which checks that there is
-	 * a provider.
+	 * To send a prompt, use `check_provider()`, which checks that one can be
+	 * sent.
 	 *
 	 * @since 2.0.0
 	 *
@@ -176,22 +176,31 @@ final class AI_Providers {
 	}
 
 	/**
-	 * Check that WP SEO can send prompts.
+	 * Get the AI provider to send a prompt to, checking that one can be sent.
 	 *
 	 * Prompts cannot be sent before WordPress 7.0, or when there is no
 	 * provider. Whether the provider is still available is not checked; an
 	 * unavailable one surfaces as an error when a prompt is sent.
 	 *
+	 *     $provider = AI_Providers::check_provider();
+	 *
+	 *     if ( ! is_wp_error( $provider ) ) {
+	 *         $text = wp_ai_client_prompt( 'Summarize this post.' )->using_provider( $provider )->generate_text();
+	 *     }
+	 *
 	 * @since 2.0.0
 	 *
-	 * @return true|\WP_Error True if prompts can be sent, or an error.
+	 * @return string|\WP_Error Connector ID of the provider, or an error if
+	 *                          prompts cannot be sent.
 	 */
-	public static function check_provider(): true|\WP_Error {
+	public static function check_provider(): string|\WP_Error {
 		if ( ! function_exists( 'wp_ai_client_prompt' ) ) {
 			return new \WP_Error( 'wp_seo_ai_unsupported', __( 'WP SEO requires WordPress 7.0 or later to use AI providers.', 'wp-seo' ) );
 		}
 
-		if ( '' === self::get_provider() ) {
+		$provider = self::get_provider();
+
+		if ( '' === $provider ) {
 			return new \WP_Error(
 				'wp_seo_ai_no_provider',
 				__( 'No AI provider is selected on the WP SEO AI settings page.', 'wp-seo' ),
@@ -199,37 +208,6 @@ final class AI_Providers {
 			);
 		}
 
-		return true;
-	}
-
-	/**
-	 * Start a prompt to the AI provider.
-	 *
-	 * Returns the core prompt builder, so callers configure and send the prompt
-	 * with its methods. Errors from sending it (e.g. AI disabled on the site, the
-	 * prompt blocked by a filter, an unknown or unconfigured provider, a failed
-	 * request) come back as a `WP_Error` from the builder's `generate_*()`
-	 * methods.
-	 *
-	 *     $builder = AI_Providers::get_prompt_builder( 'Summarize this post.' );
-	 *
-	 *     if ( ! is_wp_error( $builder ) ) {
-	 *         $text = $builder->generate_text();
-	 *     }
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param string $prompt Prompt text.
-	 * @return \WP_AI_Client_Prompt_Builder|\WP_Error Prompt builder, or the error
-	 *                                                from `check_provider()`.
-	 */
-	public static function get_prompt_builder( string $prompt ): \WP_AI_Client_Prompt_Builder|\WP_Error {
-		$check = self::check_provider();
-
-		if ( is_wp_error( $check ) ) {
-			return $check;
-		}
-
-		return wp_ai_client_prompt( $prompt )->using_provider( self::get_provider() );
+		return $provider;
 	}
 }
