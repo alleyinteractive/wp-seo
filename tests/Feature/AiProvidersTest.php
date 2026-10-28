@@ -1,26 +1,25 @@
 <?php
 /**
- * AiTest class file
+ * AiProvidersTest class file
  *
  * @package wp-seo
  */
 
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
+use Alley\WP\WP_SEO\AI_Providers;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
-use function Alley\WP\WP_SEO\get_ai_prompt;
-use function Alley\WP\WP_SEO\get_ai_providers;
-
 /**
- * Tests for the helpers that use the AI connectors configured in WordPress.
+ * Tests for the AI providers WP SEO features can send prompts to, and the one
+ * each feature uses.
  *
  * No test sends a prompt: that would need a provider plugin and credentials,
  * and would make a request to the provider.
  *
  * @link https://mantle.alley.com/docs/testing
  */
-class AiTest extends TestCase {
+class AiProvidersTest extends TestCase {
 	/**
 	 * Connectors registered by a test, removed again after it.
 	 *
@@ -32,6 +31,8 @@ class AiTest extends TestCase {
 		foreach ( $this->connectors as $id ) {
 			\WP_Connector_Registry::get_instance()->unregister( $id );
 		}
+
+		delete_option( AI_Providers::OPTION );
 
 		parent::tearDown();
 	}
@@ -60,10 +61,10 @@ class AiTest extends TestCase {
 	/**
 	 * An AI provider whose plugin is active is listed by name.
 	 */
-	public function test_get_ai_providers_lists_active_ai_providers() {
+	public function test_get_available_providers_lists_active_ai_providers() {
 		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
 
-		$providers = get_ai_providers();
+		$providers = AI_Providers::get_available_providers();
 
 		$this->assertArrayHasKey( 'wp_seo_active', $providers );
 		$this->assertSame( 'Test wp_seo_active', $providers['wp_seo_active'] );
@@ -73,11 +74,11 @@ class AiTest extends TestCase {
 	 * Connectors that are not AI providers, and AI providers whose plugin is not
 	 * active, are left out.
 	 */
-	public function test_get_ai_providers_omits_inactive_and_non_ai_connectors() {
+	public function test_get_available_providers_omits_inactive_and_non_ai_connectors() {
 		$this->register_connector( 'wp_seo_inactive', 'ai_provider', false );
 		$this->register_connector( 'wp_seo_other', 'spam_filtering', true );
 
-		$providers = get_ai_providers();
+		$providers = AI_Providers::get_available_providers();
 
 		$this->assertArrayNotHasKey( 'wp_seo_inactive', $providers );
 		$this->assertArrayNotHasKey( 'wp_seo_other', $providers );
@@ -87,18 +88,45 @@ class AiTest extends TestCase {
 	/**
 	 * A prompt starts as the core prompt builder.
 	 */
-	public function test_get_ai_prompt_returns_core_prompt_builder() {
-		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, get_ai_prompt( 'Hello' ) );
+	public function test_get_prompt_builder_returns_core_prompt_builder() {
+		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, AI_Providers::get_prompt_builder( 'Hello' ) );
 	}
 
 	/**
 	 * A prompt goes to the provider it was given. A provider that does not exist
 	 * shows this without a request being made: generating fails, naming it.
 	 */
-	public function test_get_ai_prompt_uses_the_given_provider() {
-		$result = get_ai_prompt( 'Hello', 'wp_seo_missing' )->generate_text();
+	public function test_get_prompt_builder_uses_the_given_provider() {
+		$result = AI_Providers::get_prompt_builder( 'Hello', 'wp_seo_missing' )->generate_text();
 
 		$this->assertWPError( $result );
 		$this->assertStringContainsString( 'wp_seo_missing', $result->get_error_message() );
+	}
+
+	/**
+	 * A provider set in code wins over the stored one, the stored one is used
+	 * otherwise, and a feature with neither has no provider.
+	 */
+	public function test_get_feature_provider_prefers_code_then_setting() {
+		$this->assertSame( '', AI_Providers::get_feature_provider( 'description_generator' ) );
+
+		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		update_option( AI_Providers::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
+
+		$this->assertSame( 'wp_seo_active', AI_Providers::get_feature_provider( 'description_generator' ) );
+
+		add_filter( 'wp_seo_ai_provider', fn () => '' );
+
+		$this->assertSame( '', AI_Providers::get_feature_provider( 'description_generator' ), 'An empty string set in code means no provider.' );
+	}
+
+	/**
+	 * A filter that answers with something other than a string leaves the
+	 * choice to the settings page.
+	 */
+	public function test_get_feature_provider_from_code_ignores_non_strings() {
+		add_filter( 'wp_seo_ai_provider', fn () => 123 );
+
+		$this->assertNull( AI_Providers::get_feature_provider_from_code( 'description_generator' ) );
 	}
 }

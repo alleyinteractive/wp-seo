@@ -30,3 +30,7 @@ _Avoid_: On, turned on
 **Active**:
 A Feature that is actually running on the site. A Feature nested inside a group that was never enabled is not Active however its own filters answered, so Enabled and Active can disagree — the admin display reports Active, because that is what an administrator is asking about.
 _Avoid_: Loaded, running. "Booted" names the mechanism rather than the state, and belongs in code (`boot()`, `booted()`) rather than in conversation about a site.
+
+**AI Provider**:
+An AI service a site administrator has connected to WordPress, which a Feature can send prompts to. Each Feature that sends prompts has at most one, chosen by the site; one with none sends no prompts.
+_Avoid_: Connector (when meaning an AI one), model

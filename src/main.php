@@ -28,7 +28,7 @@ function main(): void {
 	 */
 	( new AI_Settings(
 		[
-			'description_generator' => __( 'Meta Description Generator', 'wp-seo' ),
+			Features\Description_Generator::HANDLE => __( 'Meta Description Generator', 'wp-seo' ),
 		]
 	) )->boot();
 
@@ -36,7 +36,7 @@ function main(): void {
 	$plugin = new Group(
 		Feature::top_level( 'open_graph', __( 'Open Graph', 'wp-seo' ), new Features\Open_Graph() ),
 		Feature::top_level( 'twitter_card', __( 'Twitter Card', 'wp-seo' ), new Features\Twitter_Card() ),
-		Feature::top_level( 'description_generator', __( 'Meta Description Generator', 'wp-seo' ), new Features\Description_Generator() ),
+		Feature::top_level( Features\Description_Generator::HANDLE, __( 'Meta Description Generator', 'wp-seo' ), new Features\Description_Generator() ),
 	);
 
 	/**

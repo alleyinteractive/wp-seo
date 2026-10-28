@@ -133,13 +133,15 @@ final class Description_Generator_Command {
 			return;
 		}
 
-		if ( '' === get_ai_provider( 'description_generator' ) ) {
-			WP_CLI::error( __( 'No AI provider is selected for the Meta Description Generator.', 'wp-seo' ) );
+		$provider = Description_Generator::get_provider();
+
+		if ( is_wp_error( $provider ) ) {
+			WP_CLI::error( $provider );
 		}
 
 		$query_args = array_merge(
 			[
-				'post_type'    => get_description_generator_post_types(),
+				'post_type'    => Description_Generator::get_post_types(),
 				'post_status'  => 'publish',
 				'has_password' => false,
 			],
@@ -197,7 +199,20 @@ final class Description_Generator_Command {
 						return;
 					}
 
-					$description = generate_description( $post );
+					$description = Description_Generator::generate_description( $post );
+					$max_length  = Description_Generator::get_max_length( $post );
+
+					// The description is saved without an editor reviewing it, so one that is too long is refused.
+					if ( is_string( $description ) && mb_strlen( $description ) > $max_length ) {
+						$description = new \WP_Error(
+							'wp_seo_description_too_long',
+							sprintf(
+								/* translators: %d: maximum length, in characters. */
+								__( 'The AI provider returned a description longer than %d characters.', 'wp-seo' ),
+								$max_length
+							)
+						);
+					}
 
 					if ( is_wp_error( $description ) ) {
 						$message = sprintf(
