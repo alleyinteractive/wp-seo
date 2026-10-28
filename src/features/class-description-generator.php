@@ -31,7 +31,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	public function boot(): void {
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
 
-		( new AI_Settings() )->boot();
+		( new AI_Settings() )->register();
 	}
 
 	/**
