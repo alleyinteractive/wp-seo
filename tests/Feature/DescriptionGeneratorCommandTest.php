@@ -485,7 +485,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		$result = $this->run_command();
 
 		$this->assertSame( 1, $result['exit'] );
-		$this->assertStringContainsString( "Post {$first}: Too Many Requests (429) (prompt_client_error)", $result['stderr'] );
+		$this->assertStringContainsString( "Post {$first}: Too Many Requests (429) (" . Description_Generator::ERROR_PROVIDER_LIMITED . ")", $result['stderr'] );
 		$this->assertStringContainsString( 'The AI provider is limiting requests or is out of quota, so the run stopped.', $result['stderr'] );
 		$this->assertStringNotContainsString( "Post {$second}:", $result['stderr'] );
 

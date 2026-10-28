@@ -11,6 +11,7 @@ use Alley\WP\WP_SEO\Features\Description_Generator;
 use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use WordPress\AiClient\Providers\Http\Exception\ClientException;
 
 /**
  * Tests for the Meta Description Generator feature.
@@ -331,6 +332,21 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
+	 * A provider that is limiting requests or is out of quota is reported with
+	 * the generator's own error code, keeping core's message and status.
+	 */
+	public function test_a_provider_limit_is_its_own_error() {
+		FakeAiProvider::$exception = new ClientException( 'Too Many Requests (429)', 429 );
+
+		$result = Description_Generator::generate_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( Description_Generator::ERROR_PROVIDER_LIMITED, $result->get_error_code() );
+		$this->assertSame( 'Too Many Requests (429)', $result->get_error_message() );
+		$this->assertSame( 429, $result->get_error_data()['status'] ?? null );
+	}
+
+	/**
 	 * A description generated to be saved is saved to the post and returned.
 	 */
 	public function test_generate_and_save_description_saves_it() {
@@ -393,7 +409,7 @@ class DescriptionGeneratorTest extends TestCase {
 		$result = Description_Generator::generate_and_save_description( $this->post );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'wp_seo_description_exists', $result->get_error_code() );
+		$this->assertSame( Description_Generator::ERROR_DESCRIPTION_EXISTS, $result->get_error_code() );
 		$this->assertSame( 'Written by an editor.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
 	}
 

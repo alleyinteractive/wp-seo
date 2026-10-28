@@ -51,6 +51,22 @@ final class Description_Generator implements Sends_Prompts {
 	public const MISSING_DESCRIPTION_QUERY_VAR = 'wp_seo_missing_description';
 
 	/**
+	 * Code of the error returned when the AI provider is limiting requests or
+	 * is out of quota, so that every prompt sent soon after would fail too.
+	 *
+	 * @var string
+	 */
+	public const ERROR_PROVIDER_LIMITED = 'wp_seo_description_provider_limited';
+
+	/**
+	 * Code of the error `generate_and_save_description()` returns when it kept
+	 * a description an editor saved while this one was being generated.
+	 *
+	 * @var string
+	 */
+	public const ERROR_DESCRIPTION_EXISTS = 'wp_seo_description_exists';
+
+	/**
 	 * Boot the feature.
 	 */
 	public function boot(): void {
@@ -162,8 +178,11 @@ final class Description_Generator implements Sends_Prompts {
 	 * @since 2.0.0
 	 *
 	 * @param \WP_Post $post Post to describe.
-	 * @return string|\WP_Error The description, or an error. Errors from sending
-	 *                          the prompt are the ones core returns.
+	 * @return string|\WP_Error The description, or an error. The error code is
+	 *                          `ERROR_PROVIDER_LIMITED` when the provider is
+	 *                          limiting requests or is out of quota. Other
+	 *                          errors from sending the prompt are the ones
+	 *                          core returns.
 	 */
 	public static function generate_description( \WP_Post $post ): string|\WP_Error {
 		// Checked first, so that the content is not rendered for a prompt that cannot be sent.
@@ -252,6 +271,13 @@ final class Description_Generator implements Sends_Prompts {
 		$text = $prompt->using_system_instruction( $instructions )->generate_text();
 
 		if ( is_wp_error( $text ) ) {
+			$data = $text->get_error_data();
+
+			// Core reports a provider's rate limit or exhausted quota with a 429 status.
+			if ( is_array( $data ) && 429 === ( $data['status'] ?? null ) ) {
+				return new \WP_Error( self::ERROR_PROVIDER_LIMITED, $text->get_error_message(), $data );
+			}
+
 			return $text;
 		}
 
@@ -288,8 +314,10 @@ final class Description_Generator implements Sends_Prompts {
 	 *
 	 * @param \WP_Post $post Post to describe.
 	 * @return string|\WP_Error The saved description, or an error. The error
-	 *                          code is `wp_seo_description_exists` when an
-	 *                          editor's description was kept.
+	 *                          code is `ERROR_DESCRIPTION_EXISTS` when an
+	 *                          editor's description was kept, and
+	 *                          `ERROR_PROVIDER_LIMITED` when the provider is
+	 *                          limiting requests or is out of quota.
 	 */
 	public static function generate_and_save_description( \WP_Post $post ): string|\WP_Error {
 		$description = self::generate_description( $post );
@@ -320,7 +348,7 @@ final class Description_Generator implements Sends_Prompts {
 
 		if ( '' !== get_post_meta( $post->ID, self::META_KEY, true ) ) {
 			return new \WP_Error(
-				'wp_seo_description_exists',
+				self::ERROR_DESCRIPTION_EXISTS,
 				__( 'Kept the description saved while this one was being generated.', 'wp-seo' )
 			);
 		}

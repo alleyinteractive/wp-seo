@@ -253,7 +253,7 @@ final class Description_Generator_Command {
 		$description = Description_Generator::generate_and_save_description( $post );
 
 		// An editor's description was kept, which is not a failure.
-		if ( is_wp_error( $description ) && 'wp_seo_description_exists' === $description->get_error_code() ) {
+		if ( is_wp_error( $description ) && Description_Generator::ERROR_DESCRIPTION_EXISTS === $description->get_error_code() ) {
 			/* translators: 1: post ID, 2: message. */
 			WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $description->get_error_message() ) );
 			$cursor->set( $post->ID );
@@ -268,14 +268,12 @@ final class Description_Generator_Command {
 				$description->get_error_message(),
 				$description->get_error_code()
 			);
-			$data = $description->get_error_data();
 
 			/*
-			 * Core reports a provider's rate limit or exhausted quota with a 429
-			 * status. Every post after it would fail too, so the run stops, and
-			 * the place is not saved so that the post is tried again next run.
+			 * Every post after this one would fail too, so the run stops, and the
+			 * place is not saved so that the post is tried again next run.
 			 */
-			if ( is_array( $data ) && 429 === ( $data['status'] ?? null ) ) {
+			if ( Description_Generator::ERROR_PROVIDER_LIMITED === $description->get_error_code() ) {
 				WP_CLI::error( $message . "\n" . __( 'The AI provider is limiting requests or is out of quota, so the run stopped.', 'wp-seo' ) . ' ' . $this->summarize() );
 			}
 
