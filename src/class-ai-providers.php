@@ -38,11 +38,8 @@ final class AI_Providers {
 	 * settings page. Whether the provider is still available is not checked; an
 	 * unavailable one surfaces as an error when a prompt is sent.
 	 *
-	 *     $provider = AI_Providers::get_feature_provider( 'description_generator' );
-	 *
-	 *     if ( '' !== $provider ) {
-	 *         $builder = AI_Providers::get_prompt_builder( 'Summarize this post.', $provider );
-	 *     }
+	 * To send a prompt, use `get_prompt_builder()`, which checks that the
+	 * feature has a provider.
 	 *
 	 * @since 2.0.0
 	 *
@@ -128,7 +125,40 @@ final class AI_Providers {
 	}
 
 	/**
-	 * Start a prompt to an AI provider.
+	 * Check that a WP SEO feature can send prompts.
+	 *
+	 * A feature cannot send prompts before WordPress 7.0, or when it has no
+	 * provider. Whether the provider is still available is not checked; an
+	 * unavailable one surfaces as an error when a prompt is sent.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $feature Handle of the feature sending prompts.
+	 * @return true|\WP_Error True if the feature can send prompts, or an error.
+	 */
+	public static function check_feature( string $feature ): true|\WP_Error {
+		if ( ! function_exists( 'wp_ai_client_prompt' ) ) {
+			return new \WP_Error( 'wp_seo_ai_unsupported', __( 'WP SEO requires WordPress 7.0 or later to use AI providers.', 'wp-seo' ) );
+		}
+
+		if ( '' === self::get_feature_provider( $feature ) ) {
+			$registry = Registry::features();
+
+			return new \WP_Error(
+				'wp_seo_ai_no_provider',
+				isset( $registry[ $feature ] )
+					/* translators: %s: name of the feature. */
+					? sprintf( __( 'No AI provider is selected for the %s.', 'wp-seo' ), $registry[ $feature ]->label() )
+					: __( 'No AI provider is selected for this feature.', 'wp-seo' ),
+				[ 'status' => 503 ]
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Start a prompt from a WP SEO feature to its AI provider.
 	 *
 	 * Returns the core prompt builder, so callers configure and send the prompt
 	 * with its methods. Errors from sending it (e.g. AI disabled on the site, the
@@ -136,7 +166,7 @@ final class AI_Providers {
 	 * request) come back as a `WP_Error` from the builder's `generate_*()`
 	 * methods.
 	 *
-	 *     $builder = AI_Providers::get_prompt_builder( 'Summarize this post.', 'anthropic' );
+	 *     $builder = AI_Providers::get_prompt_builder( 'description_generator', 'Summarize this post.' );
 	 *
 	 *     if ( ! is_wp_error( $builder ) ) {
 	 *         $text = $builder->generate_text();
@@ -144,24 +174,18 @@ final class AI_Providers {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string      $prompt   Prompt text.
-	 * @param string|null $provider Optional. Connector ID of the provider to use, from
-	 *                              `AI_Providers::get_available_providers()`. Default
-	 *                              null, which lets WordPress choose a provider that
-	 *                              supports the prompt.
-	 * @return \WP_AI_Client_Prompt_Builder|\WP_Error Prompt builder, or an error before WordPress 7.0.
+	 * @param string $feature Handle of the feature sending the prompt.
+	 * @param string $prompt  Prompt text.
+	 * @return \WP_AI_Client_Prompt_Builder|\WP_Error Prompt builder, or the error
+	 *                                                from `check_feature()`.
 	 */
-	public static function get_prompt_builder( string $prompt, ?string $provider = null ): \WP_AI_Client_Prompt_Builder|\WP_Error {
-		if ( ! function_exists( 'wp_ai_client_prompt' ) ) {
-			return new \WP_Error( 'wp_seo_ai_unsupported', __( 'WP SEO requires WordPress 7.0 or later to use AI providers.', 'wp-seo' ) );
+	public static function get_prompt_builder( string $feature, string $prompt ): \WP_AI_Client_Prompt_Builder|\WP_Error {
+		$check = self::check_feature( $feature );
+
+		if ( is_wp_error( $check ) ) {
+			return $check;
 		}
 
-		$builder = wp_ai_client_prompt( $prompt );
-
-		if ( null !== $provider ) {
-			$builder = $builder->using_provider( $provider );
-		}
-
-		return $builder;
+		return wp_ai_client_prompt( $prompt )->using_provider( self::get_feature_provider( $feature ) );
 	}
 }
