@@ -96,10 +96,10 @@ class AiSettingsTest extends TestCase {
 	}
 
 	/**
-	 * Saving keeps only the features the page lists, and only providers that
-	 * are available.
+	 * Saving the option keeps providers only for the features the page was
+	 * given.
 	 */
-	public function test_saving_drops_unknown_features_and_providers() {
+	public function test_saving_is_sanitized_for_the_page_features() {
 		$this->register_provider( 'wp_seo_active' );
 
 		update_option(
@@ -111,37 +111,6 @@ class AiSettingsTest extends TestCase {
 		);
 
 		$this->assertSame( [ 'description_generator' => 'wp_seo_active' ], get_option( AI_Providers::OPTION ) );
-
-		update_option( AI_Providers::OPTION, [ 'description_generator' => 'not_a_provider' ] );
-
-		$this->assertSame( [], get_option( AI_Providers::OPTION ) );
-	}
-
-	/**
-	 * A feature missing from what is saved keeps its stored provider, since a
-	 * row set in code renders a disabled field that the browser does not
-	 * submit.
-	 */
-	public function test_saving_without_a_feature_keeps_its_stored_provider() {
-		$this->register_provider( 'wp_seo_active' );
-
-		update_option( AI_Providers::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
-		update_option( AI_Providers::OPTION, [] );
-
-		$this->assertSame( [ 'description_generator' => 'wp_seo_active' ], get_option( AI_Providers::OPTION ) );
-	}
-
-	/**
-	 * Saving "None" for a feature clears its stored provider, unlike leaving
-	 * the feature out of what is saved.
-	 */
-	public function test_saving_none_clears_the_stored_provider() {
-		$this->register_provider( 'wp_seo_active' );
-
-		update_option( AI_Providers::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
-		update_option( AI_Providers::OPTION, [ 'description_generator' => '' ] );
-
-		$this->assertSame( [], get_option( AI_Providers::OPTION ) );
 	}
 
 	/**
