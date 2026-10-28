@@ -8,6 +8,8 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\AI_Providers;
+use Alley\WP\WP_SEO\Feature;
+use Alley\WP\WP_SEO\Registry;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
 /**
@@ -86,21 +88,76 @@ class AiProvidersTest extends TestCase {
 	}
 
 	/**
-	 * A prompt starts as the core prompt builder.
+	 * A feature with a provider can send prompts.
 	 */
-	public function test_get_prompt_builder_returns_core_prompt_builder() {
-		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, AI_Providers::get_prompt_builder( 'Hello' ) );
+	public function test_check_feature_passes_with_a_provider() {
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
+
+		$this->assertTrue( AI_Providers::check_feature( 'description_generator' ) );
 	}
 
 	/**
-	 * A prompt goes to the provider it was given. A provider that does not exist
+	 * A feature without a provider sends no prompts.
+	 */
+	public function test_check_feature_fails_without_a_provider() {
+		$result = AI_Providers::check_feature( 'description_generator' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_ai_no_provider', $result->get_error_code() );
+		$this->assertSame( [ 'status' => 503 ], $result->get_error_data() );
+	}
+
+	/**
+	 * The error for a feature without a provider names the feature by its label.
+	 */
+	public function test_check_feature_names_the_feature_without_a_provider() {
+		Registry::reset_for_tests();
+
+		Feature::top_level(
+			'wp_seo_test',
+			'Test Feature',
+			new class() implements \Alley\WP\Types\Feature {
+				/**
+				 * Boot the feature.
+				 */
+				public function boot(): void {}
+			}
+		);
+
+		$this->assertSame( 'No AI provider is selected for the Test Feature.', AI_Providers::check_feature( 'wp_seo_test' )->get_error_message() );
+		$this->assertSame( 'No AI provider is selected for this feature.', AI_Providers::check_feature( 'wp_seo_unregistered' )->get_error_message() );
+	}
+
+	/**
+	 * A prompt starts as the core prompt builder.
+	 */
+	public function test_get_prompt_builder_returns_core_prompt_builder() {
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
+
+		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, AI_Providers::get_prompt_builder( 'description_generator', 'Hello' ) );
+	}
+
+	/**
+	 * A prompt goes to the feature's provider. A provider that does not exist
 	 * shows this without a request being made: generating fails, naming it.
 	 */
-	public function test_get_prompt_builder_uses_the_given_provider() {
-		$result = AI_Providers::get_prompt_builder( 'Hello', 'wp_seo_missing' )->generate_text();
+	public function test_get_prompt_builder_uses_the_features_provider() {
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
+
+		$result = AI_Providers::get_prompt_builder( 'description_generator', 'Hello' )->generate_text();
 
 		$this->assertWPError( $result );
 		$this->assertStringContainsString( 'wp_seo_missing', $result->get_error_message() );
+	}
+
+	/**
+	 * A feature without a provider cannot start a prompt.
+	 */
+	public function test_get_prompt_builder_fails_without_a_provider() {
+		$result = AI_Providers::get_prompt_builder( 'description_generator', 'Hello' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_ai_no_provider', $result->get_error_code() );
 	}
 
 	/**
