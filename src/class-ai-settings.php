@@ -12,9 +12,9 @@ namespace Alley\WP\WP_SEO;
  * prompts to.
  *
  * Providers are the AI connectors configured under Settings > Connectors. The
- * page lists one row per active feature it was given, and saves the choices to
- * the option `AI_Providers` reads them from. A row whose provider is set in code
- * with the `wp_seo_ai_provider` filter is shown read-only.
+ * page lists one row per active feature it was given, and `AI_Providers` gives
+ * each row its choices and sanitizes what is saved. A row whose provider is set
+ * in code with the `wp_seo_ai_provider` filter is shown read-only.
  *
  * This is infrastructure rather than a WP SEO feature, though it implements the
  * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
@@ -70,6 +70,10 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 
 	/**
 	 * Register the option with WordPress.
+	 *
+	 * A row set in code renders a disabled field, which browsers do not submit,
+	 * and an inactive feature has no row at all, so either is missing from what
+	 * is saved and keeps its stored provider.
 	 */
 	public function register_setting(): void {
 		register_setting(
@@ -78,7 +82,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 			[
 				'type'              => 'object',
 				'default'           => [],
-				'sanitize_callback' => [ $this, 'sanitize' ],
+				'sanitize_callback' => fn ( mixed $value ): array => AI_Providers::sanitize_feature_providers( $value, array_keys( $this->features ) ),
 				'show_in_rest'      => false,
 			]
 		);
@@ -135,8 +139,8 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * The features to list on the page: those that are active.
 	 *
 	 * A feature that is not active sends no prompts, so there is no provider
-	 * to choose for it. Its stored provider is kept all the same, since
-	 * `sanitize()` covers every feature the page was given, listed or not.
+	 * to choose for it. Its stored provider is kept all the same, since the
+	 * setting is sanitized for every feature the page was given, listed or not.
 	 *
 	 * @return array<string, string> Labels of the active features, keyed by handle.
 	 */
@@ -148,37 +152,6 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 			fn ( string $feature ): bool => isset( $registry[ $feature ] ) && $registry[ $feature ]->booted(),
 			ARRAY_FILTER_USE_KEY
 		);
-	}
-
-	/**
-	 * Sanitize the option before it is saved.
-	 *
-	 * Keeps a provider only for a feature the page was given and only if it is
-	 * an available AI provider. A feature missing from the input keeps the
-	 * provider already stored for it: a row set in code renders a disabled
-	 * field, browsers do not submit disabled fields, and an inactive feature
-	 * has no row at all. A feature submitted as an empty string, which is what
-	 * choosing "None" sends, has its provider cleared.
-	 *
-	 * @param mixed $value Option value to save.
-	 * @return array<string, string> Connector IDs keyed by feature handle.
-	 */
-	public function sanitize( mixed $value ): array {
-		$value     = is_array( $value ) ? $value : [];
-		$stored    = get_option( AI_Providers::OPTION );
-		$stored    = is_array( $stored ) ? $stored : [];
-		$providers = AI_Providers::get_available_providers();
-		$sanitized = [];
-
-		foreach ( array_keys( $this->features ) as $feature ) {
-			$provider = $value[ $feature ] ?? $stored[ $feature ] ?? '';
-
-			if ( is_string( $provider ) && isset( $providers[ $provider ] ) ) {
-				$sanitized[ $feature ] = $provider;
-			}
-		}
-
-		return $sanitized;
 	}
 
 	/**
@@ -229,38 +202,24 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	/**
 	 * Render the provider dropdown for one feature.
 	 *
-	 * A provider the feature uses that is not available, as one set in code can
-	 * be, is listed as unavailable rather than left out, so that the dropdown
-	 * does not show "None" for a feature that still sends its prompts there.
-	 *
 	 * @param array{feature: string, label_for: string} $args Field arguments.
 	 */
 	public function render_field( array $args ): void {
-		$in_code   = null !== AI_Providers::get_feature_provider_from_code( $args['feature'] );
-		$selected  = AI_Providers::get_feature_provider( $args['feature'] );
-		$providers = AI_Providers::get_available_providers();
-
-		if ( '' !== $selected && ! isset( $providers[ $selected ] ) ) {
-			$providers[ $selected ] = sprintf(
-				/* translators: %s: connector ID of the provider. */
-				__( '%s (unavailable)', 'wp-seo' ),
-				$selected
-			);
-		}
+		$choice = AI_Providers::get_feature_choice( $args['feature'] );
 		?>
 		<select
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="<?php echo esc_attr( AI_Providers::OPTION . '[' . $args['feature'] . ']' ); ?>"
-			<?php disabled( $in_code ); ?>
+			<?php disabled( $choice['in_code'] ); ?>
 		>
 			<option value=""><?php esc_html_e( 'None', 'wp-seo' ); ?></option>
-			<?php foreach ( $providers as $id => $name ) : ?>
-				<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $selected, $id ); ?>>
+			<?php foreach ( $choice['providers'] as $id => $name ) : ?>
+				<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $choice['provider'], $id ); ?>>
 					<?php echo esc_html( $name ); ?>
 				</option>
 			<?php endforeach; ?>
 		</select>
-		<?php if ( $in_code ) : ?>
+		<?php if ( $choice['in_code'] ) : ?>
 			<p class="description">
 				<?php
 				printf(

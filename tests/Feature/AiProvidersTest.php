@@ -181,9 +181,96 @@ class AiProvidersTest extends TestCase {
 	 * A filter that answers with something other than a string leaves the
 	 * choice to the settings page.
 	 */
-	public function test_get_feature_provider_from_code_ignores_non_strings() {
+	public function test_get_feature_provider_ignores_non_strings_set_in_code() {
+		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		update_option( AI_Providers::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
+
 		add_filter( 'wp_seo_ai_provider', fn () => 123 );
 
-		$this->assertNull( AI_Providers::get_feature_provider_from_code( 'description_generator' ) );
+		$this->assertSame( 'wp_seo_active', AI_Providers::get_feature_provider( 'description_generator' ) );
+		$this->assertFalse( AI_Providers::get_feature_choice( 'description_generator' )['in_code'] );
+	}
+
+	/**
+	 * A feature's choice lists the available providers, and is read-only when
+	 * its provider is set in code.
+	 */
+	public function test_get_feature_choice_is_read_only_when_set_in_code() {
+		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+
+		$this->assertSame(
+			[
+				'provider'  => '',
+				'providers' => [ 'wp_seo_active' => 'Test wp_seo_active' ],
+				'in_code'   => false,
+			],
+			AI_Providers::get_feature_choice( 'description_generator' )
+		);
+
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_active' );
+
+		$this->assertSame(
+			[
+				'provider'  => 'wp_seo_active',
+				'providers' => [ 'wp_seo_active' => 'Test wp_seo_active' ],
+				'in_code'   => true,
+			],
+			AI_Providers::get_feature_choice( 'description_generator' )
+		);
+	}
+
+	/**
+	 * A feature's provider that is not available, as one set in code can be,
+	 * is listed as unavailable rather than left out.
+	 */
+	public function test_get_feature_choice_lists_an_unavailable_provider() {
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
+
+		$choice = AI_Providers::get_feature_choice( 'description_generator' );
+
+		$this->assertSame( 'wp_seo_missing', $choice['provider'] );
+		$this->assertSame( [ 'wp_seo_missing' => 'wp_seo_missing (unavailable)' ], $choice['providers'] );
+	}
+
+	/**
+	 * Sanitizing keeps only the given features, and only providers that are
+	 * available.
+	 */
+	public function test_sanitize_feature_providers_drops_unknown_features_and_providers() {
+		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+
+		$this->assertSame(
+			[ 'description_generator' => 'wp_seo_active' ],
+			AI_Providers::sanitize_feature_providers(
+				[
+					'description_generator' => 'wp_seo_active',
+					'unknown_feature'       => 'wp_seo_active',
+				],
+				[ 'description_generator' ]
+			)
+		);
+		$this->assertSame( [], AI_Providers::sanitize_feature_providers( [ 'description_generator' => 'not_a_provider' ], [ 'description_generator' ] ) );
+		$this->assertSame( [], AI_Providers::sanitize_feature_providers( 'wp_seo_active', [ 'description_generator' ] ) );
+	}
+
+	/**
+	 * A feature missing from what is sanitized keeps its stored provider.
+	 */
+	public function test_sanitize_feature_providers_keeps_a_missing_feature_provider() {
+		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		update_option( AI_Providers::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
+
+		$this->assertSame( [ 'description_generator' => 'wp_seo_active' ], AI_Providers::sanitize_feature_providers( [], [ 'description_generator' ] ) );
+	}
+
+	/**
+	 * A feature given "None" has its stored provider cleared, unlike one left
+	 * out.
+	 */
+	public function test_sanitize_feature_providers_clears_none() {
+		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		update_option( AI_Providers::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
+
+		$this->assertSame( [], AI_Providers::sanitize_feature_providers( [ 'description_generator' => '' ], [ 'description_generator' ] ) );
 	}
 }
