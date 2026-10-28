@@ -97,6 +97,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * @return \WP_REST_Response
 	 */
 	private function request( array $params ): \WP_REST_Response {
+		$this->register_description_meta();
 		( new Description_Generator() )->boot();
 
 		// Build the REST server again, so that it registers the route.
@@ -334,6 +335,8 @@ class DescriptionGeneratorTest extends TestCase {
 	 * attachments, and the list is filterable.
 	 */
 	public function test_post_types() {
+		$this->register_description_meta();
+
 		$post_types = Description_Generator::get_post_types();
 
 		$this->assertContains( 'post', $post_types );
@@ -343,6 +346,29 @@ class DescriptionGeneratorTest extends TestCase {
 		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page' ] );
 
 		$this->assertSame( [ 'page' ], Description_Generator::get_post_types() );
+	}
+
+	/**
+	 * Only post types that store the description are included, whether they
+	 * are public by default or added by the filter.
+	 */
+	public function test_post_types_need_a_stored_description() {
+		$this->register_description_meta();
+		register_post_type(
+			'wp_seo_product',
+			[
+				'public'  => true,
+				'show_ui' => true,
+			]
+		);
+
+		$this->assertNotContains( 'wp_seo_product', Description_Generator::get_post_types() );
+
+		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page', 'wp_block' ] );
+
+		$this->assertSame( [ 'page' ], Description_Generator::get_post_types() );
+
+		unregister_post_type( 'wp_seo_product' );
 	}
 
 	/**
@@ -432,6 +458,29 @@ class DescriptionGeneratorTest extends TestCase {
 		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page' ] );
 
 		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * A post whose type does not store the description is turned away, even
+	 * when the type is public.
+	 */
+	public function test_rest_route_requires_a_stored_description() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		register_post_type(
+			'wp_seo_product',
+			[
+				'public'  => true,
+				'show_ui' => true,
+			]
+		);
+		$post_id = static::factory()->post->create( [ 'post_type' => 'wp_seo_product' ] );
+
+		$response = $this->request( [ 'post_id' => $post_id ] );
+
+		unregister_post_type( 'wp_seo_product' );
 
 		$this->assertSame( 403, $response->get_status() );
 		$this->assertNull( FakeAiProvider::$prompt );
