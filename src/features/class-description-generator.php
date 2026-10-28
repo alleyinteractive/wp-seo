@@ -78,7 +78,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 			\WP_CLI::add_command( 'wp-seo generate-descriptions', Description_Generator_Command::class );
 		}
 
-		( new AI_Settings() )->boot();
+		( new AI_Settings() )->register();
 	}
 
 	/**
