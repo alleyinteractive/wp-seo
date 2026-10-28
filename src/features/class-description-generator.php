@@ -67,28 +67,6 @@ final class Description_Generator implements Feature {
 	}
 
 	/**
-	 * Get the AI provider the description generator sends its prompts to.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @return string|\WP_Error Connector ID of the provider, or an error if none
-	 *                          is chosen.
-	 */
-	public static function get_provider(): string|\WP_Error {
-		$provider = AI_Providers::get_feature_provider( self::HANDLE );
-
-		if ( '' === $provider ) {
-			return new \WP_Error(
-				'wp_seo_ai_no_provider',
-				__( 'No AI provider is selected for the Meta Description Generator.', 'wp-seo' ),
-				[ 'status' => 503 ]
-			);
-		}
-
-		return $provider;
-	}
-
-	/**
 	 * Get the maximum length of a generated meta description.
 	 *
 	 * @since 2.0.0
@@ -132,10 +110,11 @@ final class Description_Generator implements Feature {
 	 *                          the prompt are the ones core returns.
 	 */
 	public static function generate_description( \WP_Post $post ): string|\WP_Error {
-		$provider = self::get_provider();
+		// Checked first, so that the content is not rendered for a prompt that cannot be sent.
+		$check = AI_Providers::check_feature( self::HANDLE );
 
-		if ( is_wp_error( $provider ) ) {
-			return $provider;
+		if ( is_wp_error( $check ) ) {
+			return $check;
 		}
 
 		/*
@@ -208,7 +187,7 @@ final class Description_Generator implements Feature {
 		 */
 		$instructions = apply_filters( 'wp_seo_description_generator_prompt', $instructions, $post );
 
-		$prompt = AI_Providers::get_prompt_builder( "Title: {$title}\n\nContent: {$content}", $provider );
+		$prompt = AI_Providers::get_prompt_builder( self::HANDLE, "Title: {$title}\n\nContent: {$content}" );
 
 		if ( is_wp_error( $prompt ) ) {
 			return $prompt;
