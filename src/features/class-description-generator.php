@@ -9,7 +9,6 @@ namespace Alley\WP\WP_SEO\Features;
 
 use Alley\WP\Types\Feature;
 use Alley\WP\WP_SEO\AI_Providers;
-use Alley\WP\WP_SEO\Description_Generator_Command;
 
 /**
  * Meta Description Generator Feature

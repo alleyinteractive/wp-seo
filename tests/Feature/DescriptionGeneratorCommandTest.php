@@ -7,7 +7,7 @@
 
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
-use Alley\WP\WP_SEO\Description_Generator_Command;
+use Alley\WP\WP_SEO\Features\Description_Generator_Command;
 use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
