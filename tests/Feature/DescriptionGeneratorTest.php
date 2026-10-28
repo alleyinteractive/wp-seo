@@ -12,9 +12,6 @@ use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-use function Alley\WP\WP_SEO\generate_description;
-use function Alley\WP\WP_SEO\get_description_generator_post_types;
-
 /**
  * Tests for the Meta Description Generator feature.
  *
@@ -76,7 +73,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * post's title and rendered content as text.
 	 */
 	public function test_generates_a_description_from_the_post() {
-		$this->assertSame( 'A neutral summary of the post.', generate_description( $this->post ) );
+		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
 		$this->assertStringContainsString( 'Title: Hello World', FakeAiProvider::$prompt );
 		$this->assertStringContainsString( 'Content: Some post content.', FakeAiProvider::$prompt );
 		$this->assertStringContainsString( 'no more than 160 characters', FakeAiProvider::$system_instruction );
@@ -94,7 +91,7 @@ class DescriptionGeneratorTest extends TestCase {
 			]
 		);
 
-		generate_description( $post );
+		Description_Generator::generate_description( $post );
 
 		$this->assertStringContainsString( "Title: Hello World\n", FakeAiProvider::$prompt );
 		$this->assertStringNotContainsString( 'Private', FakeAiProvider::$prompt );
@@ -112,7 +109,7 @@ class DescriptionGeneratorTest extends TestCase {
 			]
 		);
 
-		generate_description( $post );
+		Description_Generator::generate_description( $post );
 
 		$this->assertStringContainsString( 'Title: Salt & Pepper', FakeAiProvider::$prompt );
 		$this->assertStringContainsString( 'Content: It’s “quoted” & <escaped>.', FakeAiProvider::$prompt );
@@ -136,7 +133,7 @@ class DescriptionGeneratorTest extends TestCase {
 			2
 		);
 
-		generate_description( $this->post );
+		Description_Generator::generate_description( $this->post );
 
 		$this->assertStringContainsString( 'Content: Some post content.', FakeAiProvider::$prompt );
 		$this->assertStringNotContainsString( 'Share this', FakeAiProvider::$prompt );
@@ -153,30 +150,26 @@ class DescriptionGeneratorTest extends TestCase {
 			2
 		);
 
-		generate_description( $this->post );
+		Description_Generator::generate_description( $this->post );
 
 		$this->assertSame( "Describe post {$this->post->ID}.", FakeAiProvider::$system_instruction );
 	}
 
 	/**
-	 * The maximum length is asked for in the instructions, and a longer reply
-	 * is an error that still holds the description.
+	 * The maximum length is asked for in the instructions, is given the post,
+	 * and a longer reply is still returned.
 	 */
-	public function test_a_description_over_the_max_length_is_an_error() {
-		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
-
-		$result = generate_description( $this->post );
-
-		$this->assertStringContainsString( 'no more than 20 characters', FakeAiProvider::$system_instruction );
-		$this->assertWPError( $result );
-		$this->assertSame( 'wp_seo_description_too_long', $result->get_error_code() );
-		$this->assertSame(
-			[
-				'status'      => 502,
-				'description' => 'A neutral summary of the post.',
-			],
-			$result->get_error_data()
+	public function test_a_description_over_the_max_length_is_returned() {
+		add_filter(
+			'wp_seo_description_generator_max_length',
+			fn ( int $max_length, \WP_Post $post ) => $post->ID === $this->post->ID ? 20 : $max_length,
+			10,
+			2
 		);
+
+		$this->assertSame( 20, Description_Generator::get_max_length( $this->post ) );
+		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
+		$this->assertStringContainsString( 'no more than 20 characters', FakeAiProvider::$system_instruction );
 	}
 
 	/**
@@ -185,7 +178,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_the_reply_is_cleaned_up() {
 		FakeAiProvider::$response = "  \"A <b>bold</b>\n summary.\"  ";
 
-		$this->assertSame( 'A bold summary.', generate_description( $this->post ) );
+		$this->assertSame( 'A bold summary.', Description_Generator::generate_description( $this->post ) );
 	}
 
 	/**
@@ -194,7 +187,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_html_entities_in_the_reply_are_decoded() {
 		FakeAiProvider::$response = '&quot;Salt &amp; pepper&#8217;s summary.&quot;';
 
-		$this->assertSame( 'Salt & pepper’s summary.', generate_description( $this->post ) );
+		$this->assertSame( 'Salt & pepper’s summary.', Description_Generator::generate_description( $this->post ) );
 	}
 
 	/**
@@ -207,7 +200,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_wrapping_quotes_are_removed( string $reply, string $expected ) {
 		FakeAiProvider::$response = $reply;
 
-		$this->assertSame( $expected, generate_description( $this->post ) );
+		$this->assertSame( $expected, Description_Generator::generate_description( $this->post ) );
 	}
 
 	/**
@@ -233,7 +226,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_an_empty_reply_is_an_error() {
 		FakeAiProvider::$response = ' "" ';
 
-		$result = generate_description( $this->post );
+		$result = Description_Generator::generate_description( $this->post );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'wp_seo_description_empty', $result->get_error_code() );
@@ -245,7 +238,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_no_provider_is_an_error() {
 		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
 
-		$result = generate_description( $this->post );
+		$result = Description_Generator::generate_description( $this->post );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'wp_seo_ai_no_provider', $result->get_error_code() );
@@ -259,7 +252,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_a_password_protected_post_is_an_error() {
 		$post = static::factory()->post->create_and_get( [ 'post_password' => 'secret' ] );
 
-		$result = generate_description( $post );
+		$result = Description_Generator::generate_description( $post );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'wp_seo_description_password_protected', $result->get_error_code() );
@@ -277,7 +270,7 @@ class DescriptionGeneratorTest extends TestCase {
 			]
 		);
 
-		$result = generate_description( $post );
+		$result = Description_Generator::generate_description( $post );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'wp_seo_description_no_content', $result->get_error_code() );
@@ -290,7 +283,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_errors_from_core_are_returned() {
 		add_filter( 'wp_ai_client_prevent_prompt', '__return_true' );
 
-		$result = generate_description( $this->post );
+		$result = Description_Generator::generate_description( $this->post );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'prompt_prevented', $result->get_error_code() );
@@ -301,7 +294,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * attachments, and the list is filterable.
 	 */
 	public function test_post_types() {
-		$post_types = get_description_generator_post_types();
+		$post_types = Description_Generator::get_post_types();
 
 		$this->assertContains( 'post', $post_types );
 		$this->assertContains( 'page', $post_types );
@@ -309,7 +302,7 @@ class DescriptionGeneratorTest extends TestCase {
 
 		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page' ] );
 
-		$this->assertSame( [ 'page' ], get_description_generator_post_types() );
+		$this->assertSame( [ 'page' ], Description_Generator::get_post_types() );
 	}
 
 	/**
@@ -371,5 +364,19 @@ class DescriptionGeneratorTest extends TestCase {
 
 		$this->assertSame( 503, $response->get_status() );
 		$this->assertSame( 'wp_seo_ai_no_provider', $response->get_data()['code'] );
+	}
+
+	/**
+	 * A description over the maximum length is returned, since the editor
+	 * reviews it before saving.
+	 */
+	public function test_rest_route_returns_a_description_over_the_max_length() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
+
+		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $response->get_data() );
 	}
 }
