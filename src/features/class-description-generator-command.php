@@ -253,19 +253,14 @@ final class Description_Generator_Command {
 			return;
 		}
 
-		$description = Description_Generator::generate_description( $post );
-		$max_length  = Description_Generator::get_max_length( $post );
+		$description = Description_Generator::generate_and_save_description( $post );
 
-		// The description is saved without an editor reviewing it, so one that is too long is refused.
-		if ( is_string( $description ) && mb_strlen( $description ) > $max_length ) {
-			$description = new \WP_Error(
-				'wp_seo_description_too_long',
-				sprintf(
-					/* translators: %d: maximum length, in characters. */
-					__( 'The AI provider returned a description longer than %d characters.', 'wp-seo' ),
-					$max_length
-				)
-			);
+		// An editor's description was kept, which is not a failure.
+		if ( is_wp_error( $description ) && 'wp_seo_description_exists' === $description->get_error_code() ) {
+			/* translators: 1: post ID, 2: message. */
+			WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $description->get_error_message() ) );
+			$cursor->set( $post->ID );
+			return;
 		}
 
 		if ( is_wp_error( $description ) ) {
@@ -304,28 +299,6 @@ final class Description_Generator_Command {
 			return;
 		}
 
-		/*
-		 * The post was queried with its batch, which can be minutes ago, so its
-		 * description is read again, past the cache, in case an editor has
-		 * saved one since.
-		 */
-		wp_cache_delete( $post->ID, 'post_meta' );
-
-		if ( '' !== get_post_meta( $post->ID, Description_Generator::META_KEY, true ) ) {
-			/* translators: %d: post ID. */
-			WP_CLI::log( sprintf( __( 'Post %d: Kept the description saved while this one was being generated.', 'wp-seo' ), $post->ID ) );
-			$cursor->set( $post->ID );
-			return;
-		}
-
-		/*
-		 * The description is saved without an editor reviewing it, and markup
-		 * the provider escaped comes back decoded, so it is sanitized as the
-		 * plain text it should be.
-		 */
-		$description = sanitize_text_field( $description );
-
-		update_post_meta( $post->ID, Description_Generator::META_KEY, $description );
 		++$this->generated;
 
 		/* translators: 1: post ID, 2: description. */

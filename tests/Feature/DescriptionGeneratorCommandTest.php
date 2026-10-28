@@ -117,21 +117,6 @@ class DescriptionGeneratorCommandTest extends TestCase {
 	}
 
 	/**
-	 * Markup in the description, which the provider can return escaped, is
-	 * removed before it is saved.
-	 */
-	public function test_descriptions_are_saved_as_plain_text() {
-		FakeAiProvider::$response = '&lt;img src=x onerror=alert(1)&gt;A &lt;b&gt;bold&lt;/b&gt; summary.';
-
-		$post = static::factory()->post->create();
-
-		$result = $this->run_command();
-
-		$this->assertSame( 'A bold summary.', $this->description( $post ) );
-		$this->assertStringContainsString( "Post {$post}: A bold summary.", $result['stdout'] );
-	}
-
-	/**
 	 * A description an editor saves while one is being generated is kept,
 	 * though the post was queried, and its meta cached, before it was saved.
 	 */

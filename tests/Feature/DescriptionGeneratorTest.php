@@ -331,6 +331,73 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
+	 * A description generated to be saved is saved to the post and returned.
+	 */
+	public function test_generate_and_save_description_saves_it() {
+		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_and_save_description( $this->post ) );
+		$this->assertSame( 'A neutral summary of the post.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * Markup in the description, which the provider can return escaped, is
+	 * removed before it is saved.
+	 */
+	public function test_generate_and_save_description_saves_plain_text() {
+		FakeAiProvider::$response = '&lt;img src=x onerror=alert(1)&gt;A &lt;b&gt;bold&lt;/b&gt; summary.';
+
+		$this->assertSame( 'A bold summary.', Description_Generator::generate_and_save_description( $this->post ) );
+		$this->assertSame( 'A bold summary.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * A description over the maximum length is refused, since no editor
+	 * reviews it.
+	 */
+	public function test_generate_and_save_description_refuses_one_over_the_max_length() {
+		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
+
+		$result = Description_Generator::generate_and_save_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_description_too_long', $result->get_error_code() );
+		$this->assertSame( '', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * A description an editor saves while one is being generated is kept,
+	 * though this request cached the post's meta before it was saved.
+	 */
+	public function test_generate_and_save_description_keeps_one_saved_during_generation() {
+		// Cache the post's meta without a description.
+		get_post_meta( $this->post->ID );
+
+		add_filter(
+			'wp_seo_description_generator_content',
+			function ( string $content ) {
+				global $wpdb;
+
+				// An editor saving in another request, which this request's cache doesn't know about.
+				$wpdb->insert(
+					$wpdb->postmeta,
+					[
+						'post_id'    => $this->post->ID,
+						'meta_key'   => Description_Generator::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => 'Written by an editor.', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					]
+				);
+
+				return $content;
+			}
+		);
+
+		$result = Description_Generator::generate_and_save_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_description_exists', $result->get_error_code() );
+		$this->assertSame( 'Written by an editor.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
 	 * Public post types shown in the admin are included by default, except
 	 * attachments, and the list is filterable.
 	 */

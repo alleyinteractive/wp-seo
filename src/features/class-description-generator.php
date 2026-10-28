@@ -18,8 +18,8 @@ use Alley\WP\WP_SEO\AI_Providers;
  * description is returned, not saved.
  *
  * Every request costs a prompt, so each user may make a limited number of
- * requests to the route an hour. Calling `generate_description()` directly, as
- * bulk runs do, is not limited.
+ * requests to the route an hour. Calling `generate_description()` or
+ * `generate_and_save_description()` directly, as bulk runs do, is not limited.
  *
  * The block editor offers a button to generate the description on post types
  * with the `wp-seo-description-generator` support, and the
@@ -148,8 +148,8 @@ final class Description_Generator implements Feature {
 		 * Filters the maximum length of a generated meta description.
 		 *
 		 * The default instructions ask for a description no longer than this. A
-		 * longer one is still returned, so a caller that saves descriptions
-		 * without review should check it.
+		 * longer one is still returned for an editor to review, but
+		 * `generate_and_save_description()` refuses it.
 		 *
 		 * @since 2.0.0
 		 *
@@ -287,6 +287,65 @@ final class Description_Generator implements Feature {
 	}
 
 	/**
+	 * Generate a meta description for a post and save it, without an editor
+	 * reviewing it.
+	 *
+	 * Since no editor reviews it, a description longer than `get_max_length()`
+	 * is refused, and markup is removed before it is saved. A description an
+	 * editor saved while this one was being generated is kept.
+	 *
+	 *     $description = Description_Generator::generate_and_save_description( get_post( 123 ) );
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \WP_Post $post Post to describe.
+	 * @return string|\WP_Error The saved description, or an error. The error
+	 *                          code is `wp_seo_description_exists` when an
+	 *                          editor's description was kept.
+	 */
+	public static function generate_and_save_description( \WP_Post $post ): string|\WP_Error {
+		$description = self::generate_description( $post );
+
+		if ( is_wp_error( $description ) ) {
+			return $description;
+		}
+
+		$max_length = self::get_max_length( $post );
+
+		if ( mb_strlen( $description ) > $max_length ) {
+			return new \WP_Error(
+				'wp_seo_description_too_long',
+				sprintf(
+					/* translators: %d: maximum length, in characters. */
+					__( 'The AI provider returned a description longer than %d characters.', 'wp-seo' ),
+					$max_length
+				)
+			);
+		}
+
+		/*
+		 * The post can have been read minutes ago, as a bulk run reads it with
+		 * its batch, so its description is read again, past the cache, in case
+		 * an editor has saved one since.
+		 */
+		wp_cache_delete( $post->ID, 'post_meta' );
+
+		if ( '' !== get_post_meta( $post->ID, self::META_KEY, true ) ) {
+			return new \WP_Error(
+				'wp_seo_description_exists',
+				__( 'Kept the description saved while this one was being generated.', 'wp-seo' )
+			);
+		}
+
+		// Markup the provider escaped comes back decoded, so it is removed as plain text.
+		$description = sanitize_text_field( $description );
+
+		update_post_meta( $post->ID, self::META_KEY, $description );
+
+		return $description;
+	}
+
+	/**
 	 * Register the route that generates a description.
 	 *
 	 * The route takes POST rather than GET, since every request costs a prompt
@@ -406,7 +465,8 @@ final class Description_Generator implements Feature {
 		 * Filters the number of descriptions a user may generate an hour
 		 * through the REST route.
 		 *
-		 * Calling `generate_description()` directly is not limited.
+		 * Calling `generate_description()` or `generate_and_save_description()`
+		 * directly is not limited.
 		 *
 		 * @since 2.0.0
 		 *
