@@ -10,6 +10,7 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 use Alley\WP\WP_SEO\AI_Providers;
 use Alley\WP\WP_SEO\AI_Settings;
 use Alley\WP\WP_SEO\Features_Page;
+use Alley\WP\WP_SEO\Tests\Concerns\RegistersConnectors;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
 use function Mantle\Support\Helpers\capture;
@@ -17,18 +18,13 @@ use function Mantle\Support\Helpers\capture;
 /**
  * Tests for the page that chooses the AI provider WP SEO sends prompts to.
  *
- * The page is booted by features that send prompts, so each test registers
- * the setting itself.
+ * The page is registered by features that send prompts, so each test
+ * registers the setting itself.
  *
  * @link https://mantle.alley.com/docs/testing
  */
 class AiSettingsTest extends TestCase {
-	/**
-	 * Connectors registered by a test, removed again after it.
-	 *
-	 * @var string[]
-	 */
-	private array $connectors = [];
+	use RegistersConnectors;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -43,33 +39,12 @@ class AiSettingsTest extends TestCase {
 	}
 
 	protected function tearDown(): void {
-		foreach ( $this->connectors as $id ) {
-			\WP_Connector_Registry::get_instance()->unregister( $id );
-		}
+		$this->unregister_connectors();
 
 		delete_option( AI_Providers::OPTION );
 		unregister_setting( AI_Settings::SLUG, AI_Providers::OPTION );
 
 		parent::tearDown();
-	}
-
-	/**
-	 * Register an active AI provider for the length of a test.
-	 *
-	 * @param string $id Connector ID.
-	 */
-	private function register_provider( string $id ): void {
-		\WP_Connector_Registry::get_instance()->register(
-			$id,
-			[
-				'name'           => "Test {$id}",
-				'type'           => 'ai_provider',
-				'authentication' => [ 'method' => 'none' ],
-				'plugin'         => [ 'is_active' => '__return_true' ],
-			]
-		);
-
-		$this->connectors[] = $id;
 	}
 
 	/**
@@ -83,7 +58,7 @@ class AiSettingsTest extends TestCase {
 	 * Saving the option keeps only a provider that is available.
 	 */
 	public function test_saving_is_sanitized() {
-		$this->register_provider( 'wp_seo_active' );
+		$this->register_connector( 'wp_seo_active' );
 
 		update_option( AI_Providers::OPTION, 'wp_seo_active' );
 
@@ -126,7 +101,7 @@ class AiSettingsTest extends TestCase {
 	 * provider is set in code.
 	 */
 	public function test_field_is_editable_unless_set_in_code() {
-		$this->register_provider( 'wp_seo_active' );
+		$this->register_connector( 'wp_seo_active' );
 
 		$field = capture( fn () => ( new AI_Settings() )->render_field() );
 
@@ -164,7 +139,7 @@ class AiSettingsTest extends TestCase {
 		$this->assertSame( [], AI_Providers::get_available_providers(), 'No AI provider plugin is active in the test environment.' );
 		$this->assertStringContainsString( 'options-connectors.php', capture( fn () => $page->render_section() ) );
 
-		$this->register_provider( 'wp_seo_active' );
+		$this->register_connector( 'wp_seo_active' );
 
 		$this->assertSame( '', capture( fn () => $page->render_section() ) );
 	}

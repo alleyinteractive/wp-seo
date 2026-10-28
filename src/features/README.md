@@ -39,7 +39,7 @@ function main(): void {
 }
 ```
 
-A feature that sends prompts to an AI provider gets its provider from `Alley\WP\WP_SEO\AI_Providers::check_provider()`, and boots `Alley\WP\WP_SEO\AI_Settings` so that the WP SEO AI settings page is offered while it is active.
+A feature that sends prompts to an AI provider gets its provider from `Alley\WP\WP_SEO\AI_Providers::check_provider()`, and registers `Alley\WP\WP_SEO\AI_Settings` so that the WP SEO AI settings page is offered while it is active.
 
 ## Example feature class
 

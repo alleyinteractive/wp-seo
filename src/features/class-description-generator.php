@@ -48,7 +48,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		add_action( 'init', [ $this, 'add_post_type_support' ], 99 );
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
 
-		( new AI_Settings() )->boot();
+		( new AI_Settings() )->register();
 	}
 
 	/**
