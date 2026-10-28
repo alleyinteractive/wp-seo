@@ -18,7 +18,8 @@ namespace Alley\WP\WP_SEO;
  * This is infrastructure rather than a WP SEO feature, though it implements the
  * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
  * wrapped in a `Feature` and carries no handle, since it only configures
- * features that are.
+ * features that are. A feature that sends prompts boots it, so that the page
+ * is offered only while such a feature is active.
  */
 final class AI_Settings implements \Alley\WP\Types\Feature {
 	/**

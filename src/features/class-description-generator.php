@@ -8,7 +8,7 @@
 namespace Alley\WP\WP_SEO\Features;
 
 use Alley\WP\WP_SEO\AI_Providers;
-use Alley\WP\WP_SEO\Sends_Prompts;
+use Alley\WP\WP_SEO\AI_Settings;
 
 /**
  * Meta Description Generator Feature
@@ -17,10 +17,9 @@ use Alley\WP\WP_SEO\Sends_Prompts;
  * provider chosen on the WP SEO AI settings page, for the editor to use. The
  * description is returned, not saved.
  */
-final class Description_Generator implements Sends_Prompts {
+final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
-	 * Handle of the feature, which names its enablement filter and keys its AI
-	 * provider.
+	 * Handle of the feature, which names its enablement filter.
 	 *
 	 * @var string
 	 */
@@ -31,6 +30,8 @@ final class Description_Generator implements Sends_Prompts {
 	 */
 	public function boot(): void {
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
+
+		( new AI_Settings() )->boot();
 	}
 
 	/**
@@ -89,8 +90,8 @@ final class Description_Generator implements Sends_Prompts {
 	/**
 	 * Generate a meta description for a post.
 	 *
-	 * Sends the post's title and rendered content to the AI provider chosen for
-	 * the description generator, and returns the description it writes. The
+	 * Sends the post's title and rendered content to the AI provider chosen on
+	 * the WP SEO AI settings page, and returns the description it writes. The
 	 * description is not saved, and may be longer than `get_max_length()`.
 	 *
 	 *     $description = Description_Generator::generate_description( get_post( 123 ) );
