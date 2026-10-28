@@ -54,10 +54,8 @@ final class Description_Generator implements Feature {
 	 * Add support for the block editor's button to the post types it can
 	 * be used on.
 	 *
-	 * The button fills the description the Search Engine panel edits, so it is
-	 * offered only on post types that store that description. It is not
-	 * offered until an AI provider is chosen, since an editor could not fix
-	 * the error every click would get.
+	 * The button is not offered until an AI provider is chosen, since an
+	 * editor could not fix the error every click would get.
 	 */
 	public function add_post_type_support(): void {
 		if ( is_wp_error( self::get_provider() ) ) {
@@ -65,14 +63,15 @@ final class Description_Generator implements Feature {
 		}
 
 		foreach ( self::get_post_types() as $post_type ) {
-			if ( registered_meta_key_exists( 'post', self::META_KEY, $post_type ) ) {
-				add_post_type_support( $post_type, 'wp-seo-description-generator' );
-			}
+			add_post_type_support( $post_type, 'wp-seo-description-generator' );
 		}
 	}
 
 	/**
 	 * Get the post types the description generator writes meta descriptions for.
+	 *
+	 * Only post types that store the description the Search Engine panel edits
+	 * are included, including any the filter adds.
 	 *
 	 * @since 2.0.0
 	 *
@@ -92,12 +91,21 @@ final class Description_Generator implements Feature {
 		/**
 		 * Filters the post types the description generator writes meta descriptions for.
 		 *
+		 * Post types that do not store the description are removed afterward.
+		 *
 		 * @since 2.0.0
 		 *
 		 * @param string[] $post_types Post type names. Default every public post type
 		 *                             shown in the admin, except attachments.
 		 */
-		return apply_filters( 'wp_seo_description_generator_post_types', array_values( $post_types ) );
+		$post_types = apply_filters( 'wp_seo_description_generator_post_types', array_values( $post_types ) );
+
+		return array_values(
+			array_filter(
+				$post_types,
+				fn ( string $post_type ): bool => registered_meta_key_exists( 'post', self::META_KEY, $post_type ),
+			)
+		);
 	}
 
 	/**
