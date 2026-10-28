@@ -54,11 +54,11 @@ final class Description_Generator implements Feature {
 	 * Add support for the block editor's button to the post types it can
 	 * be used on.
 	 *
-	 * The button is not offered until an AI provider is chosen, since an
+	 * The button is not offered until the feature can send prompts, since an
 	 * editor could not fix the error every click would get.
 	 */
 	public function add_post_type_support(): void {
-		if ( is_wp_error( self::get_provider() ) ) {
+		if ( is_wp_error( AI_Providers::check_feature( self::HANDLE ) ) ) {
 			return;
 		}
 
