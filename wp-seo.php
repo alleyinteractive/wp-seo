@@ -6,7 +6,7 @@
  * Version: 2.0.0
  * Author: Alley Interactive
  * Author URI: https://github.com/alleyinteractive/wp-seo
- * Requires at least: 7.0
+ * Requires at least: 5.9
  * Requires PHP: 8.2
  * Tested up to: 6.7
  *

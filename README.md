@@ -3,7 +3,7 @@
 **Contributors:** alleyinteractive\
 **Tags:** alleyinteractive, wp-seo\
 **Stable tag:** 0.0.0\
-**Requires at least:** 7.0\
+**Requires at least:** 6.3\
 **Tested up to:** 6.7\
 **Requires PHP:** 8.2\
 **License:** GPL v2 or later

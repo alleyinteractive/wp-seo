@@ -149,7 +149,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 		$value     = is_array( $value ) ? $value : [];
 		$stored    = get_option( self::OPTION );
 		$stored    = is_array( $stored ) ? $stored : [];
-		$providers = get_ai_providers();
+		$providers = AI_Providers::get_available_providers();
 		$sanitized = [];
 
 		foreach ( array_keys( $this->features ) as $feature ) {
@@ -192,7 +192,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * when there are none to choose from.
 	 */
 	public function render_section(): void {
-		if ( get_ai_providers() ) {
+		if ( AI_Providers::get_available_providers() ) {
 			return;
 		}
 		?>
@@ -220,7 +220,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	public function render_field( array $args ): void {
 		$in_code   = null !== get_ai_provider_from_code( $args['feature'] );
 		$selected  = get_ai_provider( $args['feature'] );
-		$providers = get_ai_providers();
+		$providers = AI_Providers::get_available_providers();
 
 		if ( '' !== $selected && ! isset( $providers[ $selected ] ) ) {
 			$providers[ $selected ] = sprintf(
