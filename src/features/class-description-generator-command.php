@@ -240,10 +240,10 @@ final class Description_Generator_Command {
 	 * The place reached is saved after the post, except when the AI provider
 	 * is limiting requests, so that the post is tried again next run.
 	 *
-	 * @param \WP_Post                     $post             Post to describe.
+	 * @param \WP_Post                    $post             Post to describe.
 	 * @param Option_Cursor|Memory_Cursor $cursor           Place reached in the run.
-	 * @param bool                         $dry_run          Whether to only list the post.
-	 * @param int                          $allowed_failures Number of posts that may fail before the run stops.
+	 * @param bool                        $dry_run          Whether to only list the post.
+	 * @param int                         $allowed_failures Number of posts that may fail before the run stops.
 	 */
 	private function describe_post( \WP_Post $post, Option_Cursor|Memory_Cursor $cursor, bool $dry_run, int $allowed_failures ): void {
 		if ( $dry_run ) {
