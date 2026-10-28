@@ -7,8 +7,8 @@
 
 namespace Alley\WP\WP_SEO\Features;
 
-use Alley\WP\Types\Feature;
 use Alley\WP\WP_SEO\AI_Providers;
+use Alley\WP\WP_SEO\Sends_Prompts;
 
 /**
  * Meta Description Generator Feature
@@ -21,7 +21,7 @@ use Alley\WP\WP_SEO\AI_Providers;
  * requests to the route an hour. Calling `generate_description()` directly, as
  * bulk runs do, is not limited.
  */
-final class Description_Generator implements Feature {
+final class Description_Generator implements Sends_Prompts {
 	/**
 	 * Handle of the feature, which names its enablement filter and keys its AI
 	 * provider.
