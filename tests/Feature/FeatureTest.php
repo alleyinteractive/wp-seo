@@ -11,7 +11,6 @@ use Alley\WP\Features\Group;
 use Alley\WP\Types\Feature as Origin;
 use Alley\WP\WP_SEO\Feature;
 use Alley\WP\WP_SEO\Registry;
-use Alley\WP\WP_SEO\Sends_Prompts;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use Mantle\Testing\Attributes\Expected_Incorrect_Usage;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -73,22 +72,6 @@ class FeatureTest extends TestCase {
 			'Title & Description Tags',
 			Feature::group( 'titles', 'Title & Description Tags', Feature::nested( 'term_titles', 'Term Titles', $this->boot_spy() ) )->label()
 		);
-	}
-
-	/**
-	 * A feature sends prompts when the feature it wraps implements
-	 * `Sends_Prompts`.
-	 */
-	public function test_a_feature_reports_whether_it_sends_prompts() {
-		$sends_prompts = new class() implements Sends_Prompts {
-			/**
-			 * Boot the feature.
-			 */
-			public function boot(): void {}
-		};
-
-		$this->assertTrue( Feature::top_level( 'description_generator', 'Meta Description Generator', $sends_prompts )->sends_prompts() );
-		$this->assertFalse( Feature::top_level( 'open_graph', 'Open Graph', $this->boot_spy() )->sends_prompts() );
 	}
 
 	/**

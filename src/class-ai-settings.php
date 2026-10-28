@@ -8,19 +8,18 @@
 namespace Alley\WP\WP_SEO;
 
 /**
- * The admin page for choosing which AI provider each WP SEO feature sends its
- * prompts to.
+ * The admin page for choosing which AI provider WP SEO sends its prompts to.
  *
- * Providers are the AI connectors configured under Settings > Connectors. The
- * page lists one row per active feature in the Registry that implements
- * `Sends_Prompts`, and `AI_Providers` gives each row its choices and sanitizes
- * what is saved. A row whose provider is set in code with the
- * `wp_seo_ai_provider` filter is shown read-only.
+ * Providers are the AI connectors configured under Settings > Connectors.
+ * `AI_Providers` gives the page its choices and sanitizes what is saved. When
+ * the provider is set in code with the `wp_seo_ai_provider` filter, the choice
+ * is shown read-only.
  *
  * This is infrastructure rather than a WP SEO feature, though it implements the
  * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
  * wrapped in a `Feature` and carries no handle, since it only configures
- * features that are, and it does nothing when no feature sends prompts.
+ * features that are. A feature that sends prompts boots it, so that the page
+ * is offered only while such a feature is active.
  */
 final class AI_Settings implements \Alley\WP\Types\Feature {
 	/**
@@ -57,48 +56,35 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	}
 
 	/**
-	 * Register the option with WordPress, if any feature sends prompts.
-	 *
-	 * A row set in code renders a disabled field, which browsers do not submit,
-	 * and an inactive feature has no row at all, so either is missing from what
-	 * is saved and keeps its stored provider.
+	 * Register the option with WordPress.
 	 */
 	public function register_setting(): void {
-		if ( ! $this->get_features() ) {
-			return;
-		}
-
 		register_setting(
 			self::SLUG,
 			AI_Providers::OPTION,
 			[
-				'type'              => 'object',
-				'default'           => [],
-				'sanitize_callback' => fn ( mixed $value ): array => AI_Providers::sanitize_feature_providers( $value, array_keys( $this->get_features() ) ),
+				'type'              => 'string',
+				'default'           => '',
+				'sanitize_callback' => [ AI_Providers::class, 'sanitize_provider' ],
 				'show_in_rest'      => false,
 			]
 		);
 	}
 
 	/**
-	 * Add the page's section and one field per feature.
+	 * Add the page's section and its one field.
 	 */
 	public function add_fields(): void {
 		add_settings_section( self::SECTION, '', [ $this, 'render_section' ], self::SLUG );
 
-		foreach ( $this->get_active_features() as $feature => $label ) {
-			add_settings_field(
-				"wp_seo_ai_provider_{$feature}",
-				$label,
-				[ $this, 'render_field' ],
-				self::SLUG,
-				self::SECTION,
-				[
-					'feature'   => $feature,
-					'label_for' => "wp_seo_ai_provider_{$feature}",
-				]
-			);
-		}
+		add_settings_field(
+			AI_Providers::OPTION,
+			__( 'AI provider', 'wp-seo' ),
+			[ $this, 'render_field' ],
+			self::SLUG,
+			self::SECTION,
+			[ 'label_for' => AI_Providers::OPTION ]
+		);
 	}
 
 	/**
@@ -106,13 +92,8 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 *
 	 * The fields are added only when the page loads, since only rendering the
 	 * page needs them; saving through `options.php` needs only the setting.
-	 * With no active features to list, there is no page.
 	 */
 	public function add_page(): void {
-		if ( ! $this->get_active_features() ) {
-			return;
-		}
-
 		$hook = add_submenu_page(
 			Features_Page::SLUG,
 			__( 'WP SEO AI Settings', 'wp-seo' ),
@@ -125,47 +106,6 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 		if ( $hook ) {
 			add_action( "load-{$hook}", [ $this, 'add_fields' ] );
 		}
-	}
-
-	/**
-	 * Get the features that send prompts, active or not.
-	 *
-	 * Read from the Registry each time rather than when the page boots, so
-	 * that features composed after it, including any added with the
-	 * `wp_seo_register_features` action, are included.
-	 *
-	 * @return array<string, string> Labels of the features, keyed by handle.
-	 */
-	private function get_features(): array {
-		$features = [];
-
-		foreach ( Registry::features() as $handle => $feature ) {
-			if ( $feature->sends_prompts() ) {
-				$features[ $handle ] = $feature->label();
-			}
-		}
-
-		return $features;
-	}
-
-	/**
-	 * Get the features to list on the page: those that send prompts and are
-	 * active.
-	 *
-	 * A feature that is not active sends no prompts, so there is no provider
-	 * to choose for it. Its stored provider is kept all the same, since the
-	 * setting is sanitized for every feature that sends prompts, listed or not.
-	 *
-	 * @return array<string, string> Labels of the active features, keyed by handle.
-	 */
-	private function get_active_features(): array {
-		$registry = Registry::features();
-
-		return array_filter(
-			$this->get_features(),
-			fn ( string $feature ): bool => $registry[ $feature ]->booted(),
-			ARRAY_FILTER_USE_KEY
-		);
 	}
 
 	/**
@@ -214,16 +154,14 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	}
 
 	/**
-	 * Render the provider dropdown for one feature.
-	 *
-	 * @param array{feature: string, label_for: string} $args Field arguments.
+	 * Render the provider dropdown.
 	 */
-	public function render_field( array $args ): void {
-		$choice = AI_Providers::get_feature_choice( $args['feature'] );
+	public function render_field(): void {
+		$choice = AI_Providers::get_choice();
 		?>
 		<select
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="<?php echo esc_attr( AI_Providers::OPTION . '[' . $args['feature'] . ']' ); ?>"
+			id="<?php echo esc_attr( AI_Providers::OPTION ); ?>"
+			name="<?php echo esc_attr( AI_Providers::OPTION ); ?>"
 			<?php disabled( $choice['in_code'] ); ?>
 		>
 			<option value=""><?php esc_html_e( 'None', 'wp-seo' ); ?></option>

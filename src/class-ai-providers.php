@@ -8,23 +8,22 @@
 namespace Alley\WP\WP_SEO;
 
 /**
- * The AI providers WP SEO features can send prompts to, and the one each
- * feature uses.
+ * The AI providers WP SEO can send prompts to, and the one it uses.
  *
  * AI providers are the connectors a site administrator configures under
  * Settings > Connectors (WordPress 7.0+). Before WordPress 7.0, there are none,
  * and a prompt cannot be started.
  *
- * Each feature's provider is chosen on the WP SEO AI settings page, or set in
- * code with the `wp_seo_ai_provider` filter.
+ * The provider is chosen on the WP SEO AI settings page, or set in code with
+ * the `wp_seo_ai_provider` filter.
  */
 final class AI_Providers {
 	/**
-	 * Name of the option holding the provider chosen for each feature.
+	 * Name of the option holding the chosen provider.
 	 *
 	 * @var string
 	 */
-	public const OPTION = 'wp_seo_ai_providers';
+	public const OPTION = 'wp_seo_ai_provider';
 
 	/**
 	 * The class is static; there is nothing to instantiate.
@@ -32,23 +31,22 @@ final class AI_Providers {
 	private function __construct() {}
 
 	/**
-	 * Get the AI provider a WP SEO feature sends its prompts to.
+	 * Get the AI provider WP SEO sends its prompts to.
 	 *
 	 * The provider set in code, if any, or else the one chosen on the WP SEO AI
 	 * settings page. Whether the provider is still available is not checked; an
 	 * unavailable one surfaces as an error when a prompt is sent.
 	 *
-	 * To send a prompt, use `get_prompt_builder()`, which checks that the
-	 * feature has a provider.
+	 * To send a prompt, use `get_prompt_builder()`, which checks that there is
+	 * a provider.
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string $feature Handle of the feature sending prompts.
-	 * @return string Connector ID of the provider, or an empty string if the
-	 *                feature has none and should not send prompts.
+	 * @return string Connector ID of the provider, or an empty string if there
+	 *                is none and no prompts should be sent.
 	 */
-	public static function get_feature_provider( string $feature ): string {
-		$provider = self::get_feature_provider_from_code( $feature );
+	public static function get_provider(): string {
+		$provider = self::get_provider_from_code();
 
 		if ( null !== $provider ) {
 			return $provider;
@@ -56,29 +54,26 @@ final class AI_Providers {
 
 		$stored = get_option( self::OPTION );
 
-		return is_array( $stored ) && isset( $stored[ $feature ] ) && is_string( $stored[ $feature ] ) ? $stored[ $feature ] : '';
+		return is_string( $stored ) ? $stored : '';
 	}
 
 	/**
-	 * Get the choice of AI provider for a WP SEO feature, as the WP SEO AI
-	 * settings page shows it.
+	 * Get the choice of AI provider, as the WP SEO AI settings page shows it.
 	 *
-	 * The providers to choose from are the available ones, plus the feature's
+	 * The providers to choose from are the available ones, plus the current
 	 * provider if it is not available, as one set in code can be, so that the
-	 * page does not show "None" for a feature that still sends its prompts
-	 * there.
+	 * page does not show "None" while prompts are still sent there.
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string $feature Handle of the feature sending prompts.
 	 * @return array{provider: string, providers: array<string, string>, in_code: bool} The
-	 *         feature's provider, or an empty string for none; the providers to
-	 *         choose from, keyed by connector ID; and whether the provider is set
-	 *         in code, which makes the choice read-only.
+	 *         provider, or an empty string for none; the providers to choose
+	 *         from, keyed by connector ID; and whether the provider is set in
+	 *         code, which makes the choice read-only.
 	 */
-	public static function get_feature_choice( string $feature ): array {
-		$in_code   = null !== self::get_feature_provider_from_code( $feature );
-		$provider  = self::get_feature_provider( $feature );
+	public static function get_choice(): array {
+		$in_code   = null !== self::get_provider_from_code();
+		$provider  = self::get_provider();
 		$providers = self::get_available_providers();
 
 		if ( '' !== $provider && ! isset( $providers[ $provider ] ) ) {
@@ -97,63 +92,50 @@ final class AI_Providers {
 	}
 
 	/**
-	 * Sanitize the AI providers chosen for WP SEO features before they are
-	 * saved.
+	 * Sanitize the chosen AI provider before it is saved.
 	 *
-	 * Keeps a provider only for one of the given features, and only if it is an
-	 * available AI provider. A feature missing from the input keeps the provider
-	 * already stored for it, so that a form can leave out features it does not
-	 * let the user change. A feature given an empty string, which is what
-	 * choosing "None" sends, has its provider cleared.
+	 * Keeps the provider only if it is an available AI provider. When nothing
+	 * is submitted, as when the field is disabled because the provider is set
+	 * in code, the stored provider is kept. An empty string, which is what
+	 * choosing "None" sends, clears it.
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param mixed    $value    Connector IDs to save, keyed by feature handle.
-	 * @param string[] $features Handles of the features whose providers can be saved.
-	 * @return array<string, string> Connector IDs keyed by feature handle.
+	 * @param mixed $value Connector ID to save.
+	 * @return string Connector ID, or an empty string for none.
 	 */
-	public static function sanitize_feature_providers( mixed $value, array $features ): array {
-		$value     = is_array( $value ) ? $value : [];
-		$stored    = get_option( self::OPTION );
-		$stored    = is_array( $stored ) ? $stored : [];
-		$providers = self::get_available_providers();
-		$sanitized = [];
+	public static function sanitize_provider( mixed $value ): string {
+		if ( null === $value ) {
+			$stored = get_option( self::OPTION );
 
-		foreach ( $features as $feature ) {
-			$provider = $value[ $feature ] ?? $stored[ $feature ] ?? '';
-
-			if ( is_string( $provider ) && isset( $providers[ $provider ] ) ) {
-				$sanitized[ $feature ] = $provider;
-			}
+			return is_string( $stored ) ? $stored : '';
 		}
 
-		return $sanitized;
+		return is_string( $value ) && isset( self::get_available_providers()[ $value ] ) ? $value : '';
 	}
 
 	/**
-	 * Get the AI provider set in code for a WP SEO feature, if any.
+	 * Get the AI provider set in code, if any.
 	 *
 	 * A provider set in code takes the place of the one chosen on the WP SEO AI
-	 * settings page, which then shows that feature's setting as read-only.
+	 * settings page, which then shows the setting as read-only.
 	 *
-	 * @param string $feature Handle of the feature sending prompts.
 	 * @return string|null Connector ID of the provider, an empty string for no
 	 *                     provider, or null to leave it to the settings page.
 	 */
-	private static function get_feature_provider_from_code( string $feature ): ?string {
+	private static function get_provider_from_code(): ?string {
 		/**
-		 * Filters the AI provider a WP SEO feature sends its prompts to.
+		 * Filters the AI provider WP SEO sends its prompts to.
 		 *
 		 * Return a connector ID to use that provider, or an empty string for none,
-		 * and the feature's setting on the WP SEO AI settings page becomes
-		 * read-only. Return null to leave the choice to the settings page.
+		 * and the setting on the WP SEO AI settings page becomes read-only.
+		 * Return null to leave the choice to the settings page.
 		 *
 		 * @since 2.0.0
 		 *
 		 * @param string|null $provider Connector ID of the provider. Default null.
-		 * @param string      $feature  Handle of the feature sending prompts.
 		 */
-		$provider = apply_filters( 'wp_seo_ai_provider', null, $feature );
+		$provider = apply_filters( 'wp_seo_ai_provider', null );
 
 		return is_string( $provider ) ? $provider : null;
 	}
@@ -194,31 +176,25 @@ final class AI_Providers {
 	}
 
 	/**
-	 * Check that a WP SEO feature can send prompts.
+	 * Check that WP SEO can send prompts.
 	 *
-	 * A feature cannot send prompts before WordPress 7.0, or when it has no
+	 * Prompts cannot be sent before WordPress 7.0, or when there is no
 	 * provider. Whether the provider is still available is not checked; an
 	 * unavailable one surfaces as an error when a prompt is sent.
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string $feature Handle of the feature sending prompts.
-	 * @return true|\WP_Error True if the feature can send prompts, or an error.
+	 * @return true|\WP_Error True if prompts can be sent, or an error.
 	 */
-	public static function check_feature( string $feature ): true|\WP_Error {
+	public static function check_provider(): true|\WP_Error {
 		if ( ! function_exists( 'wp_ai_client_prompt' ) ) {
 			return new \WP_Error( 'wp_seo_ai_unsupported', __( 'WP SEO requires WordPress 7.0 or later to use AI providers.', 'wp-seo' ) );
 		}
 
-		if ( '' === self::get_feature_provider( $feature ) ) {
-			$registry = Registry::features();
-
+		if ( '' === self::get_provider() ) {
 			return new \WP_Error(
 				'wp_seo_ai_no_provider',
-				isset( $registry[ $feature ] )
-					/* translators: %s: name of the feature. */
-					? sprintf( __( 'No AI provider is selected for the %s.', 'wp-seo' ), $registry[ $feature ]->label() )
-					: __( 'No AI provider is selected for this feature.', 'wp-seo' ),
+				__( 'No AI provider is selected on the WP SEO AI settings page.', 'wp-seo' ),
 				[ 'status' => 503 ]
 			);
 		}
@@ -227,7 +203,7 @@ final class AI_Providers {
 	}
 
 	/**
-	 * Start a prompt from a WP SEO feature to its AI provider.
+	 * Start a prompt to the AI provider.
 	 *
 	 * Returns the core prompt builder, so callers configure and send the prompt
 	 * with its methods. Errors from sending it (e.g. AI disabled on the site, the
@@ -235,7 +211,7 @@ final class AI_Providers {
 	 * request) come back as a `WP_Error` from the builder's `generate_*()`
 	 * methods.
 	 *
-	 *     $builder = AI_Providers::get_prompt_builder( 'description_generator', 'Summarize this post.' );
+	 *     $builder = AI_Providers::get_prompt_builder( 'Summarize this post.' );
 	 *
 	 *     if ( ! is_wp_error( $builder ) ) {
 	 *         $text = $builder->generate_text();
@@ -243,18 +219,17 @@ final class AI_Providers {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string $feature Handle of the feature sending the prompt.
-	 * @param string $prompt  Prompt text.
+	 * @param string $prompt Prompt text.
 	 * @return \WP_AI_Client_Prompt_Builder|\WP_Error Prompt builder, or the error
-	 *                                                from `check_feature()`.
+	 *                                                from `check_provider()`.
 	 */
-	public static function get_prompt_builder( string $feature, string $prompt ): \WP_AI_Client_Prompt_Builder|\WP_Error {
-		$check = self::check_feature( $feature );
+	public static function get_prompt_builder( string $prompt ): \WP_AI_Client_Prompt_Builder|\WP_Error {
+		$check = self::check_provider();
 
 		if ( is_wp_error( $check ) ) {
 			return $check;
 		}
 
-		return wp_ai_client_prompt( $prompt )->using_provider( self::get_feature_provider( $feature ) );
+		return wp_ai_client_prompt( $prompt )->using_provider( self::get_provider() );
 	}
 }

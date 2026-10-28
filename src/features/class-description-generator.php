@@ -8,7 +8,7 @@
 namespace Alley\WP\WP_SEO\Features;
 
 use Alley\WP\WP_SEO\AI_Providers;
-use Alley\WP\WP_SEO\Sends_Prompts;
+use Alley\WP\WP_SEO\AI_Settings;
 
 /**
  * Meta Description Generator Feature
@@ -25,10 +25,9 @@ use Alley\WP\WP_SEO\Sends_Prompts;
  * with the `wp-seo-description-generator` support, and the
  * `wp wp-seo generate-descriptions` command generates and saves them in bulk.
  */
-final class Description_Generator implements Sends_Prompts {
+final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
-	 * Handle of the feature, which names its enablement filter and keys its AI
-	 * provider.
+	 * Handle of the feature, which names its enablement filter.
 	 *
 	 * @var string
 	 */
@@ -78,6 +77,8 @@ final class Description_Generator implements Sends_Prompts {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command( 'wp-seo generate-descriptions', Description_Generator_Command::class );
 		}
+
+		( new AI_Settings() )->boot();
 	}
 
 	/**
@@ -88,7 +89,7 @@ final class Description_Generator implements Sends_Prompts {
 	 * editor could not fix the error every click would get.
 	 */
 	public function add_post_type_support(): void {
-		if ( is_wp_error( AI_Providers::check_feature( self::HANDLE ) ) ) {
+		if ( is_wp_error( AI_Providers::check_provider() ) ) {
 			return;
 		}
 
@@ -165,8 +166,8 @@ final class Description_Generator implements Sends_Prompts {
 	/**
 	 * Generate a meta description for a post.
 	 *
-	 * Sends the post's title and rendered content to the AI provider chosen for
-	 * the description generator, and returns the description it writes. The
+	 * Sends the post's title and rendered content to the AI provider chosen on
+	 * the WP SEO AI settings page, and returns the description it writes. The
 	 * description is not saved, and may be longer than `get_max_length()`.
 	 *
 	 *     $description = Description_Generator::generate_description( get_post( 123 ) );
@@ -186,7 +187,7 @@ final class Description_Generator implements Sends_Prompts {
 	 */
 	public static function generate_description( \WP_Post $post ): string|\WP_Error {
 		// Checked first, so that the content is not rendered for a prompt that cannot be sent.
-		$check = AI_Providers::check_feature( self::HANDLE );
+		$check = AI_Providers::check_provider();
 
 		if ( is_wp_error( $check ) ) {
 			return $check;
@@ -262,7 +263,7 @@ final class Description_Generator implements Sends_Prompts {
 		 */
 		$instructions = apply_filters( 'wp_seo_description_generator_prompt', $instructions, $post );
 
-		$prompt = AI_Providers::get_prompt_builder( self::HANDLE, "Title: {$title}\n\nContent: {$content}" );
+		$prompt = AI_Providers::get_prompt_builder( "Title: {$title}\n\nContent: {$content}" );
 
 		if ( is_wp_error( $prompt ) ) {
 			return $prompt;
