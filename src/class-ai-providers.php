@@ -178,9 +178,10 @@ final class AI_Providers {
 	/**
 	 * Get the AI provider to send a prompt to, checking that one can be sent.
 	 *
-	 * Prompts cannot be sent before WordPress 7.0, or when there is no
-	 * provider. Whether the provider is still available is not checked; an
-	 * unavailable one surfaces as an error when a prompt is sent.
+	 * Prompts cannot be sent before WordPress 7.0, when AI is turned off on the
+	 * site, or when there is no provider. Whether the provider is still
+	 * available is not checked; an unavailable one surfaces as an error when a
+	 * prompt is sent.
 	 *
 	 *     $provider = AI_Providers::check_provider();
 	 *
@@ -194,8 +195,8 @@ final class AI_Providers {
 	 *                          prompts cannot be sent.
 	 */
 	public static function check_provider(): string|\WP_Error {
-		if ( ! function_exists( 'wp_ai_client_prompt' ) ) {
-			return new \WP_Error( 'wp_seo_ai_unsupported', __( 'WP SEO requires WordPress 7.0 or later to use AI providers.', 'wp-seo' ) );
+		if ( ! function_exists( 'wp_supports_ai' ) || ! wp_supports_ai() ) {
+			return new \WP_Error( 'wp_seo_ai_unsupported', __( 'AI is not available on this site. WP SEO needs WordPress 7.0 or later, with AI turned on.', 'wp-seo' ) );
 		}
 
 		$provider = self::get_provider();

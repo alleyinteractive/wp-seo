@@ -8,6 +8,7 @@
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\AI_Providers;
+use Alley\WP\WP_SEO\Tests\Concerns\RegistersConnectors;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
 /**
@@ -19,17 +20,10 @@ use Alley\WP\WP_SEO\Tests\TestCase;
  * @link https://mantle.alley.com/docs/testing
  */
 class AiProvidersTest extends TestCase {
-	/**
-	 * Connectors registered by a test, removed again after it.
-	 *
-	 * @var string[]
-	 */
-	private array $connectors = [];
+	use RegistersConnectors;
 
 	protected function tearDown(): void {
-		foreach ( $this->connectors as $id ) {
-			\WP_Connector_Registry::get_instance()->unregister( $id );
-		}
+		$this->unregister_connectors();
 
 		delete_option( AI_Providers::OPTION );
 
@@ -37,31 +31,10 @@ class AiProvidersTest extends TestCase {
 	}
 
 	/**
-	 * Register a connector for the length of a test.
-	 *
-	 * @param string $id        Connector ID.
-	 * @param string $type      Connector type.
-	 * @param bool   $is_active Whether the connector's plugin is active.
-	 */
-	private function register_connector( string $id, string $type, bool $is_active ): void {
-		\WP_Connector_Registry::get_instance()->register(
-			$id,
-			[
-				'name'           => "Test {$id}",
-				'type'           => $type,
-				'authentication' => [ 'method' => 'none' ],
-				'plugin'         => [ 'is_active' => $is_active ? '__return_true' : '__return_false' ],
-			]
-		);
-
-		$this->connectors[] = $id;
-	}
-
-	/**
 	 * An AI provider whose plugin is active is listed by name.
 	 */
 	public function test_get_available_providers_lists_active_ai_providers() {
-		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		$this->register_connector( 'wp_seo_active' );
 
 		$providers = AI_Providers::get_available_providers();
 
@@ -75,7 +48,7 @@ class AiProvidersTest extends TestCase {
 	 */
 	public function test_get_available_providers_omits_inactive_and_non_ai_connectors() {
 		$this->register_connector( 'wp_seo_inactive', 'ai_provider', false );
-		$this->register_connector( 'wp_seo_other', 'spam_filtering', true );
+		$this->register_connector( 'wp_seo_other', 'spam_filtering' );
 
 		$providers = AI_Providers::get_available_providers();
 
@@ -91,6 +64,19 @@ class AiProvidersTest extends TestCase {
 		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
 
 		$this->assertSame( 'wp_seo_missing', AI_Providers::check_provider() );
+	}
+
+	/**
+	 * With AI turned off on the site, no prompts are sent, whatever the provider.
+	 */
+	public function test_check_provider_fails_when_ai_is_turned_off() {
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
+		add_filter( 'wp_supports_ai', '__return_false' );
+
+		$result = AI_Providers::check_provider();
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_ai_unsupported', $result->get_error_code() );
 	}
 
 	/**
@@ -111,7 +97,7 @@ class AiProvidersTest extends TestCase {
 	public function test_get_provider_prefers_code_then_setting() {
 		$this->assertSame( '', AI_Providers::get_provider() );
 
-		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		$this->register_connector( 'wp_seo_active' );
 		update_option( AI_Providers::OPTION, 'wp_seo_active' );
 
 		$this->assertSame( 'wp_seo_active', AI_Providers::get_provider() );
@@ -126,7 +112,7 @@ class AiProvidersTest extends TestCase {
 	 * choice to the settings page.
 	 */
 	public function test_get_provider_ignores_non_strings_set_in_code() {
-		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		$this->register_connector( 'wp_seo_active' );
 		update_option( AI_Providers::OPTION, 'wp_seo_active' );
 
 		add_filter( 'wp_seo_ai_provider', fn () => 123 );
@@ -140,7 +126,7 @@ class AiProvidersTest extends TestCase {
 	 * provider is set in code.
 	 */
 	public function test_get_choice_is_read_only_when_set_in_code() {
-		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		$this->register_connector( 'wp_seo_active' );
 
 		$this->assertSame(
 			[
@@ -180,7 +166,7 @@ class AiProvidersTest extends TestCase {
 	 * Sanitizing keeps only a provider that is available, and "None" clears it.
 	 */
 	public function test_sanitize_provider_keeps_only_available_providers() {
-		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		$this->register_connector( 'wp_seo_active' );
 
 		$this->assertSame( 'wp_seo_active', AI_Providers::sanitize_provider( 'wp_seo_active' ) );
 		$this->assertSame( '', AI_Providers::sanitize_provider( 'not_a_provider' ) );
@@ -193,7 +179,7 @@ class AiProvidersTest extends TestCase {
 	 * is kept.
 	 */
 	public function test_sanitize_provider_keeps_the_stored_provider_when_nothing_is_submitted() {
-		$this->register_connector( 'wp_seo_active', 'ai_provider', true );
+		$this->register_connector( 'wp_seo_active' );
 		update_option( AI_Providers::OPTION, 'wp_seo_active' );
 
 		$this->assertSame( 'wp_seo_active', AI_Providers::sanitize_provider( null ) );
