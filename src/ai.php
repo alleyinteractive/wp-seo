@@ -26,9 +26,15 @@ function get_ai_providers(): array {
 		return [];
 	}
 
+	$connectors = wp_get_connectors();
+
+	if ( empty( $connectors ) ) {
+		return [];
+	}
+
 	$providers = [];
 
-	foreach ( wp_get_connectors() as $id => $connector ) {
+	foreach ( $connectors as $id => $connector ) {
 		if ( 'ai_provider' === $connector['type'] && call_user_func( $connector['plugin']['is_active'] ) ) {
 			$providers[ $id ] = $connector['name'];
 		}
@@ -41,12 +47,16 @@ function get_ai_providers(): array {
  * Start a prompt to an AI provider configured in WordPress.
  *
  * Returns the core prompt builder, so callers configure and send the prompt
- * with its methods. Errors from sending it -- AI disabled on the site, the
+ * with its methods. Errors from sending it (e.g. AI disabled on the site, the
  * prompt blocked by a filter, an unknown or unconfigured provider, a failed
- * request -- come back as a `WP_Error` from the builder's `generate_*()`
+ * request) come back as a `WP_Error` from the builder's `generate_*()`
  * methods.
  *
- *     $text = get_ai_prompt( 'Summarize this post.', 'anthropic' )->generate_text();
+ *     $builder = get_ai_prompt_builder( 'Summarize this post.', 'anthropic' );
+ *
+ *     if ( ! is_wp_error( $builder ) ) {
+ *         $text = $builder->generate_text();
+ *     }
  *
  * @since 2.0.0
  *
@@ -56,7 +66,7 @@ function get_ai_providers(): array {
  *                              choose a provider that supports the prompt.
  * @return \WP_AI_Client_Prompt_Builder|\WP_Error Prompt builder, or an error before WordPress 7.0.
  */
-function get_ai_prompt( string $prompt, ?string $provider = null ): \WP_AI_Client_Prompt_Builder|\WP_Error {
+function get_ai_prompt_builder( string $prompt, ?string $provider = null ): \WP_AI_Client_Prompt_Builder|\WP_Error {
 	if ( ! function_exists( 'wp_ai_client_prompt' ) ) {
 		return new \WP_Error( 'wp_seo_ai_unsupported', __( 'WP SEO requires WordPress 7.0 or later to use AI providers.', 'wp-seo' ) );
 	}

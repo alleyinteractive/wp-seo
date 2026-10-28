@@ -9,7 +9,7 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Tests\TestCase;
 
-use function Alley\WP\WP_SEO\get_ai_prompt;
+use function Alley\WP\WP_SEO\get_ai_prompt_builder;
 use function Alley\WP\WP_SEO\get_ai_providers;
 
 /**
@@ -87,16 +87,16 @@ class AiTest extends TestCase {
 	/**
 	 * A prompt starts as the core prompt builder.
 	 */
-	public function test_get_ai_prompt_returns_core_prompt_builder() {
-		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, get_ai_prompt( 'Hello' ) );
+	public function test_get_ai_prompt_builder_returns_core_prompt_builder() {
+		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, get_ai_prompt_builder( 'Hello' ) );
 	}
 
 	/**
 	 * A prompt goes to the provider it was given. A provider that does not exist
 	 * shows this without a request being made: generating fails, naming it.
 	 */
-	public function test_get_ai_prompt_uses_the_given_provider() {
-		$result = get_ai_prompt( 'Hello', 'wp_seo_missing' )->generate_text();
+	public function test_get_ai_prompt_builder_uses_the_given_provider() {
+		$result = get_ai_prompt_builder( 'Hello', 'wp_seo_missing' )->generate_text();
 
 		$this->assertWPError( $result );
 		$this->assertStringContainsString( 'wp_seo_missing', $result->get_error_message() );
