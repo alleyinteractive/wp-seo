@@ -15,25 +15,16 @@ namespace Alley\WP\WP_SEO;
  * the provider is set in code with the `wp_seo_ai_provider` filter, the choice
  * is shown read-only.
  *
- * This is infrastructure rather than a WP SEO feature, though it implements the
- * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
- * wrapped in a `Feature` and carries no handle, since it only configures
- * features that are.
+ * This is infrastructure rather than a WP SEO feature: it is not wrapped in a
+ * `Feature` and carries no handle, since it only configures features that are.
  */
-final class AI_Settings implements \Alley\WP\Types\Feature {
+final class AI_Settings {
 	/**
 	 * Slug of the page, and the name of its settings group.
 	 *
 	 * @var string
 	 */
 	public const SLUG = 'wp-seo-ai';
-
-	/**
-	 * The capability required to view the page and save its settings.
-	 *
-	 * @var string
-	 */
-	private const CAPABILITY = 'manage_options';
 
 	/**
 	 * ID of the page's one settings section.
@@ -43,13 +34,13 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	private const SECTION = 'wp_seo_ai_providers';
 
 	/**
-	 * Boot the feature.
+	 * Register the setting and put the page in the admin menu.
 	 *
 	 * The setting is registered on `init` rather than `admin_init`, so that it
 	 * is known everywhere the option can be read or written, not only in the
 	 * admin.
 	 */
-	public function boot(): void {
+	public function register(): void {
 		add_action( 'init', [ $this, 'register_setting' ] );
 		add_action( 'admin_menu', [ $this, 'add_page' ] );
 	}
@@ -97,7 +88,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 			Features_Page::SLUG,
 			__( 'WP SEO AI Settings', 'wp-seo' ),
 			__( 'AI', 'wp-seo' ),
-			self::CAPABILITY,
+			'manage_options',
 			self::SLUG,
 			[ $this, 'render' ]
 		);

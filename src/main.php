@@ -23,10 +23,10 @@ function main(): void {
 
 	/*
 	 * The page for choosing the AI provider WP SEO sends prompts to. It is
-	 * booted after the features page registers, so that its submenu is added
-	 * after the menu it belongs to.
+	 * registered after the features page, so that its submenu is added after
+	 * the menu it belongs to.
 	 */
-	( new AI_Settings() )->boot();
+	( new AI_Settings() )->register();
 
 	// Add features here.
 	$plugin = new Group(
