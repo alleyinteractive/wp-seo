@@ -43,12 +43,21 @@ final class Description_Generator implements Sends_Prompts {
 	public const META_KEY = 'search_engine_description';
 
 	/**
+	 * Query variable that limits a `WP_Query` to posts without a description,
+	 * or with an empty one, while the feature is active.
+	 *
+	 * @var string
+	 */
+	public const MISSING_DESCRIPTION_QUERY_VAR = 'wp_seo_missing_description';
+
+	/**
 	 * Boot the feature.
 	 */
 	public function boot(): void {
 		// Late, so that post types registered on `init` are included.
 		add_action( 'init', [ $this, 'add_post_type_support' ], 99 );
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
+		add_filter( 'posts_where', [ $this, 'limit_query_to_missing_descriptions' ], 10, 2 );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command( 'wp-seo generate-descriptions', Description_Generator_Command::class );
@@ -322,6 +331,42 @@ final class Description_Generator implements Sends_Prompts {
 		update_post_meta( $post->ID, self::META_KEY, $description );
 
 		return $description;
+	}
+
+	/**
+	 * Limit a query to posts without a description, or with an empty one, when
+	 * it sets `MISSING_DESCRIPTION_QUERY_VAR`.
+	 *
+	 * A post has a description when its meta is a non-empty string, the same
+	 * test `generate_and_save_description()` makes before saving one. Queries
+	 * that do not set the variable are left alone.
+	 *
+	 * This is a correlated NOT EXISTS rather than a meta query, which would
+	 * join the meta table twice to match both missing and empty descriptions.
+	 * Either way, MySQL reads every meta row of each post it steps over, and
+	 * a run steps over every post with a description between where it starts
+	 * and the next post without one. On 500,000 posts with 10 meta rows each,
+	 * all but the newest described, finding the first batch took 13 seconds
+	 * this way, and 19 with the meta query.
+	 *
+	 * @param string    $where WHERE clause of the query.
+	 * @param \WP_Query $query The query.
+	 * @return string WHERE clause.
+	 */
+	public function limit_query_to_missing_descriptions( string $where, \WP_Query $query ): string {
+		global $wpdb;
+
+		if ( ! $query->get( self::MISSING_DESCRIPTION_QUERY_VAR ) || ! $wpdb instanceof \wpdb ) {
+			return $where;
+		}
+
+		return $where . $wpdb->prepare(
+			' AND NOT EXISTS ( SELECT 1 FROM %i AS wp_seo_description WHERE wp_seo_description.post_id = %i.ID AND wp_seo_description.meta_key = %s AND wp_seo_description.meta_value <> %s )',
+			$wpdb->postmeta,
+			$wpdb->posts,
+			self::META_KEY,
+			''
+		);
 	}
 
 	/**

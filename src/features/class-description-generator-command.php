@@ -18,7 +18,8 @@ use WP_CLI;
  * meta descriptions in bulk with the Meta Description Generator.
  *
  * The Meta Description Generator feature registers it while the feature is
- * active.
+ * active, along with the query filter the command finds posts without a
+ * description with.
  */
 final class Description_Generator_Command {
 	/**
@@ -169,8 +170,8 @@ final class Description_Generator_Command {
 			$query,
 			[
 				// Bulk_Task pages through posts by the ID of the last post object.
-				'fields'                     => 'all',
-				'wp_seo_missing_description' => true,
+				'fields' => 'all',
+				Description_Generator::MISSING_DESCRIPTION_QUERY_VAR => true,
 			]
 		);
 
@@ -200,9 +201,6 @@ final class Description_Generator_Command {
 		 */
 		$limit_reached = new \RuntimeException();
 
-		$where_missing_description = $this->where_missing_description( ... );
-		add_filter( 'posts_where', $where_missing_description, 10, 2 );
-
 		try {
 			( new Bulk_Task( $key, null, $cursor ) )->run(
 				$query_args,
@@ -222,8 +220,6 @@ final class Description_Generator_Command {
 
 			/* translators: %d: limit, in posts. */
 			WP_CLI::log( sprintf( _n( 'Stopped at the limit of %d post.', 'Stopped at the limit of %d posts.', $limit, 'wp-seo' ), $limit ) );
-		} finally {
-			remove_filter( 'posts_where', $where_missing_description, 10 );
 		}
 
 		if ( $dry_run ) {
@@ -305,41 +301,6 @@ final class Description_Generator_Command {
 		/* translators: 1: post ID, 2: description. */
 		WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $description ) );
 		$cursor->set( $post->ID );
-	}
-
-	/**
-	 * Limit the command's query to posts without a description, or with an
-	 * empty one.
-	 *
-	 * Other queries that run during the command, such as ones a post's
-	 * content makes, are left alone.
-	 *
-	 * This is a correlated NOT EXISTS rather than a meta query, which would
-	 * join the meta table twice to match both missing and empty descriptions.
-	 * Either way, MySQL reads every meta row of each post it steps over, and
-	 * a run steps over every post with a description between where it starts
-	 * and the next post without one. On 500,000 posts with 10 meta rows each,
-	 * all but the newest described, finding the first batch took 13 seconds
-	 * this way, and 19 with the meta query.
-	 *
-	 * @param string    $where WHERE clause of the query.
-	 * @param \WP_Query $query The query.
-	 * @return string WHERE clause.
-	 */
-	private function where_missing_description( string $where, \WP_Query $query ): string {
-		global $wpdb;
-
-		if ( ! $query->get( 'wp_seo_missing_description' ) || ! $wpdb instanceof \wpdb ) {
-			return $where;
-		}
-
-		return $where . $wpdb->prepare(
-			' AND NOT EXISTS ( SELECT 1 FROM %i AS wp_seo_description WHERE wp_seo_description.post_id = %i.ID AND wp_seo_description.meta_key = %s AND wp_seo_description.meta_value <> %s )',
-			$wpdb->postmeta,
-			$wpdb->posts,
-			Description_Generator::META_KEY,
-			''
-		);
 	}
 
 	/**

@@ -67,6 +67,9 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		add_filter( 'wp_seo_ai_provider', fn () => FakeAiProvider::ID );
 
+		// The command runs only while the feature is active, which finds the posts without a description.
+		( new Description_Generator() )->boot();
+
 		( new \ReflectionProperty( WP_CLI::class, 'capture_exit' ) )->setValue( null, true );
 
 		/*

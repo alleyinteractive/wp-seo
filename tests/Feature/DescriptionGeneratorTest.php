@@ -398,6 +398,27 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
+	 * A query that sets the query variable finds only posts without a
+	 * description, or with an empty one, and other queries find every post.
+	 */
+	public function test_query_var_limits_a_query_to_posts_without_a_description() {
+		( new Description_Generator() )->boot();
+
+		$missing   = static::factory()->post->create();
+		$empty     = static::factory()->post->create( [ 'meta_input' => [ Description_Generator::META_KEY => '' ] ] );
+		$described = static::factory()->post->create( [ 'meta_input' => [ Description_Generator::META_KEY => 'Written by an editor.' ] ] );
+		$args      = [
+			'post__in' => [ $missing, $empty, $described ],
+			'orderby'  => 'ID',
+			'order'    => 'ASC',
+			'fields'   => 'ids',
+		];
+
+		$this->assertSame( [ $missing, $empty ], ( new \WP_Query( $args + [ Description_Generator::MISSING_DESCRIPTION_QUERY_VAR => true ] ) )->posts );
+		$this->assertSame( [ $missing, $empty, $described ], ( new \WP_Query( $args ) )->posts );
+	}
+
+	/**
 	 * Public post types shown in the admin are included by default, except
 	 * attachments, and the list is filterable.
 	 */
