@@ -28,6 +28,14 @@ class DescriptionGeneratorTest extends TestCase {
 	 */
 	private \WP_Post $post;
 
+	/**
+	 * Post types a test registered the description meta for, unregistered
+	 * again after it.
+	 *
+	 * @var string[]
+	 */
+	private array $registered_meta = [];
+
 	protected function setUp(): void {
 		parent::setUp();
 
@@ -50,7 +58,36 @@ class DescriptionGeneratorTest extends TestCase {
 		remove_post_type_support( 'post', 'wp-seo-description-generator' );
 		remove_post_type_support( 'page', 'wp-seo-description-generator' );
 
+		foreach ( $this->registered_meta as $post_type ) {
+			unregister_post_meta( $post_type, Description_Generator::META_KEY );
+		}
+
 		parent::tearDown();
+	}
+
+	/**
+	 * Make sure posts and pages store the description, as the plugin registers
+	 * them to when it loads.
+	 *
+	 * Earlier tests can reset post types and their meta, so a test that needs
+	 * the meta registers it rather than relying on the registration from when
+	 * the plugin loaded.
+	 */
+	private function register_description_meta(): void {
+		foreach ( [ 'post', 'page' ] as $post_type ) {
+			if ( ! registered_meta_key_exists( 'post', Description_Generator::META_KEY, $post_type ) ) {
+				register_post_meta(
+					$post_type,
+					Description_Generator::META_KEY,
+					[
+						'type'   => 'string',
+						'single' => true,
+					]
+				);
+
+				$this->registered_meta[] = $post_type;
+			}
+		}
 	}
 
 	/**
@@ -313,6 +350,8 @@ class DescriptionGeneratorTest extends TestCase {
 	 * works on.
 	 */
 	public function test_post_type_support_is_added_to_its_post_types() {
+		$this->register_description_meta();
+
 		( new Description_Generator() )->add_post_type_support();
 
 		$this->assertTrue( post_type_supports( 'post', 'wp-seo-description-generator' ) );
@@ -324,6 +363,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * that store the description it fills.
 	 */
 	public function test_post_type_support_needs_a_stored_description() {
+		$this->register_description_meta();
 		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page', 'wp_block' ] );
 
 		( new Description_Generator() )->add_post_type_support();
@@ -337,6 +377,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * The button is not offered until an AI provider is chosen.
 	 */
 	public function test_post_type_support_needs_a_provider() {
+		$this->register_description_meta();
 		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
 
 		( new Description_Generator() )->add_post_type_support();

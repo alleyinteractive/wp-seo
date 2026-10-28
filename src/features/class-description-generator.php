@@ -34,6 +34,14 @@ final class Description_Generator implements Feature {
 	public const HANDLE = 'description_generator';
 
 	/**
+	 * Meta key the description is saved to, which the block editor's Search
+	 * Engine panel edits.
+	 *
+	 * @var string
+	 */
+	public const META_KEY = 'search_engine_description';
+
+	/**
 	 * Boot the feature.
 	 */
 	public function boot(): void {
@@ -57,7 +65,7 @@ final class Description_Generator implements Feature {
 		}
 
 		foreach ( self::get_post_types() as $post_type ) {
-			if ( registered_meta_key_exists( 'post', 'search_engine_description', $post_type ) ) {
+			if ( registered_meta_key_exists( 'post', self::META_KEY, $post_type ) ) {
 				add_post_type_support( $post_type, 'wp-seo-description-generator' );
 			}
 		}
