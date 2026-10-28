@@ -60,18 +60,87 @@ final class AI_Providers {
 	}
 
 	/**
+	 * Get the choice of AI provider for a WP SEO feature, as the WP SEO AI
+	 * settings page shows it.
+	 *
+	 * The providers to choose from are the available ones, plus the feature's
+	 * provider if it is not available, as one set in code can be, so that the
+	 * page does not show "None" for a feature that still sends its prompts
+	 * there.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $feature Handle of the feature sending prompts.
+	 * @return array{provider: string, providers: array<string, string>, in_code: bool} The
+	 *         feature's provider, or an empty string for none; the providers to
+	 *         choose from, keyed by connector ID; and whether the provider is set
+	 *         in code, which makes the choice read-only.
+	 */
+	public static function get_feature_choice( string $feature ): array {
+		$in_code   = null !== self::get_feature_provider_from_code( $feature );
+		$provider  = self::get_feature_provider( $feature );
+		$providers = self::get_available_providers();
+
+		if ( '' !== $provider && ! isset( $providers[ $provider ] ) ) {
+			$providers[ $provider ] = sprintf(
+				/* translators: %s: connector ID of the provider. */
+				__( '%s (unavailable)', 'wp-seo' ),
+				$provider
+			);
+		}
+
+		return [
+			'provider'  => $provider,
+			'providers' => $providers,
+			'in_code'   => $in_code,
+		];
+	}
+
+	/**
+	 * Sanitize the AI providers chosen for WP SEO features before they are
+	 * saved.
+	 *
+	 * Keeps a provider only for one of the given features, and only if it is an
+	 * available AI provider. A feature missing from the input keeps the provider
+	 * already stored for it, so that a form can leave out features it does not
+	 * let the user change. A feature given an empty string, which is what
+	 * choosing "None" sends, has its provider cleared.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param mixed    $value    Connector IDs to save, keyed by feature handle.
+	 * @param string[] $features Handles of the features whose providers can be saved.
+	 * @return array<string, string> Connector IDs keyed by feature handle.
+	 */
+	public static function sanitize_feature_providers( mixed $value, array $features ): array {
+		$value     = is_array( $value ) ? $value : [];
+		$stored    = get_option( self::OPTION );
+		$stored    = is_array( $stored ) ? $stored : [];
+		$providers = self::get_available_providers();
+		$sanitized = [];
+
+		foreach ( $features as $feature ) {
+			$provider = $value[ $feature ] ?? $stored[ $feature ] ?? '';
+
+			if ( is_string( $provider ) && isset( $providers[ $provider ] ) ) {
+				$sanitized[ $feature ] = $provider;
+			}
+		}
+
+		return $sanitized;
+	}
+
+	/**
 	 * Get the AI provider set in code for a WP SEO feature, if any.
 	 *
 	 * A provider set in code takes the place of the one chosen on the WP SEO AI
 	 * settings page, which then shows that feature's setting as read-only.
 	 *
-	 * @since 2.0.0
-	 *
 	 * @param string $feature Handle of the feature sending prompts.
 	 * @return string|null Connector ID of the provider, an empty string for no
 	 *                     provider, or null to leave it to the settings page.
 	 */
-	public static function get_feature_provider_from_code( string $feature ): ?string {
+	private static function get_feature_provider_from_code( string $feature ): ?string {
 		/**
 		 * Filters the AI provider a WP SEO feature sends its prompts to.
 		 *
