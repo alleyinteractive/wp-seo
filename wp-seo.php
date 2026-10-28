@@ -6,7 +6,7 @@
  * Version: 2.0.0
  * Author: Alley Interactive
  * Author URI: https://github.com/alleyinteractive/wp-seo
- * Requires at least: 7.0
+ * Requires at least: 5.9
  * Requires PHP: 8.2
  * Tested up to: 6.7
  *
@@ -121,8 +121,6 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\wp_seo_admin_scripts' );
 require_once __DIR__ . '/src/assets.php';
 require_once __DIR__ . '/src/meta.php';
 require_once __DIR__ . '/src/settings.php';
-require_once __DIR__ . '/src/ai.php';
-require_once __DIR__ . '/src/description-generator.php';
 require_once __DIR__ . '/src/main.php';
 
 load_scripts();

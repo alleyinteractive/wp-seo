@@ -7,14 +7,13 @@
 
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
+use Alley\WP\WP_SEO\AI_Providers;
 use Alley\WP\WP_SEO\AI_Settings;
 use Alley\WP\WP_SEO\Feature;
 use Alley\WP\WP_SEO\Features_Page;
 use Alley\WP\WP_SEO\Registry;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
-use function Alley\WP\WP_SEO\get_ai_provider;
-use function Alley\WP\WP_SEO\get_ai_providers;
 use function Mantle\Support\Helpers\capture;
 
 /**
@@ -49,7 +48,7 @@ class AiSettingsTest extends TestCase {
 			\WP_Connector_Registry::get_instance()->unregister( $id );
 		}
 
-		delete_option( AI_Settings::OPTION );
+		delete_option( AI_Providers::OPTION );
 
 		parent::tearDown();
 	}
@@ -117,7 +116,7 @@ class AiSettingsTest extends TestCase {
 	 * The option is registered with WordPress.
 	 */
 	public function test_setting_is_registered() {
-		$this->assertArrayHasKey( AI_Settings::OPTION, get_registered_settings() );
+		$this->assertArrayHasKey( AI_Providers::OPTION, get_registered_settings() );
 	}
 
 	/**
@@ -128,18 +127,18 @@ class AiSettingsTest extends TestCase {
 		$this->register_provider( 'wp_seo_active' );
 
 		update_option(
-			AI_Settings::OPTION,
+			AI_Providers::OPTION,
 			[
 				'description_generator' => 'wp_seo_active',
 				'unknown_feature'       => 'wp_seo_active',
 			]
 		);
 
-		$this->assertSame( [ 'description_generator' => 'wp_seo_active' ], get_option( AI_Settings::OPTION ) );
+		$this->assertSame( [ 'description_generator' => 'wp_seo_active' ], get_option( AI_Providers::OPTION ) );
 
-		update_option( AI_Settings::OPTION, [ 'description_generator' => 'not_a_provider' ] );
+		update_option( AI_Providers::OPTION, [ 'description_generator' => 'not_a_provider' ] );
 
-		$this->assertSame( [], get_option( AI_Settings::OPTION ) );
+		$this->assertSame( [], get_option( AI_Providers::OPTION ) );
 	}
 
 	/**
@@ -150,10 +149,10 @@ class AiSettingsTest extends TestCase {
 	public function test_saving_without_a_feature_keeps_its_stored_provider() {
 		$this->register_provider( 'wp_seo_active' );
 
-		update_option( AI_Settings::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
-		update_option( AI_Settings::OPTION, [] );
+		update_option( AI_Providers::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
+		update_option( AI_Providers::OPTION, [] );
 
-		$this->assertSame( [ 'description_generator' => 'wp_seo_active' ], get_option( AI_Settings::OPTION ) );
+		$this->assertSame( [ 'description_generator' => 'wp_seo_active' ], get_option( AI_Providers::OPTION ) );
 	}
 
 	/**
@@ -163,27 +162,10 @@ class AiSettingsTest extends TestCase {
 	public function test_saving_none_clears_the_stored_provider() {
 		$this->register_provider( 'wp_seo_active' );
 
-		update_option( AI_Settings::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
-		update_option( AI_Settings::OPTION, [ 'description_generator' => '' ] );
+		update_option( AI_Providers::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
+		update_option( AI_Providers::OPTION, [ 'description_generator' => '' ] );
 
-		$this->assertSame( [], get_option( AI_Settings::OPTION ) );
-	}
-
-	/**
-	 * A provider set in code wins over the stored one, the stored one is used
-	 * otherwise, and a feature with neither has no provider.
-	 */
-	public function test_get_ai_provider_prefers_code_then_setting() {
-		$this->assertSame( '', get_ai_provider( 'description_generator' ) );
-
-		$this->register_provider( 'wp_seo_active' );
-		update_option( AI_Settings::OPTION, [ 'description_generator' => 'wp_seo_active' ] );
-
-		$this->assertSame( 'wp_seo_active', get_ai_provider( 'description_generator' ) );
-
-		add_filter( 'wp_seo_ai_provider', fn () => '' );
-
-		$this->assertSame( '', get_ai_provider( 'description_generator' ), 'An empty string set in code means no provider.' );
+		$this->assertSame( [], get_option( AI_Providers::OPTION ) );
 	}
 
 	/**
@@ -283,7 +265,7 @@ class AiSettingsTest extends TestCase {
 	public function test_section_links_to_connectors_when_there_are_no_providers() {
 		$page = new AI_Settings( [ 'description_generator' => 'Meta Description Generator' ] );
 
-		$this->assertSame( [], get_ai_providers(), 'No AI provider plugin is active in the test environment.' );
+		$this->assertSame( [], AI_Providers::get_available_providers(), 'No AI provider plugin is active in the test environment.' );
 		$this->assertStringContainsString( 'options-connectors.php', capture( fn () => $page->render_section() ) );
 
 		$this->register_provider( 'wp_seo_active' );
