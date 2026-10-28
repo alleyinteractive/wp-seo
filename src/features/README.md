@@ -39,6 +39,8 @@ function main(): void {
 }
 ```
 
+A feature that sends prompts to an AI provider implements `Alley\WP\WP_SEO\Sends_Prompts` in place of `Alley\WP\Types\Feature`. Its handle keys its provider, and while it is active, the WP SEO AI settings page lists it by its label.
+
 ## Example feature class
 
 This is a port of the infamous WordPress `hello.php` plugin to a feature. The lyrics would be passed in when the feature was called, as shown above.

@@ -7,8 +7,8 @@
 
 namespace Alley\WP\WP_SEO\Features;
 
-use Alley\WP\Types\Feature;
 use Alley\WP\WP_SEO\AI_Providers;
+use Alley\WP\WP_SEO\Sends_Prompts;
 
 /**
  * Meta Description Generator Feature
@@ -17,7 +17,7 @@ use Alley\WP\WP_SEO\AI_Providers;
  * provider chosen on the WP SEO AI settings page, for the editor to use. The
  * description is returned, not saved.
  */
-final class Description_Generator implements Feature {
+final class Description_Generator implements Sends_Prompts {
 	/**
 	 * Handle of the feature, which names its enablement filter and keys its AI
 	 * provider.
