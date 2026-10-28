@@ -7,7 +7,9 @@
 
 namespace Alley\WP\WP_SEO\Tests\Feature;
 
+use Alley\WP\WP_SEO\AI_Settings;
 use Alley\WP\WP_SEO\Features\Description_Generator;
+use Alley\WP\WP_SEO\Features_Page;
 use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -48,6 +50,23 @@ class DescriptionGeneratorTest extends TestCase {
 		$GLOBALS['wp_rest_server'] = null;
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Booting the feature offers the WP SEO AI settings page.
+	 */
+	public function test_boot_adds_the_ai_settings_page() {
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['submenu'] = [];
+		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		( new Description_Generator() )->boot();
+
+		do_action( 'admin_menu' );
+
+		$this->assertContains( AI_Settings::SLUG, wp_list_pluck( $GLOBALS['submenu'][ Features_Page::SLUG ] ?? [], 2 ) );
 	}
 
 	/**

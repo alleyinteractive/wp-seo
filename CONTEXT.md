@@ -32,5 +32,5 @@ A Feature that is actually running on the site. A Feature nested inside a group 
 _Avoid_: Loaded, running. "Booted" names the mechanism rather than the state, and belongs in code (`boot()`, `booted()`) rather than in conversation about a site.
 
 **AI Provider**:
-An AI service a site administrator has connected to WordPress, which a Feature can send prompts to. Each Feature that sends prompts has at most one, chosen by the site; one with none sends no prompts.
+An AI service a site administrator has connected to WordPress, which a Feature can send prompts to. WP SEO uses at most one, chosen by the site; with none, no prompts are sent.
 _Avoid_: Connector (when meaning an AI one), model
