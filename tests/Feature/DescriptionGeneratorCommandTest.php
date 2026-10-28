@@ -550,7 +550,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		$result = $this->run_command();
 
 		$this->assertSame( 1, $result['exit'] );
-		$this->assertStringContainsString( 'No AI provider is selected for the Meta Description Generator.', $result['stderr'] );
+		$this->assertStringContainsString( 'No AI provider is selected for ', $result['stderr'] );
 		$this->assertSame( '', $this->description( $post ) );
 	}
 

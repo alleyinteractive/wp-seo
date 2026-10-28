@@ -10,6 +10,7 @@ namespace Alley\WP\WP_SEO\Features;
 use Alley\WP_Bulk_Task\Bulk_Task;
 use Alley\WP_Bulk_Task\Cursor\Memory_Cursor;
 use Alley\WP_Bulk_Task\Cursor\Option_Cursor;
+use Alley\WP\WP_SEO\AI_Providers;
 use WP_CLI;
 
 /**
@@ -153,10 +154,10 @@ final class Description_Generator_Command {
 			return;
 		}
 
-		$provider = Description_Generator::get_provider();
+		$check = AI_Providers::check_feature( Description_Generator::HANDLE );
 
-		if ( is_wp_error( $provider ) ) {
-			WP_CLI::error( $provider );
+		if ( is_wp_error( $check ) ) {
+			WP_CLI::error( $check );
 		}
 
 		$query_args = array_merge(
