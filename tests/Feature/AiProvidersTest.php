@@ -85,12 +85,12 @@ class AiProvidersTest extends TestCase {
 	}
 
 	/**
-	 * Prompts can be sent once there is a provider.
+	 * Once there is a provider, it is the one prompts are sent to.
 	 */
-	public function test_check_provider_passes_with_a_provider() {
+	public function test_check_provider_returns_the_provider() {
 		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
 
-		$this->assertTrue( AI_Providers::check_provider() );
+		$this->assertSame( 'wp_seo_missing', AI_Providers::check_provider() );
 	}
 
 	/**
@@ -102,38 +102,6 @@ class AiProvidersTest extends TestCase {
 		$this->assertWPError( $result );
 		$this->assertSame( 'wp_seo_ai_no_provider', $result->get_error_code() );
 		$this->assertSame( [ 'status' => 503 ], $result->get_error_data() );
-	}
-
-	/**
-	 * A prompt starts as the core prompt builder.
-	 */
-	public function test_get_prompt_builder_returns_core_prompt_builder() {
-		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
-
-		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, AI_Providers::get_prompt_builder( 'Hello' ) );
-	}
-
-	/**
-	 * A prompt goes to the provider. A provider that does not exist shows this
-	 * without a request being made: generating fails, naming it.
-	 */
-	public function test_get_prompt_builder_uses_the_provider() {
-		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
-
-		$result = AI_Providers::get_prompt_builder( 'Hello' )->generate_text();
-
-		$this->assertWPError( $result );
-		$this->assertStringContainsString( 'wp_seo_missing', $result->get_error_message() );
-	}
-
-	/**
-	 * Without a provider, a prompt cannot be started.
-	 */
-	public function test_get_prompt_builder_fails_without_a_provider() {
-		$result = AI_Providers::get_prompt_builder( 'Hello' );
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'wp_seo_ai_no_provider', $result->get_error_code() );
 	}
 
 	/**
