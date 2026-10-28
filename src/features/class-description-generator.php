@@ -7,8 +7,8 @@
 
 namespace Alley\WP\WP_SEO\Features;
 
-use Alley\WP\Types\Feature;
 use Alley\WP\WP_SEO\AI_Providers;
+use Alley\WP\WP_SEO\Sends_Prompts;
 
 /**
  * Meta Description Generator Feature
@@ -24,7 +24,7 @@ use Alley\WP\WP_SEO\AI_Providers;
  * The block editor offers a button to generate the description on post types
  * with the `wp-seo-description-generator` support.
  */
-final class Description_Generator implements Feature {
+final class Description_Generator implements Sends_Prompts {
 	/**
 	 * Handle of the feature, which names its enablement filter and keys its AI
 	 * provider.

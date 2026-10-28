@@ -271,6 +271,15 @@ final class Feature implements \Alley\WP\Types\Feature {
 	}
 
 	/**
+	 * Whether the wrapped feature sends prompts to an AI provider.
+	 *
+	 * @return bool Whether the wrapped feature implements `Sends_Prompts`.
+	 */
+	public function sends_prompts(): bool {
+		return $this->origin instanceof Sends_Prompts;
+	}
+
+	/**
 	 * The handle of the group that holds this feature.
 	 *
 	 * A handle rather than the group itself, because that is what the answer is

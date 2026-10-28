@@ -26,11 +26,7 @@ function main(): void {
 	 * It is booted after the features page registers, so that its submenu is
 	 * added after the menu it belongs to.
 	 */
-	( new AI_Settings(
-		[
-			Features\Description_Generator::HANDLE => __( 'Meta Description Generator', 'wp-seo' ),
-		]
-	) )->boot();
+	( new AI_Settings() )->boot();
 
 	// Add features here.
 	$plugin = new Group(
