@@ -112,10 +112,10 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 */
 	public static function generate_description( \WP_Post $post ): string|\WP_Error {
 		// Checked first, so that the content is not rendered for a prompt that cannot be sent.
-		$check = AI_Providers::check_provider();
+		$provider = AI_Providers::check_provider();
 
-		if ( is_wp_error( $check ) ) {
-			return $check;
+		if ( is_wp_error( $provider ) ) {
+			return $provider;
 		}
 
 		/*
@@ -188,13 +188,10 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		 */
 		$instructions = apply_filters( 'wp_seo_description_generator_prompt', $instructions, $post );
 
-		$prompt = AI_Providers::get_prompt_builder( "Title: {$title}\n\nContent: {$content}" );
-
-		if ( is_wp_error( $prompt ) ) {
-			return $prompt;
-		}
-
-		$text = $prompt->using_system_instruction( $instructions )->generate_text();
+		$text = wp_ai_client_prompt( "Title: {$title}\n\nContent: {$content}" )
+			->using_provider( $provider )
+			->using_system_instruction( $instructions )
+			->generate_text();
 
 		if ( is_wp_error( $text ) ) {
 			return $text;
