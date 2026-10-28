@@ -107,7 +107,7 @@ final class Description_Generator implements Sends_Prompts {
 	 */
 	public static function generate_description( \WP_Post $post ): string|\WP_Error {
 		// Checked first, so that the content is not rendered for a prompt that cannot be sent.
-		$check = AI_Providers::check_feature( self::HANDLE );
+		$check = AI_Providers::check_provider();
 
 		if ( is_wp_error( $check ) ) {
 			return $check;
@@ -183,7 +183,7 @@ final class Description_Generator implements Sends_Prompts {
 		 */
 		$instructions = apply_filters( 'wp_seo_description_generator_prompt', $instructions, $post );
 
-		$prompt = AI_Providers::get_prompt_builder( self::HANDLE, "Title: {$title}\n\nContent: {$content}" );
+		$prompt = AI_Providers::get_prompt_builder( "Title: {$title}\n\nContent: {$content}" );
 
 		if ( is_wp_error( $prompt ) ) {
 			return $prompt;
