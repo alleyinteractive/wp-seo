@@ -15,11 +15,9 @@ use Alley\WP\WP_SEO\Tests\TestCase;
 use function Mantle\Support\Helpers\capture;
 
 /**
- * Tests for the page that chooses the AI provider of each feature that sends
- * prompts.
+ * Tests for the page that chooses the AI provider WP SEO sends prompts to.
  *
- * The plugin boots the page with a `description_generator` row, so these tests
- * use that row and the setting the plugin registered for it.
+ * These tests use the setting the plugin registered when it booted the page.
  *
  * @link https://mantle.alley.com/docs/testing
  */
@@ -71,24 +69,6 @@ class AiSettingsTest extends TestCase {
 	}
 
 	/**
-	 * Render the plugin's provider field for the description generator.
-	 *
-	 * @return string The rendered markup.
-	 */
-	private function render_field(): string {
-		$page = new AI_Settings( [ 'description_generator' => 'Meta Description Generator' ] );
-
-		return capture(
-			fn () => $page->render_field(
-				[
-					'feature'   => 'description_generator',
-					'label_for' => 'wp_seo_ai_provider_description_generator',
-				]
-			)
-		);
-	}
-
-	/**
 	 * The option is registered with WordPress.
 	 */
 	public function test_setting_is_registered() {
@@ -96,72 +76,62 @@ class AiSettingsTest extends TestCase {
 	}
 
 	/**
-	 * Saving the option keeps providers only for the features the page was
-	 * given.
+	 * Saving the option keeps only a provider that is available.
 	 */
-	public function test_saving_is_sanitized_for_the_page_features() {
+	public function test_saving_is_sanitized() {
 		$this->register_provider( 'wp_seo_active' );
 
-		update_option(
-			AI_Providers::OPTION,
-			[
-				'description_generator' => 'wp_seo_active',
-				'unknown_feature'       => 'wp_seo_active',
-			]
-		);
+		update_option( AI_Providers::OPTION, 'wp_seo_active' );
 
-		$this->assertSame( [ 'description_generator' => 'wp_seo_active' ], get_option( AI_Providers::OPTION ) );
+		$this->assertSame( 'wp_seo_active', get_option( AI_Providers::OPTION ) );
+
+		update_option( AI_Providers::OPTION, 'not_a_provider' );
+
+		$this->assertSame( '', get_option( AI_Providers::OPTION ) );
 	}
 
 	/**
-	 * The page is added to the WP SEO menu only when it has features to list.
+	 * The page is added to the WP SEO menu.
 	 */
-	public function test_page_is_added_only_when_it_has_features() {
-		$empty = new AI_Settings( [] );
-		$empty->boot();
-
-		$this->assertFalse( has_action( 'admin_menu', [ $empty, 'add_page' ] ) );
-
-		$page = new AI_Settings( [ 'description_generator' => 'Meta Description Generator' ] );
-		$page->boot();
-		$page->add_page();
+	public function test_page_is_added_to_the_menu() {
+		( new AI_Settings() )->add_page();
 
 		$this->assertSame( AI_Settings::SLUG, $GLOBALS['submenu'][ Features_Page::SLUG ][0][2] ?? null );
 	}
 
 	/**
-	 * Loading the page adds a row for each of its features.
+	 * Loading the page adds the provider field.
 	 */
-	public function test_page_lists_a_row_per_feature() {
+	public function test_page_lists_the_provider_field() {
 		// Tests do not run in an admin request, which would have loaded this.
 		require_once ABSPATH . 'wp-admin/includes/template.php';
 
-		$page = new AI_Settings( [ 'description_generator' => 'Meta Description Generator' ] );
+		$page = new AI_Settings();
 		$page->add_page();
 
 		do_action( 'load-' . get_plugin_page_hookname( AI_Settings::SLUG, Features_Page::SLUG ) );
 
 		$html = capture( fn () => $page->render() );
 
-		$this->assertStringContainsString( 'Meta Description Generator', $html );
-		$this->assertStringContainsString( 'name="wp_seo_ai_providers[description_generator]"', $html );
+		$this->assertStringContainsString( 'AI provider', $html );
+		$this->assertStringContainsString( 'name="wp_seo_ai_provider"', $html );
 	}
 
 	/**
-	 * A row is editable, and lists the available providers, unless its
+	 * The field is editable, and lists the available providers, unless the
 	 * provider is set in code.
 	 */
 	public function test_field_is_editable_unless_set_in_code() {
 		$this->register_provider( 'wp_seo_active' );
 
-		$field = $this->render_field();
+		$field = capture( fn () => ( new AI_Settings() )->render_field() );
 
 		$this->assertStringContainsString( 'value="wp_seo_active"', $field );
 		$this->assertStringNotContainsString( 'disabled', $field );
 
 		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_active' );
 
-		$field = $this->render_field();
+		$field = capture( fn () => ( new AI_Settings() )->render_field() );
 
 		$this->assertStringContainsString( "disabled='disabled'", $field );
 		$this->assertMatchesRegularExpression( "/value=\"wp_seo_active\"\\s+selected='selected'/", $field );
@@ -175,7 +145,7 @@ class AiSettingsTest extends TestCase {
 	public function test_field_lists_an_unavailable_provider_set_in_code() {
 		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
 
-		$field = $this->render_field();
+		$field = capture( fn () => ( new AI_Settings() )->render_field() );
 
 		$this->assertMatchesRegularExpression( "/value=\"wp_seo_missing\"\\s+selected='selected'>\\s*wp_seo_missing \\(unavailable\\)/", $field );
 	}
@@ -185,7 +155,7 @@ class AiSettingsTest extends TestCase {
 	 * up.
 	 */
 	public function test_section_links_to_connectors_when_there_are_no_providers() {
-		$page = new AI_Settings( [ 'description_generator' => 'Meta Description Generator' ] );
+		$page = new AI_Settings();
 
 		$this->assertSame( [], AI_Providers::get_available_providers(), 'No AI provider plugin is active in the test environment.' );
 		$this->assertStringContainsString( 'options-connectors.php', capture( fn () => $page->render_section() ) );

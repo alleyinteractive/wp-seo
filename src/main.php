@@ -22,15 +22,11 @@ function main(): void {
 	( new Features_Page() )->register();
 
 	/*
-	 * The page for choosing the AI provider of each feature that sends prompts.
-	 * It is booted after the features page registers, so that its submenu is
-	 * added after the menu it belongs to.
+	 * The page for choosing the AI provider WP SEO sends prompts to. It is
+	 * booted after the features page registers, so that its submenu is added
+	 * after the menu it belongs to.
 	 */
-	( new AI_Settings(
-		[
-			'description_generator' => __( 'Meta Description Generator', 'wp-seo' ),
-		]
-	) )->boot();
+	( new AI_Settings() )->boot();
 
 	// Add features here.
 	$plugin = new Group(

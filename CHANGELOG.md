@@ -10,8 +10,8 @@ Just kidding about the "no plans for additional feature development" thing, we'r
 * Added: `wp_seo_register_features` action, for adding features to the plugin without editing it.
 * Added: Configurable site-wide default Open Graph image, used as a fallback when a post has no explicit or featured image.
 * Added: Support for canonical URL and robots meta.
-* Added: `AI_Providers` class for sending prompts through the AI connectors configured in WordPress. A feature starts a prompt to its AI provider with `AI_Providers::get_prompt_builder()`, and `AI_Providers::check_feature()` reports whether it can. Both return a `WP_Error` when the feature has no AI provider, or before WordPress 7.0, when `AI_Providers::get_available_providers()` also lists no providers.
-* Added: A WP SEO AI settings page for choosing the AI provider each feature sends prompts to, the `AI_Providers::get_feature_provider()` and `AI_Providers::get_feature_provider_from_code()` methods, and the `wp_seo_ai_provider` filter for setting a provider in code.
+* Added: `AI_Providers` class for sending prompts through the AI connectors configured in WordPress. A feature starts a prompt with `AI_Providers::get_prompt_builder()`, and `AI_Providers::check_provider()` reports whether it can. Both return a `WP_Error` when there is no AI provider, or before WordPress 7.0, when `AI_Providers::get_available_providers()` also lists no providers.
+* Added: A WP SEO AI settings page for choosing the AI provider WP SEO sends prompts to, the `AI_Providers::get_provider()` method, and the `wp_seo_ai_provider` filter for setting the provider in code.
 * Changed: Rebase plugin on @alleyinteractive/create-wordpress-plugin.
 * Removed: Support for keywords which are no longer used by search engines.
 

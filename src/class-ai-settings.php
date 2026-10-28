@@ -8,18 +8,17 @@
 namespace Alley\WP\WP_SEO;
 
 /**
- * The admin page for choosing which AI provider each WP SEO feature sends its
- * prompts to.
+ * The admin page for choosing which AI provider WP SEO sends its prompts to.
  *
- * Providers are the AI connectors configured under Settings > Connectors. The
- * page lists one row per feature it was given, and `AI_Providers` gives each
- * row its choices and sanitizes what is saved. A row whose provider is set in
- * code with the `wp_seo_ai_provider` filter is shown read-only.
+ * Providers are the AI connectors configured under Settings > Connectors.
+ * `AI_Providers` gives the page its choices and sanitizes what is saved. When
+ * the provider is set in code with the `wp_seo_ai_provider` filter, the choice
+ * is shown read-only.
  *
  * This is infrastructure rather than a WP SEO feature, though it implements the
  * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
  * wrapped in a `Feature` and carries no handle, since it only configures
- * features that are, and it does nothing when it was given none.
+ * features that are.
  */
 final class AI_Settings implements \Alley\WP\Types\Feature {
 	/**
@@ -44,15 +43,6 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	private const SECTION = 'wp_seo_ai_providers';
 
 	/**
-	 * Set up.
-	 *
-	 * @param array<string, string> $features Labels of the features that send prompts, keyed by handle.
-	 */
-	public function __construct(
-		private readonly array $features,
-	) {}
-
-	/**
 	 * Boot the feature.
 	 *
 	 * The setting is registered on `init` rather than `admin_init`, so that it
@@ -60,53 +50,40 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * admin.
 	 */
 	public function boot(): void {
-		if ( ! $this->features ) {
-			return;
-		}
-
 		add_action( 'init', [ $this, 'register_setting' ] );
 		add_action( 'admin_menu', [ $this, 'add_page' ] );
 	}
 
 	/**
 	 * Register the option with WordPress.
-	 *
-	 * A row set in code renders a disabled field, which browsers do not submit,
-	 * so its feature is missing from what is saved and keeps its stored
-	 * provider.
 	 */
 	public function register_setting(): void {
 		register_setting(
 			self::SLUG,
 			AI_Providers::OPTION,
 			[
-				'type'              => 'object',
-				'default'           => [],
-				'sanitize_callback' => fn ( mixed $value ): array => AI_Providers::sanitize_feature_providers( $value, array_keys( $this->features ) ),
+				'type'              => 'string',
+				'default'           => '',
+				'sanitize_callback' => [ AI_Providers::class, 'sanitize_provider' ],
 				'show_in_rest'      => false,
 			]
 		);
 	}
 
 	/**
-	 * Add the page's section and one field per feature.
+	 * Add the page's section and its one field.
 	 */
 	public function add_fields(): void {
 		add_settings_section( self::SECTION, '', [ $this, 'render_section' ], self::SLUG );
 
-		foreach ( $this->features as $feature => $label ) {
-			add_settings_field(
-				"wp_seo_ai_provider_{$feature}",
-				$label,
-				[ $this, 'render_field' ],
-				self::SLUG,
-				self::SECTION,
-				[
-					'feature'   => $feature,
-					'label_for' => "wp_seo_ai_provider_{$feature}",
-				]
-			);
-		}
+		add_settings_field(
+			AI_Providers::OPTION,
+			__( 'AI provider', 'wp-seo' ),
+			[ $this, 'render_field' ],
+			self::SLUG,
+			self::SECTION,
+			[ 'label_for' => AI_Providers::OPTION ]
+		);
 	}
 
 	/**
@@ -176,16 +153,14 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	}
 
 	/**
-	 * Render the provider dropdown for one feature.
-	 *
-	 * @param array{feature: string, label_for: string} $args Field arguments.
+	 * Render the provider dropdown.
 	 */
-	public function render_field( array $args ): void {
-		$choice = AI_Providers::get_feature_choice( $args['feature'] );
+	public function render_field(): void {
+		$choice = AI_Providers::get_choice();
 		?>
 		<select
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="<?php echo esc_attr( AI_Providers::OPTION . '[' . $args['feature'] . ']' ); ?>"
+			id="<?php echo esc_attr( AI_Providers::OPTION ); ?>"
+			name="<?php echo esc_attr( AI_Providers::OPTION ); ?>"
 			<?php disabled( $choice['in_code'] ); ?>
 		>
 			<option value=""><?php esc_html_e( 'None', 'wp-seo' ); ?></option>
