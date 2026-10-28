@@ -12,9 +12,9 @@ namespace Alley\WP\WP_SEO;
  * prompts to.
  *
  * Providers are the AI connectors configured under Settings > Connectors. The
- * page lists one row per feature it was given, and stores the choices in one
- * option keyed by feature handle. A row whose provider is set in code with the
- * `wp_seo_ai_provider` filter is shown read-only.
+ * page lists one row per feature it was given, and saves the choices to the
+ * option `AI_Providers` reads them from. A row whose provider is set in code
+ * with the `wp_seo_ai_provider` filter is shown read-only.
  *
  * This is infrastructure rather than a WP SEO feature, though it implements the
  * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
@@ -28,13 +28,6 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * @var string
 	 */
 	public const SLUG = 'wp-seo-ai';
-
-	/**
-	 * Name of the option holding each feature's provider.
-	 *
-	 * @var string
-	 */
-	public const OPTION = 'wp_seo_ai_providers';
 
 	/**
 	 * The capability required to view the page and save its settings.
@@ -81,7 +74,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	public function register_setting(): void {
 		register_setting(
 			self::SLUG,
-			self::OPTION,
+			AI_Providers::OPTION,
 			[
 				'type'              => 'object',
 				'default'           => [],
@@ -147,7 +140,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 */
 	public function sanitize( mixed $value ): array {
 		$value     = is_array( $value ) ? $value : [];
-		$stored    = get_option( self::OPTION );
+		$stored    = get_option( AI_Providers::OPTION );
 		$stored    = is_array( $stored ) ? $stored : [];
 		$providers = AI_Providers::get_available_providers();
 		$sanitized = [];
@@ -218,8 +211,8 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * @param array{feature: string, label_for: string} $args Field arguments.
 	 */
 	public function render_field( array $args ): void {
-		$in_code   = null !== get_ai_provider_from_code( $args['feature'] );
-		$selected  = get_ai_provider( $args['feature'] );
+		$in_code   = null !== AI_Providers::get_feature_provider_from_code( $args['feature'] );
+		$selected  = AI_Providers::get_feature_provider( $args['feature'] );
 		$providers = AI_Providers::get_available_providers();
 
 		if ( '' !== $selected && ! isset( $providers[ $selected ] ) ) {
@@ -232,7 +225,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 		?>
 		<select
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="<?php echo esc_attr( self::OPTION . '[' . $args['feature'] . ']' ); ?>"
+			name="<?php echo esc_attr( AI_Providers::OPTION . '[' . $args['feature'] . ']' ); ?>"
 			<?php disabled( $in_code ); ?>
 		>
 			<option value=""><?php esc_html_e( 'None', 'wp-seo' ); ?></option>
