@@ -58,7 +58,7 @@ function get_description_generator_post_types(): array {
  *                          holds the description.
  */
 function generate_description( \WP_Post $post ): string|\WP_Error {
-	$provider = get_ai_provider( 'description_generator' );
+	$provider = AI_Providers::get_feature_provider( 'description_generator' );
 
 	if ( '' === $provider ) {
 		return new \WP_Error(
@@ -151,7 +151,7 @@ function generate_description( \WP_Post $post ): string|\WP_Error {
 	 */
 	$instructions = apply_filters( 'wp_seo_description_generator_prompt', $instructions, $post );
 
-	$prompt = get_ai_prompt( "Title: {$title}\n\nContent: {$content}", $provider );
+	$prompt = AI_Providers::get_prompt_builder( "Title: {$title}\n\nContent: {$content}", $provider );
 
 	if ( is_wp_error( $prompt ) ) {
 		return $prompt;
