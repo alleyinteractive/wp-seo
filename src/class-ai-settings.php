@@ -12,14 +12,15 @@ namespace Alley\WP\WP_SEO;
  * prompts to.
  *
  * Providers are the AI connectors configured under Settings > Connectors. The
- * page lists one row per active feature it was given, and `AI_Providers` gives
- * each row its choices and sanitizes what is saved. A row whose provider is set
- * in code with the `wp_seo_ai_provider` filter is shown read-only.
+ * page lists one row per active feature in the Registry that implements
+ * `Sends_Prompts`, and `AI_Providers` gives each row its choices and sanitizes
+ * what is saved. A row whose provider is set in code with the
+ * `wp_seo_ai_provider` filter is shown read-only.
  *
  * This is infrastructure rather than a WP SEO feature, though it implements the
  * `\Alley\WP\Types\Feature` interface so that it can be booted: it is not
  * wrapped in a `Feature` and carries no handle, since it only configures
- * features that are, and it does nothing when it was given none.
+ * features that are, and it does nothing when no feature sends prompts.
  */
 final class AI_Settings implements \Alley\WP\Types\Feature {
 	/**
@@ -44,15 +45,6 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	private const SECTION = 'wp_seo_ai_providers';
 
 	/**
-	 * Set up.
-	 *
-	 * @param array<string, string> $features Labels of the features that send prompts, keyed by handle.
-	 */
-	public function __construct(
-		private readonly array $features,
-	) {}
-
-	/**
 	 * Boot the feature.
 	 *
 	 * The setting is registered on `init` rather than `admin_init`, so that it
@@ -60,29 +52,29 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * admin.
 	 */
 	public function boot(): void {
-		if ( ! $this->features ) {
-			return;
-		}
-
 		add_action( 'init', [ $this, 'register_setting' ] );
 		add_action( 'admin_menu', [ $this, 'add_page' ] );
 	}
 
 	/**
-	 * Register the option with WordPress.
+	 * Register the option with WordPress, if any feature sends prompts.
 	 *
 	 * A row set in code renders a disabled field, which browsers do not submit,
 	 * and an inactive feature has no row at all, so either is missing from what
 	 * is saved and keeps its stored provider.
 	 */
 	public function register_setting(): void {
+		if ( ! $this->get_features() ) {
+			return;
+		}
+
 		register_setting(
 			self::SLUG,
 			AI_Providers::OPTION,
 			[
 				'type'              => 'object',
 				'default'           => [],
-				'sanitize_callback' => fn ( mixed $value ): array => AI_Providers::sanitize_feature_providers( $value, array_keys( $this->features ) ),
+				'sanitize_callback' => fn ( mixed $value ): array => AI_Providers::sanitize_feature_providers( $value, array_keys( $this->get_features() ) ),
 				'show_in_rest'      => false,
 			]
 		);
@@ -94,7 +86,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	public function add_fields(): void {
 		add_settings_section( self::SECTION, '', [ $this, 'render_section' ], self::SLUG );
 
-		foreach ( $this->active_features() as $feature => $label ) {
+		foreach ( $this->get_active_features() as $feature => $label ) {
 			add_settings_field(
 				"wp_seo_ai_provider_{$feature}",
 				$label,
@@ -117,7 +109,7 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	 * With no active features to list, there is no page.
 	 */
 	public function add_page(): void {
-		if ( ! $this->active_features() ) {
+		if ( ! $this->get_active_features() ) {
 			return;
 		}
 
@@ -136,20 +128,42 @@ final class AI_Settings implements \Alley\WP\Types\Feature {
 	}
 
 	/**
-	 * The features to list on the page: those that are active.
+	 * Get the features that send prompts, active or not.
+	 *
+	 * Read from the Registry each time rather than when the page boots, so
+	 * that features composed after it, including any added with the
+	 * `wp_seo_register_features` action, are included.
+	 *
+	 * @return array<string, string> Labels of the features, keyed by handle.
+	 */
+	private function get_features(): array {
+		$features = [];
+
+		foreach ( Registry::features() as $handle => $feature ) {
+			if ( $feature->sends_prompts() ) {
+				$features[ $handle ] = $feature->label();
+			}
+		}
+
+		return $features;
+	}
+
+	/**
+	 * Get the features to list on the page: those that send prompts and are
+	 * active.
 	 *
 	 * A feature that is not active sends no prompts, so there is no provider
 	 * to choose for it. Its stored provider is kept all the same, since the
-	 * setting is sanitized for every feature the page was given, listed or not.
+	 * setting is sanitized for every feature that sends prompts, listed or not.
 	 *
 	 * @return array<string, string> Labels of the active features, keyed by handle.
 	 */
-	private function active_features(): array {
+	private function get_active_features(): array {
 		$registry = Registry::features();
 
 		return array_filter(
-			$this->features,
-			fn ( string $feature ): bool => isset( $registry[ $feature ] ) && $registry[ $feature ]->booted(),
+			$this->get_features(),
+			fn ( string $feature ): bool => $registry[ $feature ]->booted(),
 			ARRAY_FILTER_USE_KEY
 		);
 	}
