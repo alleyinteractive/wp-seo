@@ -148,21 +148,21 @@ final class AI_Settings {
 	 * Render the provider dropdown.
 	 */
 	public function render_field(): void {
-		$choice = AI_Providers::get_choice();
+		$options = AI_Providers::get_provider_field_options();
 		?>
 		<select
 			id="<?php echo esc_attr( AI_Providers::OPTION ); ?>"
 			name="<?php echo esc_attr( AI_Providers::OPTION ); ?>"
-			<?php disabled( $choice['in_code'] ); ?>
+			<?php disabled( $options['in_code'] ); ?>
 		>
 			<option value=""><?php esc_html_e( 'None', 'wp-seo' ); ?></option>
-			<?php foreach ( $choice['providers'] as $id => $name ) : ?>
-				<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $choice['provider'], $id ); ?>>
+			<?php foreach ( $options['providers'] as $id => $name ) : ?>
+				<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $options['provider'], $id ); ?>>
 					<?php echo esc_html( $name ); ?>
 				</option>
 			<?php endforeach; ?>
 		</select>
-		<?php if ( $choice['in_code'] ) : ?>
+		<?php if ( $options['in_code'] ) : ?>
 			<p class="description">
 				<?php
 				printf(
