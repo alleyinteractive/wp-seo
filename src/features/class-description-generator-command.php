@@ -17,9 +17,8 @@ use WP_CLI;
  * The `wp wp-seo generate-descriptions` command, which generates and saves
  * meta descriptions in bulk with the Meta Description Generator.
  *
- * The Meta Description Generator feature registers it while the feature is
- * active, along with the query filter the command finds posts without a
- * description with.
+ * The Meta Description Generator feature registers it while active, along with
+ * the query filter it uses to find posts without a description.
  */
 final class Description_Generator_Command {
 	/**
@@ -46,8 +45,8 @@ final class Description_Generator_Command {
 	/**
 	 * Generate meta descriptions for posts that don't have one.
 	 *
-	 * Sends each post without a description to the AI provider chosen for the
-	 * Meta Description Generator, and saves the description it writes. A post
+	 * Sends each post without a description to the AI provider chosen on the
+	 * WP SEO AI settings page, and saves the description it writes. A post
 	 * whose description can't be generated, or comes back too long, is logged
 	 * and left alone.
 	 *
@@ -62,12 +61,14 @@ final class Description_Generator_Command {
 	 *
 	 * [--query=<json>]
 	 * : WP_Query arguments for the posts to describe, as a JSON object. They
-	 * replace the defaults: published posts without a password, of the post
-	 * types the Meta Description Generator works on. Posts that already have a
-	 * description are always left out, and posts are always ordered by ID.
+	 * override the matching defaults: published posts without a password, of
+	 * the post types the Meta Description Generator works on. Posts that
+	 * already have a description are always left out, and posts are always
+	 * ordered by ID.
 	 *
 	 * [--limit=<number>]
-	 * : Most posts to send to the AI provider in this run. Default 100.
+	 * : Maximum number of posts to send to the AI provider in this run.
+	 * Default 100.
 	 *
 	 * [--fault-tolerance=<percent>]
 	 * : Percentage of the limit that may fail before the run stops. Default 5.
@@ -176,7 +177,7 @@ final class Description_Generator_Command {
 			]
 		);
 
-		// WP_Query reads no post types as `post`, which the filter may have removed.
+		// An empty `post_type` makes WP_Query fall back to `post`, which the filter may have removed.
 		if ( [] === $query_args['post_type'] ) {
 			WP_CLI::error( __( 'There are no post types to generate descriptions for.', 'wp-seo' ) );
 		}
@@ -194,8 +195,8 @@ final class Description_Generator_Command {
 
 		/*
 		 * Bulk_Task has no way to stop partway, so reaching the limit throws
-		 * this, which is caught below. Its cleanup after a run is skipped then,
-		 * which matters only to a process that goes on to change terms.
+		 * this, which is caught below. Skipping its cleanup leaves term counting
+		 * deferred, which matters only if the process goes on to change terms.
 		 */
 		$limit_reached = new \RuntimeException();
 

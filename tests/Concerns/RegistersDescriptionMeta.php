@@ -10,8 +10,8 @@ namespace Alley\WP\WP_SEO\Tests\Concerns;
 use Alley\WP\WP_SEO\Features\Description_Generator;
 
 /**
- * Makes sure posts and pages store the meta description, as the plugin
- * registers them to when it loads.
+ * Registers the description meta on posts and pages, as the plugin does when
+ * it loads.
  *
  * Earlier tests can reset post types and their meta, so a test that needs the
  * meta registers it rather than relying on the registration from when the

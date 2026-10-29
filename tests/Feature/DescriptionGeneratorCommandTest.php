@@ -45,7 +45,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		add_filter( 'wp_seo_ai_provider', fn () => FakeAiProvider::ID );
 
-		// The command runs only while the feature is active, which finds the posts without a description.
+		// Boot the feature, which registers the command and its query filter.
 		( new Description_Generator() )->boot();
 
 		( new \ReflectionProperty( WP_CLI::class, 'capture_exit' ) )->setValue( null, true );
@@ -207,7 +207,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 	}
 
 	/**
-	 * Arguments passed in --query replace the defaults.
+	 * Arguments passed in --query override the matching defaults.
 	 */
 	public function test_query_replaces_the_defaults() {
 		$draft     = static::factory()->post->create( [ 'post_status' => 'draft' ] );
@@ -534,8 +534,8 @@ class DescriptionGeneratorCommandTest extends TestCase {
 	}
 
 	/**
-	 * When the filter leaves no post types, the command stops rather than
-	 * describing posts, which WP_Query would query for no post types.
+	 * When the filter leaves no post types, the command stops, since WP_Query
+	 * would otherwise fall back to `post`.
 	 */
 	public function test_no_post_types_is_an_error() {
 		add_filter( 'wp_seo_description_generator_post_types', fn () => [] );

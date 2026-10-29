@@ -51,15 +51,15 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 
 	/**
 	 * Code of the error returned when the AI provider is limiting requests or
-	 * is out of quota, so that every prompt sent soon after would fail too.
+	 * is out of quota, since every prompt sent soon after would fail too.
 	 *
 	 * @var string
 	 */
 	public const ERROR_PROVIDER_LIMITED = 'wp_seo_description_provider_limited';
 
 	/**
-	 * Code of the error `generate_and_save_description()` returns when it kept
-	 * a description an editor saved while this one was being generated.
+	 * Code of the error `generate_and_save_description()` returns when an
+	 * editor saved a description during generation, and theirs was kept.
 	 *
 	 * @var string
 	 */
@@ -299,12 +299,11 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	}
 
 	/**
-	 * Generate a meta description for a post and save it, without an editor
-	 * reviewing it.
+	 * Generate a meta description for a post and save it.
 	 *
-	 * Since no editor reviews it, a description longer than `get_max_length()`
-	 * is refused, and markup is removed before it is saved. A description an
-	 * editor saved while this one was being generated is kept.
+	 * Nobody reviews it, so a description over `get_max_length()` is refused
+	 * and markup is stripped. If an editor saved a description in the
+	 * meantime, theirs is kept.
 	 *
 	 *     $description = Description_Generator::generate_and_save_description( get_post( 123 ) );
 	 *
@@ -338,9 +337,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		}
 
 		/*
-		 * The post can have been read minutes ago, as a bulk run reads it with
-		 * its batch, so its description is read again, past the cache, in case
-		 * an editor has saved one since.
+		 * A bulk run may have loaded this post minutes ago. Clear the meta cache
+		 * so a description an editor saved since then is seen.
 		 */
 		wp_cache_delete( $post->ID, 'post_meta' );
 
@@ -351,7 +349,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 			);
 		}
 
-		// Markup the provider escaped comes back decoded, so it is removed as plain text.
+		// Decoding entities can turn escaped markup in the reply into real tags, so strip them.
 		$description = sanitize_text_field( $description );
 
 		update_post_meta( $post->ID, self::META_KEY, $description );
@@ -367,11 +365,10 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * test `generate_and_save_description()` makes before saving one. Queries
 	 * that do not set the variable are left alone.
 	 *
-	 * This is a correlated NOT EXISTS rather than a meta query, which would
-	 * join the meta table twice to match both missing and empty descriptions.
-	 * Either way, MySQL reads every meta row of each post it steps over, and
-	 * a run steps over every post with a description between where it starts
-	 * and the next post without one.
+	 * Uses NOT EXISTS rather than a meta query, which would need two joins to
+	 * match missing and empty descriptions. Either way, MySQL scans the meta of
+	 * every described post between the run's start and the next post without
+	 * one.
 	 *
 	 * @param string    $where WHERE clause of the query.
 	 * @param \WP_Query $query The query.
