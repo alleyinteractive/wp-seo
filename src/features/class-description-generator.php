@@ -59,7 +59,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * editor could not fix the error every click would get.
 	 */
 	public function add_post_type_support(): void {
-		if ( is_wp_error( AI_Providers::check_provider() ) ) {
+		if ( is_wp_error( AI_Providers::get_prompt_provider() ) ) {
 			return;
 		}
 
