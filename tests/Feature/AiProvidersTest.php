@@ -11,7 +11,7 @@ use Alley\WP\WP_SEO\AI_Providers;
 use Alley\WP\WP_SEO\Tests\TestCase;
 
 /**
- * Tests for the AI providers WP SEO features can send prompts to.
+ * Tests for the AI providers WP SEO can send prompts to, and the one it uses.
  *
  * No test sends a prompt: that would need a provider plugin and credentials,
  * and would make a request to the provider.
@@ -83,20 +83,51 @@ class AiProvidersTest extends TestCase {
 	}
 
 	/**
-	 * A prompt starts as the core prompt builder.
+	 * Once there is a provider, it is the one prompts are sent to.
 	 */
-	public function test_get_prompt_builder_returns_core_prompt_builder() {
-		$this->assertInstanceOf( \WP_AI_Client_Prompt_Builder::class, AI_Providers::get_prompt_builder( 'Hello' ) );
+	public function test_get_prompt_provider_returns_the_provider() {
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
+
+		$this->assertSame( 'wp_seo_missing', AI_Providers::get_prompt_provider() );
 	}
 
 	/**
-	 * A prompt goes to the provider it was given. A provider that does not exist
-	 * shows this without a request being made: generating fails, naming it.
+	 * With AI turned off on the site, no prompts are sent, whatever the provider.
 	 */
-	public function test_get_prompt_builder_uses_the_given_provider() {
-		$result = AI_Providers::get_prompt_builder( 'Hello', 'wp_seo_missing' )->generate_text();
+	public function test_get_prompt_provider_fails_when_ai_is_turned_off() {
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
+		add_filter( 'wp_supports_ai', '__return_false' );
+
+		$result = AI_Providers::get_prompt_provider();
 
 		$this->assertWPError( $result );
-		$this->assertStringContainsString( 'wp_seo_missing', $result->get_error_message() );
+		$this->assertSame( 'wp_seo_ai_unsupported', $result->get_error_code() );
+	}
+
+	/**
+	 * Without a provider, no prompts are sent.
+	 */
+	public function test_get_prompt_provider_fails_without_a_provider() {
+		$result = AI_Providers::get_prompt_provider();
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_ai_no_provider', $result->get_error_code() );
+		$this->assertSame( [ 'status' => 503 ], $result->get_error_data() );
+	}
+
+	/**
+	 * The provider is the one set in code, and a filter that answers with
+	 * something other than a string means no provider.
+	 */
+	public function test_get_provider_uses_the_provider_set_in_code() {
+		$this->assertSame( '', AI_Providers::get_provider() );
+
+		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_active' );
+
+		$this->assertSame( 'wp_seo_active', AI_Providers::get_provider() );
+
+		add_filter( 'wp_seo_ai_provider', fn () => 123, 20 );
+
+		$this->assertSame( '', AI_Providers::get_provider() );
 	}
 }
