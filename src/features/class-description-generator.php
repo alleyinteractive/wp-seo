@@ -18,11 +18,12 @@ use Alley\WP\WP_SEO\AI_Settings;
  * description is returned, not saved.
  *
  * Every request costs a prompt, so each user may make a limited number of
- * requests to the route an hour. Calling `generate_description()` directly, as
- * bulk runs do, is not limited.
+ * requests to the route an hour. Calling `generate_description()` or
+ * `generate_and_save_description()` directly, as bulk runs do, is not limited.
  *
  * The block editor offers a button to generate the description on post types
- * with the `wp-seo-description-generator` support.
+ * with the `wp-seo-description-generator` support, and the
+ * `wp wp-seo generate-descriptions` command generates and saves them in bulk.
  */
 final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
@@ -41,12 +42,41 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	public const META_KEY = 'search_engine_description';
 
 	/**
+	 * Query variable that limits a `WP_Query` to posts without a description,
+	 * or with an empty one, while the feature is active.
+	 *
+	 * @var string
+	 */
+	public const MISSING_DESCRIPTION_QUERY_VAR = 'wp_seo_missing_description';
+
+	/**
+	 * Code of the error returned when the AI provider is limiting requests or
+	 * is out of quota, since every prompt sent soon after would fail too.
+	 *
+	 * @var string
+	 */
+	public const ERROR_PROVIDER_LIMITED = 'wp_seo_description_provider_limited';
+
+	/**
+	 * Code of the error `generate_and_save_description()` returns when an
+	 * editor saved a description during generation, and theirs was kept.
+	 *
+	 * @var string
+	 */
+	public const ERROR_DESCRIPTION_EXISTS = 'wp_seo_description_exists';
+
+	/**
 	 * Boot the feature.
 	 */
 	public function boot(): void {
 		// Late, so that post types registered on `init` are included.
 		add_action( 'init', [ $this, 'add_post_type_support' ], 99 );
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
+		add_filter( 'posts_where', [ $this, 'limit_query_to_missing_descriptions' ], 10, 2 );
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			\WP_CLI::add_command( 'wp-seo generate-descriptions', Description_Generator_Command::class );
+		}
 
 		( new AI_Settings() )->register();
 	}
@@ -122,8 +152,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		 * Filters the maximum length of a generated meta description.
 		 *
 		 * The default instructions ask for a description no longer than this. A
-		 * longer one is still returned, so a caller that saves descriptions
-		 * without review should check it.
+		 * longer one is still returned for an editor to review, but
+		 * `generate_and_save_description()` refuses it.
 		 *
 		 * @since 2.0.0
 		 *
@@ -149,8 +179,11 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * @since 2.0.0
 	 *
 	 * @param \WP_Post $post Post to describe.
-	 * @return string|\WP_Error The description, or an error. Errors from sending
-	 *                          the prompt are the ones core returns.
+	 * @return string|\WP_Error The description, or an error. The error code is
+	 *                          `ERROR_PROVIDER_LIMITED` when the provider is
+	 *                          limiting requests or is out of quota. Other
+	 *                          errors from sending the prompt are the ones
+	 *                          core returns.
 	 */
 	public static function generate_description( \WP_Post $post ): string|\WP_Error {
 		// Checked first, so that the content is not rendered for a prompt that cannot be sent.
@@ -236,6 +269,13 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 			->generate_text();
 
 		if ( is_wp_error( $text ) ) {
+			$data = $text->get_error_data();
+
+			// Core reports a provider's rate limit or exhausted quota with a 429 status.
+			if ( is_array( $data ) && 429 === ( $data['status'] ?? null ) ) {
+				return new \WP_Error( self::ERROR_PROVIDER_LIMITED, $text->get_error_message(), $data );
+			}
+
 			return $text;
 		}
 
@@ -256,6 +296,103 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		}
 
 		return $description;
+	}
+
+	/**
+	 * Generate a meta description for a post and save it.
+	 *
+	 * Nobody reviews it, so a description over `get_max_length()` is refused
+	 * and markup is stripped. If an editor saved a description in the
+	 * meantime, theirs is kept.
+	 *
+	 *     $description = Description_Generator::generate_and_save_description( get_post( 123 ) );
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \WP_Post $post Post to describe.
+	 * @return string|\WP_Error The saved description, or an error. The error
+	 *                          code is `ERROR_DESCRIPTION_EXISTS` when an
+	 *                          editor's description was kept, and
+	 *                          `ERROR_PROVIDER_LIMITED` when the provider is
+	 *                          limiting requests or is out of quota.
+	 */
+	public static function generate_and_save_description( \WP_Post $post ): string|\WP_Error {
+		$description = self::generate_description( $post );
+
+		if ( is_wp_error( $description ) ) {
+			return $description;
+		}
+
+		$max_length = self::get_max_length( $post );
+
+		if ( mb_strlen( $description ) > $max_length ) {
+			return new \WP_Error(
+				'wp_seo_description_too_long',
+				sprintf(
+					/* translators: %d: maximum length, in characters. */
+					__( 'The AI provider returned a description longer than %d characters.', 'wp-seo' ),
+					$max_length
+				)
+			);
+		}
+
+		/*
+		 * A bulk run may have loaded this post minutes ago. Clear the meta cache
+		 * so a description an editor saved since then is seen.
+		 */
+		wp_cache_delete( $post->ID, 'post_meta' );
+
+		if ( '' !== get_post_meta( $post->ID, self::META_KEY, true ) ) {
+			return new \WP_Error(
+				self::ERROR_DESCRIPTION_EXISTS,
+				__( 'Kept the description saved while this one was being generated.', 'wp-seo' )
+			);
+		}
+
+		// Decoding entities can turn escaped markup in the reply into real tags, so strip them.
+		$description = sanitize_text_field( $description );
+
+		update_post_meta( $post->ID, self::META_KEY, $description );
+
+		return $description;
+	}
+
+	/**
+	 * Limit a query to posts without a description, or with an empty one, when
+	 * it sets `MISSING_DESCRIPTION_QUERY_VAR`.
+	 *
+	 * A post has a description when its meta is a non-empty string, the same
+	 * test `generate_and_save_description()` makes before saving one. Queries
+	 * that do not set the variable are left alone.
+	 *
+	 * Uses NOT EXISTS rather than a meta query, which would need two joins to
+	 * match missing and empty descriptions. Either way, MySQL scans the meta of
+	 * every described post between the run's start and the next post without
+	 * one.
+	 *
+	 * @param mixed $where WHERE clause of the query.
+	 * @param mixed $query The query.
+	 * @return mixed WHERE clause.
+	 */
+	public function limit_query_to_missing_descriptions( $where, $query ): mixed {
+		global $wpdb;
+
+		if (
+			! is_string( $where )
+			|| ! $query instanceof \WP_Query
+			|| ! $query->get( self::MISSING_DESCRIPTION_QUERY_VAR )
+			|| ! $wpdb instanceof \wpdb
+		) {
+			return $where;
+		}
+
+		return $where . $wpdb->prepare(
+			' AND NOT EXISTS ( SELECT 1 FROM %i AS wp_seo_description WHERE wp_seo_description.post_id = %i.ID AND wp_seo_description.meta_key = %s AND wp_seo_description.meta_value <> %s )',
+			$wpdb->postmeta,
+			$wpdb->posts,
+			self::META_KEY,
+			''
+		);
 	}
 
 	/**
@@ -378,7 +515,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		 * Filters the number of descriptions a user may generate an hour
 		 * through the REST route.
 		 *
-		 * Calling `generate_description()` directly is not limited.
+		 * Calling `generate_description()` or `generate_and_save_description()`
+		 * directly is not limited.
 		 *
 		 * @since 2.0.0
 		 *
