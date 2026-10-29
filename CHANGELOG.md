@@ -12,6 +12,7 @@ Just kidding about the "no plans for additional feature development" thing, we'r
 * Added: Support for canonical URL and robots meta.
 * Added: `AI_Providers` class for sending prompts through the AI connectors configured in WordPress. `AI_Providers::get_prompt_provider()` returns the AI provider a feature sends its prompts to, or a `WP_Error` when there is none, when AI is turned off on the site, or before WordPress 7.0, when `AI_Providers::get_available_providers()` also lists no providers.
 * Added: A WP SEO AI settings page for choosing the AI provider WP SEO sends prompts to, the `AI_Providers::get_provider()` method, and the `wp_seo_ai_provider` filter for setting the provider in code.
+* Added: Meta Description Generator feature (`wp_seo_enable_description_generator`), which writes a meta description for a post with the AI provider chosen on the WP SEO AI settings page. It adds the `Description_Generator::generate_description()`, `Description_Generator::get_post_types()`, and `Description_Generator::get_max_length()` methods, a `POST /wp-seo/v1/generate-description` REST route for people who can edit the post, and the `wp_seo_description_generator_prompt`, `wp_seo_description_generator_content`, `wp_seo_description_generator_max_length`, and `wp_seo_description_generator_post_types` filters.
 * Changed: Rebase plugin on @alleyinteractive/create-wordpress-plugin.
 * Removed: Support for keywords which are no longer used by search engines.
 

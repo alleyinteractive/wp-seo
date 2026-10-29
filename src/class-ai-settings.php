@@ -15,8 +15,9 @@ namespace Alley\WP\WP_SEO;
  * the provider is set in code with the `wp_seo_ai_provider` filter, the choice
  * is shown read-only.
  *
- * This isn't a feature itself, so it has no `Feature` wrapper or handle. It
- * configures the features that send prompts.
+ * This isn't a feature itself, so it has no `Feature` wrapper or handle.
+ * Features that send prompts register it, so the page appears only while one
+ * is active.
  */
 final class AI_Settings {
 	/**

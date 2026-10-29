@@ -18,7 +18,8 @@ use function Mantle\Support\Helpers\capture;
 /**
  * Tests for the page that chooses the AI provider WP SEO sends prompts to.
  *
- * These tests use the setting the plugin registered with the page.
+ * The page is registered by features that send prompts, so each test
+ * registers the setting itself.
  *
  * @link https://mantle.alley.com/docs/testing
  */
@@ -33,12 +34,15 @@ class AiSettingsTest extends TestCase {
 		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		( new AI_Settings() )->register_setting();
 	}
 
 	protected function tearDown(): void {
 		$this->unregister_connectors();
 
 		delete_option( AI_Providers::OPTION );
+		unregister_setting( AI_Settings::SLUG, AI_Providers::OPTION );
 
 		parent::tearDown();
 	}
