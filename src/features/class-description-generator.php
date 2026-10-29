@@ -52,8 +52,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	}
 
 	/**
-	 * Add support for the block editor's button to the post types it can
-	 * be used on.
+	 * Add the `wp-seo-description-generator` support, which shows the block
+	 * editor's button, to the generator's post types.
 	 *
 	 * The button is not offered until the feature can send prompts, since an
 	 * editor could not fix the error every click would get.
@@ -71,8 +71,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
 	 * Get the post types the description generator writes meta descriptions for.
 	 *
-	 * Only post types that store the description the Search Engine panel edits
-	 * are included, including any the filter adds.
+	 * Post types that don't register the description meta are left out, even
+	 * if the filter adds them.
 	 *
 	 * @since 2.0.0
 	 *
