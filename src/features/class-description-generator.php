@@ -370,14 +370,19 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * every described post between the run's start and the next post without
 	 * one.
 	 *
-	 * @param string    $where WHERE clause of the query.
-	 * @param \WP_Query $query The query.
-	 * @return string WHERE clause.
+	 * @param mixed $where WHERE clause of the query.
+	 * @param mixed $query The query.
+	 * @return mixed WHERE clause.
 	 */
-	public function limit_query_to_missing_descriptions( string $where, \WP_Query $query ): string {
+	public function limit_query_to_missing_descriptions( $where, $query ): mixed {
 		global $wpdb;
 
-		if ( ! $query->get( self::MISSING_DESCRIPTION_QUERY_VAR ) || ! $wpdb instanceof \wpdb ) {
+		if (
+			! is_string( $where )
+			|| ! $query instanceof \WP_Query
+			|| ! $query->get( self::MISSING_DESCRIPTION_QUERY_VAR )
+			|| ! $wpdb instanceof \wpdb
+		) {
 			return $where;
 		}
 
