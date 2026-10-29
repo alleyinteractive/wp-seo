@@ -529,7 +529,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		$result = $this->run_command();
 
 		$this->assertSame( 1, $result['exit'] );
-		$this->assertStringContainsString( 'No AI provider is selected for ', $result['stderr'] );
+		$this->assertStringContainsString( 'No AI provider is selected on the WP SEO AI settings page.', $result['stderr'] );
 		$this->assertSame( '', $this->description( $post ) );
 	}
 
