@@ -191,6 +191,7 @@ final class Description_Generator_Command {
 			$cursor->set( $saved );
 		}
 
+		// Rounded down, so with the default 5%, a limit under 20 allows no failures and the first one stops the run.
 		$allowed_failures = (int) floor( $limit * $fault_tolerance / 100 );
 
 		/*
