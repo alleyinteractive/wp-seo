@@ -156,7 +156,7 @@ final class Description_Generator_Command {
 			return;
 		}
 
-		$check = AI_Providers::check_provider();
+		$check = AI_Providers::get_prompt_provider();
 
 		if ( is_wp_error( $check ) ) {
 			WP_CLI::error( $check );
