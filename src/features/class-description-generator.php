@@ -20,6 +20,9 @@ use Alley\WP\WP_SEO\AI_Settings;
  * Every request costs a prompt, so each user may make a limited number of
  * requests to the route an hour. Calling `generate_description()` directly, as
  * bulk runs do, is not limited.
+ *
+ * The block editor offers a button to generate the description on post types
+ * with the `wp-seo-description-generator` support.
  */
 final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
@@ -30,16 +33,46 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	public const HANDLE = 'description_generator';
 
 	/**
+	 * Meta key the description is saved to, which the block editor's Search
+	 * Engine panel edits.
+	 *
+	 * @var string
+	 */
+	public const META_KEY = 'search_engine_description';
+
+	/**
 	 * Boot the feature.
 	 */
 	public function boot(): void {
+		// Late, so that post types registered on `init` are included.
+		add_action( 'init', [ $this, 'add_post_type_support' ], 99 );
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
 
 		( new AI_Settings() )->register();
 	}
 
 	/**
+	 * Add the `wp-seo-description-generator` support, which shows the block
+	 * editor's button, to the generator's post types.
+	 *
+	 * The button is not offered until the feature can send prompts, since an
+	 * editor could not fix the error every click would get.
+	 */
+	public function add_post_type_support(): void {
+		if ( is_wp_error( AI_Providers::get_prompt_provider() ) ) {
+			return;
+		}
+
+		foreach ( self::get_post_types() as $post_type ) {
+			add_post_type_support( $post_type, 'wp-seo-description-generator' );
+		}
+	}
+
+	/**
 	 * Get the post types the description generator writes meta descriptions for.
+	 *
+	 * Post types that don't register the description meta are left out, even
+	 * if the filter adds them.
 	 *
 	 * @since 2.0.0
 	 *
@@ -59,12 +92,21 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		/**
 		 * Filters the post types the description generator writes meta descriptions for.
 		 *
+		 * Post types that do not store the description are removed afterward.
+		 *
 		 * @since 2.0.0
 		 *
 		 * @param string[] $post_types Post type names. Default every public post type
 		 *                             shown in the admin, except attachments.
 		 */
-		return apply_filters( 'wp_seo_description_generator_post_types', array_values( $post_types ) );
+		$post_types = apply_filters( 'wp_seo_description_generator_post_types', array_values( $post_types ) );
+
+		return array_values(
+			array_filter(
+				$post_types,
+				fn ( string $post_type ): bool => registered_meta_key_exists( 'post', self::META_KEY, $post_type ),
+			)
+		);
 	}
 
 	/**
@@ -276,8 +318,9 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
 	 * Generate a description for the post.
 	 *
-	 * Returns a description over the maximum length anyway, since the editor
-	 * reviews it before saving.
+	 * Returns a description over the maximum length anyway: the editor reviews
+	 * it before saving, and retrying would count toward the limit and might be
+	 * just as long.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @phpstan-param \WP_REST_Request<array{post_id: int}> $request
