@@ -8,17 +8,134 @@
 namespace Alley\WP\WP_SEO;
 
 /**
- * The AI providers WP SEO features can send prompts to.
+ * The AI providers WP SEO can send prompts to, and the one it uses.
  *
  * AI providers are the connectors a site administrator configures under
  * Settings > Connectors (WordPress 7.0+). Before WordPress 7.0, there are none,
  * and a prompt cannot be started.
+ *
+ * The provider is chosen on the WP SEO AI settings page, or set in code with
+ * the `wp_seo_ai_provider` filter.
  */
 final class AI_Providers {
+	/**
+	 * Name of the option holding the chosen provider.
+	 *
+	 * @var string
+	 */
+	public const OPTION = 'wp_seo_ai_provider';
+
 	/**
 	 * The class is static; there is nothing to instantiate.
 	 */
 	private function __construct() {}
+
+	/**
+	 * Get the AI provider WP SEO sends its prompts to.
+	 *
+	 * Returns the provider set with the `wp_seo_ai_provider` filter, or else the
+	 * one saved on the WP SEO AI settings page. To send a prompt, use
+	 * `get_prompt_provider()` instead, which also checks that prompts can be
+	 * sent.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return string Connector ID of the provider, or an empty string if there
+	 *                is none and no prompts should be sent.
+	 */
+	public static function get_provider(): string {
+		$provider = self::get_provider_from_code();
+
+		if ( null !== $provider ) {
+			return $provider;
+		}
+
+		$stored = get_option( self::OPTION );
+
+		return is_string( $stored ) ? $stored : '';
+	}
+
+	/**
+	 * Get the options for the AI provider field on the WP SEO AI settings page.
+	 *
+	 * The selected provider is the one prompts go to, which may be set with the
+	 * `wp_seo_ai_provider` filter instead of on the page. If that provider isn't
+	 * available, it is added to the list and labeled unavailable, so the field
+	 * doesn't show "None" while prompts still go to it.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return array{provider: string, providers: array<string, string>, in_code: bool} The
+	 *         connector ID of the selected provider, or an empty string for
+	 *         none; the providers to list, as names keyed by connector ID; and
+	 *         whether the provider is set in code, which makes the field
+	 *         read-only.
+	 */
+	public static function get_provider_field_options(): array {
+		$in_code   = null !== self::get_provider_from_code();
+		$provider  = self::get_provider();
+		$providers = self::get_available_providers();
+
+		if ( '' !== $provider && ! isset( $providers[ $provider ] ) ) {
+			$providers[ $provider ] = sprintf(
+				/* translators: %s: connector ID of the provider. */
+				__( '%s (unavailable)', 'wp-seo' ),
+				$provider
+			);
+		}
+
+		return [
+			'provider'  => $provider,
+			'providers' => $providers,
+			'in_code'   => $in_code,
+		];
+	}
+
+	/**
+	 * Sanitize the chosen AI provider before it is saved.
+	 *
+	 * Keeps the provider only if it is an available AI provider. When nothing
+	 * is submitted, as when the field is disabled because the provider is set
+	 * in code, the stored provider is kept. An empty string, which is what
+	 * choosing "None" sends, clears it.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param mixed $value Connector ID to save.
+	 * @return string Connector ID, or an empty string for none.
+	 */
+	public static function sanitize_provider( mixed $value ): string {
+		if ( null === $value ) {
+			$stored = get_option( self::OPTION );
+
+			return is_string( $stored ) ? $stored : '';
+		}
+
+		return is_string( $value ) && isset( self::get_available_providers()[ $value ] ) ? $value : '';
+	}
+
+	/**
+	 * Get the AI provider set in code, if any.
+	 *
+	 * @return string|null Connector ID of the provider, an empty string for no
+	 *                     provider, or null to leave it to the settings page.
+	 */
+	private static function get_provider_from_code(): ?string {
+		/**
+		 * Filters the AI provider WP SEO sends its prompts to.
+		 *
+		 * Return a connector ID to use that provider, or an empty string for none.
+		 * Either makes the setting on the WP SEO AI settings page read-only.
+		 * Return null to leave the choice to the settings page.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param string|null $provider Connector ID of the provider. Default null.
+		 */
+		$provider = apply_filters( 'wp_seo_ai_provider', null );
+
+		return is_string( $provider ) ? $provider : null;
+	}
 
 	/**
 	 * Get the AI providers WP SEO can send prompts to.
@@ -56,40 +173,39 @@ final class AI_Providers {
 	}
 
 	/**
-	 * Start a prompt to an AI provider.
+	 * Get the AI provider to send a prompt to, or an error if prompts can't be sent.
 	 *
-	 * Returns the core prompt builder, so callers configure and send the prompt
-	 * with its methods. Errors from sending it (e.g. AI disabled on the site, the
-	 * prompt blocked by a filter, an unknown or unconfigured provider, a failed
-	 * request) come back as a `WP_Error` from the builder's `generate_*()`
-	 * methods.
+	 * Prompts can't be sent before WordPress 7.0, when AI is turned off on the
+	 * site, or when there is no provider. Whether the provider is still
+	 * available is not checked; an unavailable one surfaces as an error when a
+	 * prompt is sent.
 	 *
-	 *     $builder = AI_Providers::get_prompt_builder( 'Summarize this post.', 'anthropic' );
+	 *     $provider = AI_Providers::get_prompt_provider();
 	 *
-	 *     if ( ! is_wp_error( $builder ) ) {
-	 *         $text = $builder->generate_text();
+	 *     if ( ! is_wp_error( $provider ) ) {
+	 *         $text = wp_ai_client_prompt( 'Summarize this post.' )->using_provider( $provider )->generate_text();
 	 *     }
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string      $prompt   Prompt text.
-	 * @param string|null $provider Optional. Connector ID of the provider to use, from
-	 *                              `AI_Providers::get_available_providers()`. Default
-	 *                              null, which lets WordPress choose a provider that
-	 *                              supports the prompt.
-	 * @return \WP_AI_Client_Prompt_Builder|\WP_Error Prompt builder, or an error before WordPress 7.0.
+	 * @return string|\WP_Error Connector ID of the provider, or an error if
+	 *                          prompts cannot be sent.
 	 */
-	public static function get_prompt_builder( string $prompt, ?string $provider = null ): \WP_AI_Client_Prompt_Builder|\WP_Error {
-		if ( ! function_exists( 'wp_ai_client_prompt' ) ) {
-			return new \WP_Error( 'wp_seo_ai_unsupported', __( 'WP SEO requires WordPress 7.0 or later to use AI providers.', 'wp-seo' ) );
+	public static function get_prompt_provider(): string|\WP_Error {
+		if ( ! function_exists( 'wp_supports_ai' ) || ! wp_supports_ai() ) {
+			return new \WP_Error( 'wp_seo_ai_unsupported', __( 'AI is not available on this site. WP SEO needs WordPress 7.0 or later, with AI turned on.', 'wp-seo' ) );
 		}
 
-		$builder = wp_ai_client_prompt( $prompt );
+		$provider = self::get_provider();
 
-		if ( null !== $provider ) {
-			$builder = $builder->using_provider( $provider );
+		if ( '' === $provider ) {
+			return new \WP_Error(
+				'wp_seo_ai_no_provider',
+				__( 'No AI provider is selected on the WP SEO AI settings page.', 'wp-seo' ),
+				[ 'status' => 503 ]
+			);
 		}
 
-		return $builder;
+		return $provider;
 	}
 }
