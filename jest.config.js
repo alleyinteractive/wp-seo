@@ -5,7 +5,7 @@ module.exports = {
   transform: {
     // For transformations with .ts and .tsx files.
     ...tsjPreset.transform,
-    // For transformations with .js, .jsx and .mjs files.
+    // For transformations with .js, .jsx, and .mjs files.
     '^.+\\.(js|jsx|mjs)$': 'babel-jest',
   },
   /*

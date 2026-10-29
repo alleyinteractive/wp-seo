@@ -31,7 +31,7 @@ final class FakeAiModel implements ModelInterface, TextGenerationModelInterface 
 	private ModelConfig $config;
 
 	/**
-	 * Set up.
+	 * Create the model with a default configuration.
 	 *
 	 * @param ModelMetadata    $metadata Metadata of the model.
 	 * @param ProviderMetadata $provider Metadata of the provider.

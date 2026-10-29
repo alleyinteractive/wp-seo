@@ -15,10 +15,9 @@ namespace Alley\WP\WP_SEO;
  * the provider is set in code with the `wp_seo_ai_provider` filter, the choice
  * is shown read-only.
  *
- * This is infrastructure rather than a WP SEO feature: it is not wrapped in a
- * `Feature` and carries no handle, since it only configures features that are.
- * A feature that sends prompts registers it, so that the page is offered only
- * while such a feature is active.
+ * This isn't a feature itself, so it has no `Feature` wrapper or handle.
+ * Features that send prompts register it, so the page appears only while one
+ * is active.
  */
 final class AI_Settings {
 	/**
@@ -125,8 +124,8 @@ final class AI_Settings {
 	}
 
 	/**
-	 * Render the section introduction: a pointer to where providers are set up,
-	 * when there are none to choose from.
+	 * Render a link to Settings > Connectors when there are no providers to
+	 * choose from.
 	 */
 	public function render_section(): void {
 		if ( AI_Providers::get_available_providers() ) {

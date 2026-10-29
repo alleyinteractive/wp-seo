@@ -82,8 +82,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	}
 
 	/**
-	 * Add support for the block editor's button to the post types it can
-	 * be used on.
+	 * Add the `wp-seo-description-generator` support, which shows the block
+	 * editor's button, to the generator's post types.
 	 *
 	 * The button is not offered until the feature can send prompts, since an
 	 * editor could not fix the error every click would get.
@@ -101,8 +101,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
 	 * Get the post types the description generator writes meta descriptions for.
 	 *
-	 * Only post types that store the description the Search Engine panel edits
-	 * are included, including any the filter adds.
+	 * Post types that don't register the description meta are left out, even
+	 * if the filter adds them.
 	 *
 	 * @since 2.0.0
 	 *
@@ -453,9 +453,9 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
 	 * Generate a description for the post.
 	 *
-	 * A description longer than the maximum length is returned all the same,
-	 * since the editor reviews it before saving, and asking again would count
-	 * toward the limit and could be just as long.
+	 * Returns a description over the maximum length anyway: the editor reviews
+	 * it before saving, and retrying would count toward the limit and might be
+	 * just as long.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @phpstan-param \WP_REST_Request<array{post_id: int}> $request
