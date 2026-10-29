@@ -216,8 +216,8 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
-	 * The maximum length is asked for in the instructions, is given the post,
-	 * and a longer reply is still returned.
+	 * The instructions ask for the maximum length, the length filter gets the
+	 * post, and a longer reply is still returned.
 	 */
 	public function test_a_description_over_the_max_length_is_returned() {
 		add_filter(
@@ -233,7 +233,7 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
-	 * Whitespace, tags and wrapping quotes are removed from the reply.
+	 * Whitespace, tags, and wrapping quotes are removed from the reply.
 	 */
 	public function test_the_reply_is_cleaned_up() {
 		FakeAiProvider::$response = "  \"A <b>bold</b>\n summary.\"  ";
