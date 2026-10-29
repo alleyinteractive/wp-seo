@@ -10,6 +10,7 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 use Alley\WP\WP_SEO\AI_Settings;
 use Alley\WP\WP_SEO\Features\Description_Generator;
 use Alley\WP\WP_SEO\Features_Page;
+use Alley\WP\WP_SEO\Tests\Concerns\RegistersDescriptionMeta;
 use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -24,20 +25,14 @@ use WordPress\AiClient\Providers\Http\Exception\ClientException;
  * @link https://mantle.alley.com/docs/testing
  */
 class DescriptionGeneratorTest extends TestCase {
+	use RegistersDescriptionMeta;
+
 	/**
 	 * A post with a title and content to describe.
 	 *
 	 * @var \WP_Post
 	 */
 	private \WP_Post $post;
-
-	/**
-	 * Post types a test registered the description meta for, unregistered
-	 * again after it.
-	 *
-	 * @var string[]
-	 */
-	private array $registered_meta = [];
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -61,36 +56,9 @@ class DescriptionGeneratorTest extends TestCase {
 		remove_post_type_support( 'post', 'wp-seo-description-generator' );
 		remove_post_type_support( 'page', 'wp-seo-description-generator' );
 
-		foreach ( $this->registered_meta as $post_type ) {
-			unregister_post_meta( $post_type, Description_Generator::META_KEY );
-		}
+		$this->unregister_description_meta();
 
 		parent::tearDown();
-	}
-
-	/**
-	 * Make sure posts and pages store the description, as the plugin registers
-	 * them to when it loads.
-	 *
-	 * Earlier tests can reset post types and their meta, so a test that needs
-	 * the meta registers it rather than relying on the registration from when
-	 * the plugin loaded.
-	 */
-	private function register_description_meta(): void {
-		foreach ( [ 'post', 'page' ] as $post_type ) {
-			if ( ! registered_meta_key_exists( 'post', Description_Generator::META_KEY, $post_type ) ) {
-				register_post_meta(
-					$post_type,
-					Description_Generator::META_KEY,
-					[
-						'type'   => 'string',
-						'single' => true,
-					]
-				);
-
-				$this->registered_meta[] = $post_type;
-			}
-		}
 	}
 
 	/**

@@ -163,9 +163,10 @@ final class Description_Generator_Command {
 
 		$query_args = array_merge(
 			[
-				'post_type'    => Description_Generator::get_post_types(),
-				'post_status'  => 'publish',
-				'has_password' => false,
+				'post_type'      => Description_Generator::get_post_types(),
+				'post_status'    => 'publish',
+				'has_password'   => false,
+				'posts_per_page' => min( $limit, 100 ),
 			],
 			$query,
 			[
@@ -190,9 +191,6 @@ final class Description_Generator_Command {
 		}
 
 		$allowed_failures = (int) floor( $limit * $fault_tolerance / 100 );
-		$this->attempted  = 0;
-		$this->generated  = 0;
-		$this->failed     = 0;
 
 		/*
 		 * Bulk_Task has no way to stop partway, so reaching the limit throws
@@ -205,12 +203,30 @@ final class Description_Generator_Command {
 			( new Bulk_Task( $key, null, $cursor ) )->run(
 				$query_args,
 				function ( \WP_Post $post ) use ( $cursor, $dry_run, $limit, $allowed_failures, $limit_reached ): void {
+					++$this->attempted;
+
+					if ( $dry_run ) {
+						/* translators: 1: post ID, 2: post title. */
+						WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $post->post_title ) );
+					} else {
+						$this->describe_post( $post );
+					}
+
+					$cursor->set( $post->ID );
+
+					if ( $this->failed > $allowed_failures ) {
+						WP_CLI::error(
+							sprintf(
+								/* translators: %d: number of posts allowed to fail. */
+								_n( 'More than %d post failed, so the run stopped.', 'More than %d posts failed, so the run stopped.', $allowed_failures, 'wp-seo' ),
+								$allowed_failures
+							) . ' ' . $this->summarize()
+						);
+					}
+
 					if ( $this->attempted >= $limit ) {
 						throw $limit_reached; // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 					}
-
-					++$this->attempted;
-					$this->describe_post( $post, $cursor, $dry_run, $allowed_failures );
 				}
 			);
 		} catch ( \RuntimeException $e ) {
@@ -234,71 +250,44 @@ final class Description_Generator_Command {
 	/**
 	 * Generate and save the description of one post, or log why it was not.
 	 *
-	 * The place reached is saved after the post, except when the AI provider
-	 * is limiting requests, so that the post is tried again next run.
-	 *
-	 * @param \WP_Post                    $post             Post to describe.
-	 * @param Option_Cursor|Memory_Cursor $cursor           Place reached in the run.
-	 * @param bool                        $dry_run          Whether to only list the post.
-	 * @param int                         $allowed_failures Number of posts that may fail before the run stops.
+	 * @param \WP_Post $post Post to describe.
 	 */
-	private function describe_post( \WP_Post $post, Option_Cursor|Memory_Cursor $cursor, bool $dry_run, int $allowed_failures ): void {
-		if ( $dry_run ) {
-			/* translators: 1: post ID, 2: post title. */
-			WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $post->post_title ) );
-			$cursor->set( $post->ID );
-			return;
-		}
-
+	private function describe_post( \WP_Post $post ): void {
 		$description = Description_Generator::generate_and_save_description( $post );
 
+		if ( ! is_wp_error( $description ) ) {
+			++$this->generated;
+
+			/* translators: 1: post ID, 2: description. */
+			WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $description ) );
+			return;
+		}
+
 		// An editor's description was kept, which is not a failure.
-		if ( is_wp_error( $description ) && Description_Generator::ERROR_DESCRIPTION_EXISTS === $description->get_error_code() ) {
+		if ( Description_Generator::ERROR_DESCRIPTION_EXISTS === $description->get_error_code() ) {
 			/* translators: 1: post ID, 2: message. */
 			WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $description->get_error_message() ) );
-			$cursor->set( $post->ID );
 			return;
 		}
 
-		if ( is_wp_error( $description ) ) {
-			$message = sprintf(
-				/* translators: 1: post ID, 2: error message, 3: error code. */
-				__( 'Post %1$d: %2$s (%3$s)', 'wp-seo' ),
-				$post->ID,
-				$description->get_error_message(),
-				$description->get_error_code()
-			);
+		$message = sprintf(
+			/* translators: 1: post ID, 2: error message, 3: error code. */
+			__( 'Post %1$d: %2$s (%3$s)', 'wp-seo' ),
+			$post->ID,
+			$description->get_error_message(),
+			$description->get_error_code()
+		);
 
-			/*
-			 * Every post after this one would fail too, so the run stops, and the
-			 * place is not saved so that the post is tried again next run.
-			 */
-			if ( Description_Generator::ERROR_PROVIDER_LIMITED === $description->get_error_code() ) {
-				WP_CLI::error( $message . "\n" . __( 'The AI provider is limiting requests or is out of quota, so the run stopped.', 'wp-seo' ) . ' ' . $this->summarize() );
-			}
-
-			++$this->failed;
-			WP_CLI::warning( $message );
-			$cursor->set( $post->ID );
-
-			if ( $this->failed > $allowed_failures ) {
-				WP_CLI::error(
-					sprintf(
-						/* translators: %d: number of posts allowed to fail. */
-						_n( 'More than %d post failed, so the run stopped.', 'More than %d posts failed, so the run stopped.', $allowed_failures, 'wp-seo' ),
-						$allowed_failures
-					) . ' ' . $this->summarize()
-				);
-			}
-
-			return;
+		/*
+		 * Every post after this one would fail too, so the run stops before the
+		 * place is saved, and the post is tried again next run.
+		 */
+		if ( Description_Generator::ERROR_PROVIDER_LIMITED === $description->get_error_code() ) {
+			WP_CLI::error( $message . "\n" . __( 'The AI provider is limiting requests or is out of quota, so the run stopped.', 'wp-seo' ) . ' ' . $this->summarize() );
 		}
 
-		++$this->generated;
-
-		/* translators: 1: post ID, 2: description. */
-		WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $description ) );
-		$cursor->set( $post->ID );
+		++$this->failed;
+		WP_CLI::warning( $message );
 	}
 
 	/**

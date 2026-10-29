@@ -371,9 +371,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * join the meta table twice to match both missing and empty descriptions.
 	 * Either way, MySQL reads every meta row of each post it steps over, and
 	 * a run steps over every post with a description between where it starts
-	 * and the next post without one. On 500,000 posts with 10 meta rows each,
-	 * all but the newest described, finding the first batch took 13 seconds
-	 * this way, and 19 with the meta query.
+	 * and the next post without one.
 	 *
 	 * @param string    $where WHERE clause of the query.
 	 * @param \WP_Query $query The query.

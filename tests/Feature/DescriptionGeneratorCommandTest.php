@@ -9,6 +9,7 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 
 use Alley\WP\WP_SEO\Features\Description_Generator;
 use Alley\WP\WP_SEO\Features\Description_Generator_Command;
+use Alley\WP\WP_SEO\Tests\Concerns\RegistersDescriptionMeta;
 use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -25,6 +26,8 @@ use WP_CLI\Loggers\Execution;
  * text a test sets and makes no request.
  */
 class DescriptionGeneratorCommandTest extends TestCase {
+	use RegistersDescriptionMeta;
+
 	/**
 	 * What the provider replies.
 	 *
@@ -32,36 +35,11 @@ class DescriptionGeneratorCommandTest extends TestCase {
 	 */
 	private const DESCRIPTION = 'A neutral summary of the post.';
 
-	/**
-	 * Post types a test registered the description meta for, unregistered
-	 * again after it.
-	 *
-	 * @var string[]
-	 */
-	private array $registered_meta = [];
-
 	protected function setUp(): void {
 		parent::setUp();
 
-		/*
-		 * The command describes only post types that store the description.
-		 * Earlier tests can reset post types and their meta, so it is registered
-		 * here rather than relied on from when the plugin loaded.
-		 */
-		foreach ( [ 'post', 'page' ] as $post_type ) {
-			if ( ! registered_meta_key_exists( 'post', Description_Generator::META_KEY, $post_type ) ) {
-				register_post_meta(
-					$post_type,
-					Description_Generator::META_KEY,
-					[
-						'type'   => 'string',
-						'single' => true,
-					]
-				);
-
-				$this->registered_meta[] = $post_type;
-			}
-		}
+		// The command describes only post types that store the description.
+		$this->register_description_meta();
 
 		FakeAiProvider::register( self::DESCRIPTION );
 
@@ -87,9 +65,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		( new \ReflectionProperty( WP_CLI::class, 'capture_exit' ) )->setValue( null, false );
 		WP_CLI::set_logger( null );
 
-		foreach ( $this->registered_meta as $post_type ) {
-			unregister_post_meta( $post_type, Description_Generator::META_KEY );
-		}
+		$this->unregister_description_meta();
 
 		parent::tearDown();
 	}
