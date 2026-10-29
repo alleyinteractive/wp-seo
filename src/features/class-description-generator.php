@@ -276,8 +276,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
 	 * Generate a description for the post.
 	 *
-	 * A description longer than the maximum length is returned all the same,
-	 * since the editor reviews it before saving.
+	 * Returns a description over the maximum length anyway, since the editor
+	 * reviews it before saving.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @phpstan-param \WP_REST_Request<array{post_id: int}> $request
