@@ -60,20 +60,20 @@ class AiProvidersTest extends TestCase {
 	/**
 	 * Once there is a provider, it is the one prompts are sent to.
 	 */
-	public function test_check_provider_returns_the_provider() {
+	public function test_get_prompt_provider_returns_the_provider() {
 		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
 
-		$this->assertSame( 'wp_seo_missing', AI_Providers::check_provider() );
+		$this->assertSame( 'wp_seo_missing', AI_Providers::get_prompt_provider() );
 	}
 
 	/**
 	 * With AI turned off on the site, no prompts are sent, whatever the provider.
 	 */
-	public function test_check_provider_fails_when_ai_is_turned_off() {
+	public function test_get_prompt_provider_fails_when_ai_is_turned_off() {
 		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
 		add_filter( 'wp_supports_ai', '__return_false' );
 
-		$result = AI_Providers::check_provider();
+		$result = AI_Providers::get_prompt_provider();
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'wp_seo_ai_unsupported', $result->get_error_code() );
@@ -82,8 +82,8 @@ class AiProvidersTest extends TestCase {
 	/**
 	 * Without a provider, no prompts are sent.
 	 */
-	public function test_check_provider_fails_without_a_provider() {
-		$result = AI_Providers::check_provider();
+	public function test_get_prompt_provider_fails_without_a_provider() {
+		$result = AI_Providers::get_prompt_provider();
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'wp_seo_ai_no_provider', $result->get_error_code() );
@@ -118,14 +118,14 @@ class AiProvidersTest extends TestCase {
 		add_filter( 'wp_seo_ai_provider', fn () => 123 );
 
 		$this->assertSame( 'wp_seo_active', AI_Providers::get_provider() );
-		$this->assertFalse( AI_Providers::get_choice()['in_code'] );
+		$this->assertFalse( AI_Providers::get_provider_field_options()['in_code'] );
 	}
 
 	/**
-	 * The choice lists the available providers, and is read-only when the
-	 * provider is set in code.
+	 * The field options list the available providers, and are read-only when
+	 * the provider is set in code.
 	 */
-	public function test_get_choice_is_read_only_when_set_in_code() {
+	public function test_get_provider_field_options_is_read_only_when_set_in_code() {
 		$this->register_connector( 'wp_seo_active' );
 
 		$this->assertSame(
@@ -134,7 +134,7 @@ class AiProvidersTest extends TestCase {
 				'providers' => [ 'wp_seo_active' => 'Test wp_seo_active' ],
 				'in_code'   => false,
 			],
-			AI_Providers::get_choice()
+			AI_Providers::get_provider_field_options()
 		);
 
 		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_active' );
@@ -145,7 +145,7 @@ class AiProvidersTest extends TestCase {
 				'providers' => [ 'wp_seo_active' => 'Test wp_seo_active' ],
 				'in_code'   => true,
 			],
-			AI_Providers::get_choice()
+			AI_Providers::get_provider_field_options()
 		);
 	}
 
@@ -153,13 +153,13 @@ class AiProvidersTest extends TestCase {
 	 * A provider that is not available, as one set in code can be, is listed
 	 * as unavailable rather than left out.
 	 */
-	public function test_get_choice_lists_an_unavailable_provider() {
+	public function test_get_provider_field_options_lists_an_unavailable_provider() {
 		add_filter( 'wp_seo_ai_provider', fn () => 'wp_seo_missing' );
 
-		$choice = AI_Providers::get_choice();
+		$options = AI_Providers::get_provider_field_options();
 
-		$this->assertSame( 'wp_seo_missing', $choice['provider'] );
-		$this->assertSame( [ 'wp_seo_missing' => 'wp_seo_missing (unavailable)' ], $choice['providers'] );
+		$this->assertSame( 'wp_seo_missing', $options['provider'] );
+		$this->assertSame( [ 'wp_seo_missing' => 'wp_seo_missing (unavailable)' ], $options['providers'] );
 	}
 
 	/**
