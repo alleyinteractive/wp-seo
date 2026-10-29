@@ -33,12 +33,9 @@ final class AI_Providers {
 	/**
 	 * Get the AI provider WP SEO sends its prompts to.
 	 *
-	 * The provider set in code, if any, or else the one chosen on the WP SEO AI
-	 * settings page. Whether the provider is still available is not checked; an
-	 * unavailable one surfaces as an error when a prompt is sent.
-	 *
-	 * To send a prompt, use `check_provider()`, which checks that one can be
-	 * sent.
+	 * Returns the provider set with the `wp_seo_ai_provider` filter, or else the
+	 * one saved on the WP SEO AI settings page. Use `check_provider()` before
+	 * sending a prompt.
 	 *
 	 * @since 2.0.0
 	 *
@@ -60,9 +57,9 @@ final class AI_Providers {
 	/**
 	 * Get the choice of AI provider, as the WP SEO AI settings page shows it.
 	 *
-	 * The providers to choose from are the available ones, plus the current
-	 * provider if it is not available, as one set in code can be, so that the
-	 * page does not show "None" while prompts are still sent there.
+	 * Lists the available providers. If the current provider isn't available,
+	 * as can happen when it is set in code, it is added and marked unavailable,
+	 * so the page doesn't show "None" while prompts still go to it.
 	 *
 	 * @since 2.0.0
 	 *
@@ -117,9 +114,6 @@ final class AI_Providers {
 	/**
 	 * Get the AI provider set in code, if any.
 	 *
-	 * A provider set in code takes the place of the one chosen on the WP SEO AI
-	 * settings page, which then shows the setting as read-only.
-	 *
 	 * @return string|null Connector ID of the provider, an empty string for no
 	 *                     provider, or null to leave it to the settings page.
 	 */
@@ -127,8 +121,8 @@ final class AI_Providers {
 		/**
 		 * Filters the AI provider WP SEO sends its prompts to.
 		 *
-		 * Return a connector ID to use that provider, or an empty string for none,
-		 * and the setting on the WP SEO AI settings page becomes read-only.
+		 * Return a connector ID to use that provider, or an empty string for none.
+		 * Either makes the setting on the WP SEO AI settings page read-only.
 		 * Return null to leave the choice to the settings page.
 		 *
 		 * @since 2.0.0

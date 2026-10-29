@@ -78,7 +78,7 @@ class AiSettingsTest extends TestCase {
 	 * Loading the page adds the provider field.
 	 */
 	public function test_page_lists_the_provider_field() {
-		// Tests do not run in an admin request, which would have loaded this.
+		// An admin request would load this file, but tests do not run in one.
 		require_once ABSPATH . 'wp-admin/includes/template.php';
 
 		$page = new AI_Settings();
