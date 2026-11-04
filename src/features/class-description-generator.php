@@ -224,8 +224,8 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 			'/generate-description',
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'generate' ],
-				'permission_callback' => [ $this, 'can_generate' ],
+				'callback'            => [ $this, 'get_description_response' ],
+				'permission_callback' => [ $this, 'can_generate_description' ],
 				'args'                => [
 					'post_id' => [
 						'description' => __( 'ID of the post to describe.', 'wp-seo' ),
@@ -248,7 +248,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * @phpstan-param \WP_REST_Request<array{post_id: int}> $request
 	 * @return true|\WP_Error True if allowed, or an error.
 	 */
-	public function can_generate( \WP_REST_Request $request ): true|\WP_Error {
+	public function can_generate_description( \WP_REST_Request $request ): true|\WP_Error {
 		$post = $this->get_requested_post( $request );
 
 		if ( is_wp_error( $post ) ) {
@@ -279,7 +279,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * @phpstan-param \WP_REST_Request<array{post_id: int}> $request
 	 * @return \WP_REST_Response|\WP_Error The description, or an error.
 	 */
-	public function generate( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
+	public function get_description_response( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {
 		$post = $this->get_requested_post( $request );
 
 		if ( is_wp_error( $post ) ) {
