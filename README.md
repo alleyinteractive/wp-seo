@@ -120,6 +120,12 @@ For example, to add a Google Verification meta tag:
 
 ---
 
+## Documentation
+
+- [AI providers](docs/ai-providers.md)
+
+---
+
 ## Frequently Asked Questions
 
 ### How can I change who has access to the SEO settings page?
