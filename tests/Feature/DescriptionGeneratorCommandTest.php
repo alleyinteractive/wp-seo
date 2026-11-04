@@ -102,7 +102,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 	 * @param int $post_id Post ID.
 	 * @return string
 	 */
-	private function description( int $post_id ): string {
+	private function get_saved_description( int $post_id ): string {
 		return (string) get_post_meta( $post_id, 'search_engine_description', true );
 	}
 
@@ -119,10 +119,10 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		$result = $this->run_command();
 
 		$this->assertSame( 0, $result['exit'] );
-		$this->assertSame( self::DESCRIPTION, $this->description( $missing ) );
-		$this->assertSame( self::DESCRIPTION, $this->description( $empty ) );
-		$this->assertSame( 'Written by an editor.', $this->description( $existing ) );
-		$this->assertSame( self::DESCRIPTION, $this->description( $page ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $missing ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $empty ) );
+		$this->assertSame( 'Written by an editor.', $this->get_saved_description( $existing ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $page ) );
 		$this->assertStringContainsString( "Post {$missing}: " . self::DESCRIPTION, $result['stdout'] );
 		$this->assertStringContainsString( 'Generated 3 descriptions. 0 posts failed.', $result['stdout'] );
 		$this->assertSame( '', $result['stderr'] );
@@ -156,7 +156,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$result = $this->run_command();
 
-		$this->assertSame( 'Written by an editor.', $this->description( $post ) );
+		$this->assertSame( 'Written by an editor.', $this->get_saved_description( $post ) );
 		$this->assertStringContainsString( "Post {$post}: Kept the description saved while this one was being generated.", $result['stdout'] );
 		$this->assertStringContainsString( 'Generated 0 descriptions. 0 posts failed.', $result['stdout'] );
 	}
@@ -189,7 +189,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 	 * By default, drafts, password-protected posts, and post types the filter
 	 * leaves out are not described.
 	 */
-	public function test_default_query() {
+	public function test_default_query_leaves_out_drafts_protected_posts_and_filtered_post_types() {
 		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'post' ] );
 
 		$draft    = static::factory()->post->create( [ 'post_status' => 'draft' ] );
@@ -200,9 +200,9 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->assertSame( 0, $result['exit'] );
 		$this->assertNull( FakeAiProvider::$prompt );
-		$this->assertSame( '', $this->description( $draft ) );
-		$this->assertSame( '', $this->description( $password ) );
-		$this->assertSame( '', $this->description( $page ) );
+		$this->assertSame( '', $this->get_saved_description( $draft ) );
+		$this->assertSame( '', $this->get_saved_description( $password ) );
+		$this->assertSame( '', $this->get_saved_description( $page ) );
 		$this->assertStringContainsString( 'Generated 0 descriptions.', $result['stdout'] );
 	}
 
@@ -215,8 +215,8 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->run_command( [ 'query' => '{"post_status":"draft"}' ] );
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $draft ) );
-		$this->assertSame( '', $this->description( $published ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $draft ) );
+		$this->assertSame( '', $this->get_saved_description( $published ) );
 	}
 
 	/**
@@ -237,9 +237,9 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->run_command( [ 'query' => '{"meta_query":[{"key":"featured","value":"1"}]}' ] );
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $featured ) );
-		$this->assertSame( 'Written by an editor.', $this->description( $described ) );
-		$this->assertSame( '', $this->description( $other ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $featured ) );
+		$this->assertSame( 'Written by an editor.', $this->get_saved_description( $described ) );
+		$this->assertSame( '', $this->get_saved_description( $other ) );
 	}
 
 	/**
@@ -255,7 +255,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->assertSame( 1, $result['exit'] );
 		$this->assertStringContainsString( 'must be a JSON object', $result['stderr'] );
-		$this->assertSame( '', $this->description( $post ) );
+		$this->assertSame( '', $this->get_saved_description( $post ) );
 	}
 
 	/**
@@ -275,20 +275,20 @@ class DescriptionGeneratorCommandTest extends TestCase {
 	 * A run stops at the limit, and the next run continues after the last post
 	 * it reached.
 	 */
-	public function test_limit() {
+	public function test_a_run_stops_at_the_limit_and_the_next_one_continues() {
 		[ $first, $second, $third ] = static::factory()->post->create_many( 3 );
 
 		$result = $this->run_command( [ 'limit' => '2' ] );
 
 		$this->assertSame( 0, $result['exit'] );
-		$this->assertSame( self::DESCRIPTION, $this->description( $first ) );
-		$this->assertSame( self::DESCRIPTION, $this->description( $second ) );
-		$this->assertSame( '', $this->description( $third ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $first ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $second ) );
+		$this->assertSame( '', $this->get_saved_description( $third ) );
 		$this->assertStringContainsString( 'Stopped at the limit of 2 posts.', $result['stdout'] );
 
 		$this->run_command( [ 'limit' => '2' ] );
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $third ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $third ) );
 	}
 
 	/**
@@ -301,13 +301,13 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->run_command();
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $first ) );
-		$this->assertSame( '', $this->description( $second ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $first ) );
+		$this->assertSame( '', $this->get_saved_description( $second ) );
 
 		$this->run_command( [ 'limit' => '2' ] );
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $second ) );
-		$this->assertSame( self::DESCRIPTION, $this->description( $third ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $second ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $third ) );
 	}
 
 	/**
@@ -351,8 +351,8 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		$result = $this->run_command();
 
 		$this->assertSame( 0, $result['exit'] );
-		$this->assertSame( '', $this->description( $failing ) );
-		$this->assertSame( self::DESCRIPTION, $this->description( $passing ) );
+		$this->assertSame( '', $this->get_saved_description( $failing ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $passing ) );
 		$this->assertStringContainsString( "Post {$failing}: The AI provider returned a description longer than 5 characters. (wp_seo_description_too_long)", $result['stderr'] );
 		$this->assertStringContainsString( 'Generated 1 description. 1 post failed.', $result['stdout'] );
 
@@ -362,7 +362,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		$this->run_command();
 
 		$this->assertNull( FakeAiProvider::$prompt );
-		$this->assertSame( '', $this->description( $failing ) );
+		$this->assertSame( '', $this->get_saved_description( $failing ) );
 
 		$result = $this->run_command( [ 'rewind' => true ] );
 
@@ -372,7 +372,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->run_command();
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $failing ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $failing ) );
 	}
 
 	/**
@@ -396,12 +396,12 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		$this->assertStringContainsString( "Post {$first}:", $result['stderr'] );
 		$this->assertStringContainsString( "Post {$second}:", $result['stderr'] );
 		$this->assertStringContainsString( 'More than 1 post failed, so the run stopped. Generated 0 descriptions. 2 posts failed.', $result['stderr'] );
-		$this->assertSame( '', $this->description( $third ) );
+		$this->assertSame( '', $this->get_saved_description( $third ) );
 
 		$result = $this->run_command();
 
 		$this->assertSame( 0, $result['exit'] );
-		$this->assertSame( self::DESCRIPTION, $this->description( $third ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $third ) );
 		$this->assertStringContainsString( 'Generated 1 description. 0 posts failed.', $result['stdout'] );
 	}
 
@@ -469,15 +469,15 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->run_command();
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $first ) );
-		$this->assertSame( self::DESCRIPTION, $this->description( $second ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $first ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $second ) );
 	}
 
 	/**
 	 * A dry run lists the posts a run would describe, up to the limit, without
 	 * sending prompts, saving descriptions, or moving the saved place.
 	 */
-	public function test_dry_run() {
+	public function test_dry_run_lists_posts_without_describing_them() {
 		[ $first, $second ] = static::factory()->post->create_many( 2, [ 'post_title' => 'Hello World' ] );
 
 		$result = $this->run_command(
@@ -489,15 +489,15 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->assertSame( 0, $result['exit'] );
 		$this->assertNull( FakeAiProvider::$prompt );
-		$this->assertSame( '', $this->description( $first ) );
+		$this->assertSame( '', $this->get_saved_description( $first ) );
 		$this->assertStringContainsString( "Post {$first}: Hello World", $result['stdout'] );
 		$this->assertStringNotContainsString( "Post {$second}:", $result['stdout'] );
 		$this->assertStringContainsString( '1 post would get a description.', $result['stdout'] );
 
 		$this->run_command();
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $first ) );
-		$this->assertSame( self::DESCRIPTION, $this->description( $second ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $first ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $second ) );
 	}
 
 	/**
@@ -510,12 +510,12 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->run_command( [ 'query' => '{"post_type":"page"}' ] );
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $page ) );
-		$this->assertSame( '', $this->description( $post ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $page ) );
+		$this->assertSame( '', $this->get_saved_description( $post ) );
 
 		$this->run_command();
 
-		$this->assertSame( self::DESCRIPTION, $this->description( $post ) );
+		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $post ) );
 	}
 
 	/**
@@ -530,7 +530,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->assertSame( 1, $result['exit'] );
 		$this->assertStringContainsString( 'No AI provider is selected on the WP SEO AI settings page.', $result['stderr'] );
-		$this->assertSame( '', $this->description( $post ) );
+		$this->assertSame( '', $this->get_saved_description( $post ) );
 	}
 
 	/**
@@ -546,6 +546,6 @@ class DescriptionGeneratorCommandTest extends TestCase {
 
 		$this->assertSame( 1, $result['exit'] );
 		$this->assertStringContainsString( 'There are no post types to generate descriptions for.', $result['stderr'] );
-		$this->assertSame( '', $this->description( $post ) );
+		$this->assertSame( '', $this->get_saved_description( $post ) );
 	}
 }

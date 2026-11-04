@@ -26,21 +26,21 @@ final class Description_Generator_Command {
 	 *
 	 * @var int
 	 */
-	private int $attempted = 0;
+	private int $attempted_count = 0;
 
 	/**
 	 * Number of descriptions a run has saved.
 	 *
 	 * @var int
 	 */
-	private int $generated = 0;
+	private int $saved_count = 0;
 
 	/**
 	 * Number of posts a run has failed to describe.
 	 *
 	 * @var int
 	 */
-	private int $failed = 0;
+	private int $failed_count = 0;
 
 	/**
 	 * Generate meta descriptions for posts that don't have one.
@@ -97,9 +97,9 @@ final class Description_Generator_Command {
 	 * @param array<string, mixed> $assoc_args Flags.
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
-		$query = json_decode( is_string( $assoc_args['query'] ?? null ) ? $assoc_args['query'] : '{}', true );
+		$query_overrides = json_decode( is_string( $assoc_args['query'] ?? null ) ? $assoc_args['query'] : '{}', true );
 
-		if ( ! is_array( $query ) || ( [] !== $query && array_is_list( $query ) ) ) {
+		if ( ! is_array( $query_overrides ) || ( [] !== $query_overrides && array_is_list( $query_overrides ) ) ) {
 			WP_CLI::error( __( 'The --query value must be a JSON object of WP_Query arguments.', 'wp-seo' ) );
 		}
 
@@ -146,8 +146,8 @@ final class Description_Generator_Command {
 		}
 
 		// Each --query keeps its own place, so that running one doesn't skip the posts of another.
-		$key    = 'wp_seo_generate_descriptions_' . md5( (string) wp_json_encode( $query ) );
-		$cursor = new Option_Cursor( $key );
+		$cursor_key = 'wp_seo_generate_descriptions_' . md5( (string) wp_json_encode( $query_overrides ) );
+		$cursor     = new Option_Cursor( $cursor_key );
 
 		if ( ! empty( $assoc_args['rewind'] ) ) {
 			$cursor->reset();
@@ -168,7 +168,7 @@ final class Description_Generator_Command {
 				'has_password'   => false,
 				'posts_per_page' => min( $limit, 100 ),
 			],
-			$query,
+			$query_overrides,
 			[
 				// Bulk_Task pages through posts by the ID of the last post object.
 				'fields' => 'all',
@@ -185,9 +185,9 @@ final class Description_Generator_Command {
 
 		if ( $dry_run ) {
 			// A dry run starts where a real run would, without moving the saved place.
-			$saved  = $cursor->get();
-			$cursor = new Memory_Cursor();
-			$cursor->set( $saved );
+			$saved_position = $cursor->get();
+			$cursor         = new Memory_Cursor();
+			$cursor->set( $saved_position );
 		}
 
 		// Rounded down, so with the default 5%, a limit under 20 allows no failures and the first one stops the run.
@@ -201,10 +201,10 @@ final class Description_Generator_Command {
 		$limit_reached = new \RuntimeException();
 
 		try {
-			( new Bulk_Task( $key, null, $cursor ) )->run(
+			( new Bulk_Task( $cursor_key, null, $cursor ) )->run(
 				$query_args,
 				function ( \WP_Post $post ) use ( $cursor, $dry_run, $limit, $allowed_failures, $limit_reached ): void {
-					++$this->attempted;
+					++$this->attempted_count;
 
 					if ( $dry_run ) {
 						/* translators: 1: post ID, 2: post title. */
@@ -215,7 +215,7 @@ final class Description_Generator_Command {
 
 					$cursor->set( $post->ID );
 
-					if ( $this->failed > $allowed_failures ) {
+					if ( $this->failed_count > $allowed_failures ) {
 						WP_CLI::error(
 							sprintf(
 								/* translators: %d: number of posts allowed to fail. */
@@ -225,7 +225,7 @@ final class Description_Generator_Command {
 						);
 					}
 
-					if ( $this->attempted >= $limit ) {
+					if ( $this->attempted_count >= $limit ) {
 						throw $limit_reached; // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 					}
 				}
@@ -241,7 +241,7 @@ final class Description_Generator_Command {
 
 		if ( $dry_run ) {
 			/* translators: %d: number of posts. */
-			WP_CLI::success( sprintf( _n( '%d post would get a description.', '%d posts would get a description.', $this->attempted, 'wp-seo' ), $this->attempted ) );
+			WP_CLI::success( sprintf( _n( '%d post would get a description.', '%d posts would get a description.', $this->attempted_count, 'wp-seo' ), $this->attempted_count ) );
 			return;
 		}
 
@@ -257,7 +257,7 @@ final class Description_Generator_Command {
 		$description = Description_Generator::generate_and_save_description( $post );
 
 		if ( ! is_wp_error( $description ) ) {
-			++$this->generated;
+			++$this->saved_count;
 
 			/* translators: 1: post ID, 2: description. */
 			WP_CLI::log( sprintf( __( 'Post %1$d: %2$s', 'wp-seo' ), $post->ID, $description ) );
@@ -287,7 +287,7 @@ final class Description_Generator_Command {
 			WP_CLI::error( $message . "\n" . __( 'The AI provider is limiting requests or is out of quota, so the run stopped.', 'wp-seo' ) . ' ' . $this->get_run_summary() );
 		}
 
-		++$this->failed;
+		++$this->failed_count;
 		WP_CLI::warning( $message );
 	}
 
@@ -299,12 +299,12 @@ final class Description_Generator_Command {
 	private function get_run_summary(): string {
 		return sprintf(
 			/* translators: %d: number of descriptions. */
-			_n( 'Generated %d description.', 'Generated %d descriptions.', $this->generated, 'wp-seo' ),
-			$this->generated
+			_n( 'Generated %d description.', 'Generated %d descriptions.', $this->saved_count, 'wp-seo' ),
+			$this->saved_count
 		) . ' ' . sprintf(
 			/* translators: %d: number of posts. */
-			_n( '%d post failed.', '%d posts failed.', $this->failed, 'wp-seo' ),
-			$this->failed
+			_n( '%d post failed.', '%d posts failed.', $this->failed_count, 'wp-seo' ),
+			$this->failed_count
 		);
 	}
 }

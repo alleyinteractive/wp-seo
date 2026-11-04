@@ -269,11 +269,11 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 			->generate_text();
 
 		if ( is_wp_error( $reply ) ) {
-			$data = $reply->get_error_data();
+			$error_data = $reply->get_error_data();
 
 			// Core reports a provider's rate limit or exhausted quota with a 429 status.
-			if ( is_array( $data ) && 429 === ( $data['status'] ?? null ) ) {
-				return new \WP_Error( self::ERROR_PROVIDER_LIMITED, $reply->get_error_message(), $data );
+			if ( is_array( $error_data ) && 429 === ( $error_data['status'] ?? null ) ) {
+				return new \WP_Error( self::ERROR_PROVIDER_LIMITED, $reply->get_error_message(), $error_data );
 			}
 
 			return $reply;
