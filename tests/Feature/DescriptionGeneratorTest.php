@@ -75,7 +75,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * @param array<string, mixed> $params Request parameters.
 	 * @return \WP_REST_Response
 	 */
-	private function request( array $params ): \WP_REST_Response {
+	private function request_description( array $params ): \WP_REST_Response {
 		( new Description_Generator() )->boot();
 
 		// Build the REST server again, so that it registers the route.
@@ -215,7 +215,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * @param string $reply    Reply from the provider.
 	 * @param string $expected Description returned.
 	 */
-	#[DataProvider( 'quoted_replies' )]
+	#[DataProvider( 'data_quoted_replies' )]
 	public function test_wrapping_quotes_are_removed( string $reply, string $expected ) {
 		FakeAiProvider::$response = $reply;
 
@@ -227,7 +227,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 *
 	 * @return array<string, array{string, string}>
 	 */
-	public static function quoted_replies(): array {
+	public static function data_quoted_replies(): array {
 		return [
 			'straight double quotes' => [ '"A summary."', 'A summary.' ],
 			'curly double quotes'    => [ '“A summary.”', 'A summary.' ],
@@ -312,7 +312,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * Public post types shown in the admin are included by default, except
 	 * attachments, and the list is filterable.
 	 */
-	public function test_post_types() {
+	public function test_post_types_default_to_public_ones_and_are_filterable() {
 		$post_types = Description_Generator::get_post_types();
 
 		$this->assertContains( 'post', $post_types );
@@ -330,7 +330,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_rest_route_returns_a_description() {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
 
-		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $response->get_data() );
@@ -342,7 +342,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_rest_route_requires_editing_the_post() {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'contributor' ] ) );
 
-		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
 
 		$this->assertSame( 403, $response->get_status() );
 		$this->assertNull( FakeAiProvider::$prompt );
@@ -355,7 +355,7 @@ class DescriptionGeneratorTest extends TestCase {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
 		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page' ] );
 
-		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
 
 		$this->assertSame( 403, $response->get_status() );
 		$this->assertNull( FakeAiProvider::$prompt );
@@ -367,7 +367,7 @@ class DescriptionGeneratorTest extends TestCase {
 	public function test_rest_route_requires_an_existing_post() {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
 
-		$response = $this->request( [ 'post_id' => PHP_INT_MAX ] );
+		$response = $this->request_description( [ 'post_id' => PHP_INT_MAX ] );
 
 		$this->assertSame( 404, $response->get_status() );
 	}
@@ -379,7 +379,7 @@ class DescriptionGeneratorTest extends TestCase {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
 		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
 
-		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
 
 		$this->assertSame( 503, $response->get_status() );
 		$this->assertSame( 'wp_seo_ai_no_provider', $response->get_data()['code'] );
@@ -393,7 +393,7 @@ class DescriptionGeneratorTest extends TestCase {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
 		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
 
-		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $response->get_data() );
