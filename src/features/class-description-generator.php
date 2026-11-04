@@ -188,13 +188,13 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		 */
 		$instructions = apply_filters( 'wp_seo_description_generator_prompt', $instructions, $post );
 
-		$text = wp_ai_client_prompt( "Title: {$title}\n\nContent: {$content}" )
+		$reply = wp_ai_client_prompt( "Title: {$title}\n\nContent: {$content}" )
 			->using_provider( $provider )
 			->using_system_instruction( $instructions )
 			->generate_text();
 
-		if ( is_wp_error( $text ) ) {
-			return $text;
+		if ( is_wp_error( $reply ) ) {
+			return $reply;
 		}
 
 		/*
@@ -202,7 +202,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		 * The quotes are removed only when the opening one appears nowhere else in
 		 * the reply, so that a reply such as `"A" vs "B"` keeps its quotes.
 		 */
-		$description = trim( $to_text( $text ) );
+		$description = trim( $to_text( $reply ) );
 		$description = (string) preg_replace( '/^(?|"([^"]*)"|\'([^\']*)\'|“([^“]*)”|‘([^‘]*)’)$/u', '$1', $description );
 
 		if ( '' === $description ) {

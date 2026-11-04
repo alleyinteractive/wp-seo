@@ -65,16 +65,16 @@ final class AI_Providers {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @return array{provider: string, providers: array<string, string>, in_code: bool} The
+	 * @return array{provider: string, providers: array<string, string>, is_set_in_code: bool} The
 	 *         connector ID of the selected provider, or an empty string for
 	 *         none; the providers to list, as names keyed by connector ID; and
 	 *         whether the provider is set in code, which makes the field
 	 *         read-only.
 	 */
 	public static function get_provider_field_options(): array {
-		$in_code   = null !== self::get_provider_from_code();
-		$provider  = self::get_provider();
-		$providers = self::get_available_providers();
+		$is_set_in_code = null !== self::get_provider_from_code();
+		$provider       = self::get_provider();
+		$providers      = self::get_available_providers();
 
 		if ( '' !== $provider && ! isset( $providers[ $provider ] ) ) {
 			$providers[ $provider ] = sprintf(
@@ -85,9 +85,9 @@ final class AI_Providers {
 		}
 
 		return [
-			'provider'  => $provider,
-			'providers' => $providers,
-			'in_code'   => $in_code,
+			'provider'       => $provider,
+			'providers'      => $providers,
+			'is_set_in_code' => $is_set_in_code,
 		];
 	}
 
