@@ -279,6 +279,21 @@ final class Description_Generator_Command {
 			$description->get_error_code()
 		);
 
+		$error_data = $description->get_error_data();
+
+		if (
+			Description_Generator::ERROR_DESCRIPTION_TOO_LONG === $description->get_error_code()
+			&& is_array( $error_data )
+			&& is_string( $error_data['description'] ?? null )
+		) {
+			$message .= "\n" . sprintf(
+				/* translators: 1: number of characters, 2: description. */
+				__( 'Description (%1$d characters): %2$s', 'wp-seo' ),
+				mb_strlen( $error_data['description'] ),
+				$error_data['description']
+			);
+		}
+
 		/*
 		 * Every post after this one would fail too, so the run stops before the
 		 * place is saved, and the post is tried again next run.

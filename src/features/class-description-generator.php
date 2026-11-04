@@ -66,6 +66,14 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	public const ERROR_DESCRIPTION_EXISTS = 'wp_seo_description_exists';
 
 	/**
+	 * Code of the error `generate_and_save_description()` returns when the
+	 * description is over `get_max_length()`. Its data holds the description.
+	 *
+	 * @var string
+	 */
+	public const ERROR_DESCRIPTION_TOO_LONG = 'wp_seo_description_too_long';
+
+	/**
 	 * Boot the feature.
 	 */
 	public function boot(): void {
@@ -151,8 +159,9 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		/**
 		 * Filters the maximum length of a generated meta description.
 		 *
-		 * The default instructions ask for a description no longer than this. A
-		 * longer one is still returned for an editor to review, but
+		 * The default instructions ask for a description 15% shorter than this,
+		 * since models often run past the length they are given. A description
+		 * over the maximum is still returned for an editor to review, but
 		 * `generate_and_save_description()` refuses it.
 		 *
 		 * @since 2.0.0
@@ -245,9 +254,15 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 			);
 		}
 
+		/*
+		 * Models often run past a character count they are given, so the
+		 * instructions ask for fewer characters than the maximum.
+		 */
+		$requested_length = (int) floor( self::get_max_length( $post ) * 0.85 );
+
 		$instructions = sprintf(
 			"Write one meta description for the web page below. Summarize what the page is about in a neutral, factual tone. Don't use promotional or sales language, calls to action, questions, hashtags, or emoji. Use no more than %d characters, in the page's language. Your response will be used in code: reply with only the meta description, with no quotes, labels, or explanation.",
-			self::get_max_length( $post )
+			$requested_length
 		);
 
 		/**
@@ -312,7 +327,9 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * @param \WP_Post $post Post to describe.
 	 * @return string|\WP_Error The saved description, or an error. The error
 	 *                          code is `ERROR_DESCRIPTION_EXISTS` when an
-	 *                          editor's description was kept, and
+	 *                          editor's description was kept,
+	 *                          `ERROR_DESCRIPTION_TOO_LONG` when the
+	 *                          description is over the maximum length, and
 	 *                          `ERROR_PROVIDER_LIMITED` when the provider is
 	 *                          limiting requests or is out of quota.
 	 */
@@ -327,12 +344,13 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 
 		if ( mb_strlen( $description ) > $max_length ) {
 			return new \WP_Error(
-				'wp_seo_description_too_long',
+				self::ERROR_DESCRIPTION_TOO_LONG,
 				sprintf(
 					/* translators: %d: maximum length, in characters. */
 					__( 'The AI provider returned a description longer than %d characters.', 'wp-seo' ),
 					$max_length
-				)
+				),
+				[ 'description' => $description ]
 			);
 		}
 

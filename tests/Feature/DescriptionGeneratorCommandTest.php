@@ -353,7 +353,7 @@ class DescriptionGeneratorCommandTest extends TestCase {
 		$this->assertSame( 0, $result['exit'] );
 		$this->assertSame( '', $this->get_saved_description( $failing ) );
 		$this->assertSame( self::DESCRIPTION, $this->get_saved_description( $passing ) );
-		$this->assertStringContainsString( "Post {$failing}: The AI provider returned a description longer than 5 characters. (wp_seo_description_too_long)", $result['stderr'] );
+		$this->assertStringContainsString( "Post {$failing}: The AI provider returned a description longer than 5 characters. (wp_seo_description_too_long)\nDescription (30 characters): " . self::DESCRIPTION, $result['stderr'] );
 		$this->assertStringContainsString( 'Generated 1 description. 1 post failed.', $result['stdout'] );
 
 		remove_filter( 'wp_seo_description_generator_max_length', $max_length );

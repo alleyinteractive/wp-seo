@@ -105,7 +105,7 @@ class DescriptionGeneratorTest extends TestCase {
 		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
 		$this->assertStringContainsString( 'Title: Hello World', FakeAiProvider::$prompt );
 		$this->assertStringContainsString( 'Content: Some post content.', FakeAiProvider::$prompt );
-		$this->assertStringContainsString( 'no more than 160 characters', FakeAiProvider::$system_instruction );
+		$this->assertStringContainsString( 'no more than 136 characters', FakeAiProvider::$system_instruction );
 	}
 
 	/**
@@ -185,8 +185,8 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
-	 * The instructions ask for the maximum length, the length filter gets the
-	 * post, and a longer reply is still returned.
+	 * The instructions ask for 15% less than the maximum length, the length
+	 * filter gets the post, and a longer reply is still returned.
 	 */
 	public function test_a_description_over_the_max_length_is_returned() {
 		add_filter(
@@ -198,7 +198,7 @@ class DescriptionGeneratorTest extends TestCase {
 
 		$this->assertSame( 20, Description_Generator::get_max_length( $this->post ) );
 		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
-		$this->assertStringContainsString( 'no more than 20 characters', FakeAiProvider::$system_instruction );
+		$this->assertStringContainsString( 'no more than 17 characters', FakeAiProvider::$system_instruction );
 	}
 
 	/**
@@ -354,7 +354,7 @@ class DescriptionGeneratorTest extends TestCase {
 
 	/**
 	 * A description over the maximum length is refused, since no editor
-	 * reviews it.
+	 * reviews it, and the error holds the description.
 	 */
 	public function test_generate_and_save_description_refuses_one_over_the_max_length() {
 		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
@@ -362,7 +362,8 @@ class DescriptionGeneratorTest extends TestCase {
 		$result = Description_Generator::generate_and_save_description( $this->post );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'wp_seo_description_too_long', $result->get_error_code() );
+		$this->assertSame( Description_Generator::ERROR_DESCRIPTION_TOO_LONG, $result->get_error_code() );
+		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $result->get_error_data() );
 		$this->assertSame( '', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
 	}
 
