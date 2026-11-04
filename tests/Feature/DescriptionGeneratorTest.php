@@ -10,9 +10,11 @@ namespace Alley\WP\WP_SEO\Tests\Feature;
 use Alley\WP\WP_SEO\AI_Settings;
 use Alley\WP\WP_SEO\Features\Description_Generator;
 use Alley\WP\WP_SEO\Features_Page;
+use Alley\WP\WP_SEO\Tests\Concerns\RegistersDescriptionMeta;
 use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
 use Alley\WP\WP_SEO\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use WordPress\AiClient\Providers\Http\Exception\ClientException;
 
 /**
  * Tests for the Meta Description Generator feature.
@@ -23,20 +25,14 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * @link https://mantle.alley.com/docs/testing
  */
 class DescriptionGeneratorTest extends TestCase {
+	use RegistersDescriptionMeta;
+
 	/**
 	 * A post with a title and content to describe.
 	 *
 	 * @var \WP_Post
 	 */
 	private \WP_Post $post;
-
-	/**
-	 * Post types a test registered the description meta for, unregistered
-	 * again after it.
-	 *
-	 * @var string[]
-	 */
-	private array $registered_meta = [];
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -60,36 +56,9 @@ class DescriptionGeneratorTest extends TestCase {
 		remove_post_type_support( 'post', 'wp-seo-description-generator' );
 		remove_post_type_support( 'page', 'wp-seo-description-generator' );
 
-		foreach ( $this->registered_meta as $post_type ) {
-			unregister_post_meta( $post_type, Description_Generator::META_KEY );
-		}
+		$this->unregister_description_meta();
 
 		parent::tearDown();
-	}
-
-	/**
-	 * Make sure posts and pages store the description, as the plugin registers
-	 * them to when it loads.
-	 *
-	 * Earlier tests can reset post types and their meta, so a test that needs
-	 * the meta registers it rather than relying on the registration from when
-	 * the plugin loaded.
-	 */
-	private function register_description_meta(): void {
-		foreach ( [ 'post', 'page' ] as $post_type ) {
-			if ( ! registered_meta_key_exists( 'post', Description_Generator::META_KEY, $post_type ) ) {
-				register_post_meta(
-					$post_type,
-					Description_Generator::META_KEY,
-					[
-						'type'   => 'string',
-						'single' => true,
-					]
-				);
-
-				$this->registered_meta[] = $post_type;
-			}
-		}
 	}
 
 	/**
@@ -347,6 +316,109 @@ class DescriptionGeneratorTest extends TestCase {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'prompt_prevented', $result->get_error_code() );
+	}
+
+	/**
+	 * A provider that is limiting requests or is out of quota is reported with
+	 * the generator's own error code, keeping core's message and status.
+	 */
+	public function test_a_provider_limit_is_its_own_error() {
+		FakeAiProvider::$exception = new ClientException( 'Too Many Requests (429)', 429 );
+
+		$result = Description_Generator::generate_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( Description_Generator::ERROR_PROVIDER_LIMITED, $result->get_error_code() );
+		$this->assertSame( 'Too Many Requests (429)', $result->get_error_message() );
+		$this->assertSame( 429, $result->get_error_data()['status'] ?? null );
+	}
+
+	/**
+	 * A description generated to be saved is saved to the post and returned.
+	 */
+	public function test_generate_and_save_description_saves_it() {
+		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_and_save_description( $this->post ) );
+		$this->assertSame( 'A neutral summary of the post.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * Markup in the description, which the provider can return escaped, is
+	 * removed before it is saved.
+	 */
+	public function test_generate_and_save_description_saves_plain_text() {
+		FakeAiProvider::$response = '&lt;img src=x onerror=alert(1)&gt;A &lt;b&gt;bold&lt;/b&gt; summary.';
+
+		$this->assertSame( 'A bold summary.', Description_Generator::generate_and_save_description( $this->post ) );
+		$this->assertSame( 'A bold summary.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * A description over the maximum length is refused, since no editor
+	 * reviews it.
+	 */
+	public function test_generate_and_save_description_refuses_one_over_the_max_length() {
+		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
+
+		$result = Description_Generator::generate_and_save_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_description_too_long', $result->get_error_code() );
+		$this->assertSame( '', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * A description an editor saves while one is being generated is kept,
+	 * though this request cached the post's meta before it was saved.
+	 */
+	public function test_generate_and_save_description_keeps_one_saved_during_generation() {
+		// Cache the post's meta without a description.
+		get_post_meta( $this->post->ID );
+
+		add_filter(
+			'wp_seo_description_generator_content',
+			function ( string $content ) {
+				global $wpdb;
+
+				// An editor saving in another request, which this request's cache doesn't know about.
+				$wpdb->insert(
+					$wpdb->postmeta,
+					[
+						'post_id'    => $this->post->ID,
+						'meta_key'   => Description_Generator::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => 'Written by an editor.', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					]
+				);
+
+				return $content;
+			}
+		);
+
+		$result = Description_Generator::generate_and_save_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( Description_Generator::ERROR_DESCRIPTION_EXISTS, $result->get_error_code() );
+		$this->assertSame( 'Written by an editor.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * A query that sets the query variable finds only posts without a
+	 * description, or with an empty one, and other queries find every post.
+	 */
+	public function test_query_var_limits_a_query_to_posts_without_a_description() {
+		( new Description_Generator() )->boot();
+
+		$missing   = static::factory()->post->create();
+		$empty     = static::factory()->post->create( [ 'meta_input' => [ Description_Generator::META_KEY => '' ] ] );
+		$described = static::factory()->post->create( [ 'meta_input' => [ Description_Generator::META_KEY => 'Written by an editor.' ] ] );
+		$args      = [
+			'post__in' => [ $missing, $empty, $described ],
+			'orderby'  => 'ID',
+			'order'    => 'ASC',
+			'fields'   => 'ids',
+		];
+
+		$this->assertSame( [ $missing, $empty ], ( new \WP_Query( $args + [ Description_Generator::MISSING_DESCRIPTION_QUERY_VAR => true ] ) )->posts );
+		$this->assertSame( [ $missing, $empty, $described ], ( new \WP_Query( $args ) )->posts );
 	}
 
 	/**
