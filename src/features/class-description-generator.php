@@ -230,13 +230,13 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		 */
 		$instructions = apply_filters( 'wp_seo_description_generator_prompt', $instructions, $post );
 
-		$text = wp_ai_client_prompt( "Title: {$title}\n\nContent: {$content}" )
+		$reply = wp_ai_client_prompt( "Title: {$title}\n\nContent: {$content}" )
 			->using_provider( $provider )
 			->using_system_instruction( $instructions )
 			->generate_text();
 
-		if ( is_wp_error( $text ) ) {
-			return $text;
+		if ( is_wp_error( $reply ) ) {
+			return $reply;
 		}
 
 		/*
@@ -244,7 +244,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		 * The quotes are removed only when the opening one appears nowhere else in
 		 * the reply, so that a reply such as `"A" vs "B"` keeps its quotes.
 		 */
-		$description = trim( $to_text( $text ) );
+		$description = trim( $to_text( $reply ) );
 		$description = (string) preg_replace( '/^(?|"([^"]*)"|\'([^\']*)\'|“([^“]*)”|‘([^‘]*)’)$/u', '$1', $description );
 
 		if ( '' === $description ) {
@@ -333,7 +333,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 			return $post;
 		}
 
-		$retry_after = $this->count_request( get_current_user_id() );
+		$retry_after = $this->apply_rate_limit( get_current_user_id() );
 
 		if ( $retry_after > 0 ) {
 			// A WP_Error can't carry headers, so the error is sent as a response.
@@ -373,7 +373,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	 * @return int Seconds until the user may try again, or 0 if the request is
 	 *             allowed.
 	 */
-	private function count_request( int $user_id ): int {
+	private function apply_rate_limit( int $user_id ): int {
 		/**
 		 * Filters the number of descriptions a user may generate an hour
 		 * through the REST route.
@@ -392,28 +392,28 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 			return 0;
 		}
 
-		$key    = 'wp_seo_description_rate_limit_' . $user_id;
-		$now    = time();
-		$stored = get_transient( $key );
-		$count  = is_array( $stored ) && is_int( $stored['count'] ?? null ) ? $stored['count'] : 0;
-		$reset  = is_array( $stored ) && is_int( $stored['reset'] ?? null ) ? $stored['reset'] : 0;
+		$key       = 'wp_seo_description_rate_limit_' . $user_id;
+		$now       = time();
+		$window    = get_transient( $key );
+		$count     = is_array( $window ) && is_int( $window['count'] ?? null ) ? $window['count'] : 0;
+		$resets_at = is_array( $window ) && is_int( $window['reset'] ?? null ) ? $window['reset'] : 0;
 
-		if ( $reset <= $now ) {
-			$count = 0;
-			$reset = $now + HOUR_IN_SECONDS;
+		if ( $resets_at <= $now ) {
+			$count     = 0;
+			$resets_at = $now + HOUR_IN_SECONDS;
 		}
 
 		if ( $count >= $limit ) {
-			return $reset - $now;
+			return $resets_at - $now;
 		}
 
 		set_transient(
 			$key,
 			[
 				'count' => $count + 1,
-				'reset' => $reset,
+				'reset' => $resets_at,
 			],
-			$reset - $now
+			$resets_at - $now
 		);
 
 		return 0;
