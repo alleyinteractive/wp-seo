@@ -19,20 +19,20 @@ interface GenerateDescriptionProps {
  * button is disabled until the post has been saved once.
  */
 function GenerateDescription({ onGenerate }: GenerateDescriptionProps) {
-  const { isNew, postId, supported } = useSelect((select) => {
+  const { isNew, isSupported, postId } = useSelect((select) => {
     const editor = select(editorStore);
     const postType = select(coreStore).getEntityRecord<Type>('root', 'postType', editor.getCurrentPostType());
 
     return {
       isNew: editor.isEditedPostNew(),
+      isSupported: Boolean(postType?.supports?.['wp-seo-description-generator']),
       postId: editor.getCurrentPostId(),
-      supported: Boolean(postType?.supports?.['wp-seo-description-generator']),
     };
   }, []);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
 
-  if (!supported) {
+  if (!isSupported) {
     return null;
   }
 

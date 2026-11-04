@@ -33,12 +33,12 @@ final class FakeAiModel implements ModelInterface, TextGenerationModelInterface 
 	/**
 	 * Create the model with a default configuration.
 	 *
-	 * @param ModelMetadata    $metadata Metadata of the model.
-	 * @param ProviderMetadata $provider Metadata of the provider.
+	 * @param ModelMetadata    $metadata          Metadata of the model.
+	 * @param ProviderMetadata $provider_metadata Metadata of the provider.
 	 */
 	public function __construct(
 		private readonly ModelMetadata $metadata,
-		private readonly ProviderMetadata $provider,
+		private readonly ProviderMetadata $provider_metadata,
 	) {
 		$this->config = new ModelConfig();
 	}
@@ -48,7 +48,7 @@ final class FakeAiModel implements ModelInterface, TextGenerationModelInterface 
 	}
 
 	public function providerMetadata(): ProviderMetadata {
-		return $this->provider;
+		return $this->provider_metadata;
 	}
 
 	public function setConfig( ModelConfig $config ): void {
@@ -60,7 +60,7 @@ final class FakeAiModel implements ModelInterface, TextGenerationModelInterface 
 	}
 
 	public function generateTextResult( array $prompt ): GenerativeAiResult {
-		FakeAiProvider::record( $prompt, $this->config->getSystemInstruction() );
+		FakeAiProvider::record_prompt( $prompt, $this->config->getSystemInstruction() );
 
 		if ( FakeAiProvider::$exception ) {
 			throw FakeAiProvider::$exception;
@@ -70,7 +70,7 @@ final class FakeAiModel implements ModelInterface, TextGenerationModelInterface 
 			'fake-result',
 			[ new Candidate( new ModelMessage( [ new MessagePart( FakeAiProvider::$response ) ] ), FinishReasonEnum::stop() ) ],
 			new TokenUsage( 0, 0, 0 ),
-			$this->provider,
+			$this->provider_metadata,
 			$this->metadata
 		);
 	}

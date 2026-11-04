@@ -87,7 +87,7 @@ final class FakeAiProvider implements ProviderInterface {
 	 * @param Message[]   $prompt             Messages of the prompt.
 	 * @param string|null $system_instruction System instruction.
 	 */
-	public static function record( array $prompt, ?string $system_instruction ): void {
+	public static function record_prompt( array $prompt, ?string $system_instruction ): void {
 		$text = '';
 
 		foreach ( $prompt as $message ) {
