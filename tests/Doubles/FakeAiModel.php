@@ -62,6 +62,10 @@ final class FakeAiModel implements ModelInterface, TextGenerationModelInterface 
 	public function generateTextResult( array $prompt ): GenerativeAiResult {
 		FakeAiProvider::record_prompt( $prompt, $this->config->getSystemInstruction() );
 
+		if ( FakeAiProvider::$exception ) {
+			throw FakeAiProvider::$exception;
+		}
+
 		return new GenerativeAiResult(
 			'fake-result',
 			[ new Candidate( new ModelMessage( [ new MessagePart( FakeAiProvider::$response ) ] ), FinishReasonEnum::stop() ) ],
