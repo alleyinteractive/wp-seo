@@ -88,9 +88,8 @@ final class Description_Generator_Command {
 	 *     # Describe up to 10 pages by one author.
 	 *     $ wp wp-seo generate-descriptions --query='{"post_type":"page","author":3}' --limit=10
 	 *
-	 *     # Try the posts that failed again.
-	 *     $ wp wp-seo generate-descriptions --rewind
-	 *     $ wp wp-seo generate-descriptions
+	 *     # Describe up to 500 posts, and stop if more than 50 of them fail.
+	 *     $ wp wp-seo generate-descriptions --limit=500 --fault-tolerance=10
 	 *
 	 * @throws \RuntimeException If the bulk task throws one.
 	 *
@@ -156,10 +155,10 @@ final class Description_Generator_Command {
 			return;
 		}
 
-		$check = AI_Providers::get_prompt_provider();
+		$provider = AI_Providers::get_prompt_provider();
 
-		if ( is_wp_error( $check ) ) {
-			WP_CLI::error( $check );
+		if ( is_wp_error( $provider ) ) {
+			WP_CLI::error( $provider );
 		}
 
 		$query_args = array_merge(
@@ -222,7 +221,7 @@ final class Description_Generator_Command {
 								/* translators: %d: number of posts allowed to fail. */
 								_n( 'More than %d post failed, so the run stopped.', 'More than %d posts failed, so the run stopped.', $allowed_failures, 'wp-seo' ),
 								$allowed_failures
-							) . ' ' . $this->summarize()
+							) . ' ' . $this->get_run_summary()
 						);
 					}
 
@@ -246,7 +245,7 @@ final class Description_Generator_Command {
 			return;
 		}
 
-		WP_CLI::success( $this->summarize() );
+		WP_CLI::success( $this->get_run_summary() );
 	}
 
 	/**
@@ -285,7 +284,7 @@ final class Description_Generator_Command {
 		 * place is saved, and the post is tried again next run.
 		 */
 		if ( Description_Generator::ERROR_PROVIDER_LIMITED === $description->get_error_code() ) {
-			WP_CLI::error( $message . "\n" . __( 'The AI provider is limiting requests or is out of quota, so the run stopped.', 'wp-seo' ) . ' ' . $this->summarize() );
+			WP_CLI::error( $message . "\n" . __( 'The AI provider is limiting requests or is out of quota, so the run stopped.', 'wp-seo' ) . ' ' . $this->get_run_summary() );
 		}
 
 		++$this->failed;
@@ -293,11 +292,11 @@ final class Description_Generator_Command {
 	}
 
 	/**
-	 * Summarize what the run has done so far.
+	 * Get the number of descriptions generated and posts that failed so far in the run.
 	 *
 	 * @return string Summary.
 	 */
-	private function summarize(): string {
+	private function get_run_summary(): string {
 		return sprintf(
 			/* translators: %d: number of descriptions. */
 			_n( 'Generated %d description.', 'Generated %d descriptions.', $this->generated, 'wp-seo' ),
