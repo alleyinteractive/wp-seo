@@ -415,10 +415,10 @@ class DescriptionGeneratorTest extends TestCase {
 		);
 
 		for ( $i = 0; $i < 3; $i++ ) {
-			$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+			$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 		}
 
-		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 	}
 
 	/**
@@ -429,12 +429,12 @@ class DescriptionGeneratorTest extends TestCase {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
 
 		for ( $i = 0; $i < 30; $i++ ) {
-			$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+			$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 		}
 
 		FakeAiProvider::$prompt = null;
 
-		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
 		$headers  = $response->get_headers();
 		$data     = $response->get_data();
 
@@ -456,11 +456,11 @@ class DescriptionGeneratorTest extends TestCase {
 		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
 		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
 
-		$this->assertSame( 503, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 503, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 
 		remove_all_filters( 'wp_seo_ai_provider', 11 );
 
-		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 	}
 
 	/**
@@ -471,8 +471,8 @@ class DescriptionGeneratorTest extends TestCase {
 		wp_set_current_user( $user_id );
 		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
 
-		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
-		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 
 		// Move the end of the window into the past.
 		$key    = 'wp_seo_description_rate_limit_' . $user_id;
@@ -480,8 +480,8 @@ class DescriptionGeneratorTest extends TestCase {
 		$this->assertIsArray( $stored );
 		set_transient( $key, [ 'count' => $stored['count'], 'reset' => time() - 1 ], HOUR_IN_SECONDS );
 
-		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
-		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 	}
 
 	/**
@@ -493,13 +493,13 @@ class DescriptionGeneratorTest extends TestCase {
 		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
 
 		wp_set_current_user( $first );
-		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 
 		wp_set_current_user( $second );
-		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 
 		wp_set_current_user( $first );
-		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 	}
 
 	/**
@@ -507,13 +507,13 @@ class DescriptionGeneratorTest extends TestCase {
 	 *
 	 * @param int $limit Requests allowed per hour.
 	 */
-	#[DataProvider( 'unlimited_rate_limits' )]
+	#[DataProvider( 'data_unlimited_rate_limits' )]
 	public function test_rest_route_rate_limit_can_be_turned_off( int $limit ) {
 		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
 		add_filter( 'wp_seo_description_generator_rate_limit', fn () => $limit );
 
 		for ( $i = 0; $i < 3; $i++ ) {
-			$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+			$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 		}
 	}
 
@@ -522,7 +522,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 *
 	 * @return array<string, array{int}>
 	 */
-	public static function unlimited_rate_limits(): array {
+	public static function data_unlimited_rate_limits(): array {
 		return [
 			'zero'     => [ 0 ],
 			'negative' => [ -1 ],
@@ -541,6 +541,6 @@ class DescriptionGeneratorTest extends TestCase {
 			$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
 		}
 
-		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
 	}
 }
