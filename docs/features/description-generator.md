@@ -1,6 +1,6 @@
 # Meta Description Generator
 
-The Meta Description Generator uses AI to write meta descriptions for posts. Editors can generate a description in the block editor and review it before they save it.
+The Meta Description Generator uses AI to write meta descriptions for posts. Editors can generate a description in the block editor and review it before they save it. Developers can fill in missing descriptions in bulk with WP-CLI.
 
 | | |
 | --- | --- |
@@ -32,7 +32,7 @@ Every description takes one prompt to the AI provider. The prompt contains:
 - The post's content, rendered through `the_content` with the HTML removed.
 - Instructions to summarize the page in a neutral, factual tone, in the page's language, without promotional language, calls to action, questions, hashtags, or emoji.
 
-The instructions ask for a description no longer than the maximum length, which is 160 characters by default.
+The instructions ask for a description shorter than the maximum length, since models often write more characters than they are asked for. With the default maximum of 160 characters, the instructions ask for 136.
 
 The feature never sends a password-protected post, since a description is shown to everyone who views the post. It also returns an error for a post with no title and no content.
 
@@ -60,13 +60,86 @@ The button appears only when all of these are true:
 
 Each user can generate 30 descriptions an hour in the block editor. See [Rate limit](#rate-limit).
 
+## Generate descriptions in bulk with WP-CLI
+
+The `wp wp-seo generate-descriptions` command generates a description for each post that doesn't have one, and saves it. The command is available only while the feature is turned on.
+
+Nobody reviews these descriptions, so the command is stricter than the block editor:
+
+- It never replaces an existing description. If an editor saves a description while the command is generating one, the command keeps the editor's description.
+- It doesn't save a description that is longer than the maximum length. It logs the description and counts the post as failed.
+
+Every post takes one prompt to the AI provider. Before a large run, use `--dry-run` to see which posts the command will send, and a small `--limit` to check the descriptions it writes.
+
+```bash
+wp wp-seo generate-descriptions --dry-run
+```
+
+```bash
+wp wp-seo generate-descriptions --limit=10
+```
+
+### Options
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--query=<json>` | WP_Query arguments for the posts to describe, as a JSON object. They replace the matching defaults. | Published posts without a password, of the post types the feature works on |
+| `--limit=<number>` | The most posts to send to the AI provider in this run. | 100 |
+| `--fault-tolerance=<percent>` | The percentage of the limit that may fail before the run stops. | 5 |
+| `--dry-run` | List the posts the run would describe, without sending prompts or saving anything. | Off |
+| `--rewind` | Start from the first post the next time the command runs with this `--query`. | Off |
+
+The command always leaves out posts that already have a description, and always works through posts in order of ID, whatever `--query` says.
+
+### Examples
+
+Describe up to 10 pages by one author:
+
+```bash
+wp wp-seo generate-descriptions --query='{"post_type":"page","author":3}' --limit=10
+```
+
+Describe up to 500 posts, and stop if more than 50 of them fail:
+
+```bash
+wp wp-seo generate-descriptions --limit=500 --fault-tolerance=10
+```
+
+### How runs continue
+
+The command saves its place after each post. The next run with the same `--query` value continues from there, so you can run the command again and again to work through a large site. Each `--query` value keeps its own place, so a run with one query doesn't skip posts for another.
+
+A run passes over posts that failed. To try them again, rewind, and then run the command again:
+
+```bash
+wp wp-seo generate-descriptions --rewind
+```
+
+```bash
+wp wp-seo generate-descriptions
+```
+
+The `--rewind` run only resets the place. It doesn't describe any posts. Use the same `--query` value for both runs.
+
+A dry run starts from the saved place, but doesn't move it.
+
+### When a run stops
+
+A run stops when one of these happens:
+
+- **It reaches the limit.** The next run continues where it stopped.
+- **More posts fail than the fault tolerance allows.** The command rounds the allowed number down. With the defaults, 5 of 100 posts may fail. With a limit under 20 and the default fault tolerance, the first failure stops the run.
+- **The AI provider is limiting requests or is out of quota.** Every prompt after this one would fail too. The command doesn't save its place, so the next run tries the same post again.
+
+When an editor's description is kept, the command logs it, but doesn't count it as a failure.
+
 ## Rate limit
 
 Every request costs a prompt to the AI provider, so the REST route that the block editor uses has a limit for each user: 30 requests an hour by default. The hour starts with the user's first request. The feature counts each request before it sends the prompt, so requests that fail still count.
 
 When a user reaches the limit, the route responds with a 429 status and a `Retry-After` header that gives the number of seconds until the user can try again.
 
-The limit applies only to the REST route. Calling `generate_description()` directly is not limited.
+The limit applies only to the REST route. The WP-CLI command and the PHP methods are not limited.
 
 To change the limit, use the `wp_seo_description_generator_rate_limit` filter. Return 0 or less to turn the limit off.
 
@@ -132,7 +205,7 @@ add_filter(
 
 To change the instructions sent with the post, use the `wp_seo_description_generator_prompt` filter. The feature sends the post's title and content separately, so the instructions don't need to include them.
 
-The default instructions include the maximum length. If you replace them, include a length yourself. You can get it from `Description_Generator::get_max_length()`.
+The default instructions include the length to aim for. If you replace them, include a length yourself. You can base it on `Description_Generator::get_max_length()`.
 
 ```php
 use Alley\WP\WP_SEO\Features\Description_Generator;
@@ -141,7 +214,7 @@ add_filter(
 	'wp_seo_description_generator_prompt',
 	fn ( string $instructions, WP_Post $post ): string => sprintf(
 		'Write one meta description for this news article in AP style. Use no more than %d characters. Reply with only the meta description.',
-		Description_Generator::get_max_length( $post )
+		(int) floor( Description_Generator::get_max_length( $post ) * 0.85 )
 	),
 	10,
 	2
@@ -166,6 +239,8 @@ add_filter( 'wp_seo_description_generator_max_length', fn (): int => 150 );
 | `wp_seo_description_generator_prompt` | Filter | [Change the instructions](#instructions). |
 | `wp_seo_description_generator_max_length` | Filter | [Change the maximum length](#maximum-length). |
 | `wp_seo_description_generator_rate_limit` | Filter | [Change the rate limit](#rate-limit) for a user. |
+| `wp_seo_description_generator_cli_limit` | Filter | Change the default `--limit` of the WP-CLI command. |
+| `wp_seo_description_generator_cli_fault_tolerance` | Filter | Change the default `--fault-tolerance` of the WP-CLI command. |
 
 ## REST API
 
@@ -196,10 +271,11 @@ All methods are static methods of `Alley\WP\WP_SEO\Features\Description_Generato
 | Method | Description |
 | --- | --- |
 | `generate_description( WP_Post $post )` | Returns a description for the post, or a `WP_Error`. It doesn't save the description, and the description can be longer than the maximum length. |
+| `generate_and_save_description( WP_Post $post )` | Generates a description and saves it, as the WP-CLI command does. Returns the saved description, or a `WP_Error`. It never replaces an existing description, and doesn't save one that is too long. |
 | `get_post_types()` | Returns the names of the post types the feature works on. |
 | `get_max_length( WP_Post $post )` | Returns the maximum length of a description for the post, in characters. |
 
-`generate_description()` doesn't count toward the rate limit.
+Neither method that generates a description counts toward the rate limit.
 
 ```php
 use Alley\WP\WP_SEO\Features\Description_Generator;
@@ -211,9 +287,20 @@ if ( ! is_wp_error( $description ) ) {
 }
 ```
 
+To find posts without a description, set the `wp_seo_missing_description` query variable on a `WP_Query`. It works only while the feature is turned on. It relies on the `posts_where` filter, so with `get_posts()`, which turns off query filters, you must also set `'suppress_filters' => false`.
+
+```php
+$query = new WP_Query(
+	[
+		'post_type'                  => 'post',
+		'wp_seo_missing_description' => true,
+	]
+);
+```
+
 ## Errors
 
-These errors come from the REST route and the PHP methods. The REST route also returns the errors listed under [AI providers](../ai-providers.md#errors) when prompts can't be sent.
+These errors come from the REST route, the WP-CLI command, and the PHP methods. The REST route also returns the errors listed under [AI providers](../ai-providers.md#errors) when prompts can't be sent.
 
 | Error code | Status | Cause |
 | --- | --- | --- |
@@ -223,6 +310,9 @@ These errors come from the REST route and the PHP methods. The REST route also r
 | `wp_seo_description_password_protected` | 400 | The post is password protected. |
 | `wp_seo_description_no_content` | 400 | The post has no title and no content. |
 | `wp_seo_description_empty` | 502 | The AI provider returned an empty description. |
+| `wp_seo_description_provider_limited` | 429 | The AI provider is limiting requests or is out of quota. Available as `Description_Generator::ERROR_PROVIDER_LIMITED`. |
+| `wp_seo_description_too_long` | | The description is longer than the maximum length, so it wasn't saved. The error data includes the description. `generate_and_save_description()` only. Available as `Description_Generator::ERROR_DESCRIPTION_TOO_LONG`. |
+| `wp_seo_description_exists` | | An editor saved a description while one was being generated, and theirs was kept. `generate_and_save_description()` only. Available as `Description_Generator::ERROR_DESCRIPTION_EXISTS`. |
 
 Other errors from sending the prompt, such as a missing API key, are the ones WordPress returns.
 
@@ -237,3 +327,9 @@ Other errors from sending the prompt, such as a missing API key, are the ones Wo
 **An error mentions an API key or credentials.** Check the provider under **Settings > Connectors**. WP SEO doesn't check credentials until it sends a prompt.
 
 **"Too many descriptions have been generated."** The user reached the [rate limit](#rate-limit). Wait for the time in the `Retry-After` header, or raise the limit.
+
+**The WP-CLI command says there are no post types to generate descriptions for.** No post type registers the description meta, or the `wp_seo_description_generator_post_types` filter removed them all. See [Choose post types](#choose-post-types).
+
+**The WP-CLI command skips posts that failed before.** Run it with `--rewind`, and then run it again. See [How runs continue](#how-runs-continue).
+
+**The WP-CLI command stopped because the AI provider is limiting requests.** Wait, or check the quota on your account with the AI provider. Then run the command again; it continues with the post that stopped it.
