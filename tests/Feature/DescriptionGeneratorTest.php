@@ -398,4 +398,149 @@ class DescriptionGeneratorTest extends TestCase {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $response->get_data() );
 	}
+
+	/**
+	 * Requests under the rate limit get a description, and the limit is
+	 * filterable for each user.
+	 */
+	public function test_rest_route_allows_requests_under_the_rate_limit() {
+		$user_id = static::factory()->user->create( [ 'role' => 'editor' ] );
+		wp_set_current_user( $user_id );
+
+		add_filter(
+			'wp_seo_description_generator_rate_limit',
+			fn ( int $limit, int $id ) => $id === $user_id ? 3 : $limit,
+			10,
+			2
+		);
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		}
+
+		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+
+	/**
+	 * A request over the default limit of 30 an hour is refused before a
+	 * prompt is sent, and says when to try again.
+	 */
+	public function test_rest_route_refuses_requests_over_the_rate_limit() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+
+		for ( $i = 0; $i < 30; $i++ ) {
+			$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		}
+
+		FakeAiProvider::$prompt = null;
+
+		$response = $this->request( [ 'post_id' => $this->post->ID ] );
+		$headers  = $response->get_headers();
+		$data     = $response->get_data();
+
+		$this->assertSame( 429, $response->get_status() );
+		$this->assertSame( 'wp_seo_description_rate_limited', $data['code'] );
+		$this->assertArrayHasKey( 'Retry-After', $headers );
+		$this->assertGreaterThan( 0, (int) $headers['Retry-After'] );
+		$this->assertLessThanOrEqual( HOUR_IN_SECONDS, (int) $headers['Retry-After'] );
+		$this->assertSame( (int) $headers['Retry-After'], $data['data']['retry_after'] );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * A request that fails to generate a description still counts toward the
+	 * limit.
+	 */
+	public function test_rest_route_counts_failed_requests() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
+		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
+
+		$this->assertSame( 503, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+
+		remove_all_filters( 'wp_seo_ai_provider', 11 );
+
+		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+
+	/**
+	 * Requests are allowed again once the window resets.
+	 */
+	public function test_rest_route_rate_limit_resets() {
+		$user_id = static::factory()->user->create( [ 'role' => 'editor' ] );
+		wp_set_current_user( $user_id );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
+
+		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+
+		// Move the end of the window into the past.
+		$key    = 'wp_seo_description_rate_limit_' . $user_id;
+		$stored = get_transient( $key );
+		$this->assertIsArray( $stored );
+		set_transient( $key, [ 'count' => $stored['count'], 'reset' => time() - 1 ], HOUR_IN_SECONDS );
+
+		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+
+	/**
+	 * Each user's requests are counted separately.
+	 */
+	public function test_rest_route_rate_limit_is_per_user() {
+		$first  = static::factory()->user->create( [ 'role' => 'editor' ] );
+		$second = static::factory()->user->create( [ 'role' => 'editor' ] );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
+
+		wp_set_current_user( $first );
+		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+
+		wp_set_current_user( $second );
+		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+
+		wp_set_current_user( $first );
+		$this->assertSame( 429, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+
+	/**
+	 * A limit of 0 or less turns the rate limit off.
+	 *
+	 * @param int $limit Requests allowed per hour.
+	 */
+	#[DataProvider( 'unlimited_rate_limits' )]
+	public function test_rest_route_rate_limit_can_be_turned_off( int $limit ) {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => $limit );
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+		}
+	}
+
+	/**
+	 * Limits that turn the rate limit off.
+	 *
+	 * @return array<string, array{int}>
+	 */
+	public static function unlimited_rate_limits(): array {
+		return [
+			'zero'     => [ 0 ],
+			'negative' => [ -1 ],
+		];
+	}
+
+	/**
+	 * Calling `generate_description()` directly, as bulk runs do, is not
+	 * limited and does not count toward the REST route's limit.
+	 */
+	public function test_generate_description_is_not_rate_limited() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
+		}
+
+		$this->assertSame( 200, $this->request( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
 }
