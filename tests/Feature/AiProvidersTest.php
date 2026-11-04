@@ -118,7 +118,7 @@ class AiProvidersTest extends TestCase {
 		add_filter( 'wp_seo_ai_provider', fn () => 123 );
 
 		$this->assertSame( 'wp_seo_active', AI_Providers::get_provider() );
-		$this->assertFalse( AI_Providers::get_provider_field_options()['in_code'] );
+		$this->assertFalse( AI_Providers::get_provider_field_options()['is_set_in_code'] );
 	}
 
 	/**
@@ -130,9 +130,9 @@ class AiProvidersTest extends TestCase {
 
 		$this->assertSame(
 			[
-				'provider'  => '',
-				'providers' => [ 'wp_seo_active' => 'Test wp_seo_active' ],
-				'in_code'   => false,
+				'provider'       => '',
+				'providers'      => [ 'wp_seo_active' => 'Test wp_seo_active' ],
+				'is_set_in_code' => false,
 			],
 			AI_Providers::get_provider_field_options()
 		);
@@ -141,9 +141,9 @@ class AiProvidersTest extends TestCase {
 
 		$this->assertSame(
 			[
-				'provider'  => 'wp_seo_active',
-				'providers' => [ 'wp_seo_active' => 'Test wp_seo_active' ],
-				'in_code'   => true,
+				'provider'       => 'wp_seo_active',
+				'providers'      => [ 'wp_seo_active' => 'Test wp_seo_active' ],
+				'is_set_in_code' => true,
 			],
 			AI_Providers::get_provider_field_options()
 		);

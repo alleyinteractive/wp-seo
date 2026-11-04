@@ -152,7 +152,7 @@ final class AI_Settings {
 		<select
 			id="<?php echo esc_attr( AI_Providers::OPTION ); ?>"
 			name="<?php echo esc_attr( AI_Providers::OPTION ); ?>"
-			<?php disabled( $options['in_code'] ); ?>
+			<?php disabled( $options['is_set_in_code'] ); ?>
 		>
 			<option value=""><?php esc_html_e( 'None', 'wp-seo' ); ?></option>
 			<?php foreach ( $options['providers'] as $id => $name ) : ?>
@@ -161,7 +161,7 @@ final class AI_Settings {
 				</option>
 			<?php endforeach; ?>
 		</select>
-		<?php if ( $options['in_code'] ) : ?>
+		<?php if ( $options['is_set_in_code'] ) : ?>
 			<p class="description">
 				<?php
 				printf(
