@@ -123,6 +123,7 @@ For example, to add a Google Verification meta tag:
 ## Documentation
 
 - [AI providers](docs/ai-providers.md)
+- [Meta Description Generator](docs/features/description-generator.md)
 
 ---
 
