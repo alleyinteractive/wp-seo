@@ -12,11 +12,27 @@ WP SEO lists every AI provider whose plugin is active, but it doesn't check the 
 
 ## Choose a provider
 
-WP SEO sends prompts to one AI provider at most. Until you choose one, WP SEO sends no prompts, and features that use AI report that no provider is set.
+WP SEO sends prompts to one AI provider at most. Until you choose one, WP SEO sends no prompts, and features that use AI report that no provider is selected.
+
+You can choose the provider on the settings page or set it in code. A provider set in code takes the place of the one chosen on the settings page.
+
+### On the settings page
+
+You need the `manage_options` capability to use the **WP SEO > AI** page.
+
+1. Go to **WP SEO > AI**.
+2. Choose a provider from the **AI provider** list.
+3. Select **Save Changes**.
+
+If no providers are available, the page links to **Settings > Connectors** instead. To stop sending prompts, choose **None**.
+
+If the provider you chose is later disconnected, the list still shows it, labeled "unavailable," so that you can see where prompts are going. Prompts sent to it fail until you choose another provider or reconnect it.
+
+WP SEO saves the choice in the `wp_seo_ai_provider` option.
 
 ### In code
 
-Return a connector ID from the `wp_seo_ai_provider` filter:
+Set the provider in code when it should be the same in every environment, or when site administrators shouldn't change it. Return a connector ID from the `wp_seo_ai_provider` filter:
 
 ```php
 add_filter( 'wp_seo_ai_provider', fn () => 'anthropic' );
@@ -24,12 +40,15 @@ add_filter( 'wp_seo_ai_provider', fn () => 'anthropic' );
 
 The connector ID is the key WordPress gives the connector in `wp_get_connectors()`.
 
-The filter accepts these values:
+The filter accepts three kinds of values:
 
 | Return value | Result |
 | --- | --- |
 | A connector ID | WP SEO sends prompts to that provider. |
-| An empty string or `null` (the default) | WP SEO sends no prompts. |
+| An empty string | WP SEO sends no prompts. |
+| `null` (the default) | WP SEO uses the provider chosen on the settings page. |
+
+When the filter returns a string, the settings page shows the choice as read-only, with a note that it is set in code.
 
 ## Send prompts from your own feature
 
