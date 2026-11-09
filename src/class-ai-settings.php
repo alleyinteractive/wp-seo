@@ -42,8 +42,8 @@ final class AI_Settings {
 	 * admin.
 	 */
 	public function register(): void {
-		add_action( 'init', [ $this, 'register_setting' ] );
-		add_action( 'admin_menu', [ $this, 'add_page' ] );
+		add_action( 'init', $this->register_setting( ... ) );
+		add_action( 'admin_menu', $this->add_page( ... ) );
 	}
 
 	/**
@@ -56,7 +56,7 @@ final class AI_Settings {
 			[
 				'type'              => 'string',
 				'default'           => '',
-				'sanitize_callback' => [ AI_Providers::class, 'sanitize_provider' ],
+				'sanitize_callback' => AI_Providers::sanitize_provider( ... ),
 				'show_in_rest'      => false,
 			]
 		);
@@ -66,12 +66,12 @@ final class AI_Settings {
 	 * Add the page's section and its one field.
 	 */
 	public function add_fields(): void {
-		add_settings_section( self::SECTION, '', [ $this, 'render_section' ], self::SLUG );
+		add_settings_section( self::SECTION, '', $this->render_section( ... ), self::SLUG );
 
 		add_settings_field(
 			AI_Providers::OPTION,
 			__( 'AI provider', 'wp-seo' ),
-			[ $this, 'render_field' ],
+			$this->render_field( ... ),
 			self::SLUG,
 			self::SECTION,
 			[ 'label_for' => AI_Providers::OPTION ]
@@ -91,11 +91,11 @@ final class AI_Settings {
 			__( 'AI', 'wp-seo' ),
 			'manage_options',
 			self::SLUG,
-			[ $this, 'render' ]
+			$this->render( ... )
 		);
 
 		if ( $hook ) {
-			add_action( "load-{$hook}", [ $this, 'add_fields' ] );
+			add_action( "load-{$hook}", $this->add_fields( ... ) );
 		}
 	}
 
