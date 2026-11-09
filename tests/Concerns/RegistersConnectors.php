@@ -34,7 +34,7 @@ trait RegistersConnectors {
 				'name'           => "Test {$id}",
 				'type'           => $type,
 				'authentication' => [ 'method' => 'none' ],
-				'plugin'         => [ 'is_active' => $is_active ? '__return_true' : '__return_false' ],
+				'plugin'         => [ 'is_active' => fn (): bool => $is_active ],
 			]
 		);
 

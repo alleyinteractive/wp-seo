@@ -33,7 +33,7 @@ class AiSettingsTest extends TestCase {
 		$GLOBALS['submenu'] = [];
 		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		wp_set_current_user( static::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->acting_as( 'administrator' );
 
 		( new AI_Settings() )->register_setting();
 	}
