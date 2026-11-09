@@ -27,7 +27,7 @@ use Alley\WP\WP_SEO\AI_Settings;
  */
 final class Description_Generator implements \Alley\WP\Types\Feature {
 	/**
-	 * Handle of the feature, which names its enablement filter.
+	 * Handle of the feature, which names its activation filter.
 	 *
 	 * @var string
 	 */
@@ -79,7 +79,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 	public function boot(): void {
 		// Late, so that post types registered on `init` are included.
 		add_action( 'init', [ $this, 'add_post_type_support' ], 99 );
-		add_action( 'rest_api_init', [ $this, 'register_route' ] );
+		add_action( 'rest_api_init', $this->register_route( ... ) );
 		add_filter( 'posts_where', [ $this, 'limit_query_to_missing_descriptions' ], 10, 2 );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -220,8 +220,22 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		 */
 		$to_text = fn ( string $html ): string => html_entity_decode( wp_strip_all_tags( $html, true ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
+		/**
+		 * Filters the content of the post before it is rendered for the AI provider.
+		 *
+		 * Blocks and shortcodes are easier to remove here, before they expand.
+		 * The result is rendered through `the_content` and then passed to the
+		 * `wp_seo_description_generator_content` filter.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param string   $content Raw post content.
+		 * @param \WP_Post $post    Post being described.
+		 */
+		$content = apply_filters( 'wp_seo_description_generator_content_pre', $post->post_content, $post );
+
 		/** This filter is documented in wp-includes/post-template.php */
-		$content = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		$content = apply_filters( 'the_content', $content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
 		/**
 		 * Filters the content of the post sent to the AI provider.
@@ -261,7 +275,7 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 		$requested_length = (int) floor( self::get_max_length( $post ) * 0.85 );
 
 		$instructions = sprintf(
-			"Write one meta description for the web page below. Summarize what the page is about in a neutral, factual tone. Don't use promotional or sales language, calls to action, questions, hashtags, or emoji. Use no more than %d characters, in the page's language. Your response will be used in code: reply with only the meta description, with no quotes, labels, or explanation.",
+			"Write one HTML meta description, optimized for search engines, for the web page below. Summarize what the page is about in a neutral, factual tone. Don't use promotional or sales language, calls to action, questions, hashtags, or emoji. Use no more than %d characters, in the page's language. Your response will be used in code: reply with only the meta description, with no quotes, labels, or explanation.",
 			$requested_length
 		);
 
@@ -296,11 +310,10 @@ final class Description_Generator implements \Alley\WP\Types\Feature {
 
 		/*
 		 * Models sometimes wrap their answer in quotes despite being told not to.
-		 * The quotes are removed only when the opening one appears nowhere else in
-		 * the reply, so that a reply such as `"A" vs "B"` keeps its quotes.
+		 * A regular expression trims them, since trim() works on bytes and would
+		 * split multibyte characters that share a byte with the curly quotes.
 		 */
-		$description = trim( $to_text( $reply ) );
-		$description = (string) preg_replace( '/^(?|"([^"]*)"|\'([^\']*)\'|“([^“]*)”|‘([^‘]*)’)$/u', '$1', $description );
+		$description = (string) preg_replace( '/^[\s"\'“”‘’]+|[\s"\'“”‘’]+$/u', '', $to_text( $reply ) );
 
 		if ( '' === $description ) {
 			return new \WP_Error(
