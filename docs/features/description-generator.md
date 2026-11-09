@@ -5,7 +5,7 @@ The Meta Description Generator uses AI to write meta descriptions for posts.
 | | |
 | --- | --- |
 | Handle | `description_generator` |
-| Enablement filter | `wp_seo_enable_description_generator` |
+| Activation filter | `wp_seo_enable_description_generator` |
 | Default | Off |
 
 ## Before you start
@@ -17,7 +17,7 @@ The Meta Description Generator sends prompts through WordPress's AI connectors. 
 Like every WP SEO feature, the Meta Description Generator is off until you turn it on in code. Add the filter from a plugin or your theme's `functions.php`. WP SEO loads its features on the `after_setup_theme` hook, so the filter must be added before then.
 
 ```php
-add_filter( 'wp_seo_enable_description_generator', '__return_true' );
+add_filter( 'wp_seo_enable_description_generator', __return_true(...) );
 ```
 
 Then choose an AI provider on the **WP SEO > AI** page, or [set one in code](../ai-providers.md#in-code). To confirm that the feature is running, go to **WP SEO > Features**.
@@ -27,14 +27,14 @@ Then choose an AI provider on the **WP SEO > AI** page, or [set one in code](../
 Every description takes one prompt to the AI provider. The prompt contains:
 
 - The post's title, as stored.
-- The post's content, rendered through `the_content` with the HTML removed.
-- Instructions to summarize the page in a neutral, factual tone, in the page's language, without promotional language, calls to action, questions, hashtags, or emoji.
+- The post's content, rendered through `the_content` with the HTML removed. You can [change the content](#content) before and after it's rendered.
+- Instructions to write a meta description optimized for search engines, summarizing the page in a neutral, factual tone, in the page's language, without promotional language, calls to action, questions, hashtags, or emoji.
 
 The instructions ask for a description no longer than the maximum length, which is 160 characters by default.
 
 The feature never sends a password-protected post, since a description is shown to everyone who views the post. It also returns an error for a post with no title and no content.
 
-If the AI provider wraps its description in quotation marks, the feature removes them.
+The feature removes quotation marks from the start and end of the description, in case the AI provider wraps it in quotes.
 
 ## Rate limit
 
@@ -73,6 +73,18 @@ add_filter(
 ## Customize the prompt
 
 ### Content
+
+To change the post's content before it's rendered, use the `wp_seo_description_generator_content_pre` filter. The filter receives the raw post content, so blocks and shortcodes are easier to remove before they expand. The feature then renders the result through `the_content`.
+
+```php
+// Leave shortcodes out of the prompt.
+add_filter(
+	'wp_seo_description_generator_content_pre',
+	fn ( string $content, WP_Post $post ): string => strip_shortcodes( $content ),
+	10,
+	2
+);
+```
 
 Other plugins can add text to every post through `the_content`, such as share buttons or related posts. To keep that text out of the prompt, remove it with the `wp_seo_description_generator_content` filter. The filter receives the rendered HTML, before the feature removes tags.
 
@@ -119,6 +131,7 @@ add_filter( 'wp_seo_description_generator_max_length', fn (): int => 150 );
 | --- | --- | --- |
 | `wp_seo_enable_description_generator` | Filter | [Turn on the feature](#turn-on-the-feature). |
 | `wp_seo_description_generator_post_types` | Filter | [Choose post types](#choose-post-types). |
+| `wp_seo_description_generator_content_pre` | Filter | [Change the content before it's rendered](#content). |
 | `wp_seo_description_generator_content` | Filter | [Change the content sent to the AI provider](#content). |
 | `wp_seo_description_generator_prompt` | Filter | [Change the instructions](#instructions). |
 | `wp_seo_description_generator_max_length` | Filter | [Change the maximum length](#maximum-length). |
