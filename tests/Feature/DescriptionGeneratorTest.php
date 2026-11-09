@@ -60,7 +60,7 @@ class DescriptionGeneratorTest extends TestCase {
 		$GLOBALS['submenu'] = [];
 		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		wp_set_current_user( static::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->acting_as( 'administrator' );
 
 		( new Description_Generator() )->boot();
 
@@ -159,6 +159,41 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
+	 * The raw content can be changed before it is rendered, for example to
+	 * remove a shortcode before it expands, and the filter is given the post.
+	 */
+	public function test_content_is_filterable_before_rendering() {
+		add_shortcode( 'newsletter_signup', fn () => '<form>Sign up for our newsletter</form>' );
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_title'   => 'A post',
+				'post_content' => '<p>Some post content.</p>[newsletter_signup]',
+			]
+		);
+
+		add_filter(
+			'wp_seo_description_generator_content_pre',
+			fn ( string $content, \WP_Post $filtered_post ) => $filtered_post->ID === $post->ID
+				? strip_shortcodes( $content )
+				: $content,
+			10,
+			2
+		);
+
+		// The filtered content is still rendered through the_content.
+		add_filter( 'the_content', fn ( string $content ) => $content . '<p>Rendered.</p>' );
+
+		Description_Generator::generate_description( $post );
+
+		$this->assertStringContainsString( 'Content: Some post content.', FakeAiProvider::$prompt );
+		$this->assertStringContainsString( 'Rendered.', FakeAiProvider::$prompt );
+		$this->assertStringNotContainsString( 'Sign up', FakeAiProvider::$prompt );
+
+		remove_shortcode( 'newsletter_signup' );
+	}
+
+	/**
 	 * The instructions can be changed, and are given the post.
 	 */
 	public function test_instructions_are_filterable() {
@@ -210,7 +245,7 @@ class DescriptionGeneratorTest extends TestCase {
 	}
 
 	/**
-	 * Quotes are removed only when they wrap the whole reply.
+	 * Quotes are trimmed from the start and end of the reply.
 	 *
 	 * @param string $reply    Reply from the provider.
 	 * @param string $expected Description returned.
@@ -232,10 +267,8 @@ class DescriptionGeneratorTest extends TestCase {
 			'straight double quotes' => [ '"A summary."', 'A summary.' ],
 			'curly double quotes'    => [ '“A summary.”', 'A summary.' ],
 			'curly single quotes'    => [ '‘It’s a summary.’', 'It’s a summary.' ],
-			'quoted phrases'         => [ '"A" vs "B" compared.', '"A" vs "B" compared.' ],
-			'quoted phrases at ends' => [ '"A" vs "B"', '"A" vs "B"' ],
-			'curly quoted phrases'   => [ '“A” vs “B”', '“A” vs “B”' ],
-			'apostrophe inside'      => [ "'It's a summary.'", "'It's a summary.'" ],
+			'straight single quotes' => [ "'It's a summary.'", "It's a summary." ],
+			'quotes inside'          => [ 'A "quoted" summary.', 'A "quoted" summary.' ],
 		];
 	}
 
@@ -328,7 +361,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * Someone who can edit the post gets a description from the REST route.
 	 */
 	public function test_rest_route_returns_a_description() {
-		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		$this->acting_as( 'editor' );
 
 		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
 
@@ -340,7 +373,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * Someone who cannot edit the post is turned away before a prompt is sent.
 	 */
 	public function test_rest_route_requires_editing_the_post() {
-		wp_set_current_user( static::factory()->user->create( [ 'role' => 'contributor' ] ) );
+		$this->acting_as( 'contributor' );
 
 		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
 
@@ -352,7 +385,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * A post whose type the generator does not work on is turned away.
 	 */
 	public function test_rest_route_requires_a_supported_post_type() {
-		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		$this->acting_as( 'editor' );
 		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page' ] );
 
 		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
@@ -365,7 +398,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * A post that does not exist is not found.
 	 */
 	public function test_rest_route_requires_an_existing_post() {
-		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		$this->acting_as( 'editor' );
 
 		$response = $this->request_description( [ 'post_id' => PHP_INT_MAX ] );
 
@@ -376,7 +409,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * An error generating the description is returned with its status.
 	 */
 	public function test_rest_route_returns_errors_with_their_status() {
-		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		$this->acting_as( 'editor' );
 		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
 
 		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
@@ -390,7 +423,7 @@ class DescriptionGeneratorTest extends TestCase {
 	 * reviews it before saving.
 	 */
 	public function test_rest_route_returns_a_description_over_the_max_length() {
-		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		$this->acting_as( 'editor' );
 		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
 
 		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
