@@ -1,6 +1,6 @@
 # AI providers
 
-WP SEO features that use AI send their prompts through the AI connectors built into WordPress. WP SEO doesn't store API keys or contact AI services on its own. You connect an AI service to WordPress, and then tell WP SEO which one to use.
+WP SEO features that use AI, such as the [Meta Description Generator](features/description-generator.md), send their prompts through the AI connectors built into WordPress. WP SEO doesn't store API keys or contact AI services on its own. You connect an AI service to WordPress, and then tell WP SEO which one to use.
 
 ## Requirements
 
@@ -18,7 +18,7 @@ You can choose the provider on the settings page or set it in code. A provider s
 
 ### On the settings page
 
-You need the `manage_options` capability to use the **WP SEO > AI** page.
+The **WP SEO > AI** page appears only while a feature that uses AI is turned on. You need the `manage_options` capability to use it.
 
 1. Go to **WP SEO > AI**.
 2. Choose a provider from the **AI provider** list.
@@ -62,6 +62,12 @@ $provider = AI_Providers::get_prompt_provider();
 if ( ! is_wp_error( $provider ) ) {
 	$text = wp_ai_client_prompt( 'Summarize this post.' )->using_provider( $provider )->generate_text();
 }
+```
+
+The feature should also register the settings page in its `boot()` method, so that the page appears while the feature is turned on:
+
+```php
+( new \Alley\WP\WP_SEO\AI_Settings() )->register();
 ```
 
 ### Methods

@@ -21,17 +21,11 @@ function main(): void {
 	 */
 	( new Features_Page() )->register();
 
-	/*
-	 * The page for choosing the AI provider WP SEO sends prompts to. It is
-	 * registered after the features page, so that its submenu is added after
-	 * the menu it belongs to.
-	 */
-	( new AI_Settings() )->register();
-
 	// Add features here.
 	$plugin = new Group(
 		Feature::top_level( 'open_graph', __( 'Open Graph', 'wp-seo' ), new Features\Open_Graph() ),
 		Feature::top_level( 'twitter_card', __( 'Twitter Card', 'wp-seo' ), new Features\Twitter_Card() ),
+		Feature::top_level( Features\Description_Generator::HANDLE, __( 'Meta Description Generator', 'wp-seo' ), new Features\Description_Generator() ),
 	);
 
 	/**
