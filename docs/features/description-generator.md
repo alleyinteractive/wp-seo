@@ -1,6 +1,6 @@
 # Meta Description Generator
 
-The Meta Description Generator uses AI to write meta descriptions for posts.
+The Meta Description Generator uses AI to write meta descriptions for posts. Editors can generate a description in the block editor and review it before they save it.
 
 | | |
 | --- | --- |
@@ -11,6 +11,8 @@ The Meta Description Generator uses AI to write meta descriptions for posts.
 ## Before you start
 
 The Meta Description Generator sends prompts through WordPress's AI connectors. Make sure the site meets the [requirements for AI providers](../ai-providers.md#requirements).
+
+The feature writes the description to the `search_engine_description` post meta, which the **Search Engine** panel in the block editor edits. WP SEO registers this meta for posts and pages. To use the feature with other post types, see [Choose post types](#choose-post-types).
 
 ## Turn on the feature
 
@@ -36,9 +38,31 @@ The feature never sends a password-protected post, since a description is shown 
 
 The feature removes quotation marks from the start and end of the description, in case the AI provider wraps it in quotes.
 
+## Generate a description in the block editor
+
+1. Open a post in the block editor and save it.
+2. Open the **WP SEO** sidebar.
+3. In the **Search Engine** panel, select **Generate description** under the **Description** field.
+4. Review the description that fills the field, and edit it if needed.
+5. Save the post.
+
+The feature doesn't save the description for you. It stays in the field until you save the post.
+
+The description comes from the last saved version of the post, so save your changes before you generate a description. On a new post, the button stays disabled until you save the post once.
+
+A generated description can be longer than the maximum length. The editor still shows it, so that you can shorten it rather than generate another. Use the character count under the field to check it.
+
+The button appears only when all of these are true:
+
+- The feature is turned on.
+- An AI provider is chosen, and the site meets the [requirements for AI providers](../ai-providers.md#requirements).
+- The post type is one the feature works on. See [Choose post types](#choose-post-types).
+
+Each user can generate 30 descriptions an hour in the block editor. See [Rate limit](#rate-limit).
+
 ## Rate limit
 
-Every request costs a prompt to the AI provider, so the REST route has a limit for each user: 30 requests an hour by default. The hour starts with the user's first request. The feature counts each request before it sends the prompt, so requests that fail still count.
+Every request costs a prompt to the AI provider, so the REST route that the block editor uses has a limit for each user: 30 requests an hour by default. The hour starts with the user's first request. The feature counts each request before it sends the prompt, so requests that fail still count.
 
 When a user reaches the limit, the route responds with a 429 status and a `Retry-After` header that gives the number of seconds until the user can try again.
 
@@ -58,9 +82,28 @@ add_filter(
 
 ## Choose post types
 
-By default, the feature works on every public post type shown in the admin, except attachments.
+By default, the feature works on every public post type shown in the admin, except attachments. It then leaves out any post type that doesn't register the `search_engine_description` post meta. WP SEO registers that meta for posts and pages.
 
-To change the list of post types, use the `wp_seo_description_generator_post_types` filter.
+To use the feature with another post type, register the meta for it. The post type must also support `custom-fields`, so that the block editor can read and save the meta. Register the meta on `init` before priority 99, which is when the feature adds the block editor button to its post types.
+
+```php
+add_action(
+	'init',
+	function () {
+		register_post_meta(
+			'book',
+			'search_engine_description',
+			[
+				'show_in_rest' => true,
+				'single'       => true,
+				'type'         => 'string',
+			]
+		);
+	}
+);
+```
+
+To change the list of post types, use the `wp_seo_description_generator_post_types` filter. The feature removes any post type without the meta after the filter runs, so adding a post type here isn't enough on its own.
 
 ```php
 // Don't generate descriptions for pages.
@@ -197,6 +240,10 @@ These errors come from the REST route and the PHP methods. The REST route also r
 Other errors from sending the prompt, such as a missing API key, are the ones WordPress returns.
 
 ## Troubleshooting
+
+**The Generate description button doesn't appear.** Check that the feature is turned on, that an AI provider is chosen on **WP SEO > AI**, and that the site runs WordPress 7.0 or later with AI turned on. If the post type isn't a post or page, check that it [registers the description meta](#choose-post-types) before `init` priority 99.
+
+**The button is disabled.** Save the post. The button needs a saved version of the post to describe.
 
 **"No AI provider is selected on the WP SEO AI settings page."** Choose a provider on **WP SEO > AI**, or [set one in code](../ai-providers.md#in-code).
 
