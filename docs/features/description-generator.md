@@ -36,6 +36,26 @@ The feature never sends a password-protected post, since a description is shown 
 
 The feature removes quotation marks from the start and end of the description, in case the AI provider wraps it in quotes.
 
+## Rate limit
+
+Every request costs a prompt to the AI provider, so the REST route has a limit for each user: 30 requests an hour by default. The hour starts with the user's first request. The feature counts each request before it sends the prompt, so requests that fail still count.
+
+When a user reaches the limit, the route responds with a 429 status and a `Retry-After` header that gives the number of seconds until the user can try again.
+
+The limit applies only to the REST route. Calling `generate_description()` directly is not limited.
+
+To change the limit, use the `wp_seo_description_generator_rate_limit` filter. Return 0 or less to turn the limit off.
+
+```php
+// Allow editors 100 descriptions an hour.
+add_filter(
+	'wp_seo_description_generator_rate_limit',
+	fn ( int $limit, int $user_id ): int => user_can( $user_id, 'edit_others_posts' ) ? 100 : $limit,
+	10,
+	2
+);
+```
+
 ## Choose post types
 
 By default, the feature works on every public post type shown in the admin, except attachments.
@@ -115,6 +135,7 @@ add_filter( 'wp_seo_description_generator_max_length', fn (): int => 150 );
 | `wp_seo_description_generator_content` | Filter | [Change the content sent to the AI provider](#content). |
 | `wp_seo_description_generator_prompt` | Filter | [Change the instructions](#instructions). |
 | `wp_seo_description_generator_max_length` | Filter | [Change the maximum length](#maximum-length). |
+| `wp_seo_description_generator_rate_limit` | Filter | [Change the rate limit](#rate-limit) for a user. |
 
 ## REST API
 
@@ -122,7 +143,7 @@ add_filter( 'wp_seo_description_generator_max_length', fn (): int => 150 );
 
 Generates a description for a post and returns it. It doesn't save the description. The route uses POST rather than GET because every request costs a prompt, so it must not be cached or prefetched.
 
-The user must be able to edit the post, and the post type must be one the feature works on.
+The user must be able to edit the post, and the post type must be one the feature works on. Requests count toward the [rate limit](#rate-limit).
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -148,6 +169,8 @@ All methods are static methods of `Alley\WP\WP_SEO\Features\Description_Generato
 | `get_post_types()` | Returns the names of the post types the feature works on. |
 | `get_max_length( WP_Post $post )` | Returns the maximum length of a description for the post, in characters. |
 
+`generate_description()` doesn't count toward the rate limit.
+
 ```php
 use Alley\WP\WP_SEO\Features\Description_Generator;
 
@@ -166,6 +189,7 @@ These errors come from the REST route and the PHP methods. The REST route also r
 | --- | --- | --- |
 | `rest_post_invalid_id` | 404 | The post doesn't exist. REST route only. |
 | `rest_forbidden` | 401 or 403 | The user can't edit the post, or the feature doesn't work on its post type. REST route only. |
+| `wp_seo_description_rate_limited` | 429 | The user reached the [rate limit](#rate-limit). REST route only. |
 | `wp_seo_description_password_protected` | 400 | The post is password protected. |
 | `wp_seo_description_no_content` | 400 | The post has no title and no content. |
 | `wp_seo_description_empty` | 502 | The AI provider returned an empty description. |
@@ -177,3 +201,5 @@ Other errors from sending the prompt, such as a missing API key, are the ones Wo
 **"No AI provider is selected on the WP SEO AI settings page."** Choose a provider on **WP SEO > AI**, or [set one in code](../ai-providers.md#in-code).
 
 **An error mentions an API key or credentials.** Check the provider under **Settings > Connectors**. WP SEO doesn't check credentials until it sends a prompt.
+
+**"Too many descriptions have been generated."** The user reached the [rate limit](#rate-limit). Wait for the time in the `Retry-After` header, or raise the limit.
