@@ -42,6 +42,24 @@ class SettingsPropertiesTest extends TestCase {
 		$this->assertArrayNotHasKey( 'demo_private', WP_SEO_Settings()->get_taxonomies() );
 	}
 
+	function test_disallow_private_object_with_archive() {
+		// A non-public post type can have has_archive => true (e.g. it's only
+		// queryable in code), but it can never be added to "post_types" since
+		// that checkbox list only offers public post types. Its archive
+		// settings must not be reachable either, or there'd be no way to
+		// ever disable them once enabled.
+		register_post_type( 'demo_private_archive', [
+			'rewrite'     => true,
+			'has_archive' => true,
+			'public'      => false,
+			'label'       => 'Demo Private Archive',
+		] );
+
+		WP_SEO_Settings()->set_properties();
+
+		$this->assertArrayNotHasKey( 'demo_private_archive', WP_SEO_Settings()->get_archived_post_types() );
+	}
+
 	function test_handle_post_types_without_archives() {
 		register_post_type( 'demo_no_archive', [ 'rewrite' => true, 'has_archive' => false, 'public' => true ] );
 

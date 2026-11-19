@@ -593,7 +593,8 @@ function wp_seo_the_meta_robots_input( $value, $directive ) {
 	}
 
 	if ( ! empty( $current_screen->taxonomy ) ) {
-		$robots = WP_SEO_Settings::instance()->get_option( "archive_{$current_screen->taxonomy}_robots", [] );
+		$prefix = WP_SEO_Settings::instance()->get_archive_key_prefix( $current_screen->taxonomy, 'taxonomy' );
+		$robots = WP_SEO_Settings::instance()->get_option( "{$prefix}_robots", [] );
 	} elseif ( ! empty( $current_screen->post_type ) ) {
 		$robots = WP_SEO_Settings::instance()->get_option( "single_{$current_screen->post_type}_robots", [] );
 	}

@@ -146,7 +146,7 @@ class WP_SEO_Settings {
 		 *
 		 * @param array Associative array of post type keys and objects.
 		 */
-		$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		$this->archived_post_types = apply_filters( 'wp_seo_archived_post_types', wp_list_filter( get_post_types( array( 'public' => true, 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 
 		/**
 		 * Filter the taxonomies that support SEO fields on term archive pages.
@@ -250,6 +250,30 @@ class WP_SEO_Settings {
 	 */
 	public function has_term_fields( $taxonomy ) {
 		return in_array( $taxonomy, $this->get_enabled_taxonomies(), true );
+	}
+
+	/**
+	 * Get the settings-key prefix for a post type or taxonomy archive.
+	 *
+	 * Post type and taxonomy archive settings normally share the same
+	 * "archive_{name}" prefix for their setting keys and settings-section ID.
+	 * If a post type and a taxonomy happen to be registered with the same
+	 * name, that shared prefix would let one overwrite the other's stored
+	 * values and settings-page section. Disambiguate only in that case, so
+	 * existing keys are unaffected for the common case of no collision.
+	 *
+	 * @param string $name Post type or taxonomy name.
+	 * @param string $type Either 'post_type' or 'taxonomy'.
+	 * @return string The prefix to use for this archive's setting keys, e.g. "archive_{name}".
+	 */
+	public function get_archive_key_prefix( string $name, string $type ): string {
+		$collides = isset( $this->archived_post_types[ $name ] ) && isset( $this->taxonomies[ $name ] );
+
+		if ( ! $collides ) {
+			return "archive_{$name}";
+		}
+
+		return 'taxonomy' === $type ? "archive_term_{$name}" : "archive_post_{$name}";
 	}
 
 	/**
@@ -434,6 +458,11 @@ class WP_SEO_Settings {
 
 		// Single post types settings.
 		foreach ( $this->single_post_types as $post_type ) {
+			// Only show settings for post types with SEO fields enabled.
+			if ( ! $this->has_post_fields( $post_type->name ) ) {
+				continue;
+			}
+
 			/* translators: %s: post type singular name */
 			$this->register_settings_section(
 				'single_' . $post_type->name,
@@ -444,9 +473,14 @@ class WP_SEO_Settings {
 
 		// Archived post types settings.
 		foreach ( $this->archived_post_types as $post_type ) {
+			// Archive settings ride on the same "enabled" flag as single post type settings.
+			if ( ! $this->has_post_fields( $post_type->name ) ) {
+				continue;
+			}
+
 			/* translators: %s: post type singular name */
 			$this->register_settings_section(
-				'archive_' . $post_type->name,
+				$this->get_archive_key_prefix( $post_type->name, 'post_type' ),
 				sprintf( __( '%s Archives', 'wp-seo' ), $post_type->labels->singular_name ),
 				[ $this, 'example_post_type_archive' ],
 			);
@@ -480,9 +514,14 @@ class WP_SEO_Settings {
 
 		// Term archive settings.
 		foreach ( $this->taxonomies as $taxonomy ) {
+			// Only show settings for taxonomies with SEO fields enabled.
+			if ( ! $this->has_term_fields( $taxonomy->name ) ) {
+				continue;
+			}
+
 			/* translators: %s: taxonomy singular name */
 			$this->register_settings_section(
-				'archive_' . $taxonomy->name,
+				$this->get_archive_key_prefix( $taxonomy->name, 'taxonomy' ),
 				sprintf( __( '%s Archives', 'wp-seo' ), $taxonomy->labels->singular_name ),
 				[ $this, 'example_term_archive' ],
 			);
@@ -636,7 +675,10 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_term_archive( $section ) {
-		if ( $term = get_terms( str_replace( 'archive_', '', $section['id'] ), array( 'number' => 1 ) ) ) {
+		// Strip the disambiguated "archive_term_" prefix if present, else "archive_".
+		$taxonomy = str_replace( array( 'archive_term_', 'archive_' ), '', $section['id'] );
+
+		if ( $term = get_terms( $taxonomy, array( 'number' => 1 ) ) ) {
 			$this->example_url( $this->ex_text(), get_term_link( reset( $term ) ) );
 		} else {
 			$this->example_url( __( 'No terms yet.', 'wp-seo' ) );
@@ -649,7 +691,10 @@ class WP_SEO_Settings {
 	 * @param  array $section An array of settings section data.
 	 */
 	public function example_post_type_archive( $section ) {
-		if ( $url = get_post_type_archive_link( str_replace( 'archive_', '', $section['id'] ) ) ) {
+		// Strip the disambiguated "archive_post_" prefix if present, else "archive_".
+		$post_type = str_replace( array( 'archive_post_', 'archive_' ), '', $section['id'] );
+
+		if ( $url = get_post_type_archive_link( $post_type ) ) {
 			$this->example_url( __( 'at ', 'wp-seo' ), $url );
 		}
 	}
@@ -1056,18 +1101,77 @@ class WP_SEO_Settings {
 			'home_robots',
 		];
 
+		/**
+		 * Field names belonging to a currently-disabled post type or taxonomy.
+		 *
+		 * Settings sections for disabled types aren't rendered on the settings
+		 * page (@see WP_SEO_Settings::register_settings()), so their fields
+		 * won't be present in $in. Fields in this list fall back to their
+		 * previously saved value instead of being nulled out, so toggling a
+		 * type off and saving doesn't wipe its stored SEO values.
+		 *
+		 * @var array
+		 */
+		$preserve_fields = array();
+
 		// Single post default formats.
 		foreach ( $this->single_post_types as $type ) {
-			$sanitize_as_text_field[] = "single_{$type->name}_title";
-			$sanitize_as_text_field[] = "single_{$type->name}_description";
-			$sanitize_as_url_field[] = "single_{$type->name}_canonical_url";
-			$sanitize_as_checkboxes_field[] = "single_{$type->name}_robots";
-		}
-		// Post type, taxonomy, and other archives.
-		foreach ( array_merge( $this->archived_post_types, $this->taxonomies, array( 'author', 'date' ) ) as $type ) {
-			if ( is_object( $type ) ) {
-				$type = $type->name;
+			$fields = array(
+				"single_{$type->name}_title",
+				"single_{$type->name}_description",
+				"single_{$type->name}_canonical_url",
+				"single_{$type->name}_robots",
+			);
+
+			$sanitize_as_text_field[]       = $fields[0];
+			$sanitize_as_text_field[]       = $fields[1];
+			$sanitize_as_url_field[]        = $fields[2];
+			$sanitize_as_checkboxes_field[] = $fields[3];
+
+			if ( ! $this->has_post_fields( $type->name ) ) {
+				$preserve_fields = array_merge( $preserve_fields, $fields );
 			}
+		}
+		// Post type archives.
+		foreach ( $this->archived_post_types as $type ) {
+			$prefix = $this->get_archive_key_prefix( $type->name, 'post_type' );
+			$fields = array(
+				"{$prefix}_title",
+				"{$prefix}_description",
+				"{$prefix}_canonical_url",
+				"{$prefix}_robots",
+			);
+
+			$sanitize_as_text_field[]       = $fields[0];
+			$sanitize_as_text_field[]       = $fields[1];
+			$sanitize_as_url_field[]        = $fields[2];
+			$sanitize_as_checkboxes_field[] = $fields[3];
+
+			if ( ! $this->has_post_fields( $type->name ) ) {
+				$preserve_fields = array_merge( $preserve_fields, $fields );
+			}
+		}
+		// Taxonomy archives.
+		foreach ( $this->taxonomies as $type ) {
+			$prefix = $this->get_archive_key_prefix( $type->name, 'taxonomy' );
+			$fields = array(
+				"{$prefix}_title",
+				"{$prefix}_description",
+				"{$prefix}_canonical_url",
+				"{$prefix}_robots",
+			);
+
+			$sanitize_as_text_field[]       = $fields[0];
+			$sanitize_as_text_field[]       = $fields[1];
+			$sanitize_as_url_field[]        = $fields[2];
+			$sanitize_as_checkboxes_field[] = $fields[3];
+
+			if ( ! $this->has_term_fields( $type->name ) ) {
+				$preserve_fields = array_merge( $preserve_fields, $fields );
+			}
+		}
+		// Author and date archives have no enable/disable toggle.
+		foreach ( array( 'author', 'date' ) as $type ) {
 			$sanitize_as_text_field[] = "archive_{$type}_title";
 			$sanitize_as_text_field[] = "archive_{$type}_description";
 			$sanitize_as_url_field[] = "archive_{$type}_canonical_url";
@@ -1078,21 +1182,33 @@ class WP_SEO_Settings {
 		$sanitize_as_text_field[] = '404_title';
 
 		foreach ( $sanitize_as_text_field as $field ) {
-			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] )
-				? sanitize_text_field( $in[ $field ] )
-				: null;
+			if ( isset( $in[ $field ] ) && is_string( $in[ $field ] ) ) {
+				$out[ $field ] = sanitize_text_field( $in[ $field ] );
+			} elseif ( in_array( $field, $preserve_fields, true ) ) {
+				$out[ $field ] = $this->get_option( $field );
+			} else {
+				$out[ $field ] = null;
+			}
 		}
 
 		foreach ( $sanitize_as_url_field as $field ) {
-			$out[ $field ] = isset( $in[ $field ] ) && is_string( $in[ $field ] )
-				? esc_url( $in[ $field ] )
-				: null;
+			if ( isset( $in[ $field ] ) && is_string( $in[ $field ] ) ) {
+				$out[ $field ] = esc_url( $in[ $field ] );
+			} elseif ( in_array( $field, $preserve_fields, true ) ) {
+				$out[ $field ] = $this->get_option( $field );
+			} else {
+				$out[ $field ] = null;
+			}
 		}
 
 		foreach ( $sanitize_as_checkboxes_field as $field ) {
-			$out[ $field ] = isset( $in[ $field ] ) && is_array( $in[ $field ] )
-				? array_filter( array_map( 'sanitize_text_field', $in[ $field ] ) )
-				: [];
+			if ( isset( $in[ $field ] ) && is_array( $in[ $field ] ) ) {
+				$out[ $field ] = array_filter( array_map( 'sanitize_text_field', $in[ $field ] ) );
+			} elseif ( in_array( $field, $preserve_fields, true ) ) {
+				$out[ $field ] = $this->get_option( $field, [] );
+			} else {
+				$out[ $field ] = [];
+			}
 		}
 
 
