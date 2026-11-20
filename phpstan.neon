@@ -17,6 +17,11 @@ parameters:
 	scanDirectories:
 		- php/
 
+	# WP_CLI::error() exits unless told not to, which no caller does.
+	earlyTerminatingMethodCalls:
+		WP_CLI:
+			- error
+
 #    ignoreErrors:
 #        - '#PHPDoc tag @var#'
 #

@@ -1,0 +1,782 @@
+<?php
+/**
+ * DescriptionGeneratorTest class file
+ *
+ * @package wp-seo
+ */
+
+namespace Alley\WP\WP_SEO\Tests\Feature;
+
+use Alley\WP\WP_SEO\AI_Settings;
+use Alley\WP\WP_SEO\Features\Description_Generator;
+use Alley\WP\WP_SEO\Features_Page;
+use Alley\WP\WP_SEO\Tests\Concerns\RegistersDescriptionMeta;
+use Alley\WP\WP_SEO\Tests\Doubles\FakeAiProvider;
+use Alley\WP\WP_SEO\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use WordPress\AiClient\Providers\Http\Exception\ClientException;
+
+/**
+ * Tests for the Meta Description Generator feature.
+ *
+ * Prompts go through core to a fake provider, which replies with text a test
+ * sets and makes no request.
+ *
+ * @link https://mantle.alley.com/docs/testing
+ */
+class DescriptionGeneratorTest extends TestCase {
+	use RegistersDescriptionMeta;
+
+	/**
+	 * A post with a title and content to describe.
+	 *
+	 * @var \WP_Post
+	 */
+	private \WP_Post $post;
+
+	protected function setUp(): void {
+		parent::setUp();
+
+		FakeAiProvider::register( 'A neutral summary of the post.' );
+
+		add_filter( 'wp_seo_ai_provider', fn () => FakeAiProvider::ID );
+
+		$this->post = static::factory()->post->create_and_get(
+			[
+				'post_title'   => 'Hello <em>World</em>',
+				'post_content' => '<p>Some <strong>post</strong> content.</p>',
+			]
+		);
+	}
+
+	protected function tearDown(): void {
+		// The next request for the REST server builds a new one, without the route.
+		$GLOBALS['wp_rest_server'] = null;
+
+		remove_post_type_support( 'post', 'wp-seo-description-generator' );
+		remove_post_type_support( 'page', 'wp-seo-description-generator' );
+
+		$this->unregister_description_meta();
+
+		parent::tearDown();
+	}
+
+	/**
+	 * Booting the feature offers the WP SEO AI settings page.
+	 */
+	public function test_boot_adds_the_ai_settings_page() {
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['submenu'] = [];
+		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->acting_as( 'administrator' );
+
+		( new Description_Generator() )->boot();
+
+		do_action( 'admin_menu' );
+
+		$this->assertContains( AI_Settings::SLUG, wp_list_pluck( $GLOBALS['submenu'][ Features_Page::SLUG ] ?? [], 2 ) );
+	}
+
+	/**
+	 * Send a request to generate a description, with the feature booted.
+	 *
+	 * @param array<string, mixed> $params Request parameters.
+	 * @return \WP_REST_Response
+	 */
+	private function request_description( array $params ): \WP_REST_Response {
+		$this->register_description_meta();
+		( new Description_Generator() )->boot();
+
+		// Build the REST server again, so that it registers the route.
+		$GLOBALS['wp_rest_server'] = null;
+
+		$request = new \WP_REST_Request( 'POST', '/wp-seo/v1/generate-description' );
+		$request->set_body_params( $params );
+
+		return rest_do_request( $request );
+	}
+
+	/**
+	 * The description is what the provider replies, and the prompt carries the
+	 * post's title and rendered content as text.
+	 */
+	public function test_generates_a_description_from_the_post() {
+		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
+		$this->assertStringContainsString( 'Title: Hello World', FakeAiProvider::$prompt );
+		$this->assertStringContainsString( 'Content: Some post content.', FakeAiProvider::$prompt );
+		$this->assertStringContainsString( 'no more than 136 characters', FakeAiProvider::$system_instruction );
+	}
+
+	/**
+	 * A private post's title is sent as stored, without the "Private: " that
+	 * is prepended to it for display.
+	 */
+	public function test_a_private_post_title_is_sent_without_a_prefix() {
+		$post = static::factory()->post->create_and_get(
+			[
+				'post_title'  => 'Hello World',
+				'post_status' => 'private',
+			]
+		);
+
+		Description_Generator::generate_description( $post );
+
+		$this->assertStringContainsString( "Title: Hello World\n", FakeAiProvider::$prompt );
+		$this->assertStringNotContainsString( 'Private', FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * Characters that are encoded as HTML entities for display, such as the
+	 * curly quotes the_content adds, are sent as characters.
+	 */
+	public function test_html_entities_are_sent_as_characters() {
+		$post = static::factory()->post->create_and_get(
+			[
+				'post_title'   => 'Salt &amp; Pepper',
+				'post_content' => '<p>It\'s "quoted" &amp; &lt;escaped&gt;.</p>',
+			]
+		);
+
+		Description_Generator::generate_description( $post );
+
+		$this->assertStringContainsString( 'Title: Salt & Pepper', FakeAiProvider::$prompt );
+		$this->assertStringContainsString( 'Content: It’s “quoted” & <escaped>.', FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * The rendered content can be changed before it is sent, for example to
+	 * remove what another plugin adds to every post, and the filter is given
+	 * the post.
+	 */
+	public function test_content_is_filterable() {
+		// A plugin adding share buttons to every post.
+		add_filter( 'the_content', fn ( string $content ) => $content . '<div class="share">Share this: Facebook</div>' );
+
+		add_filter(
+			'wp_seo_description_generator_content',
+			fn ( string $content, \WP_Post $post ) => $post->ID === $this->post->ID
+				? (string) preg_replace( '#<div class="share">.*?</div>#s', '', $content )
+				: $content,
+			10,
+			2
+		);
+
+		Description_Generator::generate_description( $this->post );
+
+		$this->assertStringContainsString( 'Content: Some post content.', FakeAiProvider::$prompt );
+		$this->assertStringNotContainsString( 'Share this', FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * The raw content can be changed before it is rendered, for example to
+	 * remove a shortcode before it expands, and the filter is given the post.
+	 */
+	public function test_content_is_filterable_before_rendering() {
+		add_shortcode( 'newsletter_signup', fn () => '<form>Sign up for our newsletter</form>' );
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_title'   => 'A post',
+				'post_content' => '<p>Some post content.</p>[newsletter_signup]',
+			]
+		);
+
+		add_filter(
+			'wp_seo_description_generator_content_pre',
+			fn ( string $content, \WP_Post $filtered_post ) => $filtered_post->ID === $post->ID
+				? strip_shortcodes( $content )
+				: $content,
+			10,
+			2
+		);
+
+		// The filtered content is still rendered through the_content.
+		add_filter( 'the_content', fn ( string $content ) => $content . '<p>Rendered.</p>' );
+
+		Description_Generator::generate_description( $post );
+
+		$this->assertStringContainsString( 'Content: Some post content.', FakeAiProvider::$prompt );
+		$this->assertStringContainsString( 'Rendered.', FakeAiProvider::$prompt );
+		$this->assertStringNotContainsString( 'Sign up', FakeAiProvider::$prompt );
+
+		remove_shortcode( 'newsletter_signup' );
+	}
+
+	/**
+	 * The instructions can be changed, and are given the post.
+	 */
+	public function test_instructions_are_filterable() {
+		add_filter(
+			'wp_seo_description_generator_prompt',
+			fn ( string $instructions, \WP_Post $post ) => "Describe post {$post->ID}.",
+			10,
+			2
+		);
+
+		Description_Generator::generate_description( $this->post );
+
+		$this->assertSame( "Describe post {$this->post->ID}.", FakeAiProvider::$system_instruction );
+	}
+
+	/**
+	 * The instructions ask for 15% less than the maximum length, the length
+	 * filter gets the post, and a longer reply is still returned.
+	 */
+	public function test_a_description_over_the_max_length_is_returned() {
+		add_filter(
+			'wp_seo_description_generator_max_length',
+			fn ( int $max_length, \WP_Post $post ) => $post->ID === $this->post->ID ? 20 : $max_length,
+			10,
+			2
+		);
+
+		$this->assertSame( 20, Description_Generator::get_max_length( $this->post ) );
+		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
+		$this->assertStringContainsString( 'no more than 17 characters', FakeAiProvider::$system_instruction );
+	}
+
+	/**
+	 * Whitespace, tags, and wrapping quotes are removed from the reply.
+	 */
+	public function test_the_reply_is_cleaned_up() {
+		FakeAiProvider::$response = "  \"A <b>bold</b>\n summary.\"  ";
+
+		$this->assertSame( 'A bold summary.', Description_Generator::generate_description( $this->post ) );
+	}
+
+	/**
+	 * HTML entities in the reply are returned as characters.
+	 */
+	public function test_html_entities_in_the_reply_are_decoded() {
+		FakeAiProvider::$response = '&quot;Salt &amp; pepper&#8217;s summary.&quot;';
+
+		$this->assertSame( 'Salt & pepper’s summary.', Description_Generator::generate_description( $this->post ) );
+	}
+
+	/**
+	 * Quotes are trimmed from the start and end of the reply.
+	 *
+	 * @param string $reply    Reply from the provider.
+	 * @param string $expected Description returned.
+	 */
+	#[DataProvider( 'data_quoted_replies' )]
+	public function test_wrapping_quotes_are_removed( string $reply, string $expected ) {
+		FakeAiProvider::$response = $reply;
+
+		$this->assertSame( $expected, Description_Generator::generate_description( $this->post ) );
+	}
+
+	/**
+	 * Replies with quotes, and the descriptions returned for them.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public static function data_quoted_replies(): array {
+		return [
+			'straight double quotes' => [ '"A summary."', 'A summary.' ],
+			'curly double quotes'    => [ '“A summary.”', 'A summary.' ],
+			'curly single quotes'    => [ '‘It’s a summary.’', 'It’s a summary.' ],
+			'straight single quotes' => [ "'It's a summary.'", "It's a summary." ],
+			'quotes inside'          => [ 'A "quoted" summary.', 'A "quoted" summary.' ],
+		];
+	}
+
+	/**
+	 * A reply with nothing left once cleaned up is an error.
+	 */
+	public function test_an_empty_reply_is_an_error() {
+		FakeAiProvider::$response = ' "" ';
+
+		$result = Description_Generator::generate_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_description_empty', $result->get_error_code() );
+	}
+
+	/**
+	 * Without a provider, no prompt is sent.
+	 */
+	public function test_no_provider_is_an_error() {
+		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
+
+		$result = Description_Generator::generate_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_ai_no_provider', $result->get_error_code() );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * A password-protected post's content is not sent, since the description
+	 * would show it to people without the password.
+	 */
+	public function test_a_password_protected_post_is_an_error() {
+		$post = static::factory()->post->create_and_get( [ 'post_password' => 'secret' ] );
+
+		$result = Description_Generator::generate_description( $post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_description_password_protected', $result->get_error_code() );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * A post with no title or content has nothing to describe.
+	 */
+	public function test_a_post_without_title_or_content_is_an_error() {
+		$post = static::factory()->post->create_and_get(
+			[
+				'post_title'   => '',
+				'post_content' => '',
+			]
+		);
+
+		$result = Description_Generator::generate_description( $post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'wp_seo_description_no_content', $result->get_error_code() );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * Errors from sending the prompt are returned as core reports them.
+	 */
+	public function test_errors_from_core_are_returned() {
+		add_filter( 'wp_ai_client_prevent_prompt', '__return_true' );
+
+		$result = Description_Generator::generate_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'prompt_prevented', $result->get_error_code() );
+	}
+
+	/**
+	 * A provider that is limiting requests or is out of quota is reported with
+	 * the generator's own error code, keeping core's message and status.
+	 */
+	public function test_a_provider_limit_is_its_own_error() {
+		FakeAiProvider::$exception = new ClientException( 'Too Many Requests (429)', 429 );
+
+		$result = Description_Generator::generate_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( Description_Generator::ERROR_PROVIDER_LIMITED, $result->get_error_code() );
+		$this->assertSame( 'Too Many Requests (429)', $result->get_error_message() );
+		$this->assertSame( 429, $result->get_error_data()['status'] ?? null );
+	}
+
+	/**
+	 * A description generated to be saved is saved to the post and returned.
+	 */
+	public function test_generate_and_save_description_saves_it() {
+		$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_and_save_description( $this->post ) );
+		$this->assertSame( 'A neutral summary of the post.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * Markup in the description, which the provider can return escaped, is
+	 * removed before it is saved.
+	 */
+	public function test_generate_and_save_description_saves_plain_text() {
+		FakeAiProvider::$response = '&lt;img src=x onerror=alert(1)&gt;A &lt;b&gt;bold&lt;/b&gt; summary.';
+
+		$this->assertSame( 'A bold summary.', Description_Generator::generate_and_save_description( $this->post ) );
+		$this->assertSame( 'A bold summary.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * A description over the maximum length is refused, since no editor
+	 * reviews it, and the error holds the description.
+	 */
+	public function test_generate_and_save_description_refuses_one_over_the_max_length() {
+		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
+
+		$result = Description_Generator::generate_and_save_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( Description_Generator::ERROR_DESCRIPTION_TOO_LONG, $result->get_error_code() );
+		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $result->get_error_data() );
+		$this->assertSame( '', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * A description an editor saves while one is being generated is kept,
+	 * though this request cached the post's meta before it was saved.
+	 */
+	public function test_generate_and_save_description_keeps_one_saved_during_generation() {
+		// Cache the post's meta without a description.
+		get_post_meta( $this->post->ID );
+
+		add_filter(
+			'wp_seo_description_generator_content',
+			function ( string $content ) {
+				global $wpdb;
+
+				// An editor saving in another request, which this request's cache doesn't know about.
+				$wpdb->insert(
+					$wpdb->postmeta,
+					[
+						'post_id'    => $this->post->ID,
+						'meta_key'   => Description_Generator::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => 'Written by an editor.', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					]
+				);
+
+				return $content;
+			}
+		);
+
+		$result = Description_Generator::generate_and_save_description( $this->post );
+
+		$this->assertWPError( $result );
+		$this->assertSame( Description_Generator::ERROR_DESCRIPTION_EXISTS, $result->get_error_code() );
+		$this->assertSame( 'Written by an editor.', get_post_meta( $this->post->ID, Description_Generator::META_KEY, true ) );
+	}
+
+	/**
+	 * A query that sets the query variable finds only posts without a
+	 * description, or with an empty one, and other queries find every post.
+	 */
+	public function test_query_var_limits_a_query_to_posts_without_a_description() {
+		( new Description_Generator() )->boot();
+
+		$missing   = static::factory()->post->create();
+		$empty     = static::factory()->post->create( [ 'meta_input' => [ Description_Generator::META_KEY => '' ] ] );
+		$described = static::factory()->post->create( [ 'meta_input' => [ Description_Generator::META_KEY => 'Written by an editor.' ] ] );
+		$args      = [
+			'post__in' => [ $missing, $empty, $described ],
+			'orderby'  => 'ID',
+			'order'    => 'ASC',
+			'fields'   => 'ids',
+		];
+
+		$this->assertSame( [ $missing, $empty ], ( new \WP_Query( $args + [ Description_Generator::MISSING_DESCRIPTION_QUERY_VAR => true ] ) )->posts );
+		$this->assertSame( [ $missing, $empty, $described ], ( new \WP_Query( $args ) )->posts );
+	}
+
+	/**
+	 * Public post types shown in the admin are included by default, except
+	 * attachments, and the list is filterable.
+	 */
+	public function test_post_types_default_to_public_ones_and_are_filterable() {
+		$this->register_description_meta();
+
+		$post_types = Description_Generator::get_post_types();
+
+		$this->assertContains( 'post', $post_types );
+		$this->assertContains( 'page', $post_types );
+		$this->assertNotContains( 'attachment', $post_types );
+
+		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page' ] );
+
+		$this->assertSame( [ 'page' ], Description_Generator::get_post_types() );
+	}
+
+	/**
+	 * Only post types that store the description are included, whether they
+	 * are public by default or added by the filter.
+	 */
+	public function test_post_types_need_a_stored_description() {
+		$this->register_description_meta();
+		register_post_type(
+			'wp_seo_product',
+			[
+				'public'  => true,
+				'show_ui' => true,
+			]
+		);
+
+		$this->assertNotContains( 'wp_seo_product', Description_Generator::get_post_types() );
+
+		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page', 'wp_block' ] );
+
+		$this->assertSame( [ 'page' ], Description_Generator::get_post_types() );
+
+		unregister_post_type( 'wp_seo_product' );
+	}
+
+	/**
+	 * The block editor's button is offered on the post types the generator
+	 * works on.
+	 */
+	public function test_post_type_support_is_added_to_its_post_types() {
+		$this->register_description_meta();
+
+		( new Description_Generator() )->add_post_type_support();
+
+		$this->assertTrue( post_type_supports( 'post', 'wp-seo-description-generator' ) );
+		$this->assertTrue( post_type_supports( 'page', 'wp-seo-description-generator' ) );
+	}
+
+	/**
+	 * The button is offered only on post types left by the post types filter
+	 * that store the description it fills.
+	 */
+	public function test_post_type_support_needs_a_stored_description() {
+		$this->register_description_meta();
+		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page', 'wp_block' ] );
+
+		( new Description_Generator() )->add_post_type_support();
+
+		$this->assertTrue( post_type_supports( 'page', 'wp-seo-description-generator' ) );
+		$this->assertFalse( post_type_supports( 'post', 'wp-seo-description-generator' ) );
+		$this->assertFalse( post_type_supports( 'wp_block', 'wp-seo-description-generator' ) );
+	}
+
+	/**
+	 * The button is not offered until an AI provider is chosen.
+	 */
+	public function test_post_type_support_needs_a_provider() {
+		$this->register_description_meta();
+		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
+
+		( new Description_Generator() )->add_post_type_support();
+
+		$this->assertFalse( post_type_supports( 'post', 'wp-seo-description-generator' ) );
+		$this->assertFalse( post_type_supports( 'page', 'wp-seo-description-generator' ) );
+	}
+
+	/**
+	 * Someone who can edit the post gets a description from the REST route.
+	 */
+	public function test_rest_route_returns_a_description() {
+		$this->acting_as( 'editor' );
+
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $response->get_data() );
+	}
+
+	/**
+	 * A description over the maximum length is returned by the REST route for
+	 * the editor to review, rather than refused.
+	 */
+	public function test_rest_route_returns_a_description_over_the_max_length() {
+		$this->acting_as( 'editor' );
+		add_filter( 'wp_seo_description_generator_max_length', fn () => 20 );
+
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( [ 'description' => 'A neutral summary of the post.' ], $response->get_data() );
+	}
+
+	/**
+	 * Someone who cannot edit the post is turned away before a prompt is sent.
+	 */
+	public function test_rest_route_requires_editing_the_post() {
+		$this->acting_as( 'contributor' );
+
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * A post whose type the generator does not work on is turned away.
+	 */
+	public function test_rest_route_requires_a_supported_post_type() {
+		$this->acting_as( 'editor' );
+		add_filter( 'wp_seo_description_generator_post_types', fn () => [ 'page' ] );
+
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * A post whose type does not store the description is turned away, even
+	 * when the type is public.
+	 */
+	public function test_rest_route_requires_a_stored_description() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		register_post_type(
+			'wp_seo_product',
+			[
+				'public'  => true,
+				'show_ui' => true,
+			]
+		);
+		$post_id = static::factory()->post->create( [ 'post_type' => 'wp_seo_product' ] );
+
+		$response = $this->request_description( [ 'post_id' => $post_id ] );
+
+		unregister_post_type( 'wp_seo_product' );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * A post that does not exist is not found.
+	 */
+	public function test_rest_route_requires_an_existing_post() {
+		$this->acting_as( 'editor' );
+
+		$response = $this->request_description( [ 'post_id' => PHP_INT_MAX ] );
+
+		$this->assertSame( 404, $response->get_status() );
+	}
+
+	/**
+	 * An error generating the description is returned with its status.
+	 */
+	public function test_rest_route_returns_errors_with_their_status() {
+		$this->acting_as( 'editor' );
+		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
+
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
+
+		$this->assertSame( 503, $response->get_status() );
+		$this->assertSame( 'wp_seo_ai_no_provider', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Requests under the rate limit get a description, and the limit is
+	 * filterable for each user.
+	 */
+	public function test_rest_route_allows_requests_under_the_rate_limit() {
+		$user_id = static::factory()->user->create( [ 'role' => 'editor' ] );
+		wp_set_current_user( $user_id );
+
+		add_filter(
+			'wp_seo_description_generator_rate_limit',
+			fn ( int $limit, int $id ) => $id === $user_id ? 3 : $limit,
+			10,
+			2
+		);
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+		}
+
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+
+	/**
+	 * A request over the default limit of 30 an hour is refused before a
+	 * prompt is sent, and says when to try again.
+	 */
+	public function test_rest_route_refuses_requests_over_the_rate_limit() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+
+		for ( $i = 0; $i < 30; $i++ ) {
+			$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+		}
+
+		FakeAiProvider::$prompt = null;
+
+		$response = $this->request_description( [ 'post_id' => $this->post->ID ] );
+		$headers  = $response->get_headers();
+		$data     = $response->get_data();
+
+		$this->assertSame( 429, $response->get_status() );
+		$this->assertSame( 'wp_seo_description_rate_limited', $data['code'] );
+		$this->assertArrayHasKey( 'Retry-After', $headers );
+		$this->assertGreaterThan( 0, (int) $headers['Retry-After'] );
+		$this->assertLessThanOrEqual( HOUR_IN_SECONDS, (int) $headers['Retry-After'] );
+		$this->assertSame( (int) $headers['Retry-After'], $data['data']['retry_after'] );
+		$this->assertNull( FakeAiProvider::$prompt );
+	}
+
+	/**
+	 * A request that fails to generate a description still counts toward the
+	 * limit.
+	 */
+	public function test_rest_route_counts_failed_requests() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
+		add_filter( 'wp_seo_ai_provider', fn () => '', 11 );
+
+		$this->assertSame( 503, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+
+		remove_all_filters( 'wp_seo_ai_provider', 11 );
+
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+
+	/**
+	 * Requests are allowed again once the window resets.
+	 */
+	public function test_rest_route_rate_limit_resets() {
+		$user_id = static::factory()->user->create( [ 'role' => 'editor' ] );
+		wp_set_current_user( $user_id );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
+
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+
+		// Move the end of the window into the past.
+		$key    = 'wp_seo_description_rate_limit_' . $user_id;
+		$stored = get_transient( $key );
+		$this->assertIsArray( $stored );
+		set_transient( $key, [ 'count' => $stored['count'], 'reset' => time() - 1 ], HOUR_IN_SECONDS );
+
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+
+	/**
+	 * Each user's requests are counted separately.
+	 */
+	public function test_rest_route_rate_limit_is_per_user() {
+		$first  = static::factory()->user->create( [ 'role' => 'editor' ] );
+		$second = static::factory()->user->create( [ 'role' => 'editor' ] );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
+
+		wp_set_current_user( $first );
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+
+		wp_set_current_user( $second );
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+
+		wp_set_current_user( $first );
+		$this->assertSame( 429, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+
+	/**
+	 * A limit of 0 or less turns the rate limit off.
+	 *
+	 * @param int $limit Requests allowed per hour.
+	 */
+	#[DataProvider( 'data_unlimited_rate_limits' )]
+	public function test_rest_route_rate_limit_can_be_turned_off( int $limit ) {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => $limit );
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+		}
+	}
+
+	/**
+	 * Limits that turn the rate limit off.
+	 *
+	 * @return array<string, array{int}>
+	 */
+	public static function data_unlimited_rate_limits(): array {
+		return [
+			'zero'     => [ 0 ],
+			'negative' => [ -1 ],
+		];
+	}
+
+	/**
+	 * Calling `generate_description()` directly, as bulk runs do, is not
+	 * limited and does not count toward the REST route's limit.
+	 */
+	public function test_generate_description_is_not_rate_limited() {
+		wp_set_current_user( static::factory()->user->create( [ 'role' => 'editor' ] ) );
+		add_filter( 'wp_seo_description_generator_rate_limit', fn () => 1 );
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->assertSame( 'A neutral summary of the post.', Description_Generator::generate_description( $this->post ) );
+		}
+
+		$this->assertSame( 200, $this->request_description( [ 'post_id' => $this->post->ID ] )->get_status() );
+	}
+}
